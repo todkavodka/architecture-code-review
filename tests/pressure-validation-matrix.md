@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`.
 
 ## Global forbidden behaviors
 
@@ -32,7 +32,9 @@ Any of these is an automatic failure where applicable:
 - final editorial review changing technical semantics;
 - final package assembled while requested target/roadmap gates remain unaccepted;
 - final user-facing prose degenerating into working-artifact shorthand that hides causal explanation;
-- substantial final architecture package omitting useful diagrams for material topology/lifecycle/target complexity without an explicit rationale.
+- substantial final architecture package omitting useful diagrams for material topology/lifecycle/target complexity without an explicit rationale;
+- accepting a final package while a known Mermaid parser/render failure remains;
+- claiming Mermaid render-validation PASS without executable validation when a compatible validator/renderer is available.
 
 ## Scenario matrix
 
@@ -74,6 +76,8 @@ Any of these is an automatic failure where applicable:
 | 34 | final prose sample + editorial assessment | material conclusions explain what/why/consequence/correction instead of ledger shorthand |
 | 35 | final package diagram inventory + evidence linkage | useful diagrams explain material topology/lifecycle/target complexity when applicable |
 | 36 | terminology/language review | natural Russian prose; exact identifiers preserved; hybrid shorthand removed |
+| 37 | inventory of all final Mermaid blocks + actual validator/renderer invocations/results | every block passes available parser/render validation; known failures block acceptance; unavailable tooling is reported explicitly |
+| 38 | corrected final prose + fresh editorial re-review | one primary mechanism per material paragraph; specialist shorthand explained before compression; roadmap explanation visually separated from execution contract |
 
 ## Required final validation record
 
@@ -90,6 +94,15 @@ new rationalizations or loopholes
 corrections applied
 re-test result
 known limitations
+```
+
+For Scenario 37 also record:
+
+```text
+final Mermaid block count
+validator/renderer used
+per-block PASS/FAIL/UNAVAILABLE
+correction + revalidation refs for failures
 ```
 
 Final acceptance requires no unresolved HIGH-impact pressure failure and no violation of the global forbidden behaviors.
