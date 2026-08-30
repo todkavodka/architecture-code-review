@@ -114,11 +114,42 @@ prose
 
 Если они расходятся, это consistency issue, а не редакционная мелочь.
 
-## 7. Mermaid quality
+## 7. Mermaid render-validation gate
+
+Mermaid в final user-facing artifacts считается проверенным только после реальной parser/render validation, если в окружении доступен совместимый инструмент.
+
+Обязательная последовательность:
+
+```text
+enumerate all final Mermaid blocks
+→ assign stable document/location identity
+→ validate each block independently
+→ record PASS/FAIL per block
+→ correct every failed block
+→ re-run validation for corrected blocks
+→ only then accept diagram gate
+```
+
+Подходящие инструменты включают `mmdc`, project-provided Mermaid validator/parser, documentation build pipeline или другой совместимый renderer. Не привязывай Skill к одному vendor tool; предпочитай toolchain, который реально используется проектом или его Markdown/docs workflow.
+
+Если renderer/parser доступен, **фактически вызови его**. Визуальная инспекция текста, фраза «syntax looks valid» или проверка только одной sample-diagram не заменяют executable validation.
+
+Если renderer/parser отсутствует:
+
+- зафиксируй `MERMAID_RENDER_VALIDATION_UNAVAILABLE`;
+- выполни strongest available structural review;
+- не утверждай, что diagram render validation PASS;
+- явно укажи limitation в final verification record.
+
+Любой известный parser/render failure — `DIAG-*` issue и блокирует `FINAL_PACKAGE_ACCEPTED`, пока диаграмма не исправлена и не прошла повторную проверку.
+
+Для compatibility предпочитай простой устойчивый syntax: не используй экзотические directives/extensions без необходимости; осторожно обращайся со special characters, punctuation, multiline labels и state aliases. Однако упрощение синтаксиса не должно менять архитектурную семантику диаграммы.
+
+## 8. Mermaid quality
 
 - Используй простой стандартный Mermaid syntax.
 - Реальные subsystem names, не `Service1`/`Component2`.
 - Не кодируй огромные листинги в диаграмме.
 - Подписывай owner/scope там, где это важно для понимания.
 - Проверяй, что arrows/states отражают фактический path.
-- Если Mermaid renderer недоступен, хотя бы проверяй структуру и избегай экзотического syntax.
+- Render validation и semantic consistency — разные gates: успешно отрисованная, но технически неверная диаграмма всё равно FAIL.
