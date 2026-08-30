@@ -248,8 +248,9 @@ Important workflow state must be persisted to files; it must not exist only in c
 
 ```text
 .
-├── SKILL.md
 ├── README.md
+├── LICENSE
+├── SKILL.md
 ├── references/
 │   ├── review-modes-and-orchestration.md
 │   ├── review-method.md
@@ -325,3 +326,7 @@ design
 ```
 
 Do not treat a documentation-only appearance as evidence that a Skill change is behavior-neutral.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for the full text.
