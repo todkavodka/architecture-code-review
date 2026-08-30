@@ -23,13 +23,35 @@ Human-readable layer пишется связанными абзацами. Дл�
 
 Specialist English term или hybrid shorthand сначала объясни естественным русским предложением, если термин не очевиден из контекста. После этого точное техническое имя можно использовать как сокращение. Не превращай текст в словарь и не переводи exact identifiers.
 
+**Не считай технический shorthand объяснением.** Например `eager startup`, `registered shutdown`, `drain+close`, `in-flight`, `producer-miss`, `single-flight` могут быть точными терминами, но сначала должно быть понятно, какое наблюдаемое поведение системы они обозначают.
+
+Паттерн трансформации:
+
+```text
+Плохо:
+NATS получает eager startup + registered shutdown + drain.
+
+Хорошо:
+При запуске приложение заранее проверяет доступность NATS и не объявляет себя готовым, если соединение установить невозможно. При остановке оно сначала завершает уже начатые операции, а затем корректно закрывает соединение. После такого объяснения поведение можно кратко называть fail-fast startup и graceful drain.
+```
+
+Точные слова примера не нормативны. Нормативен порядок: **объяснение механизма → специализированный термин**.
+
 Если изменение существенно меняет topology, ownership, lifecycle, ordering или trust boundary, добавь Before → After Mermaid/flow diagram либо ссылку на соответствующую target diagram.
 
 Не начинай task сразу с class/registry/function names. Сначала читатель должен понять **зачем вообще существует эта задача**.
 
-### 1.2 Implementation contract
+Заголовок material task должен быть человеческим и описывать результат задачи. Не помещай в него `[prereq: ...]`, RF/SER metadata или другую execution metadata. Такие сведения относятся к техническому контракту.
 
-После human-readable layer зафиксируй технический контракт в визуально отдельном subsection, table или эквивалентном блоке:
+### 1.2 Технический контракт реализации
+
+После human-readable layer **обязательно** создай subsection с точным heading:
+
+```markdown
+### Технический контракт реализации
+```
+
+Только после этой границы размещай:
 
 ```text
 TASK ID
@@ -45,14 +67,12 @@ exit criteria
 rollback/fail-closed consideration where relevant
 ```
 
-Implementation details должны быть точными, но не заменяют explanatory prose.
+Предпочтительный формат — таблица или другой явно справочный блок. Implementation details должны быть точными, но не заменяют explanatory prose.
 
 Пример формы:
 
 ```markdown
-## TASK-E — Передать управление Journal DB явному владельцу
-
-Связанные finding: RF-E
+## TASK-F — Сделать жизненный цикл NATS управляемым
 
 ### Что сейчас не так
 <connected prose>
@@ -60,24 +80,35 @@ Implementation details должны быть точными, но не заме�
 ### Почему это происходит
 <ownership/lifecycle mechanism>
 
-### Что предлагаем изменить
-<target mechanism>
+### Практическое последствие
+<runtime consequence>
 
-### Как изменится поведение
-<Before/After explanation + diagram if useful>
+### Что предлагаем изменить
+<target mechanism described in natural language first>
+
+### Почему это закрывает корневую причину
+<causal explanation>
+
+### Что получим после исправления
+<observable resulting behavior>
 
 ### Технический контракт реализации
 
 | Параметр | Требование |
 |---|---|
-| Зависимости | ... |
-| Область изменений | ... |
-| Запрещённый scope | ... |
-| Regression tests | ... |
-| Verification | ... |
-| Exit criteria | ... |
-| Rollback / safe activation | ... |
+| Связанные замечания | RF-F |
+| Целевой механизм | `CacheLifecycleManager` |
+| Зависимости | Нет |
+| Инвариант | ... |
+| Регрессионные тесты | ... |
+| Допустимая область изменений | ... |
+| Запрещённая область | ... |
+| Проверка | ... |
+| Критерий завершения | ... |
+| Откат / безопасная активация | ... |
 ```
+
+Equivalent table contents are allowed, but the `### Технический контракт реализации` boundary is mandatory for every material roadmap task.
 
 Unresolved product/deployment decision блокирует только зависимые tasks.
 
@@ -140,10 +171,12 @@ semantic invariant
 Также проверяет:
 
 - task покрывает реальный RF/SER/target, а не новый scope;
+- task title понятен как инженерная цель без bracketed prerequisite metadata;
 - human-readable layer действительно объясняет current problem, root mechanism, consequence и target result;
 - material paragraphs не смешивают несколько независимых root mechanisms;
 - specialist shorthand не используется как замена объяснению;
-- implementation contract визуально отделён и не появляется раньше объяснения проблемы;
+- каждый material task содержит точный heading `### Технический контракт реализации`;
+- execution metadata находится после этого heading;
 - regression test реально проверяет mechanism;
 - dependencies acyclic/объяснимы;
 - task boundary достаточно мала для отдельного review;
@@ -173,7 +206,10 @@ Reviewer формирует issues, а не редактирует roadmap са�
 Roadmap accepted только когда:
 
 - все material RF/SER target coverage traceable;
+- material task titles human-readable and free of bracketed execution metadata;
 - tasks имеют human-readable problem/result explanation и concrete implementation contract;
+- каждый material task содержит `### Технический контракт реализации` перед execution metadata;
+- specialist shorthand не заменяет объяснение механизма;
 - tasks имеют concrete representation и verification;
 - independent tasks не блокируются unrelated gates;
 - unsafe intermediate activation не допускается;
