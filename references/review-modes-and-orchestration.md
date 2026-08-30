@@ -233,8 +233,8 @@ read persisted HANDOFF SUMMARY
 
 `INDEX.md` всегда является persistent authority. Любой native Todo/task/plan UI — только **non-authoritative projection** этого состояния.
 
-- Если host предоставляет native task/plan UI — зеркаль текущие stages/status туда и поддерживай projection синхронной с `INDEX.md`.
-- Если такого UI нет — показывай компактный текстовый план в CLI/chat.
+- Если host предоставляет native todo/task/plan **tool**, coordinator обязан **реально вызвать этот tool** для создания и последующих обновлений видимого плана. Само изменение `INDEX.md`, prose вроде «план синхронизирован» или внутреннее reasoning не считаются синхронизацией UI.
+- Если native tool отсутствует — показывай компактный текстовый план в CLI/chat.
 
 ### Native Plan Projection Sync Contract
 
@@ -243,7 +243,7 @@ read persisted HANDOFF SUMMARY
 ```text
 validate completed artifact / persisted handoff
 → update working/INDEX.md
-→ synchronize native plan projection, if available
+→ call the native todo/task/plan tool with the current projection, if available
 → only then advance/dispatch the next visible phase
 ```
 
@@ -254,9 +254,24 @@ validate completed artifact / persisted handoff
 - завершение batch subagents после проверки их persisted handoffs и отражения результатов в `INDEX.md`;
 - подтверждённая architecture correction и последующее выставление `REVALIDATION_REQUIRED` зависимым stages.
 
+При initial setup, если native tool доступен, вызови его сразу после создания/заполнения `INDEX.md`.
+
+При resume обязательный порядок:
+
+```text
+read INDEX
+→ verify/reconcile persisted artifacts and handoffs
+→ reconstruct true workflow state
+→ call native todo/task/plan tool with that reconstructed state, if available
+→ identify first non-accepted gate
+→ continue
+```
+
+Если host tool имеет конкретное имя, например `todowrite`, используй именно доступный runtime tool. Не ограничивай Skill одним vendor name: требование — **фактический tool invocation**, а не конкретное название API.
+
 Не обновляй native UI после каждого microscopic tool call, чтения файла, shell-команды или внутреннего reasoning step. Цель — точная coarse-grained projection, а не шумный progress ticker.
 
-Если native plan расходится с `INDEX.md`, это `NATIVE_PLAN_DRIFT`. Не доверяй UI и не перезапускай accepted work. Восстанови projection из `INDEX.md`, затем продолжай с первого реально non-accepted gate.
+Если native plan расходится с `INDEX.md`, это `NATIVE_PLAN_DRIFT`. Не доверяй UI и не перезапускай accepted work. Восстанови projection из `INDEX.md` реальным вызовом native tool, затем продолжай с первого реально non-accepted gate.
 
 Пример:
 
@@ -322,8 +337,7 @@ read INDEX
 → verify baseline and referenced artifacts
 → reconcile any persisted handoff not reflected in INDEX
 → reconstruct true workflow state
-→ reconcile stale native plan projection from INDEX, if available
-→ reconstruct visible plan
+→ call native todo/task/plan tool with reconstructed state, if available
 → identify first non-accepted required gate
 → continue
 ```
