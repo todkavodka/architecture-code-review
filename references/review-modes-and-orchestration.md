@@ -231,12 +231,32 @@ read persisted HANDOFF SUMMARY
 
 Пользователь должен видеть текущий план и статус длинного аудита.
 
-`INDEX.md` всегда является persistent authority.
+`INDEX.md` всегда является persistent authority. Любой native Todo/task/plan UI — только **non-authoritative projection** этого состояния.
 
-- Если host предоставляет native task/plan UI — зеркаль текущие stages/status туда.
+- Если host предоставляет native task/plan UI — зеркаль текущие stages/status туда и поддерживай projection синхронной с `INDEX.md`.
 - Если такого UI нет — показывай компактный текстовый план в CLI/chat.
 
-Не привязывай Skill к конкретному vendor UI.
+### Native Plan Projection Sync Contract
+
+После каждого **material coordinator state transition** порядок обязателен:
+
+```text
+validate completed artifact / persisted handoff
+→ update working/INDEX.md
+→ synchronize native plan projection, if available
+→ only then advance/dispatch the next visible phase
+```
+
+К material transition относятся:
+
+- изменение tracked stage между `PENDING`, `IN_PROGRESS`, `ARTIFACT_WRITTEN`, `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED`, `COMPLETE`, `NOT_APPLICABLE`;
+- смена active top-level phase;
+- завершение batch subagents после проверки их persisted handoffs и отражения результатов в `INDEX.md`;
+- подтверждённая architecture correction и последующее выставление `REVALIDATION_REQUIRED` зависимым stages.
+
+Не обновляй native UI после каждого microscopic tool call, чтения файла, shell-команды или внутреннего reasoning step. Цель — точная coarse-grained projection, а не шумный progress ticker.
+
+Если native plan расходится с `INDEX.md`, это `NATIVE_PLAN_DRIFT`. Не доверяй UI и не перезапускай accepted work. Восстанови projection из `INDEX.md`, затем продолжай с первого реально non-accepted gate.
 
 Пример:
 
@@ -301,9 +321,11 @@ INSUFFICIENT_EVIDENCE
 read INDEX
 → verify baseline and referenced artifacts
 → reconcile any persisted handoff not reflected in INDEX
+→ reconstruct true workflow state
+→ reconcile stale native plan projection from INDEX, if available
 → reconstruct visible plan
 → identify first non-accepted required gate
 → continue
 ```
 
-Не полагайся на память предыдущего чата.
+Не полагайся на память предыдущего чата и не используй stale native UI как authority.
