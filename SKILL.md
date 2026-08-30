@@ -65,11 +65,14 @@ Subagents могут исследовать независимые domains и с
 - Severity отделена от correctness verification.
 - Positive Controls сохраняются и учитываются в Target/Roadmap.
 - Absence evidence, TODO, file length, framework choice, mocks, warnings и literals не являются findings без concrete impact.
+- Working artifacts могут быть terse/machine-oriented; пользовательские финальные документы обязаны объяснять `что происходит → почему → к чему приводит → что менять` связным человеческим текстом. IDs и shorthand поддерживают объяснение, но не заменяют его.
 - Не меняй production code проекта во время review.
 
 ## Language Contract
 
 Пользовательские финальные документы — связный русский технический текст. При первом существенном употреблении допустимо `English term (русский аналог)`; exact identifiers, code, paths, API/IPC/protocol names и formal status tokens не переводятся.
+
+Не переноси стиль `HANDOFF SUMMARY`, ledger rows и agent scratchpad в финальную прозу. Обычные понятия формулируй естественно по-русски; избегай гибридов вроде `prod-risks`, `негрейсфул shutdown`, `credential-ами`, если это не точный identifier. Для сложной topology/lifecycle/ownership/target-механики используй полезные Mermaid-диаграммы по соответствующим reference contracts.
 
 ## References — Authority Map
 
