@@ -1,6 +1,6 @@
 # Pressure Validation Matrix
 
-Этот файл превращает `pressure-scenarios.md` из prose contract (текстового контракта) в воспроизводимую validation procedure (процедуру проверки).
+Этот файл превращает pressure scenarios из prose contract (текстового контракта) в воспроизводимую validation procedure (процедуру проверки).
 
 ## How to run
 
@@ -15,6 +15,8 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`.
+
 ## Global forbidden behaviors
 
 Any of these is an automatic failure where applicable:
@@ -28,7 +30,9 @@ Any of these is an automatic failure where applicable:
 - concurrent writers on one artifact;
 - declaring a major artifact accepted by its own author;
 - final editorial review changing technical semantics;
-- final package assembled while requested target/roadmap gates remain unaccepted.
+- final package assembled while requested target/roadmap gates remain unaccepted;
+- final user-facing prose degenerating into working-artifact shorthand that hides causal explanation;
+- substantial final architecture package omitting useful diagrams for material topology/lifecycle/target complexity without an explicit rationale.
 
 ## Scenario matrix
 
@@ -66,6 +70,10 @@ Any of these is an automatic failure where applicable:
 | 30 | evidence classification | absence of tests not promoted to behavioral defect |
 | 31 | endpoint acceptance status | final assembly waits for all requested accepted artifacts |
 | 32 | correction/re-review history | failed reviewed state remains traceable |
+| 33 | actual native todo/tool invocation + reconciled UI | native plan is a live projection of INDEX after material transitions/resume |
+| 34 | final prose sample + editorial assessment | material conclusions explain what/why/consequence/correction instead of ledger shorthand |
+| 35 | final package diagram inventory + evidence linkage | useful diagrams explain material topology/lifecycle/target complexity when applicable |
+| 36 | terminology/language review | natural Russian prose; exact identifiers preserved; hybrid shorthand removed |
 
 ## Required final validation record
 
