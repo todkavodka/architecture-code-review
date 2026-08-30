@@ -6,7 +6,26 @@
 
 Severity помогает приоритизировать риск, но порядок реализации определяется prerequisites и безопасной активацией.
 
-Каждая material task должна содержать:
+Каждая material task должна содержать два слоя: сначала человеческое объяснение архитектурной проблемы и результата, затем implementation contract.
+
+### 1.1 Human-readable task layer
+
+До списка файлов, tests, prerequisites и rollback каждая material task объясняет:
+
+1. **Проблема.** Что сейчас работает неправильно или нестабильно.
+2. **Почему это происходит.** Какой ownership/lifecycle/boundary/state mechanism является причиной.
+3. **Практическое последствие.** Какой runtime/security/reliability/testability effect возникает.
+4. **Что нужно изменить.** Какой target mechanism вводится или какая ответственность переносится.
+5. **Почему это закрывает root cause.** Какая causal link исчезает после изменения.
+6. **Что получим после исправления.** Как изменится наблюдаемое поведение системы.
+
+Если изменение существенно меняет topology, ownership, lifecycle, ordering или trust boundary, добавь Before → After Mermaid/flow diagram либо ссылку на соответствующую target diagram.
+
+Не начинай task сразу с class/registry/function names. Сначала читатель должен понять **зачем вообще существует эта задача**.
+
+### 1.2 Implementation contract
+
+После human-readable layer зафиксируй:
 
 ```text
 TASK ID
@@ -20,6 +39,37 @@ forbidden scope
 verification
 exit criteria
 rollback/fail-closed consideration where relevant
+```
+
+Implementation details должны быть точными, но не заменяют explanatory prose.
+
+Пример формы:
+
+```markdown
+## TASK-E — Передать управление Journal DB явному владельцу
+
+Связанные finding: RF-E
+
+### Что сейчас не так
+<connected prose>
+
+### Почему это происходит
+<ownership/lifecycle mechanism>
+
+### Что предлагаем изменить
+<target mechanism>
+
+### Как изменится поведение
+<Before/After explanation + diagram if useful>
+
+### Implementation contract
+- Prerequisites: ...
+- Allowed boundary: ...
+- Forbidden scope: ...
+- Regression tests: ...
+- Verification: ...
+- Exit criteria: ...
+- Rollback / safe activation: ...
 ```
 
 Unresolved product/deployment decision блокирует только зависимые tasks.
@@ -83,12 +133,15 @@ semantic invariant
 Также проверяет:
 
 - task покрывает реальный RF/SER/target, а не новый scope;
+- human-readable layer действительно объясняет current problem, root mechanism, consequence и target result;
+- implementation contract не появляется раньше объяснения проблемы;
 - regression test реально проверяет mechanism;
 - dependencies acyclic/объяснимы;
 - task boundary достаточно мала для отдельного review;
 - product decision не спрятан как implementation detail;
 - platform/deployment constraints учтены;
-- rollback/fail-closed behavior определён для risky activation.
+- rollback/fail-closed behavior определён для risky activation;
+- Before/After diagram присутствует, если без неё material ownership/lifecycle transition трудно понять.
 
 ## 6. Review lifecycle
 
@@ -110,9 +163,11 @@ Reviewer формирует issues, а не редактирует roadmap са�
 Roadmap accepted только когда:
 
 - все material RF/SER target coverage traceable;
+- tasks имеют human-readable problem/result explanation и concrete implementation contract;
 - tasks имеют concrete representation и verification;
 - independent tasks не блокируются unrelated gates;
 - unsafe intermediate activation не допускается;
 - unresolved decisions изолированы;
 - correction/re-review history сохранена;
-- нет placeholders `TBD/TODO/implement later` в executable parts.
+- нет placeholders `TBD/TODO/implement later` в executable parts;
+- dense internal shorthand не заменяет объяснение того, что задача решает и зачем.
