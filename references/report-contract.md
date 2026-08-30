@@ -66,6 +66,47 @@ docs/reviews/architecture-review/
 
 Основной отчёт обычно раскрывает 10–20 наиболее важных RF в читаемом виде и ссылается на полный ledger вместо копирования всех деталей.
 
+### 3.1 Human-readable synthesis contract
+
+Финальный report объясняет архитектурные механизмы человеку, а не пересказывает внутренний ledger.
+
+Для каждого material conclusion читатель должен без открытия working-файлов понять:
+
+1. **Что происходит сейчас.** Как работает текущий mechanism/flow/ownership.
+2. **Почему это происходит.** Какая граница, ответственность или lifecycle-модель создаёт поведение.
+3. **К чему это приводит.** Конкретный runtime/security/reliability/testability effect.
+4. **Что следует изменить.** Направление correction или target mechanism без преждевременного превращения вывода в кодовый patch.
+
+Предпочтительный narrative pattern:
+
+```text
+current mechanism
+→ code/evidence basis
+→ practical consequence
+→ architectural correction direction
+```
+
+`RF-*`, `SER-*`, `PC-*`, `OQ-*` и `TASK-*` являются навигацией и traceability. Они **не заменяют объяснение**.
+
+Неприемлемая форма финальной прозы:
+
+```text
+error-boundary leaks credentials (RF-A/C);
+test-app != prod-app -> risks untestable;
+shutdown non-graceful;
+cache-first pattern.
+```
+
+Такая запись допустима во внутренних registry/handoff, но пользовательский документ должен раскрыть причинно-следственную связь нормальными предложениями и абзацами.
+
+### 3.2 Executive synthesis is not a ledger dump
+
+Executive summary и раздел «ключевые выводы» не должны быть длинной нумерованной строкой из shorthand labels.
+
+Сначала дай 3–7 связных абзацев, которые группируют проблемы по системным причинам: ownership/lifecycle, trust boundaries, data integrity, testability, coupling и т.п. После объяснения можно дать компактную таблицу или список RF-ссылок.
+
+Читатель должен понять overall architectural health, системные причины и приоритеты даже если он не знает внутреннюю taxonomy Skill-а.
+
 ## 4. `02-authoritative-findings-ledger.md`
 
 Для каждого root:
@@ -89,6 +130,8 @@ roadmap task links when applicable
 ```
 
 Отдельно сохраняй registries `SER-*`, `PC-*`, `OQ-*` и explicit supersessions.
+
+Ledger может быть плотным и структурированным. Это не лицензия переносить его terse style в пользовательские narrative sections.
 
 ## 5. Cross-link contract
 
@@ -177,11 +220,74 @@ Narrative — русский. На первом существенном упо�
 
 Не переводи exact identifiers, class/function/type names, filenames, API/IPC/protocol names, runtime states, verdict/status tokens, commands/code.
 
-Пиши абзацами «механизм → evidence → consequence». Таблицы и Mermaid дополняют анализ, а не заменяют его.
+Пиши абзацами `механизм → evidence → consequence → correction direction`. Таблицы и Mermaid дополняют анализ, а не заменяют его.
+
+### 8.1 Working-artifact style must not leak into final prose
+
+Working artifacts, candidate registries, HANDOFF SUMMARY и verification notes могут быть terse/machine-oriented. Пользовательские финальные документы — нет.
+
+В final narrative избегай как основной формы:
+
+- стрелочного shorthand `X -> Y -> broken`;
+- длинных цепочек через `+`, `/`, `!=` и скобки;
+- sentence fragments вместо предложений;
+- English/Russian hybrids, когда есть естественная русская формулировка;
+- перечней implementation identifiers до объяснения проблемы;
+- RF/SER/TASK IDs как замены subject/predicate/consequence.
+
+Например, вместо:
+
+```text
+test-app structurally != prod-app -> prod-risks untestable
+```
+
+нужно объяснить, что тестовое приложение собирается иначе, чем production-приложение, какие runtime paths из-за этого не воспроизводятся и почему зелёный test suite не доказывает отсутствие соответствующих регрессий.
+
+### 8.2 Terminology quality
+
+Предпочитай естественный русский технический язык, не буквальный перевод и не транслит.
+
+Плохо:
+
+```text
+негрейсфул shutdown
+credential-ами
+prod-risks
+designated owner отсутствует
+runtime-drift
+```
+
+Лучше:
+
+```text
+некорректное/неполное завершение работы
+учётные данные
+риски production-конфигурации
+явный владелец ресурса
+расхождение поведения между версиями во время выполнения
+```
+
+Если английский термин является точным именем концепта, API или established term и русский аналог ухудшает точность, оставь его и при первом употреблении кратко поясни.
 
 Избегай необъяснённых labels вроде `god object`, `spaghetti`, `bad practice`, а также риторических усилителей, не подтверждённых severity.
 
-## 9. Executive summary
+## 9. Diagram contract
+
+Диаграмма нужна не ради квоты, а когда без неё хуже понимаются topology, ordering, lifecycle, ownership, trust boundaries, state transitions или Before/After architecture.
+
+Для substantial `STANDARD_FULL`/`FORENSIC` final package ожидается полезное визуальное покрытие, если соответствующие механизмы существуют в системе:
+
+- **As-Built:** минимум одна component/boundary diagram, когда система имеет несколько существенных runtime-компонентов/процессов/внешних зависимостей;
+- **Runtime/lifecycle:** sequence/state/flow diagram для хотя бы одного material flow или lifecycle-механизма, если ordering/ownership влияет на correctness;
+- **Target Architecture:** обязательная target component/boundary diagram, если endpoint включает target и target существенно меняет ownership/boundaries/flows;
+- **Before → After:** для material architectural change, которое трудно понять только текстом;
+- **Roadmap dependencies:** dependency diagram, когда порядок задач имеет нетривиальные prerequisites или safe-activation boundary.
+
+Если substantial report не содержит useful diagrams, final writer/reviewer должен явно объяснить, почему визуализация не добавила бы архитектурной информации. Это исключение должно быть evidence-based, а не результатом того, что диаграммы просто забыли.
+
+Для syntax/evidence rules следуй `lifecycle-and-mermaid.md`.
+
+## 10. Executive summary
 
 В начале за 1–2 страницы должно быть понятно:
 
@@ -193,7 +299,9 @@ Narrative — русский. На первом существенном упо�
 - есть ли причины блокировать feature development;
 - какой endpoint выполнен и какие документы являются authority.
 
-## 10. Verification table
+Executive summary сначала объясняет системную картину человеческим языком; таблицы/ID идут после narrative synthesis.
+
+## 11. Verification table
 
 ```markdown
 | Команда/проверка | Результат | Ограничение/комментарий |
@@ -202,7 +310,7 @@ Narrative — русский. На первом существенном упо�
 
 Не скрывай недоступные проверки.
 
-## 11. Final status
+## 12. Final status
 
 `REVIEW_COMPLETE` допускается только после completion gates `SKILL.md`, включая independent verification/adjudication, cross-link check и editorial correction/re-review.
 
