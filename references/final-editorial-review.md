@@ -83,19 +83,46 @@ mechanism → evidence → consequence → correction direction
 
 На первом material употреблении specialist English term, hybrid shorthand или неочевидного architecture pattern объясни механизм естественным русским предложением. Exact term можно сохранить в скобках или использовать дальше как короткое имя.
 
-Например вместо:
+**Technical shorthand не считается объяснением сам по себе.** Точное сочетание терминов может правильно называть решение, но не заменяет описания поведения системы.
+
+Не пиши в explanatory layer так:
 
 ```text
-single-flight wrapper предотвращает thundering-herd на cold-cache miss
+NATS получает eager startup + registered shutdown + drain.
+in-flight KV puts дропаются при shutdown.
+single-flight wrapper предотвращает thundering-herd на cold-cache miss.
 ```
 
-нужно сначала объяснить, что при одновременном отсутствии значения в кэше несколько одинаковых запросов могут одновременно обратиться к источнику, а single-flight оставляет один producer-call и заставляет остальные ждать его результат.
+Сначала раскрой наблюдаемое поведение нормальным языком. Например:
+
+```text
+При запуске приложение заранее проверяет доступность NATS и не объявляет себя готовым, если соединение установить невозможно. При остановке оно сначала завершает уже начатые операции, а затем корректно закрывает соединение. Такой подход можно дальше кратко называть fail-fast startup и graceful drain.
+```
+
+Или:
+
+```text
+При остановке приложения уже начатые операции записи в NATS KV могут быть оборваны до завершения, если соединение закрывается без ожидания активной работы.
+```
+
+Для single-flight сначала объясни, что при одновременном отсутствии значения в кэше несколько одинаковых запросов могут обратиться к источнику параллельно, а механизм оставляет один запрос к источнику и заставляет остальные ждать его результат. После этого термин `single-flight` можно использовать как краткое имя уже объяснённого поведения.
+
+Точные формулировки примеров не нормативны. Нормативен порядок: **сначала механизм на естественном языке → затем специализированный термин как краткое название**.
 
 Не требуется заново объяснять общеизвестные для целевой аудитории термины в каждом абзаце. Gate направлен против кластеров shorthand, которые заменяют explanation.
 
 ### 3.3 Roadmap presentation
 
-Roadmap task сначала содержит human-readable problem/cause/consequence/target-result layer, затем визуально отделённый implementation contract. Используй отдельный subsection, table или эквивалентное форматирование; labels `Prerequisites`, `Allowed boundary`, `Verification` не должны сливаться с объясняющим текстом.
+Roadmap task сначала содержит human-readable problem/cause/consequence/target-result layer, затем визуально отделённый implementation contract.
+
+Для material roadmap task:
+
+- заголовок должен быть понятен как инженерная задача без `[prereq: ...]`, `[RF: ...]` и другой execution metadata;
+- prerequisite/RF/SER/target metadata переносится в технический контракт;
+- после explanatory layer обязателен отдельный heading `### Технический контракт реализации`;
+- prerequisites, allowed/forbidden scope, regression tests, verification, exit criteria, rollback и safe activation находятся после этого heading, предпочтительно в таблице или другом явно справочном формате.
+
+Labels `Prerequisites`, `Allowed boundary`, `Verification` не должны сливаться с объясняющим текстом.
 
 Флагай как `STYLE-*` / `TERM-*`, если:
 
@@ -107,6 +134,9 @@ Roadmap task сначала содержит human-readable problem/cause/conseq
 - executive summary является ledger dump вместо synthesis;
 - один абзац заставляет одновременно отслеживать несколько независимых root mechanisms;
 - specialist shorthand используется до понятного объяснения его механики;
+- technical shorthand сам является explanatory layer;
+- material roadmap title содержит bracketed execution metadata;
+- material roadmap task не содержит `### Технический контракт реализации`;
 - roadmap human-readable layer и execution contract визуально не разделены.
 
 ## 4. Diagram coverage and renderability contract
@@ -162,12 +192,14 @@ SEV-###    wording rhetorically exceeds adjudicated severity
 - connected prose `mechanism → evidence → consequence → correction direction`;
 - one primary mechanism per paragraph for material explanatory prose;
 - specialist shorthand explained before it becomes compressed terminology;
+- technical shorthand is not used as the explanation itself;
 - accidental English drift;
 - mixed-language shorthand/transliteration;
 - inconsistent translations/terms;
 - grammar/readability;
 - executive summary explains system-level causes before RF lists;
-- roadmap tasks first explain problem/root cause/result, then a visually separated implementation contract;
+- material roadmap title is human-readable and does not carry bracketed execution metadata;
+- roadmap tasks first explain problem/root cause/result, then contain mandatory `### Технический контракт реализации`;
 - useful diagram coverage where material complexity warrants it;
 - every final Mermaid block enumerated;
 - actual parser/render validation for every final Mermaid block when a compatible renderer is available;
@@ -249,6 +281,7 @@ Correction writer меняет только то, что разрешено issu
 - cross-links проверены;
 - no stale authoritative projection remains;
 - language/prose quality contract соблюдён;
+- material roadmap tasks имеют human-readable titles и явную границу `### Технический контракт реализации`;
 - diagram coverage contract соблюдён либо отсутствие диаграмм обосновано;
 - нет known Mermaid parser/render failures;
 - при доступном renderer все final Mermaid blocks имеют executable validation evidence;
