@@ -9,7 +9,9 @@ Editorial Review (редакционное ревью) **не редактиру
 Проверить, что финальные документы:
 
 - написаны связным русским техническим языком;
+- объясняют material mechanisms человеку, а не копируют terse working-artifact style;
 - используют терминологию последовательно;
+- содержат полезные диаграммы там, где topology/lifecycle/ownership/target behavior трудно понять только текстом;
 - не содержат stale/superseded technical claims;
 - согласованы между собой и с authoritative ledger;
 - имеют целостный cross-link graph;
@@ -38,28 +40,95 @@ English term (русский аналог)
 
 Флагай случайные английские paragraphs/headings/table explanations.
 
-## 3. Issue types
+Также флагай mixed-language shorthand, если обычную мысль можно естественно выразить по-русски без потери точности. Примеры нежелательной final prose:
+
+```text
+error-boundary протекает credential-ами
+prod-risks untestable
+shutdown негрейсфул
+designated owner отсутствует
+runtime-drift
+```
+
+Не требуй искусственного перевода exact identifiers или established technical terms. Цель — профессиональный читаемый русский, а не языковой пуризм.
+
+## 3. Prose quality contract
+
+Working notes, HANDOFF SUMMARY, ledger rows и verification matrices могут быть плотными. Final user-facing narrative должен быть объясняющим.
+
+Для каждого material conclusion проверь, что текст отвечает на четыре вопроса:
+
+1. что происходит сейчас;
+2. почему это происходит;
+3. к чему это приводит;
+4. что нужно изменить или сохранить.
+
+Предпочтительная структура абзаца:
+
+```text
+mechanism → evidence → consequence → correction direction
+```
+
+Флагай как `STYLE-*`, если:
+
+- final prose выглядит как agent scratchpad/handoff;
+- предложения заменены fragments/labels;
+- стрелки `->`, `!=`, slash-compounds и скобочные IDs несут основную смысловую нагрузку;
+- RF/SER/TASK IDs заменяют объяснение;
+- implementation nouns появляются раньше объяснения самой проблемы;
+- executive summary является ledger dump вместо synthesis.
+
+## 4. Diagram coverage contract
+
+Сверь final package с `lifecycle-and-mermaid.md` и `report-contract.md`.
+
+Если в системе есть material topology, lifecycle, ownership, trust boundary, ordering или target transition, проверь наличие useful visual explanation.
+
+Для substantial report особенно ожидаются, когда применимы:
+
+- As-Built component/boundary diagram;
+- runtime/lifecycle/sequence diagram;
+- Target Architecture diagram;
+- Before → After diagram для material correction;
+- roadmap dependency diagram для нетривиального sequencing/safe activation.
+
+Отсутствие диаграммы допустимо, если visual representation реально не добавляет архитектурной информации. В substantial package такое решение должно быть явно объяснимо.
+
+Флагай как `DIAG-*`, если:
+
+- material architecture трудно понять без visual aid, но его нет;
+- диаграмма декоративна и не объясняет real mechanism;
+- current/target behavior смешаны;
+- Mermaid противоречит prose или accepted evidence;
+- diagram uses generic fake components instead of real subsystem names.
+
+## 5. Issue types
 
 Рекомендуемые IDs:
 
 ```text
-LANG-###   language drift / grammar
+LANG-###   language drift / grammar / hybrid shorthand
 TERM-###   inconsistent terminology
 STYLE-###  machine-like / duplicate / telegraphic prose
+DIAG-###   missing/useless/misleading diagram coverage
 LINK-###   broken/missing cross-link
 CONS-###   prose/table/diagram/document contradiction
 STALE-###  superseded claim resurfaced
 SEV-###    wording rhetorically exceeds adjudicated severity
 ```
 
-## 4. Checks
+## 6. Checks
 
 Проверь:
 
-- connected prose «mechanism → evidence → consequence»;
+- connected prose `mechanism → evidence → consequence → correction direction`;
 - accidental English drift;
+- mixed-language shorthand/transliteration;
 - inconsistent translations/terms;
 - grammar/readability;
+- executive summary explains system-level causes before RF lists;
+- roadmap tasks first explain problem/root cause/result, then implementation contract;
+- useful diagram coverage where material complexity warrants it;
 - duplicate paragraphs/findings;
 - stale superseded statements;
 - root titles/status/severity одинаковы во всех final artifacts;
@@ -72,7 +141,7 @@ SEV-###    wording rhetorically exceeds adjudicated severity
 - working superseded claims point forward to current authority where required;
 - no unsupported intensifiers `catastrophic`, `RCE`, `data loss`, `critical` вне adjudicated context.
 
-## 5. Semantic safety
+## 7. Semantic safety
 
 Editorial reviewer **не имеет права молча менять**:
 
@@ -86,9 +155,9 @@ Editorial reviewer **не имеет права молча менять**:
 - roadmap dependencies/gates;
 - security assumptions.
 
-Если language cleanup обнаруживает реальное technical contradiction, issue получает `CONS-*` и возвращается в соответствующий technical gate.
+Если language/diagram cleanup обнаруживает реальное technical contradiction, issue получает `CONS-*` и возвращается в соответствующий technical gate.
 
-## 6. Output
+## 8. Output
 
 Review artifact содержит:
 
@@ -105,7 +174,7 @@ technical-gate escalation? yes/no
 
 Не переписывай полный документ в review artifact.
 
-## 7. Correction loop
+## 9. Correction loop
 
 ```text
 FINAL PACKAGE ASSEMBLED
@@ -119,7 +188,7 @@ FINAL PACKAGE ASSEMBLED
 
 Correction writer меняет только то, что разрешено issue list; новый technical content не добавляет без возврата в technical gate.
 
-## 8. Final acceptance
+## 10. Final acceptance
 
 Пакет нельзя объявлять финальным, пока:
 
@@ -127,5 +196,6 @@ Correction writer меняет только то, что разрешено issu
 - re-review выполнен;
 - cross-links проверены;
 - no stale authoritative projection remains;
-- language contract соблюдён;
+- language/prose quality contract соблюдён;
+- diagram coverage contract соблюдён либо отсутствие диаграмм обосновано;
 - requested target/roadmap artifacts уже accepted технически.
