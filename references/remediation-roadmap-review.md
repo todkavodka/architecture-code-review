@@ -19,13 +19,17 @@ Severity помогает приоритизировать риск, но пор
 5. **Почему это закрывает root cause.** Какая causal link исчезает после изменения.
 6. **Что получим после исправления.** Как изменится наблюдаемое поведение системы.
 
+Human-readable layer пишется связанными абзацами. Для material explanatory prose придерживайся правила **one primary mechanism per paragraph**: один абзац может содержать evidence и последствия одного механизма, но не должен одновременно объяснять несколько независимых root causes.
+
+Specialist English term или hybrid shorthand сначала объясни естественным русским предложением, если термин не очевиден из контекста. После этого точное техническое имя можно использовать как сокращение. Не превращай текст в словарь и не переводи exact identifiers.
+
 Если изменение существенно меняет topology, ownership, lifecycle, ordering или trust boundary, добавь Before → After Mermaid/flow diagram либо ссылку на соответствующую target diagram.
 
 Не начинай task сразу с class/registry/function names. Сначала читатель должен понять **зачем вообще существует эта задача**.
 
 ### 1.2 Implementation contract
 
-После human-readable layer зафиксируй:
+После human-readable layer зафиксируй технический контракт в визуально отдельном subsection, table или эквивалентном блоке:
 
 ```text
 TASK ID
@@ -62,14 +66,17 @@ Implementation details должны быть точными, но не заме�
 ### Как изменится поведение
 <Before/After explanation + diagram if useful>
 
-### Implementation contract
-- Prerequisites: ...
-- Allowed boundary: ...
-- Forbidden scope: ...
-- Regression tests: ...
-- Verification: ...
-- Exit criteria: ...
-- Rollback / safe activation: ...
+### Технический контракт реализации
+
+| Параметр | Требование |
+|---|---|
+| Зависимости | ... |
+| Область изменений | ... |
+| Запрещённый scope | ... |
+| Regression tests | ... |
+| Verification | ... |
+| Exit criteria | ... |
+| Rollback / safe activation | ... |
 ```
 
 Unresolved product/deployment decision блокирует только зависимые tasks.
@@ -134,14 +141,17 @@ semantic invariant
 
 - task покрывает реальный RF/SER/target, а не новый scope;
 - human-readable layer действительно объясняет current problem, root mechanism, consequence и target result;
-- implementation contract не появляется раньше объяснения проблемы;
+- material paragraphs не смешивают несколько независимых root mechanisms;
+- specialist shorthand не используется как замена объяснению;
+- implementation contract визуально отделён и не появляется раньше объяснения проблемы;
 - regression test реально проверяет mechanism;
 - dependencies acyclic/объяснимы;
 - task boundary достаточно мала для отдельного review;
 - product decision не спрятан как implementation detail;
 - platform/deployment constraints учтены;
 - rollback/fail-closed behavior определён для risky activation;
-- Before/After diagram присутствует, если без неё material ownership/lifecycle transition трудно понять.
+- Before/After diagram присутствует, если без неё material ownership/lifecycle transition трудно понять;
+- Mermaid diagrams, входящие в final roadmap, проходят render-validation gate из `lifecycle-and-mermaid.md`.
 
 ## 6. Review lifecycle
 
@@ -170,4 +180,6 @@ Roadmap accepted только когда:
 - unresolved decisions изолированы;
 - correction/re-review history сохранена;
 - нет placeholders `TBD/TODO/implement later` в executable parts;
-- dense internal shorthand не заменяет объяснение того, что задача решает и зачем.
+- dense internal shorthand не заменяет объяснение того, что задача решает и зачем;
+- roadmap explanatory prose не содержит known paragraph-overload issues;
+- все final roadmap Mermaid diagrams соответствуют diagram render-validation contract.
