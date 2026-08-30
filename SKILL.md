@@ -30,7 +30,7 @@ description: Use when performing a whole-project or subsystem architecture/code 
 
 Создай audit package и `working/INDEX.md` по `references/review-modes-and-orchestration.md`. `INDEX.md` — persistent workflow authority; resume-critical state не хранится только в чате.
 
-Если host имеет native plan/task UI — зеркаль план туда. Иначе показывай компактный текстовый plan/status. Stability важнее максимальной параллельности.
+Если host имеет native plan/task UI — используй его только как non-authoritative projection `INDEX.md`. После каждого material coordinator state transition сначала валидируй artifacts/handoffs и обнови `INDEX.md`, затем синхронизируй native plan. После завершения batch subagents выполни ту же reconciliation последовательность. При resume восстанови состояние из `INDEX.md` и приведи stale native plan к нему до продолжения. Не обновляй UI после каждого microscopic tool call. Если native UI отсутствует — показывай компактный текстовый plan/status. Stability важнее максимальной параллельности.
 
 Subagents могут исследовать независимые domains и сами писать свои `working/*.md`. Один файл имеет одного active writer. Каждый agent-owned artifact содержит persisted `HANDOFF SUMMARY`.
 
