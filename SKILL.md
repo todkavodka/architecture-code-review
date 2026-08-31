@@ -36,6 +36,10 @@ Subagents могут исследовать независимые domains и с
 
 Если coordinator/reviewer собирается использовать `INDEX.md`, handoff или другой compact semantic record как замену чтению owning technical artifact, сначала проверь freshness/revision binding по `references/revalidation-and-freshness.md`. Stale compact state не является accepted downstream input.
 
+При resume/reconciliation `COVERAGE_ACCEPTED` не является exception authority над owning Discovery Coverage Matrix. Если independent coverage review утверждает `COVERAGE_ACCEPTED`, но material row в owning matrix остаётся `PARTIALLY_COVERED`, `BLOCKED` или `REVALIDATION_REQUIRED`, считай coverage authority противоречивой: downstream progression блокируется до evidence-backed correction/re-review. Не рационализируй такое расхождение формулировкой «partial coverage acceptable for this scope» и не переписывай INDEX вперёд к `COMPLETE`.
+
+Перед downstream use компактной Discovery Coverage projection проверь её структурную целостность. Если `domains.total` не равен сумме представленных mutually-exclusive status buckets, projection невалидна: используй authority reconciliation против owning matrix/review, а не доверяй арифметически противоречивому INDEX.
+
 ## Required Review Flow
 
 1. Зафиксируй repository baseline и применимые stack addenda.
@@ -71,6 +75,8 @@ Subagents могут исследовать независимые domains и с
 - `DISCOVERY_COMPLETE` без `COVERAGE_ACCEPTED` не является accepted downstream input для candidate verification.
 - Coverage gap исправляется targeted pass/re-review; не перезапускай весь technical audit без impact evidence.
 - `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` не являются принятым coverage state.
+- Independent Coverage Review валидирует owning matrix, но не отменяет её hard row semantics: prose `COVERAGE_ACCEPTED` не может сделать material `PARTIALLY_COVERED`, `BLOCKED` или `REVALIDATION_REQUIRED` accepted downstream state.
+- Арифметически или структурно противоречивая Discovery Coverage projection не является accepted persisted authority; сначала reconcile её с owning matrix/review.
 - Serious security finding требует attack chain; absence of hardening alone ≠ HIGH/CRITICAL.
 - Severity отделена от correctness verification.
 - Positive Controls сохраняются и учитываются в Target/Roadmap.
