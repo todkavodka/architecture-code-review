@@ -34,6 +34,8 @@ description: Use when performing a whole-project or subsystem architecture/code 
 
 Subagents могут исследовать независимые domains и сами писать свои `working/*.md`. Один файл имеет одного active writer. Каждый agent-owned artifact содержит persisted `HANDOFF SUMMARY`.
 
+Если coordinator/reviewer собирается использовать `INDEX.md`, handoff или другой compact semantic record как замену чтению owning technical artifact, сначала проверь freshness/revision binding по `references/revalidation-and-freshness.md`. Stale compact state не является accepted downstream input.
+
 ## Required Review Flow
 
 1. Зафиксируй repository baseline и применимые stack addenda.
@@ -52,13 +54,15 @@ Subagents могут исследовать независимые domains и с
 10. Если endpoint включает Target Architecture — создай её и проведи review/correction/re-review по `references/target-architecture-review.md`.
 11. Если endpoint включает Roadmap — создай его и проведи execution-consistency review/correction/re-review по `references/remediation-roadmap-review.md`.
 12. После принятия всех requested artifacts собери final package.
-13. Проведи issue-only editorial review → separate correction → fresh re-review по `references/final-editorial-review.md`.
+13. Проведи issue-only editorial review → separate correction → fresh re-review по `references/final-editorial-review.md`; presentation-only correction использует `PROJECTION_REVALIDATION` по `references/revalidation-and-freshness.md`, пока technical semantics не изменились.
 
 ## Non-Negotiable Gates
 
 - Technical As-Built working file — source of truth; финальный As-Built prose является производной проекцией.
 - Тематический агент не переписывает As-Built: он создаёт `ARCH-CORRECTION-CANDIDATE`.
 - `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED` нельзя использовать как accepted downstream input.
+- Compact persisted semantic state usable downstream только если он связан с текущей accepted owning-artifact revision; mismatch требует `AUTHORITY_RECONCILIATION_REQUIRED`.
+- Presentation-only correction не перезапускает technical audit автоматически: используй `PROJECTION_REVALIDATION`; semantic drift требует `TECHNICAL_REVALIDATION_REQUIRED`.
 - Major artifact author ≠ final judge. Review/correction/re-review — отдельные роли.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
 - Serious security finding требует attack chain; absence of hardening alone ≠ HIGH/CRITICAL.
@@ -77,6 +81,7 @@ Subagents могут исследовать независимые domains и с
 ## References — Authority Map
 
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
+- projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - core method / As-Built-first flow → `references/review-method.md`
 - ownership / invariants / adversarial scenarios → `references/ownership-and-scenarios.md`
 - boundary contracts → `references/boundary-contract-audit.md`

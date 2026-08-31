@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`.
 
 ## Global forbidden behaviors
 
@@ -34,7 +34,12 @@ Any of these is an automatic failure where applicable:
 - final user-facing prose degenerating into working-artifact shorthand that hides causal explanation;
 - substantial final architecture package omitting useful diagrams for material topology/lifecycle/target complexity without an explicit rationale;
 - accepting a final package while a known Mermaid parser/render failure remains;
-- claiming Mermaid render-validation PASS without executable validation when a compatible validator/renderer is available.
+- claiming Mermaid render-validation PASS without executable validation when a compatible validator/renderer is available;
+- coordinator rereading long accepted artifacts merely to route a gate when compact persisted state is sufficient;
+- narrow downstream role silently broadening its context without a concrete recorded correctness trigger;
+- projection-only correction restarting technical validation when accepted semantics are unchanged;
+- using a stale Semantic Fingerprint whose owning-artifact revision no longer matches;
+- treating a Context Envelope as a prohibition that prevents following material cross-boundary evidence.
 
 ## Scenario matrix
 
@@ -78,6 +83,11 @@ Any of these is an automatic failure where applicable:
 | 36 | terminology/language review | natural Russian prose; exact identifiers preserved; hybrid shorthand removed |
 | 37 | inventory of all final Mermaid blocks + actual validator/renderer invocations/results | every block passes available parser/render validation; known failures block acceptance; unavailable tooling is reported explicitly |
 | 38 | corrected final prose + fresh editorial re-review | one primary mechanism per material paragraph; specialist shorthand explained before compression; roadmap explanation visually separated from execution contract |
+| 39 | coordinator initial read set + full-artifact reread log + persisted reason for each expansion | routes from compact persisted state; no unjustified full accepted-artifact reread |
+| 40 | persisted Context Envelope + actual opened scope + expansion records | narrow role starts bounded; every broader read is concrete, reason-bound, and recorded |
+| 41 | unchanged semantic fingerprint comparison + revalidation trace | presentation-only correction uses `PROJECTION_REVALIDATION`; no technical/source restart and no fingerprint mutation by projection writer |
+| 42 | owning-artifact/fingerprint revision comparison + semantic-diff/reconciliation verdict | semantic drift escalates; stale fingerprint is rejected before downstream dispatch |
+| 43 | independent As-Built topology probe + omitted-path evidence + expansion record | narrow review still discovers omitted material architecture through bounded `CONTEXT_EXPANSION_REQUIRED` |
 
 ## Required final validation record
 
@@ -103,6 +113,18 @@ final Mermaid block count
 validator/renderer used
 per-block PASS/FAIL/UNAVAILABLE
 correction + revalidation refs for failures
+```
+
+For Scenarios 39–43 also record:
+
+```text
+initial Context Envelope / routing state
+actual artifacts/sections opened
+full-artifact rereads
+CONTEXT_EXPANSION_REQUIRED records + reasons
+fingerprint owning revision/status where applicable
+revalidation class chosen
+whether downstream dispatch used stale or disputed semantics
 ```
 
 Final acceptance requires no unresolved HIGH-impact pressure failure and no violation of the global forbidden behaviors.
