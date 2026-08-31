@@ -157,6 +157,10 @@ QUAL-02 Tests / testability / evidence quality
 
 The taxonomy is mechanism-oriented and framework-neutral.
 
+Cryptography, signature/token verification, and TLS-specific mechanisms are not a mandatory standalone domain. When present, they are covered under the relevant domain such as `SEC-01`, `SEC-04`, `SEC-06`, or `SEC-07`. Relevant checks include issuer/audience/signature verification, randomness/nonces/IVs, certificate/TLS verification, key handling, and home-grown cryptographic constructions.
+
+`OPS-02 Supply chain / dynamic loading / update path` is likewise conditional in depth: plugin loading, runtime extensions, installers, update mechanisms, executable/module search paths, or dynamic imports make it materially applicable; otherwise it may be `NOT_APPLICABLE` with evidence.
+
 ## 6. High-risk proof-of-coverage contracts
 
 The following require stronger evidence than a generic thematic pass:
@@ -169,6 +173,7 @@ SEC-04 Outbound network target control
 SEC-05 Parsing / deserialization
 SEC-06 Secrets / sensitive-data propagation
 SEC-07 Privilege / capability boundaries
+REL-02 Availability / amplification / resource exhaustion
 REL-03 Business abuse / replay / ordering
 COMP-01 Cross-version / legacy surfaces
 ```
@@ -188,6 +193,8 @@ entrypoint / capability
 ```
 
 Representative point-read, list/bulk, write, and alternate-token/versioned paths should be considered where applicable.
+
+When authentication/session/token mechanisms exist, coverage must also consider lifecycle semantics rather than only the presence of middleware or a successful login path. Relevant mechanisms include token/session issuance, rotation, refresh, revocation, replay resistance, expiry, stale sessions, session fixation, issuer/audience/signature verification, service-token/admin fallback paths, and identity propagation across asynchronous or cross-service boundaries.
 
 ### SEC-02 Interpreter / dynamic construction
 
@@ -271,6 +278,20 @@ caller/context
 → effect
 ```
 
+### REL-02 Availability / amplification / resource exhaustion
+
+Minimum trace:
+
+```text
+untrusted/request-driven work
+→ amplification factor
+→ bounded/unbounded resource
+→ cancellation/backpressure/limits
+→ service impact
+```
+
+Consider unbounded request bodies, decompression/parser expansion, pathological regex/expression cost, expensive fan-out, queue/cache growth, retry storms, worker starvation, blocking resource pools, and request-driven work amplification where applicable. Performance suspicion alone is not a security/reliability finding; promotion still requires a reachable material effect.
+
 ### REL-03 Business abuse / replay / ordering
 
 ```text
@@ -327,7 +348,7 @@ Predecessor reasoning history is not required by default.
 
 1. **As-Built reconciliation** — map actual capabilities, interpreters, stores, external systems, privileged surfaces, versioned APIs, background flows, and resource boundaries to matrix domains.
 2. **Evidence-quality check** — challenge `COVERED` rows that have no meaningful inventory, traces, positive controls, non-findings, candidates, or explicit N/A reasoning.
-3. **Bounded blind-spot probes** — perform small risk-driven probes of selected domains to test whether claimed coverage matches the repository. Examples: raw interpreter escapes, dynamic outbound targets, representative list/read/write authorization paths, one secret-propagation trace, one versioned endpoint family.
+3. **Bounded blind-spot probes** — perform small risk-driven probes of selected domains to test whether claimed coverage matches the repository. Examples: raw interpreter escapes, dynamic outbound targets, representative list/read/write authorization paths, one authentication/token lifecycle path, one secret-propagation trace, one availability-amplification path, and one versioned endpoint family.
 
 The reviewer is not a second full auditor.
 
@@ -520,12 +541,14 @@ Known RED baseline:
 
 Additional pressure scenarios should cover:
 
-- **PS-46 — Authorization Completeness**: point endpoint protected, list/bulk scope missing, alternate service-token path.
+- **PS-46 — Authorization Completeness**: point endpoint protected, list/bulk scope missing, alternate service-token path, plus token/session lifecycle blind spots when such mechanisms exist.
 - **PS-47 — Outbound Target Control**: static destinations plus one dynamic webhook/redirect path.
 - **PS-48 — Cross-Version Projection**: issue fixed in new version but retained in old/base/compat path.
 - **PS-49 — Secrets Propagation**: secret stored correctly but leaked through exception/log/telemetry propagation.
 - **PS-50 — Business Replay / Ordering**: retry/replay creates duplicate durable business effect.
 - **PS-51 — False-Positive Resistance**: many raw-looking sites, mostly constants/allowlisted/structured, one direct unsafe sink and one unresolved second-order source.
+- **PS-52 — Availability / Amplification**: request-driven fan-out or unbounded work exists among ordinary performance code; reviewer must distinguish material exhaustion risk from generic slowness.
+- **PS-53 — Conditional Crypto / Transport**: applicable token/signature/TLS mechanism must be reviewed under the relevant domain, while projects without such mechanisms must not receive invented crypto findings.
 
 Success requires higher completeness **without** losing precision.
 
@@ -551,6 +574,10 @@ The design is implemented successfully only if:
 16. Existing final-report/editorial contracts remain intact.
 17. Safe Reproduction, when used, is non-destructive, authorized, minimal, and explicitly evidenced; lack of a PoC does not force escalation or block a well-supported static finding.
 18. The Skill does not become a public exploitation playbook.
+19. Availability/resource-exhaustion coverage traces request-driven amplification and bounding controls rather than promoting generic performance suspicion.
+20. Authentication/session/token lifecycle semantics are covered when applicable, not reduced to middleware presence.
+21. Cryptography/signature/TLS checks are conditional and routed through relevant domains rather than treated as a mandatory standalone checklist.
+22. Supply-chain/dynamic-loading depth is applicability-driven and may be evidence-backed `NOT_APPLICABLE`.
 
 ## 16. Design decision summary
 
