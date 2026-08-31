@@ -2,15 +2,17 @@
 
 Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса.
 
+Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation.
+
 ## 1. Стартовый выбор
 
 Перед существенным исследованием покажи пользователю рекомендацию и два независимых выбора.
 
 ### Глубина
 
-`STANDARD_FULL (полный стандартный аудит)` — полный evidence-first аудит с подробной фактической архитектурой, тематическим исследованием, независимой проверкой кандидатов, проверкой корневых причин и отдельной оценкой критичности. Рабочие артефакты компактнее, чем в forensic-режиме.
+`STANDARD_FULL (полный стандартный аудит)` — полный evidence-first аудит с подробной фактической архитектурой, thematic discovery, Discovery Coverage closeout, независимой проверкой кандидатов, проверкой корневых причин и отдельной оценкой критичности. Рабочие артефакты компактнее, чем в forensic-режиме.
 
-`FORENSIC (углублённое архитектурное расследование)` — максимальная глубина для сложных, конкурентных, security-sensitive или спорных систем. Тематические области исследуются отдельными рабочими проходами, история исправлений/опровержений сохраняется подробнее, а gates разделены явно.
+`FORENSIC (углублённое архитектурное расследование)` — максимальная глубина для сложных, конкурентных, security-sensitive или спорных систем. Тематические области исследуются отдельными рабочими проходами, Discovery Coverage имеет отдельный independent gate, история исправлений/опровержений сохраняется подробнее, а gates разделены явно.
 
 Skill может рекомендовать режим, но не должен молча выбирать `FORENSIC`.
 
@@ -51,10 +53,14 @@ working/
 ├── 00-baseline-and-as-built.md
 ├── 00a-as-built-review.md
 ├── 01-discovery-and-scenarios.md
+├── 01a-discovery-coverage-matrix.md
+├── 01b-independent-coverage-review.md
+├── 01c-coverage-correction.md       # conditional
+├── 01d-coverage-re-review.md        # conditional
 ├── 02-independent-verification.md
 ├── 03-root-and-severity-adjudication.md
-├── 04-target-consistency.md       # если нужно
-├── 05-roadmap-consistency.md      # если нужно
+├── 04-target-consistency.md         # если нужно
+├── 05-roadmap-consistency.md        # если нужно
 └── 06-final-editorial-review.md
 ```
 
@@ -72,6 +78,10 @@ working/
 ├── 04-frontend-state-events.md
 ├── 05-security-trust-boundaries.md
 ├── 06-maintainability-tests.md
+├── 06a-discovery-coverage-matrix.md
+├── 06b-independent-coverage-review.md
+├── 06c-coverage-correction.md       # conditional
+├── 06d-coverage-re-review.md        # conditional
 ├── 07-independent-verification.md
 ├── 08-root-boundary-adjudication.md
 ├── 09-severity-adjudication.md
@@ -87,7 +97,7 @@ working/
 └── 13b-final-editorial-re-review.md
 ```
 
-Создавай условные файлы только когда соответствующий проход реально нужен.
+Создавай conditional correction/re-review files только когда соответствующий pass реально нужен.
 
 ## 3. Карта авторитетности
 
@@ -97,10 +107,11 @@ working/
 |---|---|
 | mode / endpoint / workflow state / resume / subagent handoff | `review-modes-and-orchestration.md` |
 | общая evidence-first методика | `review-method.md` |
+| discovery coverage matrix / domains / coverage verdicts / coverage review | `discovery-coverage.md` |
 | ownership/invariants/adversarial scenarios | `ownership-and-scenarios.md` |
-| IPC/API/native/process boundary dimensions | `boundary-contract-audit.md` |
+| interaction/interpreter/resource/authority boundary dimensions | `boundary-contract-audit.md` |
 | evidence / candidate lifecycle / severity / security attack chain | `evidence-and-severity.md` |
-| независимая falsification | `independent-verification.md` |
+| независимая falsification кандидатов | `independent-verification.md` |
 | root/projection/SER split | `root-boundary-adjudication.md` |
 | lifecycle diagrams | `lifecycle-and-mermaid.md` |
 | финальный пакет / cross-links / writing | `report-contract.md` |
@@ -125,14 +136,38 @@ working/
 7. positive controls;
 8. open questions;
 9. architecture-correction candidates;
-10. supersessions/corrections;
-11. authoritative-document registry.
+10. Discovery Coverage projection;
+11. supersessions/corrections;
+12. authoritative-document registry.
+
+### Discovery Coverage projection
+
+Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактную projection:
+
+```text
+coverage_artifact: working/<coverage-matrix-file>
+coverage_review: <verdict>
+baseline: <commit/ref>
+
+domains:
+  total: <n>
+  covered: <n>
+  not_applicable: <n>
+  partial: <n>
+  blocked: <n>
+
+high_risk:
+  applicable: <n>
+  accepted: <n>
+```
+
+Перед downstream use coordinator обязан проверить freshness/revision binding owning coverage artifact и independent coverage review.
 
 Только coordinator редактирует `INDEX.md`. Тематические агенты пишут собственные файлы и persisted handoff.
 
 ## 5. Статусы
 
-Используй закрытый набор:
+Общие artifact/stage statuses:
 
 ```text
 PENDING
@@ -145,6 +180,8 @@ BLOCKED
 COMPLETE
 NOT_APPLICABLE
 ```
+
+Coverage-row states и coverage-review verdicts принадлежат `discovery-coverage.md` и не заменяют общий lifecycle status.
 
 `ARTIFACT_WRITTEN` означает только факт записи. Для артефакта с обязательным review следующий статус — `REVIEW_REQUIRED`, а не `COMPLETE`.
 
@@ -169,11 +206,33 @@ REVIEW_REQUIRED
 → COMPLETE | BLOCKED
 ```
 
+Coverage-specific semantic loop:
+
+```text
+Discovery artifacts COMPLETE
+→ Coverage Matrix closeout
+→ Independent Coverage Review
+→ COVERAGE_ACCEPTED
+```
+
+При coverage gap:
+
+```text
+COVERAGE_CORRECTION_REQUIRED
+→ targeted coverage correction
+→ matrix update
+→ impacted-domain coverage re-review
+→ COVERAGE_ACCEPTED | COVERAGE_BLOCKED
+```
+
+`COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` и `COVERAGE_CORRECTION_REQUIRED` нельзя project как `COMPLETE` для downstream candidate verification.
+
 После подтверждённой корректировки As-Built:
 
 ```text
 COMPLETE
-→ REVALIDATION_REQUIRED
+→ impact scan
+→ affected technical/coverage stages REVALIDATION_REQUIRED
 → IN_PROGRESS
 → ARTIFACT_WRITTEN/REVIEW_REQUIRED
 → COMPLETE | CORRECTION_REQUIRED | BLOCKED
@@ -204,6 +263,8 @@ architecture_correction_candidates:
 supersedes:
 - ...
 ```
+
+Coverage artifacts дополнительно должны явно ссылаться на owning matrix/review baseline и affected domains, если pass является correction/re-review.
 
 Допускается `none`, но поля должны присутствовать.
 
@@ -250,9 +311,10 @@ validate completed artifact / persisted handoff
 К material transition относятся:
 
 - изменение tracked stage между `PENDING`, `IN_PROGRESS`, `ARTIFACT_WRITTEN`, `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED`, `COMPLETE`, `NOT_APPLICABLE`;
+- изменение coverage review verdict, которое открывает/закрывает downstream gate;
 - смена active top-level phase;
 - завершение batch subagents после проверки их persisted handoffs и отражения результатов в `INDEX.md`;
-- подтверждённая architecture correction и последующее выставление `REVALIDATION_REQUIRED` зависимым stages.
+- подтверждённая architecture correction и последующее выставление `REVALIDATION_REQUIRED` зависимым stages/domains.
 
 При initial setup, если native tool доступен, вызови его сразу после создания/заполнения `INDEX.md`.
 
@@ -261,6 +323,7 @@ validate completed artifact / persisted handoff
 ```text
 read INDEX
 → verify/reconcile persisted artifacts and handoffs
+→ validate coverage matrix/review baseline binding
 → reconstruct true workflow state
 → call native todo/task/plan tool with that reconstructed state, if available
 → identify first non-accepted gate
@@ -277,12 +340,12 @@ read INDEX
 
 ```text
 [✓] Фактическая архитектура — COMPLETE
-[!] Независимое ревью As-Built — REVIEW_REQUIRED
-[ ] Владение и изоляция — PENDING
-[?] Security — BLOCKED: нужен продуктовый ответ OQ-004
+[✓] Тематическое discovery — COMPLETE
+[!] Discovery Coverage — COVERAGE_CORRECTION_REQUIRED
+[ ] Independent Candidate Verification — PENDING
 ```
 
-План динамический: подтверждённые architecture corrections могут добавить correction/impact/revalidation stages. Не перезапускай весь аудит, если impact scan показывает локальное влияние.
+План динамический: подтверждённые architecture corrections и coverage review gaps могут добавить targeted correction/impact/revalidation stages. Не перезапускай весь аудит, если impact scan показывает локальное влияние.
 
 ## 8. Subagents и стабильность
 
@@ -299,9 +362,22 @@ read INDEX
 - собственный output path;
 - `HANDOFF SUMMARY` contract.
 
+Coverage Reviewer дополнительно получает bounded factual packet по `discovery-coverage.md`: accepted As-Built, matrix, thematic artifact registry, candidate/PC/OQ registries и baseline binding. Он не получает predecessor reasoning как authority.
+
 Один файл — один активный writer. Параллельные агенты не редактируют один файл.
 
 Сначала Baseline → As-Built → независимое As-Built review. Только после принятия As-Built запускай зависимые thematic passes.
+
+После thematic discovery обязательный порядок:
+
+```text
+discovery artifacts complete
+→ coverage matrix closeout
+→ Independent Coverage Review
+→ targeted correction/re-review if needed
+→ COVERAGE_ACCEPTED
+→ candidate verification
+```
 
 Параллельность ограниченная и адаптивная. При сомнении выполняй последовательно. Stability-first.
 
@@ -318,9 +394,42 @@ PARTIALLY_CORRECT
 INSUFFICIENT_EVIDENCE
 ```
 
-При подтверждении отдельный correction pass изменяет технический As-Built, затем выполняется impact scan и только затронутые завершённые этапы получают `REVALIDATION_REQUIRED`.
+При подтверждении отдельный correction pass изменяет технический As-Built, затем выполняется impact scan.
 
-## 10. As-Built authority
+Impact scan обязан включать Discovery Coverage:
+
+```text
+confirmed As-Built change
+→ determine affected coverage domains
+→ only affected accepted rows/stages become REVALIDATION_REQUIRED
+```
+
+Не сбрасывай unrelated accepted coverage без concrete impact.
+
+## 10. Candidate verification gate
+
+Independent candidate verification разрешён только при:
+
+```text
+DISCOVERY_COMPLETE
+AND
+COVERAGE_ACCEPTED
+```
+
+Следующие состояния запрещают переход:
+
+```text
+PARTIALLY_COVERED
+BLOCKED
+COVERAGE_CORRECTION_REQUIRED
+COVERAGE_BLOCKED
+COVERAGE_AUTHORITY_DRIFT
+REVALIDATION_REQUIRED on material affected coverage
+```
+
+Coverage Review не проверяет correctness каждого кандидата; candidate verification не используется как замена coverage review.
+
+## 11. As-Built authority
 
 Во время исследования контролируемый working As-Built (`00-...as-built.md`) — **технический источник истины** для фактов архитектуры.
 
@@ -328,7 +437,7 @@ INSUFFICIENT_EVIDENCE
 
 Независимое As-Built review обязательно в обоих режимах; в `STANDARD_FULL` оно может быть компактнее.
 
-## 11. Recovery
+## 12. Recovery
 
 При новой сессии:
 
@@ -336,10 +445,13 @@ INSUFFICIENT_EVIDENCE
 read INDEX
 → verify baseline and referenced artifacts
 → reconcile any persisted handoff not reflected in INDEX
+→ validate coverage_artifact and coverage_review baseline/revision binding
 → reconstruct true workflow state
 → call native todo/task/plan tool with reconstructed state, if available
 → identify first non-accepted required gate
 → continue
 ```
+
+Если INDEX утверждает `COVERAGE_ACCEPTED`, но owning matrix/review stale, missing или bound to another accepted As-Built/baseline, не доверяй compact projection. Используй freshness/reconciliation contract и верни соответствующий coverage stage в non-accepted state.
 
 Не полагайся на память предыдущего чата и не используй stale native UI как authority.
