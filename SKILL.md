@@ -7,9 +7,9 @@ description: Use when performing a whole-project or subsystem architecture/code 
 
 ## Overview
 
-Проводить evidence-first архитектурный аудит существующей системы как управляемый, возобновляемый процесс. Сначала реконструировать фактическую архитектуру и владение, затем искать кандидатов, независимо проверять их, валидировать корневые причины и только после этого назначать критичность.
+Проводить evidence-first архитектурный аудит существующей системы как управляемый, возобновляемый процесс. Сначала реконструировать фактическую архитектуру и владение, затем искать кандидатов, независимо проверять полноту discovery и сами кандидаты, валидировать корневые причины и только после этого назначать критичность.
 
-**Core principle:** архитектурное утверждение должно опираться на traced code path (прослеженный путь кода), ownership (владение) и concrete effect (конкретное последствие), а не на название директории, framework convention или stylistic preference.
+**Core principle:** архитектурное утверждение должно опираться на traced code path (прослеженный путь кода), ownership (владение) и concrete effect (конкретное последствие), а полнота discovery — на mechanism coverage (покрытие классов механизмов), а не на количество найденных замечаний.
 
 ## Start Gate — выбрать режим и результат
 
@@ -45,16 +45,18 @@ Subagents могут исследовать независимые domains и с
    - `references/ownership-and-scenarios.md`;
    - `references/boundary-contract-audit.md`;
    - `references/lifecycle-and-mermaid.md`;
+   - `references/discovery-coverage.md`;
    - applicable `references/stacks/*.md`.
-5. Discovery создаёт `CAND-*`, `PC-*`, `OQ-*`, `AC-*`, но не final RF.
-6. Независимо проверь кандидатов по `references/independent-verification.md`.
-7. Проведи root-boundary adjudication по `references/root-boundary-adjudication.md`.
-8. Только после этого назначь severity по `references/evidence-and-severity.md` и сформируй authoritative ledger.
-9. Собери main review по `references/report-contract.md`.
-10. Если endpoint включает Target Architecture — создай её и проведи review/correction/re-review по `references/target-architecture-review.md`.
-11. Если endpoint включает Roadmap — создай его и проведи execution-consistency review/correction/re-review по `references/remediation-roadmap-review.md`.
-12. После принятия всех requested artifacts собери final package.
-13. Проведи issue-only editorial review → separate correction → fresh re-review по `references/final-editorial-review.md`; presentation-only correction использует `PROJECTION_REVALIDATION` по `references/revalidation-and-freshness.md`, пока technical semantics не изменились.
+5. Discovery создаёт `CAND-*`, `PC-*`, `OQ-*`, `AC-*`, но не final RF, и обновляет Discovery Coverage Matrix по `references/discovery-coverage.md`.
+6. Закрой Discovery Coverage Matrix и проведи отдельный Independent Coverage Review. Если есть gap — targeted coverage correction/re-review. Candidate verification начинается только после `DISCOVERY_COMPLETE` + `COVERAGE_ACCEPTED`.
+7. Независимо проверь кандидатов по `references/independent-verification.md`.
+8. Проведи root-boundary adjudication по `references/root-boundary-adjudication.md`.
+9. Только после этого назначь severity по `references/evidence-and-severity.md` и сформируй authoritative ledger.
+10. Собери main review по `references/report-contract.md`.
+11. Если endpoint включает Target Architecture — создай её и проведи review/correction/re-review по `references/target-architecture-review.md`.
+12. Если endpoint включает Roadmap — создай его и проведи execution-consistency review/correction/re-review по `references/remediation-roadmap-review.md`.
+13. После принятия всех requested artifacts собери final package.
+14. Проведи issue-only editorial review → separate correction → fresh re-review по `references/final-editorial-review.md`; presentation-only correction использует `PROJECTION_REVALIDATION` по `references/revalidation-and-freshness.md`, пока technical semantics не изменились.
 
 ## Non-Negotiable Gates
 
@@ -65,6 +67,10 @@ Subagents могут исследовать независимые domains и с
 - Presentation-only correction не перезапускает technical audit автоматически: используй `PROJECTION_REVALIDATION`; semantic drift требует `TECHNICAL_REVALIDATION_REQUIRED`.
 - Major artifact author ≠ final judge. Review/correction/re-review — отдельные роли.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
+- Количество и severity найденных `CAND-*`/`RF-*` не являются evidence полноты discovery.
+- `DISCOVERY_COMPLETE` без `COVERAGE_ACCEPTED` не является accepted downstream input для candidate verification.
+- Coverage gap исправляется targeted pass/re-review; не перезапускай весь technical audit без impact evidence.
+- `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` не являются принятым coverage state.
 - Serious security finding требует attack chain; absence of hardening alone ≠ HIGH/CRITICAL.
 - Severity отделена от correctness verification.
 - Positive Controls сохраняются и учитываются в Target/Roadmap.
@@ -83,6 +89,7 @@ Subagents могут исследовать независимые domains и с
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - core method / As-Built-first flow → `references/review-method.md`
+- discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
 - ownership / invariants / adversarial scenarios → `references/ownership-and-scenarios.md`
 - boundary contracts → `references/boundary-contract-audit.md`
 - verification → `references/independent-verification.md`
@@ -96,6 +103,8 @@ Subagents могут исследовать независимые domains и с
 
 ## Completion Gate
 
-Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are `COMPLETE`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
+Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
+
+Если material coverage остаётся `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` запрещён.
 
 Otherwise return `REVIEW_PARTIALLY_COMPLETE` with the exact blocked/missing gates from `working/INDEX.md`.
