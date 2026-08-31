@@ -1,6 +1,6 @@
 # Метод архитектурного и кодового аудита
 
-Этот файл задаёт общую evidence-first методику. Режимы/статусы/INDEX описаны в `review-modes-and-orchestration.md`; ownership/scenarios — в `ownership-and-scenarios.md`; boundary dimensions — в `boundary-contract-audit.md`.
+Этот файл задаёт общую evidence-first методику. Режимы/статусы/INDEX описаны в `review-modes-and-orchestration.md`; ownership/scenarios — в `ownership-and-scenarios.md`; boundary dimensions — в `boundary-contract-audit.md`; доказательство полноты discovery — в `discovery-coverage.md`.
 
 ## 1. Сначала фактическая система, потом суждение
 
@@ -22,7 +22,7 @@
 4. ownership state/resources;
 5. major data/control flows;
 6. external systems/native/child processes;
-7. IPC/API/native/process boundaries;
+7. interaction/interpreter/resource/authority boundaries;
 8. startup/initialization/steady-state/background/failure/recovery/shutdown;
 9. concurrency model;
 10. storage/configuration;
@@ -54,6 +54,21 @@ As-Built проходит независимое fresh-context review в обо�
 
 Discovery создаёт `CAND-*`, positive controls, open questions и architecture-correction candidates — не final findings.
 
+Одновременно thematic passes обязаны накапливать coverage evidence по `discovery-coverage.md`. Полнота не выводится из количества кандидатов.
+
+Общий security/correctness pattern для material source-driven risks:
+
+```text
+source / capability
+→ validation / transformation
+→ boundary / interpreter / resource / authority decision
+→ guard / ownership / parameterization
+→ side effect
+→ reachable consequence
+```
+
+Этот pattern — не quota и не замена domain-specific contracts. Он помогает не ограничивать security только перечислением trust boundaries.
+
 ### Architecture / responsibility
 
 Проверяй dependency direction, responsibility, hidden global state, service locators, overly broad APIs, cross-layer business rules, duplicated truth. Не требуй Clean Architecture по названию patterns.
@@ -64,7 +79,7 @@ Discovery создаёт `CAND-*`, positive controls, open questions и architec
 
 ### Boundaries
 
-Применяй `boundary-contract-audit.md` для significant IPC/API/RPC/native/process/event boundaries.
+Применяй `boundary-contract-audit.md` для significant interaction, interpreter, resource-addressing и authority/capability boundaries. Coverage completeness для этих classes регулируется `discovery-coverage.md`.
 
 ### Lifecycle / resources
 
@@ -76,7 +91,11 @@ Discovery создаёт `CAND-*`, positive controls, open questions и architec
 
 ### Security
 
-Map trust boundaries, credentials, TLS, remote content, preload/native capabilities, child processes, filesystem, update chain, deserialization, URL/path validation. Serious promotion требует attack chain из `evidence-and-severity.md`.
+Map trust boundaries, credentials, TLS, remote content, preload/native capabilities, child processes, filesystem, update chain, deserialization, URL/path validation, authentication/authorization scope, interpreter/dynamic-construction sinks, outbound-target control, secrets propagation, privileged capabilities и legacy/versioned surfaces — только где соответствующие mechanisms реально присутствуют.
+
+Не считай этот список достаточным proof-of-coverage. High-risk domains закрываются по semantic contracts из `discovery-coverage.md`.
+
+Serious promotion требует attack chain из `evidence-and-severity.md`.
 
 ### Configuration / localization / duplication
 
@@ -86,9 +105,26 @@ Map trust boundaries, credentials, TLS, remote content, preload/native capabilit
 
 Review timeout/cancel/retry/idempotency/TLS/proxy, atomic writes/migrations/locking, structured correlation and sensitive logging, blocking/event-loop risks, unbounded queues/caches and lock contention — только в контексте реального impact.
 
+Request-driven amplification/resource exhaustion и business replay/order/idempotency рассматривай как mechanism classes, а не только как performance observations.
+
 ### Tests / testability
 
 Определи, какие risks реально защищены existing tests. Raw test count и отсутствие локальных tests сами по себе не доказывают runtime defect.
+
+### Discovery coverage closeout
+
+После planned thematic passes:
+
+```text
+update Discovery Coverage Matrix
+→ classify every applicable domain
+→ record evidence / non-findings / candidates / OQ / limitations
+→ Independent Coverage Review
+→ targeted correction/re-review if needed
+→ COVERAGE_ACCEPTED
+```
+
+`DISCOVERY_COMPLETE` без `COVERAGE_ACCEPTED` не разрешает переход к candidate verification.
 
 ## 5. Safe verification
 
@@ -96,9 +132,11 @@ Review timeout/cancel/retry/idempotency/TLS/proxy, atomic writes/migrations/lock
 
 Для каждой команды фиксируй result и limitation.
 
+Runtime reproduction для security/correctness evidence выполняется только в безопасных рамках `evidence-and-severity.md`; static finding не требует forced PoC.
+
 ## 6. Независимая проверка и adjudication
 
-После discovery:
+После `COVERAGE_ACCEPTED`:
 
 ```text
 candidates
@@ -110,15 +148,24 @@ candidates
 
 Следуй `independent-verification.md`, `root-boundary-adjudication.md`, `evidence-and-severity.md`.
 
-Не назначай окончательную severity во время discovery.
+Coverage Review и candidate verification — разные gates:
+
+```text
+Coverage Review: не пропущен ли material class исследования?
+Independent Verification: реален ли уже существующий CAND?
+```
+
+Не назначай окончательную severity во время discovery или coverage review.
 
 ## 7. Architecture corrections
 
 Если thematic pass опровергает accepted As-Built, он создаёт `ARCH-CORRECTION-CANDIDATE` и продолжает в рамках собственного scope. Исправление базы выполняется отдельным review/correction/impact/revalidation loop из orchestration contract.
 
+Подтверждённая As-Built correction требует coverage impact scan; не сбрасывай unrelated accepted coverage без evidence влияния.
+
 ## 8. Positive controls и non-findings
 
-Поддерживай registry механизмов, которые следует сохранить. Также сохраняй considered-but-not-promoted conclusions, когда они предотвращают повторное появление false positives.
+Поддерживай registry механизмов, которые следует сохранить. Также сохраняй considered-but-not-promoted conclusions, когда они предотвращают повторное появление false positives и служат coverage evidence.
 
 Не считать finding без contextual impact:
 
@@ -128,13 +175,16 @@ candidates
 - raw warning count;
 - `unwrap`/`clone`/mocks;
 - hardcoded literal;
-- отсутствие тестов.
+- отсутствие тестов;
+- raw-looking API name без source/provenance/effect;
+- HTTP client без доказанного control over destination;
+- generic slowness без material resource impact.
 
 ## 9. Режимы
 
-`STANDARD_FULL` использует те же correctness gates, но может объединять тематические working passes.
+`STANDARD_FULL` использует те же correctness gates, может объединять thematic working passes, но всё равно создаёт compact coverage matrix и проходит coverage closeout.
 
-`FORENSIC` разделяет ownership/lifecycle/boundaries/frontend/security/maintainability и последующие adjudication stages явнее, сохраняя более подробный evidence trail.
+`FORENSIC` разделяет ownership/lifecycle/boundaries/frontend/security/maintainability и последующие adjudication stages явнее, сохраняет более подробный evidence trail и имеет явный Independent Coverage Review gate.
 
 В обоих режимах не возвращайся к одному giant prompt/report pass.
 
