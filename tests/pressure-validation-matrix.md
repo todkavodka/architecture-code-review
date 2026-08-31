@@ -41,7 +41,9 @@ Any of these is an automatic failure where applicable:
 - using a stale Semantic Fingerprint whose owning-artifact revision no longer matches;
 - treating a Context Envelope as a prohibition that prevents following material cross-boundary evidence;
 - treating finding count as evidence that thematic discovery was complete;
-- advancing to candidate verification while material discovery coverage is unaccepted.
+- advancing to candidate verification while material discovery coverage is unaccepted;
+- converting Discovery Coverage into a vulnerability quota;
+- demanding destructive/offensive reproduction to validate otherwise sufficient audit evidence.
 
 ## Scenario matrix
 
@@ -91,6 +93,14 @@ Any of these is an automatic failure where applicable:
 | 42 | owning-artifact/fingerprint revision comparison + semantic-diff/reconciliation verdict | semantic drift escalates; stale fingerprint is rejected before downstream dispatch |
 | 43 | independent As-Built topology probe + omitted-path evidence + expansion record | narrow review still discovers omitted material architecture through bounded `CONTEXT_EXPANSION_REQUIRED` |
 | 45 | systematic interpreter/dynamic-construction inventory + source provenance + safe/unsafe/ambiguous classification | discovery cannot complete by luck; direct unsafe, second-order unresolved, constant, allowlisted, and structured ORM cases remain correctly distinguished |
+| 46 | point/list/write/service-token authorization traces + token lifecycle evidence | authentication does not substitute for object/scope authorization; alternate token and session lifecycle semantics are considered where present |
+| 47 | target provenance + redirect/proxy/network-zone trace | dynamic outbound target risk is distinguished from static/allowlisted clients; redirects and credential propagation are not silently ignored |
+| 48 | sibling/base/compat projection inventory + root grouping | material mechanism projects across versions without duplicate-root inflation; corrected version remains a positive control |
+| 49 | secret source-to-error/log/telemetry propagation trace | secure storage does not close the domain; reachable propagation is distinguished from unproven historical exposure |
+| 50 | idempotency/replay/order/authoritative-state/side-effect trace | duplicate durable business effect is recognized as material even without classic injection/auth symptoms |
+| 51 | classified inventory of raw-looking sites | broader coverage preserves precision: safe constants/allowlists/bind values remain non-findings; second-order remains unresolved; direct unsafe remains candidate |
+| 52 | request-driven amplification + retries/concurrency + resource bounding + cancellation/backpressure trace | material exhaustion risk is separated from generic slowness and unsupported outage severity |
+| 53 | conditional token/signature/TLS trace + mechanism-absent control | real crypto/transport mechanisms are reviewed under relevant domains; absent mechanisms receive evidence-backed N/A rather than invented findings |
 
 ## Observed RED baselines
 
@@ -107,16 +117,28 @@ runtime: independent fresh GLM-5.2 session supplied by the user
 
 The baseline correctly adjudicated the supplied A–E sites after they were presented, but concluded that the installed Skill did not structurally require normal FORENSIC discovery to inventory interpreter/raw-construction sinks or trace provenance into them. This is the required pre-change failure for the Discovery Coverage Assurance work.
 
+## Candidate validation status
+
+PS-45 through PS-53 require fresh-context execution against the candidate branch after the coverage contract is present. Do not mark these rows PASS from static self-review alone.
+
+At the time the scenario contracts were added:
+
+```text
+candidate_branch: design/discovery-coverage-assurance-v0.3
+fresh_candidate_runs: PENDING
+reason: current execution host has no independent subagent/fresh-session runtime; use an external fresh session and record exact output
+```
+
 ## Required final validation record
 
-Before v0.2 is considered implementation-complete, create a validation report containing:
+Before the candidate is considered implementation-complete, create a validation report containing:
 
 ```text
 candidate Skill commit/ref
 runtime/host used
 scenario IDs executed
 control result where applicable
-v0.2 result
+candidate result
 PASS/FAIL per criterion
 new rationalizations or loopholes
 corrections applied
