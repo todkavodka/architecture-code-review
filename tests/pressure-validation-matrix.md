@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`.
 
 ## Global forbidden behaviors
 
@@ -39,7 +39,9 @@ Any of these is an automatic failure where applicable:
 - narrow downstream role silently broadening its context without a concrete recorded correctness trigger;
 - projection-only correction restarting technical validation when accepted semantics are unchanged;
 - using a stale Semantic Fingerprint whose owning-artifact revision no longer matches;
-- treating a Context Envelope as a prohibition that prevents following material cross-boundary evidence.
+- treating a Context Envelope as a prohibition that prevents following material cross-boundary evidence;
+- treating finding count as evidence that thematic discovery was complete;
+- advancing to candidate verification while material discovery coverage is unaccepted.
 
 ## Scenario matrix
 
@@ -88,6 +90,22 @@ Any of these is an automatic failure where applicable:
 | 41 | unchanged semantic fingerprint comparison + revalidation trace | presentation-only correction uses `PROJECTION_REVALIDATION`; no technical/source restart and no fingerprint mutation by projection writer |
 | 42 | owning-artifact/fingerprint revision comparison + semantic-diff/reconciliation verdict | semantic drift escalates; stale fingerprint is rejected before downstream dispatch |
 | 43 | independent As-Built topology probe + omitted-path evidence + expansion record | narrow review still discovers omitted material architecture through bounded `CONTEXT_EXPANSION_REQUIRED` |
+| 45 | systematic interpreter/dynamic-construction inventory + source provenance + safe/unsafe/ambiguous classification | discovery cannot complete by luck; direct unsafe, second-order unresolved, constant, allowlisted, and structured ORM cases remain correctly distinguished |
+
+## Observed RED baselines
+
+### PS-45
+
+```text
+baseline: main@fd7466a33362d04d964cb847d33c5a1e022ba48b
+baseline_result: RED
+verdict: PS45_RED_DISCOVERY_COVERAGE_GAP_CONFIRMED
+failure_boundary: thematic discovery
+not_failing: independent verification; root adjudication; severity; final editorial
+runtime: independent fresh GLM-5.2 session supplied by the user
+```
+
+The baseline correctly adjudicated the supplied A–E sites after they were presented, but concluded that the installed Skill did not structurally require normal FORENSIC discovery to inventory interpreter/raw-construction sinks or trace provenance into them. This is the required pre-change failure for the Discovery Coverage Assurance work.
 
 ## Required final validation record
 
@@ -125,6 +143,19 @@ CONTEXT_EXPANSION_REQUIRED records + reasons
 fingerprint owning revision/status where applicable
 revalidation class chosen
 whether downstream dispatch used stale or disputed semantics
+```
+
+For Scenarios 45–53 also record:
+
+```text
+coverage domains claimed
+inventory evidence
+semantic traces performed
+NOT_APPLICABLE reasons
+bounded coverage-review probes
+coverage verdict
+whether finding count was used as a completeness proxy
+whether any safe reproduction was attempted and under what authorization/isolation boundary
 ```
 
 Final acceptance requires no unresolved HIGH-impact pressure failure and no violation of the global forbidden behaviors.
