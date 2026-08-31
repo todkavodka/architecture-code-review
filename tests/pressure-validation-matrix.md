@@ -119,15 +119,46 @@ The baseline correctly adjudicated the supplied A–E sites after they were pres
 
 ## Candidate validation status
 
-PS-45 through PS-53 require fresh-context execution against the candidate branch after the coverage contract is present. Do not mark these rows PASS from static self-review alone.
-
-At the time the scenario contracts were added:
+Fresh-context candidate validation completed against:
 
 ```text
 candidate_branch: design/discovery-coverage-assurance-v0.3
-fresh_candidate_runs: PENDING
-reason: current execution host has no independent subagent/fresh-session runtime; use an external fresh session and record exact output
+candidate_head: 6095e9c40d71dfcf542f3f02a8a14d41f0cce698
+runtime: independent fresh GLM-5.2 session supplied by the user
+loaded_path: /home/ubuntu/.agents/skills/architecture-code-review/SKILL.md
+discovery_coverage_reference_loaded: YES
+candidate_result: DISCOVERY_COVERAGE_CANDIDATE_GREEN
 ```
+
+Scenario verdicts:
+
+```text
+PS-45 PASS — interpreter/dynamic-construction inventory + provenance distinctions enforced
+PS-46 PASS — authorization/object-scope/token-lifecycle distinctions preserved
+PS-47 PASS — dynamic outbound target/redirect/proxy semantics traced without every-HTTP-client SSRF inflation
+PS-48 PASS — cross-version projection search + one-root grouping preserved
+PS-49 PASS — secret propagation traced beyond storage; historical leakage not invented
+PS-50 PASS — replay/order/idempotency recognized as material without classic vulnerability symptoms
+PS-51 PASS — 20-site raw-looking inventory classified precisely; only direct unsafe promoted
+PS-52 PASS — request-driven amplification distinguished from generic slowness
+PS-53 PASS — real crypto/TLS mechanisms conditional; mechanism-absent control becomes evidence-backed NOT_APPLICABLE
+```
+
+Additional candidate checks:
+
+```text
+coverage_gate_state_A: PASS — CORRECTION_REQUIRED blocks candidate verification
+coverage_gate_state_B: PASS — BLOCKED prevents ordinary REVIEW_COMPLETE and preserves exact limitation
+coverage_gate_state_C: PASS — COVERAGE_ACCEPTED permits candidate verification but does not confirm CANDs
+coverage_gate_state_D: PASS — later As-Built correction revalidates only impacted domains
+safe_reproduction_boundary: PASS
+role_separation: PASS
+false_positive_overfitting: PASS
+```
+
+The run explicitly confirmed that the candidate does not behave like a vulnerability checklist, does not equate raw-looking syntax with vulnerability, does not require findings per domain, does not invent crypto/security findings for non-applicable mechanisms, does not use finding count as completeness evidence, and does not turn Coverage Review into an unbounded second audit.
+
+No candidate correction was required by this fresh validation.
 
 ## Required final validation record
 
