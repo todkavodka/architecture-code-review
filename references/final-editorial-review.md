@@ -15,7 +15,10 @@ Editorial Review (редакционное ревью) **не редактиру
 - не содержат stale/superseded technical claims;
 - согласованы между собой и с authoritative ledger;
 - имеют целостный cross-link graph;
-- не искажают severity/evidence/target/roadmap semantics при редактуре.
+- не искажают severity/evidence/target/roadmap semantics при редактуре;
+- не заявляют `REVIEW_COMPLETE`, если Discovery Coverage не имеет принятого `COVERAGE_ACCEPTED` state.
+
+Editorial Review **не является техническим re-audit**. Он не обязан заново искать пропущенные vulnerability/mechanism classes в repository. Проверка полноты thematic discovery и absence-of-investigation gaps принадлежит Independent Coverage Review из `discovery-coverage.md`.
 
 ## 2. Language contract
 
@@ -183,6 +186,7 @@ LINK-###   broken/missing cross-link
 CONS-###   prose/table/diagram/document contradiction
 STALE-###  superseded claim resurfaced
 SEV-###    wording rhetorically exceeds adjudicated severity
+STATUS-### final status contradicts accepted technical/coverage gate state
 ```
 
 ## 6. Checks
@@ -214,7 +218,9 @@ SEV-###    wording rhetorically exceeds adjudicated severity
 - target mechanisms link to motivating RF/SER/invariant;
 - roadmap tasks link to target/RF;
 - working superseded claims point forward to current authority where required;
-- no unsupported intensifiers `catastrophic`, `RCE`, `data loss`, `critical` вне adjudicated context.
+- no unsupported intensifiers `catastrophic`, `RCE`, `data loss`, `critical` вне adjudicated context;
+- final status соответствует `working/INDEX.md` и accepted Discovery Coverage state;
+- package не утверждает `REVIEW_COMPLETE`, если coverage находится в `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или material `REVALIDATION_REQUIRED`.
 
 ## 7. Semantic safety
 
@@ -228,7 +234,10 @@ Editorial reviewer **не имеет права молча менять**:
 - target invariants/ownership;
 - feasibility classification;
 - roadmap dependencies/gates;
-- security assumptions.
+- security assumptions;
+- Discovery Coverage technical verdict.
+
+Editorial reviewer также **не выполняет новый repository-wide vulnerability/discovery search** для доказательства coverage. Если final package показывает non-accepted/stale coverage state, он флагирует status/consistency issue и возвращает пакет в соответствующий technical coverage gate.
 
 Если language/diagram cleanup обнаруживает реальное technical contradiction, issue получает `CONS-*` и возвращается в соответствующий technical gate.
 
@@ -239,6 +248,7 @@ Review artifact содержит:
 ```text
 reviewed final artifact refs
 baseline / authoritative ledger ref
+coverage verdict / coverage artifact ref
 issue ID
 location
 category
@@ -265,12 +275,14 @@ FINAL PACKAGE ASSEMBLED
 → fresh-context editorial review
 → issue list
 → separate editorial correction writer
-→ verify links/semantics + Mermaid renderability
+→ verify links/semantics + Mermaid renderability + status consistency
 → fresh-context editorial re-review
 → FINAL_PACKAGE_ACCEPTED | CORRECTION_REQUIRED | TECHNICAL_GATE_REQUIRED
 ```
 
 Correction writer меняет только то, что разрешено issue list; новый technical content не добавляет без возврата в technical gate.
+
+Coverage-related `STATUS-*` не исправляется редактором подменой verdict. Если coverage не принято, correction boundary — technical Coverage Review/correction/revalidation.
 
 ## 10. Final acceptance
 
@@ -286,4 +298,6 @@ Correction writer меняет только то, что разрешено issu
 - нет known Mermaid parser/render failures;
 - при доступном renderer все final Mermaid blocks имеют executable validation evidence;
 - при недоступном renderer limitation явно зафиксирован и render PASS не заявлен;
-- requested target/roadmap artifacts уже accepted технически.
+- requested target/roadmap artifacts уже accepted технически;
+- Discovery Coverage имеет accepted `COVERAGE_ACCEPTED` state, bound to current accepted As-Built/baseline;
+- final status не маскирует material coverage limitation.
