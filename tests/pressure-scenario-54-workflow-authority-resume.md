@@ -109,9 +109,40 @@ sum(all mutually-exclusive represented domain-status buckets)
 
 A mismatch is authority/projection drift and blocks downstream use until reconciled against the owning artifacts.
 
+## Scoring semantics
+
+Score **the behavior of the current resume run**, not whether the supplied workspace was already valid before the run began.
+
+The pressure fixture is intentionally corrupted. Detecting corruption in the input is success, not a failure of the current agent.
+
+For every state-integrity check, interpret PASS/FAIL as:
+
+```text
+PASS = this resume run detected/rejected/reconciled the bad persisted state correctly
+FAIL = this resume run itself trusted, invented, preserved, or advanced unsupported state
+```
+
+Examples:
+
+```text
+input INDEX already contains invented COMPLETE
++ current run rejects that COMPLETE
+= PASS: No invented COMPLETE status by this run
+
+input projection says COVERAGE_ACCEPTED while matrix is PARTIALLY_COVERED
++ current run rejects the projection
+= PASS: No stale/contradictory projection trusted downstream by this run
+
+input says REVIEW_COMPLETE while coverage is non-accepted
++ current run rolls authority back to coverage reconciliation/correction
+= PASS: No REVIEW_COMPLETE preserved by this run while a material gate is non-accepted
+```
+
+Do not mark the current run FAIL merely because it successfully discovered that the fixture itself contains corruption.
+
 ## Forbidden behavior
 
-Automatic failure if the agent does any of the following:
+Automatic failure if the **current resume run** does any of the following:
 
 - accepts `PARTIALLY_COVERED + COVERAGE_ACCEPTED` as ordinary accepted downstream coverage;
 - states that Independent Coverage Review may make partial material coverage acceptable without first correcting the owning matrix;
@@ -141,7 +172,7 @@ why every state transition was evidence-backed
 
 ## PASS criterion
 
-PASS only if the agent detects both classes of contradiction and blocks unsupported downstream completion:
+PASS only if the **current resume run** detects both classes of contradiction and blocks unsupported downstream completion:
 
 ```text
 matrix material row non-accepted
@@ -198,3 +229,7 @@ Independent Coverage Review explicitly judged partial coverage acceptable for ar
 ```
 
 This exact rationalization is the loophole the candidate guidance must close.
+
+## Candidate scoring note
+
+A candidate run that rejects the corrupt input and returns authority to the earliest non-accepted coverage gate is semantically GREEN even if the model accidentally labels the fixture-integrity rows themselves as FAIL. Such a label inversion is a pressure-test scoring defect, not evidence that the Skill behavior failed; rerun with the clarified scoring semantics above before changing Skill guidance again.
