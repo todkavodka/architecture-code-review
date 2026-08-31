@@ -1,6 +1,6 @@
 # Доказательства, жизненный цикл кандидата и критичность
 
-Этот файл является авторитетным источником для evidence contract (контракта доказательств), promotion lifecycle (жизненного цикла кандидата), security attack chain (цепочки эксплуатации) и severity adjudication (оценки критичности).
+Этот файл является авторитетным источником для evidence contract (контракта доказательств), promotion lifecycle (жизненного цикла кандидата), security attack chain (цепочки эксплуатации), Safe Reproduction / Evidence Validation и severity adjudication (оценки критичности).
 
 ## 1. Evidence contract
 
@@ -38,6 +38,8 @@ CANDIDATE
 
 `REFUTED` и superseded formulations должны сохраняться в working evidence trail, чтобы не воскреснуть позже.
 
+Discovery Coverage Review не заменяет эту цепочку: он проверяет полноту исследования mechanism classes, а не correctness уже найденного candidate.
+
 ## 3. Evidence strength
 
 Используй confidence отдельно от severity:
@@ -48,7 +50,106 @@ CANDIDATE
 
 Не поднимай severity только из-за высокой уверенности: уверенность отвечает «правда ли», severity — «насколько плохо».
 
-## 4. Security attack-chain gate
+Для clarity допускаются evidence descriptions:
+
+```text
+STATICALLY_CONFIRMED
+RUNTIME_REPRODUCED
+RUNTIME_VALIDATION_UNAVAILABLE
+```
+
+Это **не новые lifecycle statuses и не severity levels**. Они только описывают тип фактического evidence.
+
+`RUNTIME_REPRODUCED` можно указывать только когда runtime check реально выполнялся и его результат зафиксирован. Если проверка не выполнялась, не используй wording, создающее впечатление фактического воспроизведения.
+
+## 4. Safe Reproduction / Evidence Validation
+
+Runtime reproduction может повысить confidence и подтвердить reachability/semantics, но архитектурный audit Skill не является penetration-testing или exploitation framework.
+
+Safe Reproduction — **опциональный** способ усилить evidence. Он не является prerequisite для каждого finding.
+
+### Разрешённая цель
+
+Проверить минимальный harmless effect, достаточный чтобы различить:
+
+```text
+mechanism реально существует
+vs
+static interpretation была ошибочной
+```
+
+Предпочитай в таком порядке:
+
+1. существующий non-destructive test;
+2. existing local fixture/harness;
+3. isolated test environment;
+4. synthetic input / local semantic reproduction.
+
+### Authorization boundary
+
+Выполняй runtime reproduction только на системе/environment/repository, которую пользователь авторизован проверять.
+
+Не используй audit как повод probing unrelated external targets или third-party infrastructure.
+
+### Hard safety boundary
+
+Safe Reproduction не включает:
+
+- destructive actions;
+- persistence;
+- privilege escalation;
+- credential theft;
+- lateral movement;
+- data exfiltration;
+- modification/corruption of real production data;
+- unrelated external target probing;
+- reusable offensive payload packs.
+
+Demonstrate the **minimum effect necessary**. Не расширяй reproduction только потому, что уже доказан первый exploit primitive.
+
+### Injection-like mechanisms
+
+Для injection-like candidate предпочитай доказать:
+
+```text
+construction semantics
+или
+harmless local/test predicate manipulation
+```
+
+Не извлекай реальные данные и не цепляй privileges только ради демонстрации severity.
+
+### Когда reproduction недоступна
+
+Если безопасный runtime check невозможен, не forcing PoC.
+
+Вместо этого:
+
+```text
+preserve static evidence
+→ state runtime limitation
+→ keep confidence proportional to actual evidence
+```
+
+`RUNTIME_VALIDATION_UNAVAILABLE` не означает, что static finding автоматически false или low severity; он описывает limitation evidence channel.
+
+### Связь с candidate lifecycle и severity
+
+Успешная safe reproduction может:
+
+- повысить confidence;
+- подтвердить reachable condition;
+- falsify неверную static interpretation.
+
+Она **не**:
+
+- обходит independent verification;
+- обходит root-boundary adjudication;
+- назначает severity сама по себе;
+- автоматически поднимает severity;
+- превращает conditional capability в direct exploit без evidence.
+
+## 5. Security attack-chain gate
 
 Серьёзный security finding (`HIGH`/`CRITICAL`) требует доказанной цепочки, где применимо:
 
@@ -71,7 +172,9 @@ DEFENSE_IN_DEPTH
 
 Отсутствие hardening control само по себе не является HIGH/CRITICAL vulnerability. Conditional post-compromise capability не наследует автоматически severity гипотетического prerequisite compromise.
 
-## 5. Severity adjudication
+Runtime reproduction не обязана доходить до полного offensive attack chain; chain может быть доказан combination static/runtime evidence, пока каждый material link обоснован.
+
+## 6. Severity adjudication
 
 Severity назначается **после** verification и root-boundary gate.
 
@@ -117,13 +220,13 @@ Defense-in-depth/architectural note без доказанного material incor
 
 Используй, когда correctness/severity зависит от неустановленного product intent. Не угадывай policy.
 
-## 6. Supporting Engineering Risks
+## 7. Supporting Engineering Risks
 
 `SER-*` — recurrence/non-detection risk, не обязательный runtime defect. Примеры: owner identity не закодирован, lifecycle spread across flags, отсутствие deterministic local regression tests.
 
 SER может иметь приоритет remediation, но не должен автоматически получать severity ближайшего RF.
 
-## 7. Finding shape
+## 8. Finding shape
 
 ```markdown
 ## RF-012 — Короткий русский заголовок
@@ -138,6 +241,8 @@ SER может иметь приоритет remediation, но не должен
 - `path/file.ext:10-40`
 - `path/other.ext:80-120`
 
+**Evidence validation:** STATICALLY_CONFIRMED | RUNTIME_REPRODUCED | RUNTIME_VALIDATION_UNAVAILABLE
+
 **Достижимый сценарий.** ...
 
 **Практическое последствие.** ...
@@ -149,9 +254,11 @@ SER может иметь приоритет remediation, но не должен
 **Связанные SER / open questions:** ...
 ```
 
+`Evidence validation` описывает фактический evidence mode и не обязано присутствовать, если существующее report contract уже выражает это яснее. Не создавай параллельную lifecycle state machine.
+
 Recommendation direction может быть краткой, но detailed Target Architecture создаётся только если выбран соответствующий endpoint.
 
-## 8. Anti-noise rules
+## 9. Anti-noise rules
 
 Не продвигай в material finding без concrete impact:
 
@@ -162,10 +269,16 @@ Recommendation direction может быть краткой, но detailed Targe
 - lint warning count;
 - hardcoded literal;
 - отсутствие теста;
-- broad API surface без reachable misuse path.
+- broad API surface без reachable misuse path;
+- raw-looking API name без provenance/effect;
+- mere inability to produce a PoC.
 
 Absence evidence ≠ defect evidence.
 
-## 9. Stable identity
+Runtime reproduction unavailable ≠ finding false.
+
+Runtime reproduction successful ≠ severity automatically higher.
+
+## 10. Stable identity
 
 До adjudication используй `CAND-*`. После root-boundary — stable `RF-*` для roots, `SER-*` для supporting engineering risks, `OQ-*` для open questions. Не создавай разные root IDs для одного механизма только потому, что он виден в разных файлах/layers.
