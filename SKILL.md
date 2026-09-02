@@ -42,6 +42,12 @@ Subagents могут исследовать независимые domains и с
 
 ## Required Review Flow
 
+Test Review is a composable capability. It may be selected initially, recommended
+when discovery identifies a material automated-test surface, or attached later to
+an existing audit. Its specialist methodology lives in
+`capabilities/test-review/SKILL.md`; the umbrella orchestrator retains shared
+authority, freshness, artifact-ownership, and completion gates.
+
 1. Зафиксируй repository baseline и применимые stack addenda.
 2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
 3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.
