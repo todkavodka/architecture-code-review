@@ -28,9 +28,13 @@ Technology-specific review lenses are included for:
 - React;
 - Django;
 - FastAPI;
-- Litestar.
+- Litestar;
+- Ansible (stack addendum).
 
 The common review method is technology-independent. Stack files add checks; they do not replace the core workflow.
+
+Ansible is loaded through this normal stack-addendum mechanism. It is not a
+standalone capability, endpoint, artifact family, or lifecycle.
 
 ## Key v0.2 capabilities
 
