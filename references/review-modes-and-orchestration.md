@@ -394,6 +394,20 @@ read INDEX
 
 ## 8. Subagents и стабильность
 
+### Context Orchestration v0.3
+
+Capability dispatch uses the minimum fresh authoritative context needed for the
+current decision. Start with structure/inventory, then materiality and evidence
+pointers, then targeted reads; deepen only for unresolved material questions.
+
+The dispatch envelope contains exact baseline/revision, mission and narrow scope,
+forbidden scope, accepted dependency artifact pointers with revisions, required
+shared/reference contracts, output path, and the `HANDOFF SUMMARY` contract.
+Routing projections select reads but cannot replace owning decision evidence.
+Unrelated accepted artifacts are not preloaded. A material omission or boundary
+discovered outside the initial slice is a recorded `CONTEXT_EXPANSION_REQUIRED`,
+not a blindfold or an unbounded restart.
+
 Субагенты — механизм изоляции контекста, а не только ускорение.
 
 Каждый substantial agent получает:

@@ -75,6 +75,7 @@ authority, freshness, artifact-ownership, and completion gates.
 - `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED` нельзя использовать как accepted downstream input.
 - Compact persisted semantic state usable downstream только если он связан с текущей accepted owning-artifact revision; mismatch требует `AUTHORITY_RECONCILIATION_REQUIRED`.
 - Shared assurance principles apply across capabilities: resolve material authority before a substantive verdict, and keep claim scope within directly evidenced material scope.
+- Context Orchestration v0.3 loads minimum fresh decision evidence through dependency-sliced routing; see `references/revalidation-and-freshness.md`.
 - Presentation-only correction не перезапускает technical audit автоматически: используй `PROJECTION_REVALIDATION`; semantic drift требует `TECHNICAL_REVALIDATION_REQUIRED`.
 - Major artifact author ≠ final judge. Review/correction/re-review — отдельные роли.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
