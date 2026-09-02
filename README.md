@@ -127,6 +127,32 @@ You can also state the desired result immediately:
 
 The skill should not immediately start a deep review. Its Start Gate first separates two decisions: review depth and requested final result.
 
+Architecture Review remains the primary umbrella workflow. Test Review is a
+composable capability that can be selected at the start, recommended when the
+discovered material surface includes automated-test evidence, or attached later
+by resuming the existing audit from `working/INDEX.md`.
+
+Example capability selection:
+
+```text
+Architecture Review: REVIEW_ONLY
+Test Review: REVIEW_PLUS_TEST_PLAN
+```
+
+Test Review's endpoint is independent and may be either `REVIEW_ONLY` or
+`REVIEW_PLUS_TEST_PLAN`; adding it later does not restart accepted architecture
+work by default. The Test Review owning artifact remains authoritative for its
+detailed assurance map and evidence, while the umbrella report links and
+synthesizes adjudicated cross-capability results.
+
+In short:
+
+```text
+Use architecture-code-review for a full architecture review.
+Add Test Review now when test assurance is requested.
+Later, resume the existing audit and add Test Review to its capability registry.
+```
+
 ## Review depth
 
 ### `STANDARD_FULL`
