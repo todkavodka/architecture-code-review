@@ -102,6 +102,7 @@ authority, freshness, artifact-ownership, and completion gates.
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
+- capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
 - core method / As-Built-first flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
 - ownership / invariants / adversarial scenarios → `references/ownership-and-scenarios.md`

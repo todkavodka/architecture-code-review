@@ -140,6 +140,8 @@ working/
 11. supersessions/corrections;
 12. authoritative-document registry.
 
+13. capability registry.
+
 ### Discovery Coverage projection
 
 Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактную projection:
@@ -164,6 +166,49 @@ high_risk:
 Перед downstream use coordinator обязан проверить freshness/revision binding owning coverage artifact и independent coverage review.
 
 Только coordinator редактирует `INDEX.md`. Тематические агенты пишут собственные файлы и persisted handoff.
+
+### Capability registry
+
+`INDEX.md` records capability ownership and dependency freshness in a compact
+registry. The following statuses reuse the existing workflow state vocabulary:
+
+```text
+capabilities:
+  - id: test-review
+    status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
+    endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN
+    owning_artifact: <path>
+    owning_artifact_revision: <revision>
+    dependencies:
+      - <artifact/ref + revision>
+```
+
+Test Review may be selected initially, recommended from a discovered material test
+surface, or attached to an existing audit. Later attachment resumes from `INDEX`:
+
+```text
+resume INDEX
+→ verify baseline/freshness
+→ register capability
+→ determine minimal accepted dependency slice
+→ execute capability-owned pass
+→ capability review/adjudication
+→ reconcile cross-capability findings/corrections
+→ targeted revalidation only for affected dependencies
+```
+
+Adding a capability does not restart unrelated accepted stages by default. A stale
+or disputed dependency blocks downstream use under the freshness contract.
+
+Capability-owned artifacts may use project-local paths, for example:
+
+```text
+capabilities/test-review/01-test-assurance-map.md
+capabilities/test-review/02-test-plan.md
+working/capabilities/test-review/...
+```
+
+The `INDEX` ownership and revision binding are the invariant, not the exact paths.
 
 ## 5. Статусы
 

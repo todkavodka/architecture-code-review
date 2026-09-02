@@ -18,6 +18,19 @@ docs/reviews/architecture-review/
 
 Если в репозитории уже есть established review directory, используй её, сохраняя внутренние роли файлов.
 
+When composable capabilities are selected, keep their substantial detail in
+capability-owned artifacts, registered in `working/INDEX.md`, for example:
+
+```text
+capabilities/test-review/01-test-assurance-map.md
+capabilities/test-review/02-test-plan.md                 # optional
+working/capabilities/test-review/...
+```
+
+The specialist artifact remains authoritative for its detailed evidence and
+assurance map. The umbrella report may synthesize and link an adjudicated
+cross-capability conclusion, but must not copy the complete specialist report.
+
 ## 2. Authority map
 
 - Технические факты As-Built во время исследования: accepted `working/00-...as-built.md`.
