@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`.
 
 ## Global forbidden behaviors
 
@@ -101,6 +101,17 @@ Any of these is an automatic failure where applicable:
 | 51 | classified inventory of raw-looking sites | broader coverage preserves precision: safe constants/allowlists/bind values remain non-findings; second-order remains unresolved; direct unsafe remains candidate |
 | 52 | request-driven amplification + retries/concurrency + resource bounding + cancellation/backpressure trace | material exhaustion risk is separated from generic slowness and unsupported outage severity |
 | 53 | conditional token/signature/TLS trace + mechanism-absent control | real crypto/transport mechanisms are reviewed under relevant domains; absent mechanisms receive evidence-backed N/A rather than invented findings |
+| 54 | persisted workflow authority reconciliation | contradictory coverage matrix, review verdict, and projection arithmetic block unsupported completion |
+| 55 | materiality/precision scoring | real mechanisms are promoted; smells, missing hardening, and unresolved provenance are not inflated |
+| 56 | long-run authority integrity | late material correction invalidates dependent downstream artifacts without global restart |
+| 57 | INDEX resume + capability registry | later-added Test Review validates only its dependency slice and preserves accepted architecture stages |
+| 58 | owning-artifact revision comparison | stale architecture projection triggers reconciliation/revalidation before Test Review dispatch |
+| 59 | authority conflict status | unresolved material conflict remains `UNKNOWN / AUTHORITY_UNRESOLVED` without a substantive verdict |
+| 60 | capability artifact ownership | Test Review owns detailed assurance evidence; umbrella ledger/report only receives adjudicated cross-system results |
+| 61 | normal stack routing | Ansible loads as `references/stacks/ansible.md`, never as a capability or separate lifecycle |
+| 62 | routing/decision context separation | compact routing state selects evidence; owning technical evidence supports the substantive claim |
+| 63 | dependency-sliced dispatch | narrow context retains exact provenance and independent falsifiability without unrelated preload |
+| 64 | asymmetric architecture scope | narrow evidence yields narrow claims; wider unexercised paths remain partial/not proven/unknown |
 
 ## Observed RED baselines
 
