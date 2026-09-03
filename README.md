@@ -1,248 +1,184 @@
-# Architecture Code Review Skill
+# Architecture Code Review
 
-Переиспользуемый agent skill для evidence-first (сначала доказательства) архитектурного и кодового ревью существующих программных систем.
+`architecture-code-review` — skill для глубокого архитектурного и кодового аудита существующих систем.
 
-Skill не превращает ревью в список запахов кода. Он помогает восстановить фактическую архитектуру системы, проследить владение состоянием и lifecycle, независимо проверить кандидатов на проблемы, отделить корневые причины от их проявлений и только после этого оценить severity и предложить направление исправления.
+Его задача — не собрать длинный список «подозрительных мест», а восстановить, **как система реально устроена и работает**, проверить границы ответственности и владение состоянием, проследить важные сценарии исполнения и только после этого формулировать выводы.
 
-Итоговый пользовательский отчёт по умолчанию пишется связным русским техническим текстом. Точные идентификаторы кода, названия протоколов, пути, API/IPC-имена и формальные status markers сохраняются без перевода.
+В основе подхода — простой принцип:
 
-## Что проверяет Skill
+> **ширина утверждения не должна превышать ширину доказательств.**
 
-Используйте его для ревью всего проекта или отдельной подсистемы, когда существенны:
+Если проверен один обработчик, это не доказывает корректность всей модели авторизации. Если работает обычный сценарий, это ещё не доказывает корректность повторов, восстановления после сбоя, конкурентного выполнения или остановки процесса. Если доказательств недостаточно, результат должен оставаться `PARTIAL`, `NOT_PROVEN` или `UNKNOWN`, а не превращаться в выдуманный дефект.
 
-- границы ответственности и архитектура;
-- владение состоянием и ресурсами;
-- lifecycle запуска, штатной работы, восстановления, reconnect, cancellation и shutdown;
-- concurrency и фоновые операции;
-- контракты IPC/API/native boundaries;
-- security и trust boundaries;
-- configuration и persistence;
-- контракты ошибок и observability;
-- maintainability и testability;
-- Target Architecture и remediation roadmap, если они явно запрошены.
+Skill подходит как для аудита всего репозитория, так и для отдельной подсистемы.
 
-В репозитории есть technology-specific lenses для:
+## Что именно он проверяет
 
-- Tauri;
-- Electron;
-- React;
-- Django;
-- FastAPI;
-- Litestar;
-- Ansible (stack addendum).
+В зависимости от проекта аудит охватывает:
 
-Общий метод ревью technology-independent. Stack addenda добавляют вопросы для сбора evidence, но не заменяют основной workflow.
+- архитектурные границы и распределение ответственности;
+- владение состоянием, ресурсами и жизненным циклом;
+- запуск, штатную работу, восстановление, переподключение, отмену операций и завершение работы;
+- конкурентное выполнение и фоновые процессы;
+- контракты между API, IPC, frontend/backend и native-слоями;
+- безопасность и границы доверия;
+- конфигурацию и хранение данных;
+- обработку ошибок и наблюдаемость;
+- сопровождаемость и тестируемость;
+- существующую систему тестов — через отдельную capability **Test Review**;
+- целевую архитектуру и план исправлений, если они явно запрошены.
 
-Ansible подключается через обычный механизм stack addenda. Это не отдельная capability, endpoint, группа артефактов или lifecycle.
+Для некоторых технологий есть дополнительные stack addenda: Tauri, Electron, React, Django, FastAPI, Litestar и Ansible. Они добавляют специализированные вопросы к аудиту, но не заменяют общую методологию.
 
-## Основные возможности v0.2
+Ansible здесь именно stack addendum, а не отдельная capability.
 
-Версия 0.2 вводит управляемый многоступенчатый workflow:
+## Чем этот подход отличается от обычного code review
 
-- явный выбор глубины `STANDARD_FULL` или `FORENSIC`;
-- независимый выбор требуемого endpoint;
-- подробная реконструкция As-Built Architecture до поиска тематических проблем;
-- обязательное независимое ревью As-Built в обоих режимах;
-- матрицы владения, инвариантов и неблагоприятных сценариев;
-- отдельный анализ контрактов IPC/API/native boundaries;
-- независимая проверка кандидатов до превращения их в authoritative findings;
-- разделение root, projection и SER до назначения severity;
-- требование evidence-backed attack chain для серьёзных security-утверждений;
-- постоянное состояние workflow в `working/INDEX.md` и возобновляемые handoff-артефакты;
-- обработка архитектурных corrections и `REVALIDATION_REQUIRED`;
-- опциональные Target Architecture и независимое ревью её реализуемости;
-- опциональный remediation roadmap с проверкой согласованности порядка выполнения;
-- свежий editorial review, который не может незаметно изменить технический смысл;
-- chunked writing и восстановление работы при ограничении контекста.
+Обычный ревью легко скатывается в набор локальных замечаний: большой файл, `TODO`, mock, `unwrap`, широкая функция, отсутствие теста, странный `clone`, неидеальная структура каталогов.
 
-## Установка
+Само по себе это ещё не дефект.
 
-### OpenCode / Codex и другие агенты, использующие `~/.agents/skills`
-
-Клонируйте репозиторий непосредственно в каталог персональных skills:
-
-```bash
-git clone \
-  https://github.com/todkavodka/architecture-code-review.git \
-  ~/.agents/skills/architecture-code-review
-```
-
-Затем начните новую сессию агента, чтобы Skill был обнаружен с диска.
-
-Если каталог уже существует, обновите его вместо повторного клонирования:
-
-```bash
-cd ~/.agents/skills/architecture-code-review
-git switch main
-git pull --ff-only
-```
-
-Проверьте установленную ревизию:
-
-```bash
-cd ~/.agents/skills/architecture-code-review
-git rev-parse HEAD
-```
-
-### Установка конкретной опубликованной версии
-
-Когда появится release tag, для воспроизводимости можно закрепить установку на нём:
-
-```bash
-cd ~/.agents/skills/architecture-code-review
-git fetch --tags
-git checkout v0.2.0
-```
-
-Чтобы позже вернуться к последней production-версии:
-
-```bash
-git switch main
-git pull --ff-only
-```
-
-## Использование
-
-Начните новую сессию агента в репозитории, который хотите проверить, и явно попросите использовать Skill:
+`architecture-code-review` требует доказать цепочку:
 
 ```text
-Use architecture-code-review to perform a full architecture review of this repository.
+фактическое поведение
+    ↓
+конкретный механизм
+    ↓
+нарушенный контракт или архитектурная граница
+    ↓
+реальное последствие
+    ↓
+подтверждённый finding
+    ↓
+severity
 ```
 
-Или по-русски:
+Поэтому критичность назначается **после** проверки корректности finding, а не по первому впечатлению.
 
-```text
-Используй architecture-code-review и проведи полный архитектурный аудит этого проекта.
-```
+Для серьёзных security-выводов недостаточно написать «это небезопасно». Нужна правдоподобная attack chain: кто атакует, через какую поверхность, при каких предпосылках и к какому результату это приводит.
 
-Результат можно указать сразу:
+## Как устроен аудит
 
-```text
-Используй architecture-code-review.
-Нужен полный аудит плюс целевая архитектура и план исправлений.
-```
-
-Skill не должен сразу начинать глубокое исследование. Сначала Start Gate разделяет два независимых решения: глубину ревью и требуемый итоговый результат.
-
-Architecture Review — основной umbrella workflow. Test Review — composable capability, которую можно выбрать в начале, подключить по рекомендации discovery, если обнаружена существенная поверхность автоматизированных тестов, или добавить позже, возобновив существующий audit из `working/INDEX.md`.
-
-Пример выбора capability:
-
-```text
-Architecture Review: REVIEW_ONLY
-Test Review: REVIEW_PLUS_TEST_PLAN
-```
-
-Endpoint Test Review независим от endpoint Architecture Review и может быть `REVIEW_ONLY` или `REVIEW_PLUS_TEST_PLAN`. Позднее подключение Test Review по умолчанию не перезапускает уже принятые этапы архитектурного ревью. Детальная assurance map и evidence остаются в authoritative артефакте Test Review, а umbrella report связывает и синтезирует принятые cross-capability выводы.
-
-Коротко:
-
-```text
-Use architecture-code-review for a full architecture review.
-Add Test Review now when test assurance is requested.
-Later, resume the existing audit and add Test Review to its capability registry.
-```
-
-## Глубина ревью
-
-### `STANDARD_FULL`
-
-Полное архитектурное ревью с цепочкой verification и adjudication, но с достаточно компактным тематическим исследованием.
-
-Это обычный режим для большинства production-репозиториев.
-
-### `FORENSIC`
-
-Более глубокое расследование с раздельными тематическими проходами, расширенным evidence trail, неблагоприятными сценариями и дополнительными рабочими артефактами.
-
-Выбирайте его, когда проблемы тонкие, связаны с несколькими процессами, concurrency, security или плохо воспроизводятся обычным ревью.
-
-Skill может рекомендовать глубину, но не должен молча выбирать `FORENSIC`.
-
-## Требуемый endpoint
-
-Глубина и endpoint выбираются независимо.
-
-### `REVIEW_ONLY`
-
-Формирует архитектурный review и authoritative findings ledger.
-
-### `REVIEW_PLUS_TARGET_ARCHITECTURE`
-
-Дополнительно формирует Target Architecture / To-Be design и проводит её ревью. Она строится на verified findings, инвариантах, положительных механизмах и явных product decisions.
-
-### `REVIEW_PLUS_TARGET_AND_ROADMAP`
-
-Дополнительно формирует Target Architecture и remediation roadmap с зависимостями и проверкой согласованности порядка исправлений.
-
-Выбор `FORENSIC` сам по себе не означает, что нужна Target Architecture или Roadmap.
-
-## Как устроен workflow
-
-В общих чертах:
+Базовый поток выглядит так:
 
 ```text
 baseline
   -> As-Built Architecture
   -> independent As-Built review
   -> thematic discovery
+  -> Discovery Coverage review
   -> candidate verification
   -> root-boundary adjudication
   -> severity adjudication
   -> authoritative findings ledger
-  -> optional Target Architecture + independent review
-  -> optional remediation roadmap + execution-consistency review
+  -> optional Target Architecture
+  -> optional remediation roadmap
   -> final package assembly
-  -> fresh editorial review / correction / re-review
+  -> editorial review / correction / re-review
 ```
 
-Ключевой принцип: discovery не создаёт final findings напрямую. Кандидат должен пройти independent verification, root-boundary adjudication и severity adjudication.
+### 1. Сначала восстанавливается As-Built Architecture
 
-## Evidence-first подход
+До поиска проблем агент должен понять фактическую систему: основные компоненты, процессы, владельцев состояния, ключевые границы, потоки данных и важные сценарии выполнения.
 
-Для material finding разделяйте:
+Это не пересказ README проекта и не предположение по именам директорий. Архитектурные утверждения должны опираться на реальные пути исполнения и конкретные участки кода.
 
-1. observation — что система фактически делает;
-2. interpretation — почему это важно;
-3. concrete mechanism — какой механизм создаёт проблему;
-4. impact — к какому последствию он приводит;
-5. recommendation — в каком направлении исправлять.
+As-Built проходит отдельную независимую проверку. Автор архитектурной реконструкции не может сам объявить её принятой.
 
-Утверждения должны ссылаться на конкретное evidence в формате `path:line-range`. Для cross-layer findings обычно нужны доказательства с каждой существенно затронутой границы.
+### 2. Затем проводится discovery
 
-Claim scope не может быть шире evidence scope: один handler не доказывает system-wide authorization isolation, успешный nominal path не доказывает retry/idempotency/restart/concurrency, а read-path не доказывает write, enumeration, background или export paths. Если область не исследована, результатом должны быть `PARTIAL`, `NOT_PROVEN` или `UNKNOWN`, а не выдуманный дефект.
+После принятия As-Built исследуются значимые области: lifecycle, ownership, concurrency, persistence, API/IPC-контракты, security, error handling и другие применимые механизмы.
 
-Поэтому Skill намеренно отвергает типичные shortcuts:
+Discovery создаёт кандидатов на проблемы, но ещё не окончательные findings.
 
-- имена директорий не доказывают архитектуру;
-- размер файла сам по себе не является дефектом;
-- `unwrap`, `clone`, mocks, TODOs и hardcoded values не становятся findings без доказанного impact;
-- отсутствие тестов не доказывает, что production behavior сломан;
-- широкие privileged APIs сами по себе не доказывают RCE;
-- security severity не повышается без правдоподобной attacker chain;
-- rewrite не предлагается только потому, что можно вообразить более «чистую» архитектуру.
+### 3. Полнота проверяется отдельно
 
-## Discovery coverage
+Полнота аудита не измеряется количеством просмотренных файлов, найденных замечаний или зелёных тестов.
 
-Полнота discovery определяется не числом файлов, тестов или findings, а bounded material accounting — ограниченным учётом всех существенных domains и механизмов в заявленной области.
+Перед общим выводом формируется ограниченный перечень существенных областей и механизмов в заявленном scope. Для каждого должно быть понятно, чем он покрыт, почему неприменим либо почему остался неизвестным.
 
-Перед общим выводом capability формирует bounded inventory material targets/domains. Каждый применимый элемент получает evidence, disposition или явное ограничение. Selective deep inspection допустимо; sample, test count, line coverage и зелёный CI не являются доказательством полноты.
+Отдельный Independent Coverage Review проверяет эту матрицу. Если есть пробел, выполняется точечное доисследование, а не автоматический перезапуск всего аудита.
 
-Architecture Discovery Coverage ведёт свою domain matrix. Test Review ведёт собственный bounded target universe; одна матрица не подменяет другую.
+### 4. Каждый кандидат независимо проверяется
 
-## Независимая проверка и корневые причины
+Кандидат должен выдержать проверку на достижимость, фактическое владение, существующие guards, альтернативные пути и конкретное последствие.
 
-Автор discovery не является окончательным судьёй. Кандидаты проходят отдельную falsification/verification-проверку: проверяется достижимость, ownership, guards, альтернативные пути, concrete effect и наличие противоречащего evidence.
+После этого выполняется root-boundary adjudication: определяется, является ли наблюдение самостоятельной корневой проблемой, проявлением уже найденной причины или лишь сопутствующим инженерным риском.
 
-После этого root-boundary adjudication отвечает на вопрос, является ли наблюдаемое поведение одной корневой проблемой, projection того же механизма, supporting engineering risk или отдельным finding. Несвязанные механизмы не объединяются только по тематическому сходству.
+Только после этой стадии назначается severity.
 
-Severity назначается только после того, как correctness кандидата подтверждена и корневая граница определена. Высокая уверенность в том, что проблема существует, не означает автоматически высокую severity.
+## Два режима глубины
 
-## Persistent workflow и артефакты
+### `STANDARD_FULL`
 
-Для длинных ревью `working/INDEX.md` — persistent authority состояния workflow. Результат агента не считается принятым только потому, что агент сообщил о завершении.
+Полный архитектурный аудит с обязательной реконструкцией As-Built, проверкой полноты, независимой верификацией кандидатов и финальной проверкой отчёта.
 
-Рабочие артефакты проходят явные состояния:
+Это нормальный выбор для большинства production-репозиториев.
+
+### `FORENSIC`
+
+Более глубокое расследование для сложных случаев: нескольких процессов, тонкой конкурентности, восстановления после сбоев, сложных trust boundaries, неоднозначной архитектуры или трудно воспроизводимых дефектов.
+
+Skill может рекомендовать `FORENSIC`, но не должен выбирать его молча.
+
+## Какой результат нужен
+
+Глубина аудита и итоговый результат выбираются независимо.
+
+### `REVIEW_ONLY`
+
+Архитектурный аудит и authoritative findings ledger.
+
+### `REVIEW_PLUS_TARGET_ARCHITECTURE`
+
+Дополнительно строится Target Architecture — целевое устройство системы с учётом подтверждённых findings, уже работающих механизмов и явных продуктовых ограничений.
+
+### `REVIEW_PLUS_TARGET_AND_ROADMAP`
+
+Дополнительно создаётся remediation roadmap: порядок исправлений, зависимости между изменениями и проверка того, что этот порядок архитектурно согласован.
+
+Сам по себе `FORENSIC` не означает, что обязательно нужны Target Architecture или Roadmap.
+
+## Test Review
+
+Architecture Review — основной umbrella workflow. **Test Review** подключается как отдельная capability.
+
+Её можно:
+
+- выбрать сразу;
+- подключить по рекомендации discovery, если в проекте есть существенная поверхность автоматизированных тестов;
+- добавить позже, возобновив уже начатый аудит через `working/INDEX.md`.
+
+Test Review отвечает не на вопрос «тесты зелёные или нет», а на более строгий вопрос:
+
+> Какие существенные контракты системы действительно подтверждены исполняемыми тестами, какие подтверждены частично, какие не подтверждены и какие тесты могут создавать ложное чувство уверенности?
+
+При этом Test Review ведёт собственный bounded inventory проверяемых контрактов. Архитектурная Discovery Coverage Matrix и матрица Test Review не подменяют друг друга.
+
+Endpoint Test Review выбирается независимо от архитектурного endpoint и может быть `REVIEW_ONLY` или `REVIEW_PLUS_TEST_PLAN`.
+
+Подключение Test Review позже не означает автоматический перезапуск уже принятых частей архитектурного аудита. Capability получает только тот объём актуального контекста, который нужен для её собственных решений.
+
+## Общие правила для всех capabilities
+
+Umbrella review suite использует несколько общих assurance-принципов.
+
+**Сначала authority, потом verdict.** Если два значимых источника противоречат друг другу и непонятно, какой из них имеет приоритет, нельзя произвольно выбрать более свежий, удобный или похожий на истину. До разрешения authority-конфликта результат остаётся `UNKNOWN / AUTHORITY_UNRESOLVED`.
+
+**Нельзя расширять вывод дальше доказанной области.** Узкая проверка даёт узкий вывод.
+
+**Полнота требует bounded accounting.** Для общего вывода нужен явный учёт всех существенных целей в заявленном scope. Выборочное глубокое исследование допустимо; случайная выборка не является доказательством полноты.
+
+**Отвергнутый механизм не должен унести с собой отдельный существенный контракт.** Если внутри слабого кандидата обнаружен реальный архитектурный или поведенческий вопрос, он получает собственную disposition и не исчезает вместе с исходным smell.
+
+Эти правила зафиксированы в `references/shared-assurance-principles.md`.
+
+## Состояние длинного ревью
+
+Для больших аудитов используется `working/INDEX.md`. Это не просто список задач, а сохраняемое состояние workflow: что принято, что требует проверки, что устарело и что блокирует следующий этап.
+
+Типичные состояния:
 
 ```text
 PENDING
@@ -256,81 +192,49 @@ COMPLETE
 NOT_APPLICABLE
 ```
 
-Downstream stage не должен использовать `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED` или `BLOCKED` как accepted truth.
+Артефакт со статусом `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED` или `BLOCKED` нельзя использовать дальше как уже подтверждённую истину.
 
-Типовой итоговый пакет создаётся в:
+Сводка или handoff также не получает автоматический приоритет над исходным техническим артефактом: перед использованием проверяется её свежесть и привязка к актуальной ревизии.
+
+## Итоговые артефакты
+
+По умолчанию пакет аудита создаётся в:
 
 ```text
 docs/reviews/architecture-review/
 ```
 
-В зависимости от endpoint он содержит:
+Для полного сценария структура обычно выглядит так:
 
 ```text
 docs/reviews/architecture-review/
 ├── 01-architecture-review.md
 ├── 02-authoritative-findings-ledger.md
-├── 03-target-architecture.md       # when requested
-├── 04-remediation-roadmap.md       # when requested
+├── 03-target-architecture.md       # если запрошена
+├── 04-remediation-roadmap.md       # если запрошен
 └── working/
-    └── ... intermediate evidence and review artifacts
+    └── ... промежуточные evidence и review-артефакты
 ```
 
-`working/` содержит промежуточные evidence, разбор кандидатов, независимые проверки, corrections и persisted handoffs. Промежуточные claims могут быть исправлены или опровергнуты; authoritative state отслеживается через workflow registry и итоговые документы.
+Финальный отчёт предназначен для человека. В нём должно быть понятно: **что происходит → почему это проблема → к чему приводит → что менять**.
 
-## Структура репозитория
+Внутренние IDs, ledger rows и handoff-сокращения используются для трассировки и координации, но не должны подменять нормальное техническое объяснение.
 
-```text
-.
-├── README.md
-├── LICENSE
-├── SKILL.md
-├── references/
-│   ├── review-modes-and-orchestration.md
-│   ├── review-method.md
-│   ├── evidence-and-severity.md
-│   ├── ownership-and-scenarios.md
-│   ├── boundary-contract-audit.md
-│   ├── independent-verification.md
-│   ├── root-boundary-adjudication.md
-│   ├── lifecycle-and-mermaid.md
-│   ├── report-contract.md
-│   ├── target-architecture-review.md
-│   ├── remediation-roadmap-review.md
-│   ├── final-editorial-review.md
-│   └── stacks/
-└── tests/
-    ├── pressure-scenarios.md
-    └── pressure-validation-matrix.md
+## Установка
+
+### OpenCode, Codex и другие агенты, использующие `~/.agents/skills`
+
+Клонируйте репозиторий в каталог персональных skills:
+
+```bash
+git clone \
+  https://github.com/todkavodka/architecture-code-review.git \
+  ~/.agents/skills/architecture-code-review
 ```
 
-`SKILL.md` — намеренно компактный orchestrator. Подробные нормативные правила находятся в authoritative reference files, а не дублируются в entrypoint.
+После установки начните новую сессию агента, чтобы он заново обнаружил skill на диске.
 
-## Validation
-
-Реализация v0.2 была проверена pressure scenarios в свежих изолированных контекстах агентов.
-
-Результат runtime validation:
-
-```text
-32 / 32 required scenarios PASS
-0 failed
-0 blocked
-0 inconclusive
-```
-
-Независимое implementation review сообщило:
-
-```text
-BLOCKER 0
-HIGH    0
-```
-
-Development repository сохраняет внутренние benchmarks, design documents, review materials и raw validation evidence. Этот public repository содержит только распространяемый Skill package и его pressure-test contracts.
-
-## Обновление Skill
-
-Для обычной установки, отслеживающей `main`:
+Если репозиторий уже установлен:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
@@ -338,29 +242,130 @@ git switch main
 git pull --ff-only
 ```
 
-После обновления начните новую сессию агента, чтобы runtime заново загрузил Skill с диска.
+Проверить установленную ревизию:
 
-В production-средах, где важна воспроизводимость, предпочтительно закреплять release tag, а не постоянно следовать за `main`.
+```bash
+cd ~/.agents/skills/architecture-code-review
+git rev-parse HEAD
+```
 
-## Разработка и contribution
+Если для воспроизводимости используется конкретный release tag:
 
-Изменения Skill следует рассматривать как изменения поведения, а не как обычную правку текста. Для новых указаний используются pressure scenarios и fresh-context validation, чтобы проверить изменение поведения агента и отсутствие конфликтующей authority или workflow regression.
+```bash
+cd ~/.agents/skills/architecture-code-review
+git fetch --tags
+git checkout <release-tag>
+```
 
-Перед продвижением существенного изменения сохраняйте последовательность:
+Вернуться на актуальный `main`:
+
+```bash
+git switch main
+git pull --ff-only
+```
+
+## Использование
+
+Откройте новую сессию агента в репозитории, который нужно проверить, и явно попросите использовать skill.
+
+Например:
+
+```text
+Используй architecture-code-review и проведи полный архитектурный аудит этого проекта.
+```
+
+Если нужен не только аудит:
+
+```text
+Используй architecture-code-review.
+Нужен полный аудит, целевая архитектура и план исправлений.
+```
+
+Для Test Review можно сразу уточнить требование:
+
+```text
+Используй architecture-code-review.
+Проведи архитектурный аудит и отдельно проверь, насколько существующие тесты действительно подтверждают существенные контракты системы.
+```
+
+Перед глубоким исследованием skill сначала предложит режим аудита и уточнит требуемый endpoint.
+
+## Структура репозитория
+
+```text
+.
+├── README.md
+├── LICENSE
+├── SKILL.md                         # основной orchestrator
+├── capabilities/
+│   └── test-review/
+│       └── SKILL.md                 # методология Test Review
+├── references/
+│   ├── review-modes-and-orchestration.md
+│   ├── revalidation-and-freshness.md
+│   ├── shared-assurance-principles.md
+│   ├── review-method.md
+│   ├── discovery-coverage.md
+│   ├── ownership-and-scenarios.md
+│   ├── boundary-contract-audit.md
+│   ├── independent-verification.md
+│   ├── root-boundary-adjudication.md
+│   ├── evidence-and-severity.md
+│   ├── lifecycle-and-mermaid.md
+│   ├── report-contract.md
+│   ├── target-architecture-review.md
+│   ├── remediation-roadmap-review.md
+│   ├── final-editorial-review.md
+│   └── stacks/
+│       ├── ansible.md
+│       ├── django.md
+│       ├── electron.md
+│       ├── fastapi.md
+│       ├── litestar.md
+│       ├── react.md
+│       └── tauri.md
+├── tests/                            # pressure scenarios и validation records
+└── docs/
+    └── superpowers/                  # design и implementation-документы
+```
+
+`SKILL.md` намеренно остаётся компактным orchestrator. Подробная методология разнесена по authoritative reference-файлам и capabilities, чтобы основной entrypoint не превращался в монолит.
+
+## О validation
+
+В `tests/` хранятся pressure scenarios и записи отдельных validation-проходов. Они нужны для проверки конкретных изменений методологии и поведения агента.
+
+Важно: validation record относится к той ревизии и тому сценарию, для которых он был получен. Его нельзя автоматически трактовать как вечное доказательство для любого будущего `main`.
+
+Поэтому README намеренно не публикует одно общее число вроде «N/N scenarios PASS» как универсальный текущий статус всего skill. Для проверки конкретного изменения нужно смотреть соответствующий validation record и его revision binding.
+
+## Разработка
+
+Изменение инструкций skill считается изменением поведения, даже если технически это Markdown.
+
+Для существенных изменений используется дисциплина:
 
 ```text
 design
--> implementation plan
--> isolated implementation
--> independent review
--> pressure validation
--> promotion readiness
--> public package
--> release
+  -> implementation plan
+  -> isolated implementation
+  -> independent review
+  -> pressure / real-world validation where applicable
+  -> remediation
+  -> promotion readiness
+  -> merge to main
 ```
 
-Сам по себе внешний вид documentation-only изменения не доказывает, что поведение Skill осталось неизменным.
+Новая capability должна иметь собственную область ответственности и собственный authoritative artifact. Общая методология не должна без необходимости дублироваться внутри неё.
+
+Stack addendum, наоборот, остаётся дополнением для конкретной технологии и не превращается в capability только потому, что для него появился отдельный файл.
+
+## Язык итоговых отчётов
+
+Пользовательские документы по умолчанию пишутся нормальным русским техническим языком.
+
+Точные идентификаторы кода, пути, названия API/IPC, протоколы, имена файлов и формальные status tokens не переводятся. Английский термин можно оставить там, где он является устойчивым названием понятия — например `As-Built`, `Test Review`, `finding` или `root-boundary adjudication` — но финальный текст не должен превращаться в смесь английских слов с русскими окончаниями.
 
 ## Лицензия
 
-Проект распространяется по лицензии MIT. Полный текст находится в `LICENSE`.
+См. `LICENSE`.
