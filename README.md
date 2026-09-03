@@ -152,6 +152,8 @@ REVIEW_PLUS_TARGET_AND_ROADMAP
 Современная модель Test Engineering хранит каждый запрошенный результат отдельно:
 
 ```text
+Test Engineering: OFF
+или:
 [x] Test Assurance
 [ ] Test Plan
 [ ] Contract Consistency Report
@@ -160,6 +162,11 @@ REVIEW_PLUS_TARGET_AND_ROADMAP
 [ ] Service Simulator Implementation Plan
 [ ] E2E Test Plan
 ```
+
+Например, в первом запуске пользователь может включить Test Engineering и
+выбрать `Test Assurance`, `Test Environment Design` и `E2E Test Plan`, оставив
+остальные результаты выключенными. Этот выбор сохраняется напрямую в
+независимых полях `outputs`; он не кодируется через legacy endpoint.
 
 `Test Assurance` остаётся обязательным ядром Test Engineering.
 
