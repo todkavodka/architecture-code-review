@@ -91,9 +91,8 @@ Important/Critical issue requiring remediation; runtime behavior remains
   independent collection
 - focused scenario: `PS-77` in
   `tests/pressure-scenarios-65-76-session-orchestration.md`
-- remediation commits: `d40f2b3`, `c13660a`, plus INDEX projection binding
-- candidate guidance HEAD at remediation validation: recorded after the final
-  projection-binding commit
+- remediation commits: `d40f2b3`, `c13660a`, `5713947`
+- candidate guidance HEAD at remediation validation: `5713947`
 
 PS-77 contract-level RED was demonstrated before remediation: the old contract
 left binary detection, newline/Unicode counting, and snapshot serialization
