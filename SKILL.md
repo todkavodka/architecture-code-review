@@ -11,20 +11,14 @@ description: Use when performing a whole-project or subsystem architecture/code 
 
 **Core principle:** архитектурное утверждение должно опираться на traced code path (прослеженный путь кода), ownership (владение) и concrete effect (конкретное последствие), а полнота discovery — на mechanism coverage (покрытие классов механизмов), а не на количество найденных замечаний.
 
-## Start Gate — выбрать режим и результат
+## Start Gate — Session Orchestration
 
-Перед существенным исследованием прочитай `references/review-modes-and-orchestration.md` и покажи пользователю рекомендацию с объяснением:
-
-- `STANDARD_FULL (полный стандартный аудит)`;
-- `FORENSIC (углублённое архитектурное расследование)`.
-
-Пользователь отдельно выбирает endpoint:
-
-- `REVIEW_ONLY`;
-- `REVIEW_PLUS_TARGET_ARCHITECTURE`;
-- `REVIEW_PLUS_TARGET_AND_ROADMAP`.
-
-Не выбирай `FORENSIC` молча и не выводи Target Architecture/Roadmap из глубины режима автоматически.
+Перед существенным исследованием прочитай `references/session-orchestration.md`.
+Определи/reconcile предыдущий audit package, зафиксируй baseline и dirty state,
+собери или backfill локальный Project Profile, затем покажи рекомендованный
+Session Intent и только относящиеся к нему configuration choices. Не начинай
+существенную работу для `NEW`, `RESUME`, `REVALIDATE` или `EXTEND`, пока
+требуемый пользовательский выбор не разрешён.
 
 ## Persistent Workflow
 
@@ -100,6 +94,7 @@ authority, freshness, artifact-ownership, and completion gates.
 
 ## References — Authority Map
 
+- startup / previous-audit selection / session intent / Review Suite startup / Project Profile / dirty baseline → `references/session-orchestration.md`
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`

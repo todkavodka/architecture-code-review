@@ -125,6 +125,58 @@ working/
 
 `INDEX.md` — постоянный источник состояния процесса. Он должен оставаться компактным.
 
+### Session Orchestration projection
+
+Startup selection is owned by `references/session-orchestration.md`. Persist its
+compact routing projection here, without turning it into substantive technical
+authority:
+
+```text
+orchestrator_version: 0.3
+session_intent
+repository_identity
+source_audit
+source_audit_revision
+previous_baseline
+current_baseline
+baseline_type
+working_tree_snapshot
+review_suite
+stack_addenda
+project_profile:
+  schema_version
+  collector_version
+  collected_for_revision
+  status
+  artifact_or_projection_ref
+revalidation:
+  change_range
+  impact_status
+  impact_classification
+  affected_domains
+  affected_findings
+  affected_capabilities
+  preserved_domains
+  context_expansions
+```
+
+Absent v0.3 fields in a legacy package indicate legacy state requiring additive
+reconciliation/backfill, not automatic corruption. Validate owning-artifact
+freshness before using any projection downstream.
+
+Session integration rules:
+
+```text
+USE_EXISTING → no technical stage transition solely for startup; metadata actions may update projection.
+RESUME → reconstruct true workflow state, reconcile changed baseline if required, then continue first non-accepted gate.
+REVALIDATE → delegate project-change evidence semantics to revalidation-and-freshness.md.
+EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
+NEW → enter existing full review flow with selected mode/endpoints/capabilities.
+```
+
+Test Review methodology remains in `capabilities/test-review/SKILL.md`; startup
+visibility and selection remain in Session Orchestration.
+
 Минимальные разделы:
 
 1. repository path/ref/commit и dirty-state на старте;
