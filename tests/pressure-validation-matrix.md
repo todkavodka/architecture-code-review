@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–76 live in `pressure-scenarios-65-76-session-orchestration.md`.
 
 ## Global forbidden behaviors
 
@@ -44,6 +44,12 @@ Any of these is an automatic failure where applicable:
 - advancing to candidate verification while material discovery coverage is unaccepted;
 - converting Discovery Coverage into a vulnerability quota;
 - demanding destructive/offensive reproduction to validate otherwise sufficient audit evidence.
+- repeated run silently restarting accepted technical work without impact evidence;
+- targeted REVALIDATE silently escalating into full audit;
+- calling preserved prior evidence freshly verified without fresh owning evidence;
+- treating Project Profile size metrics as architecture materiality evidence;
+- selecting a prior audit by timestamp alone when lineage/status are ambiguous;
+- silently including dirty working-tree state in a commit-bound audit baseline.
 
 ## Scenario matrix
 
