@@ -4,7 +4,8 @@
 
 ```text
 candidate_branch: feature/umbrella-review-suite-integration
-candidate_head_at_validation: b33d501d9f596c8fb44bcb1d97bc5513510bfb5c
+implementation_head_independently_reviewed: d31d9f5de8af0332ecc3cabbbc4210988d228faa
+provenance_note: this validation record was corrected in a subsequent documentation-only remediation commit; that commit does not change the independently reviewed implementation state
 verified_base: origin/main@4e8b79b1ebb3e4d06ce1dda2eaea0cd3244a5871
 implementation_worktree: /home/tod/architecture-code-review-worktrees/umbrella-review-suite-integration
 ```
