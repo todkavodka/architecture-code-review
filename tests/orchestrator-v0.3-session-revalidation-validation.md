@@ -83,3 +83,30 @@ method/infrastructure limitation, not as approval or as a verified defect.
 The coordinator also inspected the exact committed diff and found no
 Important/Critical issue requiring remediation; runtime behavior remains
 `INCONCLUSIVE` as stated above.
+
+## Targeted remediation provenance
+
+- previous review finding: `MEDIUM` — Project Profile classification/counting
+  and EPHEMERAL fingerprint semantics were not precise enough for reproducible
+  independent collection
+- focused scenario: `PS-77` in
+  `tests/pressure-scenarios-65-76-session-orchestration.md`
+- remediation commit: `d40f2b3`
+- candidate guidance HEAD at remediation validation: `d40f2b3`
+
+PS-77 contract-level RED was demonstrated before remediation: the old contract
+left binary detection, newline/Unicode counting, and snapshot serialization
+open to multiple compliant interpretations. The remediation defines exact
+classification precedence and inputs, language mapping, UTF-8/BOM/newline and
+code-point counting, historical-tree sourcing, canonical status records,
+SHA-256 content digests, UTF-8 serialization, byte sorting, and
+`working_tree_snapshot_algorithm: sha256-v1`.
+
+PS-77 candidate result: static/contract determinism verification `PASS`; runtime
+result `INCONCLUSIVE` because this repository contains no executable collector
+or coordinator. This is not reported as runtime GREEN.
+
+Directly affected regression checks remain runtime `INCONCLUSIVE` with static
+contract verification `PASS`: PS-66 metadata-only backfill, PS-75 committed
+HEAD/EPHEMERAL/Stop and deterministic fingerprint choice, and PS-76 historical
+profile unavailability without technical-audit invalidation.
