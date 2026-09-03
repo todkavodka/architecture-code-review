@@ -15,6 +15,34 @@ When invoked standalone, use the language of the user's current substantive requ
 
 Keep formal identifiers, status tokens, exact code identifiers, paths, API/IPC names, and contract field names unchanged. A formal token may be followed by a natural explanation in the user's language. Do not switch to English merely because this Skill document is written in English, and do not translate canonical tokens into localized substitutes.
 
+## Required Test Assurance Summary
+
+Detailed evidence is not the primary user-facing answer. At completion of Test Review, produce a concise decision-oriented **Test Assurance Summary** before the detailed assurance map or Test Plan.
+
+When capability artifacts are persisted, Test Review owns and writes:
+
+```text
+00-test-assurance-summary.md
+```
+
+The summary must let a reader understand in about one minute:
+
+1. **Verdict** — can the current test system be trusted for the material behavior that matters? Use a plain decision token such as `TEST_ASSURANCE_SUFFICIENT`, `TEST_ASSURANCE_PARTIAL`, or `TEST_ASSURANCE_INSUFFICIENT`, followed by one sentence explaining why.
+2. **What is working well** — only the few material strengths supported by accepted evidence.
+3. **What is wrong** — the 3–7 most decision-relevant weaknesses, ordered by material consequence. Explicitly distinguish misleading/false-confidence tests from merely absent evidence when that distinction matters.
+4. **Assurance state** — compact bounded accounting with the total: adequately evidenced, partially evidenced, not evidenced, unknown/unreviewed.
+5. **What to do first** — a short ordered priority list, normally P0/P1/P2 or equivalent, derived from the accepted assurance map and Test Plan. Do not invent a second roadmap or change existing roadmap ownership.
+6. **Important limitations** — only limitations that materially affect the verdict, such as unavailable runtime validation.
+7. **Detailed evidence** — pointers to `01-test-assurance-map.md` and, when selected, `02-test-plan.md`.
+
+The summary is a projection of accepted capability evidence. It may compress and prioritize, but MUST NOT strengthen, weaken, reclassify, or invent technical conclusions.
+
+Do not turn the summary into another ledger. `MAT-*`, `GAP-*`, `RF-*`, `TM-*`, `TASK-*`, and `WS-*` identifiers may appear as compact traceability references after a human-readable statement, but they must not be the primary prose. Do not list every gap merely because it exists. Prefer the few weaknesses that explain why the verdict is what it is.
+
+Recommended size: roughly one to two screens. If the reader must study the detailed map or plan before understanding the verdict, the major weaknesses, and the first actions, the Test Review presentation is not accepted.
+
+When Test Review is embedded in an umbrella audit, the umbrella report should surface the Test Assurance Summary verdict and link to the capability-owned summary instead of reproducing the detailed Test Review evidence.
+
 ## Assurance completeness gate
 
 Before making an overall test-assurance, test-system-quality, or release-readiness claim, establish:
