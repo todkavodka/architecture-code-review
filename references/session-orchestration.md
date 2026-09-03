@@ -140,13 +140,14 @@ alone. A binary file is counted only in `excluded.binaries`; it contributes no
 text lines or characters.
 
 A non-binary file is generated when its normalized path has a component exactly
-equal to `generated`, `gen`, or `dist-generated`; when repository-declared
-metadata available in the inspected tree marks it
-`.gitattributes linguist-generated=true`; or when one of its first five logical
-text lines contains one of these exact case-insensitive markers:
-`@generated`, `generated file`, `do not edit`, or `code generated`. Explicit
-repository-declared generated/source metadata is evaluated before heuristic
-marker matching and wins over it. Repetitive-looking content is not a rule.
+equal to `generated`, `gen`, or `dist-generated`; when `.gitattributes` in the
+inspected tree gives it `linguist-generated=true`; or when one of its first five
+logical text lines contains one of these exact case-insensitive markers:
+`@generated`, `generated file`, `do not edit`, or `code generated`. The only
+repository-declared metadata inputs for this contract are these exact
+`.gitattributes` values: `true` marks generated and `false` marks
+non-generated/source-owned. Metadata is evaluated before heuristic marker
+matching and wins over it. Repetitive-looking content is not a rule.
 
 A non-binary, non-generated file is vendor/dependency material when a normalized
 path component exactly equals one of `node_modules`, `vendor`, `vendors`,
@@ -157,9 +158,9 @@ name alone.
 
 A remaining file is a build artifact when a normalized path component exactly
 equals one of `build`, `dist`, `out`, `target`, `coverage`, `.next`, `.nuxt`, or
-`.cache`. Repository metadata explicitly marking material under such a path as
-non-generated/source-owned overrides this path rule; without that metadata the
-path rule wins.
+`.cache`. `.gitattributes linguist-generated=false` explicitly marking material
+under such a path as source-owned overrides this path rule; without that exact
+metadata the path rule wins.
 
 Everything else that decodes as text is substantive text. If UTF-8 decoding
 fails, a non-binary file is classified as binary for Project Profile purposes.
@@ -167,7 +168,8 @@ fails, a non-binary file is classified as binary for Project Profile purposes.
 ### Deterministic language mapping and text counts
 
 Language mapping is filename-first, case-sensitive, and never uses model
-inference:
+inference. Suffix rules match the final suffix of the basename exactly;
+directory names do not participate.
 
 | Filename suffix | Language |
 |---|---|
