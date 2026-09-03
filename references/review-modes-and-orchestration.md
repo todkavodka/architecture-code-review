@@ -229,12 +229,37 @@ registry. The following statuses reuse the existing workflow state vocabulary:
 capabilities:
   - id: test-review
     status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
-    endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN
+    endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN  # legacy Test Review input/projection
+    outputs:
+      test_assurance: true
+      test_plan: false
+      contract_consistency_report: false
+      test_environment_design: false
+      service_simulator_design: false
+      service_simulator_implementation_plan: false
+      e2e_test_plan: false
     owning_artifact: <path>
     owning_artifact_revision: <revision>
     dependencies:
       - <artifact/ref + revision>
 ```
+
+For Test Engineering, `outputs` is the persisted configuration authority; the
+legacy `endpoint` is retained only for backward-compatible Test Review packages
+and must not be used as the sole output selection. When normalizing legacy state:
+
+```text
+REVIEW_ONLY
+  → test_assurance=true; every optional output=false
+
+REVIEW_PLUS_TEST_PLAN
+  → test_assurance=true; test_plan=true; every other optional output=false
+```
+
+Normalization is additive and conservative: it never infers an extended output.
+`test_assurance` is required when the capability is enabled. Behavior Model is
+an internal dependency and materially applicable Contract Verification is an
+automatic gate; neither is a persisted user-selected output.
 
 Test Review may be selected initially, recommended from a discovered material test
 surface, or attached to an existing audit. Later attachment resumes from `INDEX`:
@@ -269,7 +294,8 @@ separate outputs and their owning artifacts:
 working/                                     # authoritative BC/CC/TM/GAP ledgers
 ```
 
-The registry stores output selection as independent fields. An E2E Test Plan
+The registry stores output selection as the independent `outputs` fields above.
+An E2E Test Plan
 requires Test Assurance, the internal Behavior Model, applicable Contract
 Verification, and E2E Design; Service Simulator Design is added only when the
 selected topology requires it. A Service Simulator Implementation Plan requires

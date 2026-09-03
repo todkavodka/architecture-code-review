@@ -42,6 +42,7 @@ PS-83  PS83_GREEN_ORTHOGONAL_DRIFT_AND_GAP
 PS-84  PS84_GREEN_MINIMUM_DEPENDENCY_SLICE
 PS-85  PS85_GREEN_IMPACT_DRIVEN_REVALIDATION
 PS-86  PS86_GREEN_SIMULATOR_E2E_BOUNDARIES
+PS-87  PS87_GREEN_OUTPUT_SELECTION_PERSISTED
 ```
 
 The static checks confirm:
@@ -55,6 +56,9 @@ The static checks confirm:
   dependency slice;
 - `PROJECTION_REPAIR` cannot alter BC/CC/MAT/TM/GAP semantics;
 - dependency substitutes and Service Simulator planes remain distinct.
+- persisted output selections distinguish Test Assurance-only, Test Plan, E2E,
+  Simulator+E2E, and Contract Consistency Report combinations; legacy endpoints
+  normalize without inferring optional outputs.
 
 ## Test Review-only compatibility canary
 
@@ -72,6 +76,6 @@ runtime execution of PS-81 through PS-86 was unavailable.
 
 Runtime result: `PS81_INCONCLUSIVE`, `PS82_INCONCLUSIVE`,
 `PS83_INCONCLUSIVE`, `PS84_INCONCLUSIVE`, `PS85_INCONCLUSIVE`,
-`PS86_INCONCLUSIVE`.
+`PS86_INCONCLUSIVE`, `PS87_INCONCLUSIVE`.
 
 These limitations do not convert static contract results into runtime GREEN.

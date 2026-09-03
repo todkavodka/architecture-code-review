@@ -122,6 +122,15 @@ Verification is automatic when materially applicable. `EXTEND` and
 `REVALIDATE` reuse only the minimum accepted, fresh dependency slice; they do
 not restart unrelated accepted stages.
 
+For legacy Test Review configuration, normalize only the existing endpoint:
+
+```text
+REVIEW_ONLY → test_assurance=true; all optional outputs=false
+REVIEW_PLUS_TEST_PLAN → test_assurance=true; test_plan=true; all other optional outputs=false
+```
+
+The legacy endpoint never implies an extended Test Engineering output.
+
 ## Project Profile
 
 Project Profile is cheap local routing/estimation metadata, not architecture evidence. For v0.3 it uses `schema_version: 1` and `collector_version: 1` and contains:

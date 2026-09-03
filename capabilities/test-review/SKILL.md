@@ -110,6 +110,11 @@ is automatic when materially applicable. The extension designs and plans test
 capability; it does not implement product tests, a Service Simulator, or test
 infrastructure during review.
 
+Persist the selected outputs as independent fields. Existing `REVIEW_ONLY` and
+`REVIEW_PLUS_TEST_PLAN` packages are legacy input and normalize conservatively:
+the former selects only Test Assurance; the latter selects Test Assurance plus
+Test Plan. Neither legacy value silently enables an extended output.
+
 Select a dependency strategy per material dependency and justify it. Keep
 dependency substitutes separate from a Service Simulator of the reviewed
 service; simulator consumer protocols and its test-only control plane remain
