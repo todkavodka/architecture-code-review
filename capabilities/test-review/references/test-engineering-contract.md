@@ -121,6 +121,10 @@ Use real isolated dependencies when their semantics are material. Mock external
 uncertainty, not the behavior under test. Do not assume every dependency should
 be mocked.
 
+Each dependency record includes the selected strategy and a reason tied to the
+material behavior and boundary being proved. The strategy is not inferred from
+the convenience of the test harness.
+
 ## Service Simulator Design
 
 Dependency substitutes model dependencies *of* the reviewed service. A Service
@@ -136,6 +140,11 @@ Swagger. Simulator implementation requires a separately accepted and fresh
 specification plus explicit authorization. This capability does not implement
 simulator code during review.
 
+The consumer plane may expose HTTP, gRPC, WebSocket, event/message, or another
+protocol when that is the real consumer boundary. The control plane is test-only
+and may provide health, reset, scenario, state, and seed operations; it is never
+used as evidence that the consumer protocol itself works.
+
 ## E2E Design
 
 An E2E candidate is justified only when assurance depends on multiple real
@@ -144,6 +153,11 @@ and cheaply. Each design records source `BC-*` revision, real components,
 allowed simulators/fakes, initial state, stimulus, material assertions, failure
 observability, cleanup/reset, CI suitability, and cost where useful. E2E does
 not require Service Simulator Design when the topology does not need one.
+
+An E2E record states initial state, stimulus, material assertions, failure
+observability, cleanup/reset, CI suitability, and estimated execution cost where
+useful. It names participating real components and allowed substitutes, and
+references the accepted `BC-*` revision from which the scenario derives.
 
 ## Capability Dependency DAG
 

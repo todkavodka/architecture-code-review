@@ -109,3 +109,9 @@ Behavior Model is an internal dependency, not a checkbox. Contract Verification
 is automatic when materially applicable. The extension designs and plans test
 capability; it does not implement product tests, a Service Simulator, or test
 infrastructure during review.
+
+Select a dependency strategy per material dependency and justify it. Keep
+dependency substitutes separate from a Service Simulator of the reviewed
+service; simulator consumer protocols and its test-only control plane remain
+separate. E2E is selected only when multi-component assurance adds material
+value.
