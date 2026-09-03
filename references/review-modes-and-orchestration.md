@@ -141,6 +141,7 @@ previous_baseline
 current_baseline
 baseline_type
 working_tree_snapshot
+working_tree_snapshot_algorithm
 review_suite
 stack_addenda
 project_profile:
