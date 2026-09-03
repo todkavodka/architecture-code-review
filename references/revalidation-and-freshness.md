@@ -178,3 +178,96 @@ concrete correctness trigger and is persisted in the handoff.
 - PS-42B → revision/status binding блокирует stale compact projection до downstream dispatch.
 
 PS-39, PS-40 и PS-43 были baseline-compliant и не являются основанием для добавления новых orchestration restrictions.
+
+## 7. Project-change targeted revalidation
+
+`REVALIDATE` binds the previous accepted baseline to the selected current
+baseline and produces a bounded, delta-oriented overlay:
+
+```text
+BASELINE_BINDING
+→ CHANGE_INVENTORY
+→ IMPACT_ANALYSIS
+→ IMPACT_CLASSIFICATION
+→ MINIMUM_DEPENDENCY_SLICE
+→ TARGETED_FRESH_EVIDENCE
+→ REVALIDATION / ADJUDICATION
+→ DELTA_RECONCILIATION
+```
+
+Git diff, changed paths, and Project Profile delta are routing context only.
+They select where fresh evidence is needed; they are not substantive proof.
+
+### Impact classification
+
+`LOCAL`, `BOUNDARY`, and `SYSTEMIC` are orchestration labels, not finding
+severity. `LOCAL` means no demonstrated material boundary, contract, or
+ownership change; fresh reads stay local unless evidence expands the scope.
+`BOUNDARY` means a material API, auth/trust, persistence, ownership, lifecycle,
+concurrency, IPC, external integration, or equivalent accepted boundary is
+touched; revalidate that boundary and its material dependencies. `SYSTEMIC`
+means multiple fundamental boundaries or the accepted architecture model changed
+enough that targeted completion is not trustworthy.
+
+For `SYSTEMIC`, emit:
+
+```text
+FULL_REAUDIT_RECOMMENDED
+reason: <why targeted scope is insufficient>
+systemic_scope: <affected fundamental boundaries>
+user_decision_required: true
+```
+
+Do not start a full audit until the user chooses it. If the user declines,
+finish with the systemic scope and unresolved items explicit; do not claim a
+fully revalidated audit.
+
+### Affected and preserved sets
+
+Impact analysis records affected architecture domains, accepted findings,
+candidate/evidence bindings, capabilities, and dependent artifacts, along with
+preserved accepted domains. An accepted domain is `preserved` only when the
+available dependency/evidence mapping finds no dependency requiring fresh
+verification. Unknown linkage requires targeted investigation and cannot be
+called preserved for context savings.
+
+Unrelated accepted artifacts are excluded by default. If a material omitted
+dependency is discovered, persist:
+
+```text
+CONTEXT_EXPANSION_REQUIRED
+correctness_trigger: <exact reason>
+requested_expansion: <minimal dependency slice>
+evidence_pointer: <path/authority pointer>
+affected_decision_or_domain: <decision/domain>
+```
+
+Then inspect only that required dependency slice. Do not silently broaden the
+context or refuse a material cross-boundary read merely to protect a budget.
+
+### Delta reconciliation
+
+The revalidation overlay/artifact contains at minimum:
+
+```text
+source_audit_revision
+previous_baseline
+current_baseline
+change_range
+impact_classification
+changes_investigated
+context_expansions
+previous_accepted_evidence_preserved
+findings_revalidated
+findings_resolved
+findings_still_valid
+findings_changed
+new_findings
+capability_impacts
+unresolved_items
+```
+
+Link this overlay to the previous authoritative review rather than regenerating
+the entire report by default. `previous_accepted_evidence_preserved` means the
+impact analysis found no dependency requiring fresh verification. It does not
+mean freshly reread, runtime tested, independently reviewed, or newly proven.

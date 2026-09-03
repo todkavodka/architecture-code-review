@@ -160,6 +160,70 @@ Endpoint Test Review выбирается независимо от архите
 
 Подключение Test Review позже не означает автоматический перезапуск уже принятых частей архитектурного аудита. Capability получает только тот объём актуального контекста, который нужен для её собственных решений.
 
+## Повторный запуск и Session Intent
+
+Повторный запуск Skill сначала сверяет repository identity, состояние и lineage
+предыдущего audit package с выбранным baseline. Он не означает автоматический
+повтор всего аудита. Пользователю доступны ровно пять Session Intent:
+
+- `USE_EXISTING` — принятый аудит уже соответствует тому же committed baseline;
+- `NEW` — намеренно начать новый полный ограниченный аудит;
+- `RESUME` — продолжить незавершённый аудит после reconciliation authority и
+  freshness; при изменившемся baseline сначала выполняется reconciliation;
+- `REVALIDATE` — проверить изменения относительно принятого baseline и заново
+  прочитать только затронутые evidence slices;
+- `EXTEND` — добавить Test Review, Target Architecture или Roadmap без повтора
+  несвязанных принятых частей.
+
+По умолчанию нет предыдущего аудита означает `NEW`, `IN_PROGRESS` означает
+`RESUME`, а `COMPLETE` на том же HEAD — `USE_EXISTING`. Изменившийся committed
+HEAD обычно означает targeted `REVALIDATE`, а не полный rerun. Если затронута
+системная архитектурная модель, Skill может показать
+`FULL_REAUDIT_RECOMMENDED`, но полный аудит не начинается без явного решения
+пользователя. `EXTEND` показывает только доступные additions.
+
+При `NEW` Test Review всегда виден в стартовой конфигурации:
+
+```text
+Test Review: OFF | REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN
+```
+
+Результат лёгкой reconnaissance может быть рекомендацией, но capability нельзя
+включить молча. Stack addenda по-прежнему являются отдельными технологическими
+линзами, а не capabilities.
+
+### Project Profile и изменения проекта
+
+Project Profile — дешёвая локальная metadata для маршрутизации и оценки, а не
+доказательство архитектурной materiality. Он показывает для substantive tracked
+files количество файлов, строк, символов и языковой footprint. Generated,
+vendor/dependency, build artifact и binary категории считаются отдельно и не
+загрязняют основные totals; неизвестный текстовый тип попадает в `Other Text`.
+Профиль вычисляется локально и не требует передавать содержимое каждого файла в
+контекст модели.
+
+В старом v0.2 audit package профиль можно сделать через `METADATA_BACKFILL` или
+migration без открытия принятых technical gates. При `REVALIDATE`, если доступны
+оба профиля, показывается delta по files, lines, characters и языковому footprint.
+Если исторический commit недоступен, фиксируется
+`HISTORICAL_PROFILE_UNAVAILABLE`: текущий профиль остаётся пригодным, а
+технический аудит не становится недействительным только из-за отсутствия этой
+metadata.
+
+Если рабочее дерево изменено, рекомендуемый baseline — точный committed `HEAD`;
+незакоммиченные файлы в него не входят, хотя dirty-state записывается. Явные
+варианты запуска:
+
+```text
+1. Audit committed HEAD only — recommended
+2. Include working-tree changes as EPHEMERAL snapshot
+3. Stop
+```
+
+`EPHEMERAL` записывает commit, baseline type и детерминированный fingerprint
+отсортированных путей, статуса tracked/untracked и digest содержимого. Это не
+эквивалент воспроизводимого commit baseline.
+
 ## Общие правила для всех capabilities
 
 Umbrella review suite использует несколько общих assurance-принципов.
