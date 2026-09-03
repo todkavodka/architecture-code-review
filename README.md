@@ -1140,6 +1140,7 @@ PROJECTION_REPAIR принятого пакета аудита.
 │   ├── pressure-scenario-85-test-engineering-revalidation.md
 │   ├── pressure-scenario-86-service-simulator-e2e-boundaries.md
 │   ├── pressure-scenario-87-output-selection-persistence.md
+│   ├── pressure-scenario-88-new-test-engineering-selection.md
 │   └── test-engineering-capability-validation.md
 └── docs/
     └── superpowers/

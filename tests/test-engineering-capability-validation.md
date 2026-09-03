@@ -59,6 +59,8 @@ The static checks confirm:
 - persisted output selections distinguish Test Assurance-only, Test Plan, E2E,
   Simulator+E2E, and Contract Consistency Report combinations; legacy endpoints
   normalize without inferring optional outputs.
+- `NEW` exposes direct independent Test Engineering output selection; legacy
+  `REVIEW_ONLY` and `REVIEW_PLUS_TEST_PLAN` are reconciliation inputs only.
 
 ## Test Review-only compatibility canary
 
@@ -176,6 +178,32 @@ observed_response_summary: Independent mappings distinguished Assurance-only, As
 expected_behavior: Persist independent output booleans without inventing internal gates or optional outputs.
 violations: none observed at the contract level
 verdict: PS87_GREEN_OUTPUT_SELECTION_PERSISTED
+```
+
+### PS-88
+
+```text
+run_id: PS88-20260903-independent-red-01
+feature_head: 37862d0d68d5d51ddd124ec9b962f97f4bce1f34
+scenario: PS-88 — NEW Test Engineering output selection
+execution_context: fresh independent read-only Skill pressure run against unchanged current Skill
+observed_response_summary: NEW exposed `Capabilities → Test Review: OFF | REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN`; independent Test Engineering outputs were hidden. No internal-gate exposure or silent enablement was observed.
+expected_behavior: NEW exposes Architecture Review separately from Test Engineering and allows independent output selection persisted directly as `outputs`; legacy endpoint values remain reconciliation-only.
+violations: legacy NEW menu; output selection hidden
+verdict: PS88_RED_LEGACY_NEW_MENU
+```
+
+After the startup guidance change, a fresh independent run observed:
+
+```text
+run_id: PS88-20260903-independent-green-01
+feature_head: ec2c20bda0abf313c3e4bd3d0ee551d9bd47a7dc
+scenario: PS-88 — NEW Test Engineering output selection
+execution_context: fresh independent read-only Skill pressure run
+observed_response_summary: Architecture Review and Test Engineering were separate; Test Engineering exposed OFF or independent outputs; selected outputs persisted directly; Behavior Model and Contract Verification remained internal; E2E did not force Service Simulator; legacy modes remained reconciliation-only.
+expected_behavior: Allow independent Test Assurance, Test Environment Design, and E2E Test Plan selection with other optional outputs disabled.
+violations: none
+verdict: PS88_GREEN_NEW_OUTPUT_SELECTION
 ```
 
 The first PS-84/PS-85 attempts stopped at static inspection; they were not
