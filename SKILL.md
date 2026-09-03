@@ -17,8 +17,15 @@ description: Use when performing a whole-project or subsystem architecture/code 
 Определи/reconcile предыдущий audit package, зафиксируй baseline и dirty state,
 собери или backfill локальный Project Profile, затем покажи рекомендованный
 Session Intent и только относящиеся к нему configuration choices. Не начинай
-существенную работу для `NEW`, `RESUME`, `REVALIDATE` или `EXTEND`, пока
-требуемый пользовательский выбор не разрешён.
+существенную работу для `NEW`, `RESUME`, `REVALIDATE`, `EXTEND` или
+`PROJECTION_REPAIR`, пока требуемый пользовательский выбор не разрешён.
+
+`PROJECTION_REPAIR` используется только для исправления пользовательских/финальных
+проекций уже принятого аудита. Он не является техническим re-audit: исправляй
+язык, структуру, ссылки, Markdown/Mermaid, навигацию, терминологию и
+cross-references по принятой authority. Каждый changed projection проходит
+`PROJECTION_REVALIDATION`; semantic drift требует
+`SEMANTIC_DRIFT_DETECTED` + `TECHNICAL_REVALIDATION_REQUIRED`.
 
 ## Persistent Workflow
 
@@ -71,6 +78,7 @@ authority, freshness, artifact-ownership, and completion gates.
 - Shared assurance principles apply across capabilities: resolve material authority before a substantive verdict, and keep claim scope within directly evidenced material scope.
 - Context Orchestration v0.3 loads minimum fresh decision evidence through dependency-sliced routing; see `references/revalidation-and-freshness.md`.
 - Presentation-only correction не перезапускает technical audit автоматически: используй `PROJECTION_REVALIDATION`; semantic drift требует `TECHNICAL_REVALIDATION_REQUIRED`.
+- `PROJECTION_REPAIR` не используется для сокрытия changed source/baseline; project-change freshness принадлежит `REVALIDATE`.
 - Major artifact author ≠ final judge. Review/correction/re-review — отдельные роли.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
 - Количество и severity найденных `CAND-*`/`RF-*` не являются evidence полноты discovery.
@@ -92,7 +100,7 @@ authority, freshness, artifact-ownership, and completion gates.
 
 На выбранном пользовательском языке должны быть все меню, вопросы, рекомендации, пояснения, сообщения о ходе работы и статусе, а также итоговые пользовательские документы. Это правило распространяется на весь umbrella workflow и на подключённые capabilities, включая Test Review.
 
-Формальные идентификаторы сохраняй без перевода: `USE_EXISTING`, `NEW`, `RESUME`, `REVALIDATE`, `EXTEND`, `STANDARD_FULL`, `FORENSIC`, endpoint/status tokens, точные идентификаторы кода, пути, API/IPC/protocol names и имена файлов. При необходимости после формального токена давай естественное пояснение на языке пользователя, например: `REVALIDATE — проверить изменения относительно принятой ревизии`.
+Формальные идентификаторы сохраняй без перевода: `USE_EXISTING`, `NEW`, `RESUME`, `REVALIDATE`, `EXTEND`, `PROJECTION_REPAIR`, `STANDARD_FULL`, `FORENSIC`, endpoint/status tokens, точные идентификаторы кода, пути, API/IPC/protocol names и имена файлов. При необходимости после формального токена давай естественное пояснение на языке пользователя, например: `PROJECTION_REPAIR — исправить только финальные документы без повторного технического аудита`.
 
 Постоянные machine-oriented поля, ключи `INDEX.md`, ledger rows и другие канонические технические токены могут оставаться на английском там, где это часть контракта. Объясняющий их пользовательский текст должен оставаться на выбранном языке. Смена языка пользователем действует со следующего ответа; уже сохранённые технические артефакты не переписывай только ради перевода, если пользователь этого не попросил.
 
@@ -104,7 +112,7 @@ authority, freshness, artifact-ownership, and completion gates.
 
 - startup / previous-audit selection / session intent / Review Suite startup / Project Profile / dirty baseline → `references/session-orchestration.md`
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
-- projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
+- projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
 - capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
 - core method / As-Built-first flow → `references/review-method.md`
