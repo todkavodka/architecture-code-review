@@ -49,6 +49,12 @@ an existing audit. Its specialist methodology lives in
 `capabilities/test-review/SKILL.md`; the umbrella orchestrator retains shared
 authority, freshness, artifact-ownership, and completion gates.
 
+Test Engineering output selection is persisted as independent booleans and
+executes a minimum dependency slice. `Test Assurance` remains the compatibility
+core; `Behavior Model` is an internal dependency and applicable `Contract
+Verification` is automatic. Optional output projections and ownership are
+defined by the capability contract and registered in `working/INDEX.md`.
+
 1. Зафиксируй repository baseline и применимые stack addenda.
 2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
 3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.

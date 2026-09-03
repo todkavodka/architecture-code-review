@@ -253,6 +253,29 @@ resume INDEX
 Adding a capability does not restart unrelated accepted stages by default. A stale
 or disputed dependency blocks downstream use under the freshness contract.
 
+For the Test Engineering extension, the capability registry may project these
+separate outputs and their owning artifacts:
+
+```text
+00-test-assurance-summary.md
+01-test-assurance-map.md
+02-test-plan.md                              # optional compatibility output
+03-behavior-contract-model.md                # when extended model is required
+04-contract-consistency-report.md            # optional projection
+05-test-environment-design.md                # optional
+06-service-simulator-spec.md                 # optional
+07-service-simulator-implementation-plan.md  # optional
+08-e2e-test-plan.md                          # optional
+working/                                     # authoritative BC/CC/TM/GAP ledgers
+```
+
+The registry stores output selection as independent fields. An E2E Test Plan
+requires Test Assurance, the internal Behavior Model, applicable Contract
+Verification, and E2E Design; Service Simulator Design is added only when the
+selected topology requires it. A Service Simulator Implementation Plan requires
+an accepted and fresh simulator specification. `EXTEND` reuses the accepted
+upstream slice instead of replaying the full review.
+
 Capability-owned artifacts may use project-local paths, for example:
 
 ```text
