@@ -1,46 +1,85 @@
 # Architecture Code Review
 
-`architecture-code-review` — Skill для глубокого evidence-first архитектурного и кодового аудита существующих систем.
+`architecture-code-review` — Skill для глубокого архитектурного и кодового аудита существующих систем с опорой на проверяемые доказательства.
 
-Его задача — не собрать длинный список «подозрительных мест», а восстановить, **как система реально устроена и работает**, проверить границы ответственности и владение состоянием, проследить важные сценарии исполнения и только после этого формулировать выводы.
+Его задача — не собрать длинный список «подозрительных мест», а восстановить, **как система действительно устроена и работает**, определить владельцев состояния и ресурсов, проследить важные сценарии исполнения и только после этого формулировать выводы.
 
-В основе подхода — принцип:
+В основе методологии лежит простой принцип:
 
 > **Ширина утверждения не должна превышать ширину доказательств.**
 
-Если проверен один обработчик, это не доказывает корректность всей модели авторизации. Если работает обычный сценарий, это ещё не доказывает корректность повторов, восстановления после сбоя, конкурентного выполнения или остановки процесса. Если доказательств недостаточно, результат остаётся `PARTIAL`, `NOT_PROVEN`, `UNKNOWN` или `AUTHORITY_UNRESOLVED`, а не превращается в выдуманный дефект.
+Если проверен один обработчик, это не доказывает корректность всей модели авторизации. Если работает обычный сценарий, это ещё не подтверждает правильность повторных попыток, восстановления после сбоя, конкурентного выполнения или остановки процесса. Если доказательств недостаточно, результат остаётся `PARTIAL`, `NOT_PROVEN`, `UNKNOWN` или `AUTHORITY_UNRESOLVED`, а не превращается в предположение, выданное за факт.
 
-Skill подходит для аудита всего репозитория, отдельной подсистемы и повторных проверок уже проаудированного проекта.
+Skill подходит для аудита всего репозитория, отдельной подсистемы и повторной проверки уже проаудированного проекта.
+
+---
+
+## Оглавление
+
+- [Основные возможности](#основные-возможности)
+- [Как начинается работа](#как-начинается-работа)
+  - [Session Intent](#session-intent)
+  - [Новый аудит](#новый-аудит-new)
+  - [Совместимость со старым Test Review](#совместимость-со-старым-test-review)
+- [Как устроен Architecture Review](#как-устроен-architecture-review)
+- [Test Assurance и Test Engineering](#test-assurance-и-test-engineering)
+  - [Test Assurance](#test-assurance)
+  - [Behavior Contract Model](#behavior-contract-model)
+  - [Идентификаторы](#идентификаторы)
+  - [Владение BC и CC](#владение-bc-и-cc)
+  - [Жизненный цикл, актуальность и authority](#жизненный-цикл-актуальность-и-authority)
+  - [Contract Verification](#contract-verification)
+  - [Contract drift и Test Gap](#contract-drift-и-test-gap)
+  - [Граф зависимостей Test Engineering](#граф-зависимостей-test-engineering)
+  - [Сохранение выбранных результатов](#сохранение-выбранных-результатов)
+  - [Точечная повторная проверка](#точечная-повторная-проверка)
+  - [Test Environment Design](#test-environment-design)
+  - [Service Simulator Design](#service-simulator-design)
+  - [E2E Design](#e2e-design)
+  - [Артефакты Test Engineering](#артефакты-test-engineering)
+- [Общие принципы доказательности](#общие-принципы-доказательности)
+- [Повторный запуск и актуальность](#повторный-запуск-и-актуальность)
+- [PROJECTION_REPAIR](#projection_repair)
+- [Project Profile и изменённое рабочее дерево](#project-profile-и-изменённое-рабочее-дерево)
+- [Итоговый пакет аудита](#итоговый-пакет-аудита)
+- [Установка](#установка)
+- [Использование](#использование)
+- [Структура репозитория](#структура-репозитория)
+- [Проверка изменений Skill](#проверка-изменений-skill)
+- [Язык итоговых документов](#язык-итоговых-документов)
+- [Лицензия](#лицензия)
 
 ---
 
 ## Основные возможности
 
-Skill объединяет несколько связанных, но не смешанных областей:
+Skill объединяет несколько связанных, но не смешанных областей работы:
 
-- **Architecture Review** — фактическая архитектура, ownership, lifecycle, concurrency, trust boundaries, reliability, maintainability и testability;
-- **Target Architecture** — целевая архитектура после подтверждённых findings;
-- **Remediation Roadmap** — порядок исправлений и зависимости между ними;
-- **Test Assurance** — насколько существующие тесты реально подтверждают существенное поведение;
-- **Test Engineering** — проектирование недостающих тестов, контрактная проверка, окружение тестов, Service Simulator и E2E;
-- **REVALIDATE / EXTEND / PROJECTION_REPAIR** — повторное использование принятой работы без автоматического полного rerun.
+- **Architecture Review** — восстановление фактической архитектуры, проверка границ ответственности, владения состоянием, жизненного цикла, конкурентного выполнения, доверительных границ, надёжности, сопровождаемости и тестируемости;
+- **Target Architecture** — проектирование целевой архитектуры после подтверждения проблем;
+- **Remediation Roadmap** — определение порядка исправлений и зависимостей между ними;
+- **Test Assurance** — оценка того, какие существенные поведения действительно подтверждаются существующими тестами;
+- **Test Engineering** — проектирование недостающих тестов, проверка контрактов, проектирование тестового окружения, Service Simulator и E2E-сценариев;
+- **`REVALIDATE` / `EXTEND` / `PROJECTION_REPAIR`** — повторное использование уже принятой работы без автоматического полного аудита заново.
 
-Технологические дополнения для Tauri, Electron, React, Django, FastAPI, Litestar и Ansible остаются стековыми линзами, а не отдельными верхнеуровневыми capabilities.
+Для Tauri, Electron, React, Django, FastAPI, Litestar и Ansible предусмотрены дополнительные технологические проверки. Они дополняют общую методологию, но не становятся отдельными верхнеуровневыми capabilities.
 
 ---
 
 ## Как начинается работа
 
-Начиная с Orchestrator v0.3, запуск Skill начинается не с безусловного нового аудита. Сначала Session Orchestrator определяет репозиторий, baseline, состояние рабочего дерева и уже существующие audit packages.
+Начиная с Orchestrator v0.3, Skill не начинает новый аудит автоматически. Сначала он определяет репозиторий и выбранную ревизию, проверяет состояние рабочего дерева, ищет предыдущие пакеты аудита и согласует их актуальность.
+
+Упрощённо запуск выглядит так:
 
 ```text
-repository + baseline + working tree
+репозиторий + ревизия + рабочее дерево
         |
         v
-previous audit discovery
+поиск предыдущих аудитов
         |
         v
-authority / lineage / freshness reconciliation
+проверка authority / lineage / freshness
         |
         v
 Project Profile
@@ -49,54 +88,58 @@ Project Profile
 Session Intent
         |
         v
-requested outputs / capabilities
+выбор требуемых результатов
         |
         v
-minimum necessary technical work
+минимально необходимая техническая работа
 ```
 
 Повторный запуск Skill не означает автоматический повтор всего аудита.
 
 ### Session Intent
 
-Поддерживаются:
+Поддерживаются шесть вариантов:
 
-- `USE_EXISTING` — использовать уже принятый аудит для того же committed baseline;
-- `NEW` — начать новый ограниченный аудит;
-- `RESUME` — продолжить незавершённый аудит после reconciliation;
-- `REVALIDATE` — проверить изменения относительно принятого baseline;
-- `EXTEND` — добавить новую capability/output, не повторяя несвязанные принятые части;
-- `PROJECTION_REPAIR` — исправить только финальные пользовательские документы без изменения технической семантики.
+- `USE_EXISTING` — использовать уже принятый аудит для той же зафиксированной ревизии;
+- `NEW` — начать новый аудит в явно заданных границах;
+- `RESUME` — продолжить незавершённый аудит после проверки состояния, authority и актуальности;
+- `REVALIDATE` — проверить изменения относительно принятой ревизии;
+- `EXTEND` — добавить новый результат или capability, не повторяя несвязанные принятые этапы;
+- `PROJECTION_REPAIR` — исправить только финальные пользовательские документы без изменения принятой технической семантики.
 
 Типичные рекомендации:
 
 ```text
-previous audit отсутствует                      -> NEW
-IN_PROGRESS                                     -> RESUME
-COMPLETE + тот же HEAD                          -> USE_EXISTING
-COMPLETE + изменившийся HEAD                    -> REVALIDATE
-нужен новый capability/output                   -> EXTEND
-нужен только ремонт финальных документов        -> PROJECTION_REPAIR
+предыдущего аудита нет                         -> NEW
+IN_PROGRESS                                    -> RESUME
+COMPLETE + тот же HEAD                         -> USE_EXISTING
+COMPLETE + изменившийся HEAD                   -> REVALIDATE
+нужен новый результат или capability           -> EXTEND
+нужно исправить только финальные документы     -> PROJECTION_REPAIR
 ```
 
-`RESUME_WITH_RECONCILIATION` — внутренний вариант `RESUME`, а не отдельный persisted Session Intent.
+`RESUME_WITH_RECONCILIATION` — внутренний вариант выполнения `RESUME`, а не отдельный сохраняемый Session Intent.
 
-`PROJECTION_REPAIR` не заменяет `REVALIDATE`: если для исправления финального Markdown нужно изменить evidence, root cause, severity, ownership, invariant, `BC-*`, `CC-*`, Target Architecture или Roadmap, Skill должен остановить presentation-only путь с `SEMANTIC_DRIFT_DETECTED` / `TECHNICAL_REVALIDATION_REQUIRED`.
+`PROJECTION_REPAIR` не заменяет `REVALIDATE`. Если для исправления Markdown-документа требуется изменить evidence, root cause, severity, ownership, invariant, `BC-*`, `CC-*`, Target Architecture или Roadmap, Skill должен остановить редакционный путь с `SEMANTIC_DRIFT_DETECTED` и `TECHNICAL_REVALIDATION_REQUIRED`.
 
----
+### Новый аудит (`NEW`)
 
-## Новый аудит (`NEW`)
+Architecture Review и Test Engineering настраиваются независимо.
 
-Architecture Review и Test Engineering конфигурируются независимо.
-
-### Глубина Architecture Review
+#### Глубина Architecture Review
 
 ```text
 STANDARD_FULL
 FORENSIC
 ```
 
-### Итоговый результат Architecture Review
+`STANDARD_FULL` подходит для большинства полноценных архитектурных проверок.
+
+`FORENSIC` используется, когда требуется более глубокое расследование сложного жизненного цикла, конкурентности, восстановления после сбоев, нескольких процессов или неоднозначных доверительных границ.
+
+Выбор `FORENSIC` сам по себе не означает, что нужно строить Target Architecture или Roadmap.
+
+#### Итоговый результат Architecture Review
 
 ```text
 REVIEW_ONLY
@@ -104,11 +147,9 @@ REVIEW_PLUS_TARGET_ARCHITECTURE
 REVIEW_PLUS_TARGET_AND_ROADMAP
 ```
 
-`FORENSIC` не означает автоматическое построение Target Architecture или Roadmap.
+#### Результаты Test Engineering
 
-### Test Engineering outputs
-
-Современная конфигурация Test Engineering хранит outputs независимо:
+Современная модель Test Engineering хранит каждый запрошенный результат отдельно:
 
 ```text
 [x] Test Assurance
@@ -120,78 +161,86 @@ REVIEW_PLUS_TARGET_AND_ROADMAP
 [ ] E2E Test Plan
 ```
 
-`Test Assurance` — evidence-first ядро capability.
+`Test Assurance` остаётся обязательным ядром Test Engineering.
 
-`Behavior Model` не является пользовательским checkbox: он подключается как внутренняя зависимость, когда выбранным outputs нужна единая модель существенного поведения.
+`Behavior Model` не является пользовательским переключателем. Он подключается как внутренняя зависимость, когда выбранным результатам нужна единая модель существенного поведения.
 
-`Contract Verification` также не является optional checkbox. Если существует materially relevant declared contract — например OpenAPI/Swagger, protobuf/gRPC schema, AsyncAPI или другой машинно-читаемый внешний контракт — проверка `DECLARED ↔ IMPLEMENTED ↔ CONSUMED ↔ TESTED` запускается как внутренний gate. Пользовательский `Contract Consistency Report` при этом остаётся необязательной проекцией.
+`Contract Verification` также не является необязательным пользовательским выбором. Если существует существенный внешний контракт — например OpenAPI/Swagger, protobuf/gRPC schema, AsyncAPI или другой формализованный интерфейс, — Skill автоматически сравнивает четыре представления: `DECLARED`, `IMPLEMENTED`, `CONSUMED` и `TESTED`.
 
-Skill может рекомендовать дополнительные outputs, но не должен молча включать существенную работу.
+`Contract Consistency Report` при этом остаётся необязательным пользовательским документом: саму проверку контракта нельзя отключить, если она действительно применима, но отдельный отчёт создавать не обязательно.
 
-### Legacy Test Review compatibility
+Skill может рекомендовать дополнительные результаты, однако не должен молча включать существенный объём дополнительной работы.
 
-Старые audit packages могут содержать:
+### Совместимость со старым Test Review
+
+Старые пакеты аудита могут хранить режимы:
 
 ```text
 REVIEW_ONLY
 REVIEW_PLUS_TEST_PLAN
 ```
 
-Они остаются поддерживаемым входом для resume/reconciliation, но больше не являются основной моделью конфигурации Test Engineering.
+Они по-прежнему поддерживаются при `RESUME`, `USE_EXISTING` и reconciliation, но больше не являются основной моделью настройки Test Engineering.
 
-Нормализация консервативная:
+Нормализация выполняется консервативно:
 
 ```text
 legacy REVIEW_ONLY
   -> test_assurance=true
-  -> все optional Test Engineering outputs=false
+  -> все необязательные результаты Test Engineering=false
 
 legacy REVIEW_PLUS_TEST_PLAN
   -> test_assurance=true
   -> test_plan=true
-  -> все остальные optional outputs=false
+  -> все остальные необязательные результаты=false
 ```
 
-Legacy состояние никогда не должно само включать E2E, simulator, environment design или contract report.
+Старое состояние никогда не должно само включать E2E, Service Simulator, Test Environment Design или Contract Consistency Report.
 
 ---
 
 ## Как устроен Architecture Review
 
-Базовый поток нового полного аудита:
+Базовый поток нового полного аудита выглядит так:
 
 ```text
-committed baseline
+зафиксированная ревизия
   -> As-Built Architecture
-  -> independent As-Built review
-  -> thematic discovery
+  -> независимая проверка As-Built
+  -> тематическое исследование
   -> Discovery Coverage Matrix
   -> Independent Coverage Review
-  -> independent candidate verification
+  -> независимая проверка кандидатов
   -> root-boundary adjudication
-  -> severity assignment
+  -> назначение severity
   -> Authoritative Findings Ledger
-  -> optional Target Architecture
-  -> optional Remediation Roadmap
-  -> final package
-  -> editorial review / correction / re-review
+  -> при необходимости Target Architecture
+  -> при необходимости Remediation Roadmap
+  -> сборка итогового пакета
+  -> редакционная проверка и повторная проверка
 ```
 
 ### As-Built Architecture
 
-До поиска проблем агент восстанавливает фактические компоненты, процессы, owners, state, data flows и material execution scenarios. Это не пересказ README проекта и не вывод по именам папок.
+До поиска проблем агент восстанавливает фактическую систему: основные компоненты и процессы, владельцев состояния, потоки данных, ключевые границы и существенные сценарии выполнения.
+
+Это не пересказ README проекта и не предположение по названиям директорий. Существенные архитектурные утверждения должны опираться на реальные пути исполнения и конкретные источники.
 
 ### Discovery Coverage
 
-Полнота не измеряется количеством найденных замечаний. Нужен bounded inventory существенных механизмов в scope. Для каждого должно быть ясно: покрыт, частично покрыт, неприменим, заблокирован или неизвестен.
+Полнота аудита не измеряется количеством найденных замечаний.
 
-Sampling может использоваться для качества evidence, но не является доказательством completeness.
+Перед общим выводом формируется ограниченный перечень существенных областей и механизмов в заявленных границах проверки. Для каждой области должно быть понятно, чем она покрыта, почему неприменима, что заблокировано и что осталось неизвестным.
 
-### Independent verification
+Выборочное глубокое исследование допустимо для получения качественных доказательств, но случайная выборка сама по себе не доказывает полноту.
 
-Candidate становится finding только после проверки фактического пути исполнения, ownership, существующих controls и concrete consequence. Severity назначается после correctness verification.
+### Независимая проверка
 
-Для серьёзного security finding требуется правдоподобная attack chain; отсутствие hardening само по себе не является HIGH/CRITICAL.
+Кандидат становится подтверждённой проблемой только после проверки фактического пути исполнения, владения состоянием или ресурсом, существующих защитных механизмов и конкретного последствия.
+
+Severity назначается после проверки корректности самого finding, а не по первому впечатлению.
+
+Для серьёзного security finding нужна правдоподобная цепочка атаки: кто атакует, через какую поверхность, при каких предпосылках и к какому результату это приводит. Само по себе отсутствие дополнительного hardening не является основанием для HIGH или CRITICAL.
 
 ---
 
@@ -201,29 +250,27 @@ Candidate становится finding только после проверки 
 
 Test Assurance отвечает не на вопрос «тесты зелёные или нет», а на более строгий вопрос:
 
-> Какие существенные поведения системы реально подтверждены исполняемыми доказательствами, какие подтверждены частично, какие не подтверждены и какие тесты могут создавать ложную уверенность?
+> Какие существенные поведения системы действительно подтверждены исполняемыми тестами, какие подтверждены частично, какие не подтверждены и какие тесты могут создавать ложное чувство уверенности?
 
-Для общего verdict нужен bounded inventory material assurance targets. Test Assurance сохраняет существующие совместимые outputs:
+Для общего вывода нужен явный ограниченный перечень существенных целей проверки. Test Assurance сохраняет совместимые документы:
 
 ```text
 00-test-assurance-summary.md
 01-test-assurance-map.md
-02-test-plan.md              # optional
+02-test-plan.md              # необязательный
 ```
 
-`00-test-assurance-summary.md` — короткий пользовательский decision layer: verdict, сильные стороны, главные слабости, bounded accounting, приоритеты и важные limitations.
+`00-test-assurance-summary.md` — короткое пользовательское резюме. Оно должно быстро отвечать на вопросы: можно ли доверять текущей системе тестов, что защищено хорошо, где находятся основные пробелы и что стоит исправлять первым.
 
-`01-test-assurance-map.md` — подробная evidence/authority карта.
+`01-test-assurance-map.md` — подробная карта доказательств, authority и покрытия.
 
-`02-test-plan.md` — инженерный план тестовых работ, когда он выбран.
+`02-test-plan.md` — инженерный план тестовых работ, если пользователь его выбрал.
 
 ---
 
-## Единая Behavior Contract Model
+## Behavior Contract Model
 
-Расширенный Test Engineering не позволяет Test Plan, Contract Verification, Simulator и E2E независимо придумывать продуктовую семантику.
-
-Используется один bounded Behavior Contract Model:
+Расширенный Test Engineering использует единую модель поведения, чтобы Test Plan, Contract Verification, Service Simulator и E2E не могли независимо придумывать продуктовую семантику.
 
 ```text
 accepted architecture / observed implementation / declared contracts / consumers
@@ -242,30 +289,45 @@ accepted architecture / observed implementation / declared contracts / consumers
                          Design          Design        Design
 ```
 
+`BC-*` фиксирует одно существенное поведение, которое можно проверить независимо от других поведений.
+
+Например:
+
+```text
+BC-001 Неаутентифицированный POST /orders отклоняется.
+BC-002 Тайм-аут оплаты не создаёт второй заказ.
+BC-003 Повторная попытка может перевести тот же заказ в COMPLETED.
+BC-004 На один заказ публикуется не более одного события завершения.
+```
+
+Большие формулировки вроде «обработка заказов работает правильно с учётом авторизации, retries, событий и ошибок» должны раскладываться на отдельные `BC-*`.
+
 ### Идентификаторы
 
 ```text
 RF-*    Architecture/root finding
-        Почему механизм или архитектурная граница проблемны.
+        Подтверждённая архитектурная или корневая проблема.
 
 BC-*    Behavior Contract
-        Одно independently verifiable material behavior.
+        Одно независимо проверяемое существенное поведение.
 
 CC-*    Contract Consistency Record
-        Наблюдаемое расхождение между contract views.
+        Зафиксированное расхождение между представлениями контракта.
 
 MAT-*   Material Assurance Target
-        Что Test Assurance обязуется учесть в bounded inventory.
+        Существенная цель, которую Test Assurance обязан учесть.
 
 TM-*    Test Mapping
-        Исполняемое evidence, привязанное к MAT/BC.
+        Исполняемое доказательство, привязанное к MAT/BC.
 
 GAP-*   Assurance Gap
-        Missing / partial / misleading / inadequate evidence.
+        Отсутствующее, частичное, вводящее в заблуждение или недостаточное доказательство.
 
-TASK-*  Test Engineering remediation task.
+TASK-*  Test Engineering remediation task
+        Инженерная работа, необходимая для устранения подтверждённого пробела.
 
-WS-*    Working-set / investigation record.
+WS-*    Working-set / investigation record
+        Временное рабочее состояние исследования.
 ```
 
 Нормативные границы:
@@ -277,13 +339,13 @@ BC != GAP
 CC != GAP
 ```
 
-`BC-*` отвечает на вопрос **«какое поведение?»**.
+`BC-*` отвечает на вопрос: **«Какое поведение должно выполняться?»**
 
-`TM-*` отвечает на вопрос **«что это поведение доказывает?»**.
+`TM-*` отвечает на вопрос: **«Какое исполняемое доказательство подтверждает это поведение?»**
 
-Поэтому executable evidence не хранится внутри `BC-*`.
+Поэтому сведения о существующих тестах и их результатах не хранятся внутри `BC-*`.
 
-Один architectural finding может породить несколько отдельных behaviors:
+Один архитектурный finding может породить несколько отдельных поведений:
 
 ```text
 RF-012 stale generation can overwrite terminal state
@@ -292,15 +354,13 @@ RF-012 stale generation can overwrite terminal state
   -> BC-029 cancellation/retry must not transfer publication ownership
 ```
 
-Один BC — одно независимо проверяемое существенное поведение. Большие «контракты-комбайны» вроде «order processing works correctly including auth/retries/events/errors» должны раскладываться на отдельные BC.
-
 ---
 
-## Ownership BC и CC
+### Владение BC и CC
 
 Принятую семантику `BC-*` может менять только Behavior Model gate.
 
-Другие части capability могут создавать:
+Остальные части capability могут создавать:
 
 ```text
 BC_CANDIDATE
@@ -308,19 +368,19 @@ BC_REVALIDATION_REQUEST
 BC_CONFLICT_OBSERVED
 ```
 
-но не переписывают accepted BC напрямую.
+но не могут напрямую переписывать принятый Behavior Contract.
 
-Аналогично authoritative state/classification `CC-*` принадлежит Contract Verification. Другие gates могут сообщить `CONTRACT_CONFLICT_OBSERVED`, но не назначают окончательную классификацию сами.
+Состояние и классификация `CC-*` принадлежат Contract Verification. Другие этапы могут сообщить `CONTRACT_CONFLICT_OBSERVED`, но не назначают окончательную классификацию самостоятельно.
 
-Это предотвращает скрытое изменение product semantics из Test Plan, Simulator или E2E.
+Это предотвращает ситуацию, когда Test Plan, Service Simulator или E2E незаметно меняют продуктовую семантику ради собственного сценария.
 
 ---
 
-## Lifecycle, freshness и authority
+### Жизненный цикл, актуальность и authority
 
-Для Behavior Contract используются отдельные оси, а не один гигантский status enum.
+Для Behavior Contract используются три независимые оси, а не один общий статус.
 
-Semantic lifecycle:
+Жизненный цикл:
 
 ```text
 CANDIDATE
@@ -330,7 +390,7 @@ SUPERSEDED
 REJECTED
 ```
 
-Freshness:
+Актуальность:
 
 ```text
 VALID
@@ -345,7 +405,7 @@ RESOLVED
 UNRESOLVED
 ```
 
-Стабильная semantic identity сохраняется через revisions:
+Если смысл поведения сохраняется, его идентификатор остаётся стабильным, а изменения отражаются ревизиями:
 
 ```text
 BC-042@rev1
@@ -353,34 +413,30 @@ BC-042@rev2
 BC-042@rev3
 ```
 
-Если изменилось уже само поведение, старый BC может стать `SUPERSEDED`, а новый получить другой ID.
+Если изменилось само поведение, старый BC может получить статус `SUPERSEDED`, а новое поведение — новый идентификатор.
 
-Downstream artifacts должны ссылаться на конкретную revision, когда это важно для freshness/provenance.
+Зависимые артефакты должны ссылаться на конкретную ревизию там, где это важно для актуальности и provenance.
 
 ---
 
-## Contract Verification: Swagger/OpenAPI vs code vs consumers vs tests
+## Contract Verification
 
-Если проект публикует declared contract, Skill не считает его автоматически истинным.
+Если проект публикует формализованный внешний контракт, Skill не считает его автоматически единственным источником истины.
 
 Сравниваются четыре представления:
 
 ```text
-DECLARED      OpenAPI / Swagger / protobuf / AsyncAPI / docs
-IMPLEMENTED   реальные routes / handlers / DTO / serializer / auth / errors
-CONSUMED      frontend / SDK / CLI / peer services
-TESTED        тесты, которые кодируют или утверждают поведение
+DECLARED      OpenAPI / Swagger / protobuf / AsyncAPI / документация
+IMPLEMENTED   реальные routes / handlers / DTO / serializers / auth / errors
+CONSUMED      frontend / SDK / CLI / другие сервисы
+TESTED        тесты, которые кодируют или проверяют это поведение
 ```
 
-Это **views**, а не levels of authority.
+Это разные представления одного контракта, а не иерархия authority.
 
-Swagger не получает автоматический приоритет.
+Swagger не получает автоматический приоритет. Код тоже не считается нормативным только потому, что он исполняется. Поведение потребителя и существующие тесты также не становятся источником истины автоматически.
 
-Код не получает автоматический приоритет.
-
-Consumer behavior и tests тоже не получают автоматический приоритет.
-
-При конфликте создаётся `CC-*` и отдельно выполняется authority resolution.
+Если представления расходятся, создаётся `CC-*`, после чего конфликт проходит отдельное разрешение authority.
 
 Пример:
 
@@ -402,24 +458,25 @@ classification:
   AUTHORITY_UNRESOLVED
 ```
 
-Материально проверяются не только method/path, но и при наличии соответствующего контракта:
+Когда контракт это позволяет, сравниваются не только method и path, но также:
 
-- request/response schemas;
-- required/optional/nullable/default semantics;
-- enum values;
+- схемы запросов и ответов;
+- обязательные и необязательные поля;
+- типы, `nullable` и значения по умолчанию;
+- enum-значения;
 - status codes;
 - headers;
-- authentication/authorization;
-- error contracts;
-- pagination/versioning;
-- events/messages;
-- state transitions;
-- side effects;
-- ordering;
+- authentication и authorization;
+- формат ошибок;
+- pagination и versioning;
+- события и сообщения;
+- переходы состояния;
+- побочные эффекты;
+- порядок операций;
 - idempotency;
-- retries/cancellation.
+- retries и cancellation.
 
-Возможные classified outcomes включают:
+Возможные классификации включают:
 
 ```text
 DECLARATION_STALE
@@ -431,7 +488,7 @@ CONTRACT_UNRESOLVED
 AUTHORITY_UNRESOLVED
 ```
 
-### CC resolution не переписывает BC
+Разрешение `CC-*` не переписывает Behavior Contract автоматически:
 
 ```text
 CC resolved
@@ -439,31 +496,31 @@ CC resolved
     v
 BC impact analysis
     |
-    +-- no semantic change -> BC remains valid
+    +-- semantics unchanged -> BC remains valid
     |
     +-- semantic impact -> BC freshness = REVALIDATION_REQUIRED
 ```
 
-Только Behavior Model может выпустить новую BC revision.
+Новую ревизию `BC-*` выпускает только Behavior Model.
 
 ---
 
-## Contract drift и Test Gap — разные вещи
+## Contract drift и Test Gap
 
-Контрактное расхождение не равно отсутствию тестового evidence.
+Расхождение между контрактами и отсутствие тестового доказательства — разные проблемы.
 
 Например:
 
 ```text
 Swagger не описывает 409
 implementation возвращает 409
-consumer умеет 409
-тесты полностью доказывают 409 behavior
+consumer обрабатывает 409
+тесты полностью подтверждают поведение 409
 ```
 
-Тогда существует `CC-*`, но `GAP-*` создавать автоматически не нужно.
+В этом случае существует `CC-*`, но `GAP-*` не создаётся автоматически: контракт расходится, однако само поведение тестами доказано.
 
-Если 409 ещё и не подтверждён тестами, могут существовать обе независимые проблемы:
+Если 409 ещё и не проверяется исполняемыми тестами, могут одновременно существовать две независимые проблемы:
 
 ```text
 CC-017
@@ -477,9 +534,9 @@ CC-017
 
 ---
 
-## Test Engineering dependency DAG
+## Граф зависимостей Test Engineering
 
-Capability не является фиксированным линейным pipeline.
+Test Engineering не является обязательным линейным конвейером. Каждому запрошенному результату соответствует минимально необходимая цепочка зависимостей.
 
 ```text
 Test Assurance
@@ -499,21 +556,19 @@ Test Assurance
            +-- E2E Test Plan
 ```
 
-Выполняется **minimum necessary dependency slice**.
+Если пользователь выбирает только `E2E Test Plan`, Skill может подключить Test Assurance, Behavior Model и применимый Contract Verification, но не обязан автоматически проектировать Service Simulator.
 
-Например, если пользователь выбирает только `E2E Test Plan`, Skill может подключить Test Assurance, Behavior Model и применимый Contract Verification, но не обязан автоматически проектировать Service Simulator.
+`EXTEND` переиспользует уже принятые и актуальные зависимости вместо полного повторного аудита.
 
-`EXTEND` переиспользует accepted/fresh upstream artifacts вместо полного rerun.
-
-`USE_EXISTING` разрешён только если требуемый slice accepted, fresh и достаточно authority-resolved.
+`USE_EXISTING` разрешён только тогда, когда необходимая часть графа принята, актуальна и имеет достаточно разрешённый authority.
 
 ---
 
-## Persisted Test Engineering outputs
+## Сохранение выбранных результатов
 
-Выбор outputs является частью persisted capability state/`working/INDEX.md`, чтобы `RESUME`, `EXTEND`, `USE_EXISTING` и `REVALIDATE` могли восстановить тот же requested slice.
+Выбор результатов Test Engineering сохраняется в состоянии capability и `working/INDEX.md`. Это необходимо, чтобы `RESUME`, `EXTEND`, `USE_EXISTING` и `REVALIDATE` могли восстановить именно тот набор работы, который был выбран пользователем.
 
-Концептуально:
+Пример:
 
 ```yaml
 outputs:
@@ -526,15 +581,15 @@ outputs:
   e2e_test_plan: true
 ```
 
-Эти поля независимы. Не создаются compound modes вроде `REVIEW_PLUS_SIMULATOR_PLUS_E2E`.
+Эти поля независимы друг от друга. Skill не создаёт составные режимы вроде `REVIEW_PLUS_SIMULATOR_PLUS_E2E`.
 
 ---
 
-## Impact-driven REVALIDATE
+## Точечная повторная проверка
 
-Freshness считается по affected semantics, а не просто по факту смены Git HEAD.
+`REVALIDATE` определяет затронутую область по смыслу изменений, а не просто по факту появления нового Git HEAD.
 
-### Tests-only change
+### Изменились только тесты
 
 ```text
 tests changed
@@ -543,9 +598,9 @@ tests changed
   -> GAP may close/open
 ```
 
-Это обычно **не означает автоматическую invalidation BC**.
+Такое изменение обычно **не делает `BC-*` автоматически неактуальным**.
 
-### Implementation / OpenAPI change
+### Изменилась реализация или OpenAPI
 
 ```text
 implementation or declared contract changed
@@ -554,7 +609,7 @@ implementation or declared contract changed
   -> BC impact analysis
 ```
 
-### Consumer-only change
+### Изменился только потребитель
 
 ```text
 service unchanged
@@ -565,13 +620,13 @@ consumer changed
   -> affected E2E may require revalidation
 ```
 
-Поэтому multi-repository bindings — first-class freshness inputs.
+Поэтому актуальность Test Engineering может зависеть от нескольких репозиториев, а не только от HEAD сервиса.
 
 ---
 
 ## Test Environment Design
 
-Для зависимостей **reviewed service** стратегия выбирается отдельно для каждой dependency:
+Для каждой зависимости проверяемого сервиса выбирается отдельная стратегия:
 
 ```text
 REAL_DISPOSABLE
@@ -582,22 +637,26 @@ TEMP_RESOURCE
 NOT_REQUIRED
 ```
 
-Правило:
+Основное правило:
 
-> **Mock external uncertainty, not the behavior under test.**
+> **Подменяйте внешнюю неопределённость, а не само проверяемое поведение.**
 
-Если существенное поведение зависит от реальных транзакций, expiry, ordering, constraints или persistence semantics, нельзя автоматически заменить его удобным mock.
+Если существенное поведение зависит от реальных транзакций, сроков истечения, порядка операций, ограничений базы данных или семантики хранения, нельзя автоматически заменять его удобным mock.
+
+Например, PostgreSQL или Redis часто разумнее поднимать как временную реальную зависимость, а время или нестабильный внешний API — контролировать через соответствующий double или mock.
 
 ---
 
 ## Service Simulator Design
 
-Skill различает две разные задачи:
+Skill различает две принципиально разные задачи:
 
 ```text
-A) substitutes for dependencies OF reviewed service
-B) simulator OF reviewed service FOR its consumers
+A) подмены зависимостей проверяемого сервиса
+B) Service Simulator самого проверяемого сервиса для его потребителей
 ```
+
+Это не один и тот же слой.
 
 Service Simulator может включать:
 
@@ -611,9 +670,9 @@ Control API
 Health / Reset / Seed
 ```
 
-Consumer plane должен соответствовать materially relevant real protocol.
+Интерфейс, которым пользуется реальный consumer, должен воспроизводить существенную часть реального протокола сервиса.
 
-Test-only control plane должен оставаться отдельным, например:
+Тестовый интерфейс управления симулятором должен оставаться отдельным. Например:
 
 ```text
 /__test/health
@@ -623,7 +682,7 @@ Test-only control plane должен оставаться отдельным, н
 /__test/seed
 ```
 
-Simulator не генерируется слепо из Swagger:
+Service Simulator не генерируется слепо из Swagger:
 
 ```text
 Swagger + implementation + consumers
@@ -638,46 +697,48 @@ accepted BC
 Simulator scenarios
 ```
 
-`Service Simulator Implementation Plan` — отдельный explicit output после accepted/fresh Simulator Spec. Сам review Skill не пишет simulator runtime автоматически.
+`Service Simulator Implementation Plan` — отдельный явно выбранный результат. Он допустим только после принятого и актуального Service Simulator Spec.
+
+Во время обычного review Skill проектирует симулятор, но не реализует его runtime автоматически.
 
 ---
 
 ## E2E Design
 
-E2E нужен только там, где assurance действительно зависит от нескольких реальных компонентов и не может быть доказан на меньшей границе с той же или лучшей надёжностью.
+E2E нужен только там, где существенная гарантия действительно зависит от совместной работы нескольких реальных компонентов и не может быть доказана на меньшей границе с той же или большей надёжностью.
 
-Каждый E2E scenario должен фиксировать:
+Каждый E2E-сценарий должен фиксировать:
 
-- source BC revision;
-- participating real components;
-- allowed simulators/fakes;
-- initial state;
-- stimulus;
-- material assertions;
-- failure observability;
-- cleanup/reset;
-- CI suitability;
-- execution cost, когда это существенно.
+- исходный `BC-*` и его ревизию;
+- реальные участвующие компоненты;
+- допустимые simulator/fake-компоненты;
+- начальное состояние;
+- стимул;
+- существенные проверки результата;
+- наблюдаемость ошибки;
+- очистку и сброс состояния;
+- пригодность для CI;
+- стоимость выполнения, если она влияет на решение.
 
-E2E не требует Service Simulator автоматически.
+E2E не требует Service Simulator автоматически. Если тот же существенный контракт надёжнее и дешевле доказать интеграционным тестом на меньшей границе, предпочтение отдаётся меньшей границе.
 
 ---
 
-## Test Engineering artifacts
+## Артефакты Test Engineering
 
-Совместимость Test Review сохраняется, а расширенная модель добавляет новые projections:
+Совместимость Test Review сохраняется, а расширенная модель добавляет новые документы:
 
 ```text
 test-review/
 ├── 00-test-assurance-summary.md
 ├── 01-test-assurance-map.md
-├── 02-test-plan.md                              # optional, compatibility
-├── 03-behavior-contract-model.md                # when extended model is needed
-├── 04-contract-consistency-report.md            # optional user-facing projection
-├── 05-test-environment-design.md                 # optional
-├── 06-service-simulator-spec.md                  # optional
-├── 07-service-simulator-implementation-plan.md   # optional
-├── 08-e2e-test-plan.md                           # optional
+├── 02-test-plan.md                              # необязательный, совместимость
+├── 03-behavior-contract-model.md                # когда требуется расширенная модель
+├── 04-contract-consistency-report.md            # необязательный пользовательский отчёт
+├── 05-test-environment-design.md                 # необязательный
+├── 06-service-simulator-spec.md                  # необязательный
+├── 07-service-simulator-implementation-plan.md   # необязательный
+├── 08-e2e-test-plan.md                           # необязательный
 └── working/
     ├── INDEX.md
     ├── behavior-contracts.md                     # authoritative BC ledger
@@ -687,11 +748,11 @@ test-review/
     └── ...
 ```
 
-Нумерация не задаёт dependency order.
+Нумерация файлов не задаёт порядок выполнения зависимостей.
 
-`working/behavior-contracts.md` и `working/contract-verification.md` — semantic authority. `03-*` и `04-*` — human-readable projections.
+`working/behavior-contracts.md` и `working/contract-verification.md` содержат авторитетное техническое состояние. `03-*` и `04-*` являются человекочитаемыми проекциями этого состояния, а не новым источником истины.
 
-Различаются состояния:
+Отдельно различаются состояния:
 
 ```text
 NOT_APPLICABLE
@@ -699,27 +760,27 @@ NOT_VERIFIED
 VERIFIED_NO_MATERIAL_ISSUES
 ```
 
-Отсутствие применимого declared contract — это `NOT_APPLICABLE`, а не `NOT_VERIFIED`.
+Например, отсутствие применимого declared contract означает `NOT_APPLICABLE`, а не `NOT_VERIFIED`.
 
 ---
 
 ## Общие принципы доказательности
 
-**Сначала authority, потом verdict.** Если значимые источники противоречат друг другу и precedence не определён, результат остаётся unresolved.
+**Сначала authority, потом verdict.** Если значимые источники противоречат друг другу и не определено, какой из них нормативный, результат остаётся unresolved.
 
-**Claim scope <= evidence scope.** Узкая проверка даёт узкий вывод.
+**Ширина вывода не превышает ширину доказательств.** Узкая проверка даёт узкий вывод.
 
-**Completeness требует bounded accounting.** Случайная выборка не является доказательством полноты.
+**Полнота требует явного ограниченного учёта.** Случайная выборка не является доказательством полноты.
 
-**RF, BC, MAT, TM, GAP и CC не взаимозаменяемы.** Каждый identifier имеет собственную ответственность.
+**`RF-*`, `BC-*`, `MAT-*`, `TM-*`, `GAP-*` и `CC-*` не взаимозаменяемы.** У каждого идентификатора своя ответственность.
 
-**Projection не становится authority только потому, что выглядит красиво.** Human-readable документы выводятся из accepted technical state.
+**Пользовательский документ не становится authority только потому, что он написан позже или выглядит аккуратнее.** Человекочитаемые документы выводятся из принятого технического состояния.
 
 ---
 
-## Повторный запуск и freshness
+## Повторный запуск и актуальность
 
-`REVALIDATE` по умолчанию работает только с affected slice:
+`REVALIDATE` по умолчанию проверяет только затронутую область:
 
 ```text
 accepted baseline A
@@ -732,47 +793,54 @@ accepted baseline A
   -> preserved unaffected state
 ```
 
-`preserved` означает только отсутствие найденной зависимости, требующей fresh verification. Это не новый GREEN.
+`preserved` означает только то, что анализ влияния не обнаружил зависимости, требующей новой проверки. Это не новый `GREEN` и не повторное доказательство корректности.
 
-Если изменение системное, Skill может вернуть `FULL_REAUDIT_RECOMMENDED`, но не превращает `REVALIDATE` в `NEW` без решения пользователя.
+Если изменение оказалось системным, Skill может вернуть `FULL_REAUDIT_RECOMMENDED`, но не превращает `REVALIDATE` в `NEW` без решения пользователя.
 
 ---
 
 ## PROJECTION_REPAIR
 
-Этот режим предназначен только для presentation-level исправлений:
+Этот режим предназначен только для исправления представления уже принятого результата:
 
-- язык;
-- структура;
+- языка;
+- структуры;
 - Markdown;
 - Mermaid;
-- ссылки/cross-references;
-- таблицы;
-- навигация;
-- терминология;
-- устаревшая пользовательская проекция.
+- ссылок и cross-references;
+- таблиц;
+- навигации;
+- терминологии;
+- устаревшего пользовательского текста.
 
 Он не может менять:
 
-- BC semantics;
-- CC classification;
-- MAT accounting;
-- TM verdict;
-- GAP existence;
-- TASK semantic priority;
-- accepted findings/severity;
-- simulator scenario behavior;
-- E2E topology semantics.
+- семантику `BC-*`;
+- классификацию `CC-*`;
+- учёт `MAT-*`;
+- verdict `TM-*`;
+- существование `GAP-*`;
+- смысловой приоритет `TASK-*`;
+- принятые findings и severity;
+- поведение сценариев Service Simulator;
+- семантику E2E-топологии.
 
-Если semantic change необходим — `TECHNICAL_REVALIDATION_REQUIRED`.
+Если требуется техническое изменение, Skill должен вернуть `TECHNICAL_REVALIDATION_REQUIRED`.
 
 ---
 
-## Project Profile и dirty working tree
+## Project Profile и изменённое рабочее дерево
 
-Project Profile — локальная routing/estimation metadata, а не substantive architecture evidence. Он включает количество substantive tracked files, строки, символы, language footprint и отдельный учёт generated/vendor/build/binary material.
+Project Profile — локальные метаданные для маршрутизации и оценки объёма проекта, а не архитектурное доказательство.
 
-При dirty working tree рекомендуемый baseline — committed `HEAD`.
+Профиль включает:
+
+- количество существенных отслеживаемых Git файлов;
+- строки и символы;
+- распределение по языкам;
+- отдельный учёт generated, vendor/dependency, build и binary material.
+
+При изменённом рабочем дереве рекомендуемая воспроизводимая основа аудита — committed `HEAD`.
 
 ```text
 1. Audit committed HEAD only — recommended
@@ -780,37 +848,39 @@ Project Profile — локальная routing/estimation metadata, а не subs
 3. Stop
 ```
 
-`EPHEMERAL` должен сохранять deterministic fingerprint и не представляться как обычный reproducible Git commit baseline.
+Если пользователь сознательно выбирает `EPHEMERAL`, Skill сохраняет детерминированный fingerprint рабочего дерева. Такой baseline нельзя представлять как обычную воспроизводимую Git-ревизию.
 
 ---
 
-## Итоговый audit package
+## Итоговый пакет аудита
 
-По умолчанию:
+По умолчанию результаты сохраняются в:
 
 ```text
 docs/reviews/architecture-review/
 ├── 01-architecture-review.md
 ├── 02-authoritative-findings-ledger.md
-├── 03-target-architecture.md                    # optional
-├── 04-remediation-roadmap.md                    # optional
+├── 03-target-architecture.md                      # необязательный
+├── 04-remediation-roadmap.md                      # необязательный
 ├── test-review/
 │   ├── 00-test-assurance-summary.md
 │   ├── 01-test-assurance-map.md
-│   ├── 02-test-plan.md                          # optional
-│   ├── 03-behavior-contract-model.md            # optional
-│   ├── 04-contract-consistency-report.md        # optional
-│   ├── 05-test-environment-design.md            # optional
-│   ├── 06-service-simulator-spec.md              # optional
-│   ├── 07-service-simulator-implementation-plan.md # optional
-│   ├── 08-e2e-test-plan.md                       # optional
+│   ├── 02-test-plan.md                            # необязательный
+│   ├── 03-behavior-contract-model.md              # необязательный
+│   ├── 04-contract-consistency-report.md          # необязательный
+│   ├── 05-test-environment-design.md              # необязательный
+│   ├── 06-service-simulator-spec.md                # необязательный
+│   ├── 07-service-simulator-implementation-plan.md # необязательный
+│   ├── 08-e2e-test-plan.md                         # необязательный
 │   └── working/
 │       └── ... capability authority/evidence
 └── working/
     └── ... umbrella audit authority/evidence
 ```
 
-Финальные документы предназначены для человека: **что происходит → почему это важно → к чему приводит → что менять**. Internal IDs помогают трассировке, но не заменяют объяснение.
+Финальные документы предназначены для человека. Из них должно быть понятно: **что происходит → почему это важно → к чему приводит → что менять**.
+
+Внутренние идентификаторы помогают трассировке, но не должны заменять нормальное техническое объяснение.
 
 ---
 
@@ -818,15 +888,17 @@ docs/reviews/architecture-review/
 
 ## Codex, OpenCode и другие агенты с `~/.agents/skills`
 
+Клонируйте репозиторий в каталог пользовательских Skills:
+
 ```bash
 git clone \
   https://github.com/todkavodka/architecture-code-review.git \
   ~/.agents/skills/architecture-code-review
 ```
 
-После установки начните новую agent session, чтобы Skill был заново обнаружен.
+После установки начните новую сессию агента, чтобы он заново обнаружил Skill.
 
-Обновление:
+Обновление уже установленного Skill:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
@@ -834,21 +906,21 @@ git switch main
 git pull --ff-only
 ```
 
-Проверка установленной ревизии:
+Проверить установленную ревизию:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
 git rev-parse HEAD
 ```
 
-Для воспроизводимого historical release можно checkout конкретный tag, если он существует:
+Если для воспроизводимости используется конкретный выпуск, можно перейти на соответствующий tag, если он существует:
 
 ```bash
 git fetch --tags
 git checkout <release-tag>
 ```
 
-Вернуться на `main`:
+Вернуться на актуальный `main`:
 
 ```bash
 git switch main
@@ -865,7 +937,7 @@ git pull --ff-only
 Используй architecture-code-review для этого проекта.
 ```
 
-Skill сам обнаружит applicable previous audit и предложит Session Intent.
+Skill сам найдёт применимый предыдущий аудит, если он существует, и предложит подходящий Session Intent.
 
 ## Новый Architecture Review без Test Engineering
 
@@ -877,7 +949,7 @@ Architecture Review: STANDARD_FULL.
 Test Engineering: OFF.
 ```
 
-Максимальная глубина:
+Для максимальной глубины:
 
 ```text
 Используй architecture-code-review.
@@ -909,7 +981,7 @@ Test Engineering outputs:
 - Test Plan
 ```
 
-## Полный Test Engineering design
+## Полный набор Test Engineering
 
 ```text
 Используй architecture-code-review.
@@ -926,16 +998,16 @@ Test Engineering outputs:
 - E2E Test Plan
 ```
 
-Skill должен сам разрешить внутренние зависимости, но не включать невыбранные substantial outputs без необходимости.
+Skill должен сам подключить необходимые внутренние зависимости, но не должен включать необязательные пользовательские результаты без необходимости или явного выбора.
 
-## Только Contract Consistency Report поверх принятого Test Assurance
+## Добавить Contract Consistency Report к принятому Test Assurance
 
 ```text
 Используй architecture-code-review.
-EXTEND существующий принятый audit package.
+EXTEND существующий принятый пакет аудита.
 Добавь Test Engineering output:
 - Contract Consistency Report
-Не переоткрывай несвязанные принятые gates.
+Не переоткрывай несвязанные принятые этапы.
 ```
 
 ## Добавить Service Simulator Design
@@ -945,39 +1017,39 @@ EXTEND существующий принятый audit package.
 EXTEND существующий принятый Test Assurance.
 Добавь:
 - Service Simulator Design
-Переиспользуй accepted/fresh Behavior Contracts и Contract Verification.
+Переиспользуй принятые и актуальные Behavior Contracts и результаты Contract Verification.
 Не перезапускай весь Architecture Review.
 ```
 
-## Добавить E2E Plan без автоматического simulator
+## Добавить E2E Test Plan без автоматического Service Simulator
 
 ```text
 Используй architecture-code-review.
-EXTEND существующий принятый audit package.
+EXTEND существующий принятый пакет аудита.
 Добавь:
 - E2E Test Plan
-Не включай Service Simulator Design автоматически, если выбранная topology его не требует.
+Не включай Service Simulator Design автоматически, если выбранная топология его не требует.
 ```
 
-## RESUME
+## Продолжить незавершённый аудит (`RESUME`)
 
 ```text
 Используй architecture-code-review.
 RESUME существующий незавершённый аудит.
-Сначала reconcile INDEX, authority bindings, baseline и persisted Test Engineering outputs.
-Продолжи с первого незавершённого valid gate.
+Сначала проверь INDEX, authority bindings, baseline и сохранённый выбор Test Engineering outputs.
+Продолжи с первого незавершённого валидного gate.
 ```
 
-## USE_EXISTING
+## Использовать уже принятый аудит (`USE_EXISTING`)
 
 ```text
 Используй architecture-code-review.
 USE_EXISTING для текущего принятого аудита.
 Техническую работу заново не запускай.
-Используй только accepted/fresh/sufficiently-resolved dependency slice.
+Используй только принятую, актуальную и достаточно authority-resolved часть зависимостей.
 ```
 
-## REVALIDATE
+## Проверить проект после изменений (`REVALIDATE`)
 
 ```text
 Используй architecture-code-review.
@@ -986,31 +1058,31 @@ REVALIDATE предыдущий принятый аудит относитель
 Не инвалидируй все BC/TM/GAP/scenarios автоматически только из-за изменения HEAD.
 ```
 
-## PROJECTION_REPAIR
+## Исправить только финальные документы (`PROJECTION_REPAIR`)
 
 ```text
 Используй architecture-code-review.
-PROJECTION_REPAIR принятого audit package.
+PROJECTION_REPAIR принятого пакета аудита.
 Исправь только пользовательские Markdown/Mermaid/links/wording.
 Если нужно изменить technical semantics, остановись с TECHNICAL_REVALIDATION_REQUIRED.
 ```
 
-## Dirty working tree
+## Изменённое рабочее дерево
 
-Проверить только reproducible committed baseline:
+Проверить только воспроизводимую зафиксированную ревизию:
 
 ```text
 Используй architecture-code-review.
 Проверяй только committed HEAD.
-Незакоммиченные изменения не включай в technical conclusions.
+Незакоммиченные изменения не включай в технические выводы.
 ```
 
-Включить текущее рабочее дерево сознательно:
+Или сознательно включить текущие локальные изменения:
 
 ```text
 Используй architecture-code-review.
 Включи текущее рабочее дерево как EPHEMERAL snapshot.
-Я понимаю, что это не обычный reproducible commit baseline.
+Я понимаю, что это не обычный воспроизводимый commit baseline.
 ```
 
 ---
@@ -1068,32 +1140,32 @@ PROJECTION_REPAIR принятого audit package.
         └── plans/
 ```
 
-`SKILL.md` остаётся компактным umbrella orchestrator.
+`SKILL.md` остаётся компактным общим оркестратором.
 
-Detailed Test Engineering semantics принадлежат `capabilities/test-review/references/test-engineering-contract.md`.
+Подробная семантика Test Engineering находится в `capabilities/test-review/references/test-engineering-contract.md`.
 
-Session/startup policy принадлежит `references/session-orchestration.md`.
+Правила запуска и выбора Session Intent находятся в `references/session-orchestration.md`.
 
-Persisted capability state и dependency orchestration принадлежат `references/review-modes-and-orchestration.md`.
+Сохраняемое состояние capability и граф зависимостей описаны в `references/review-modes-and-orchestration.md`.
 
-Freshness/impact-driven revalidation принадлежит `references/revalidation-and-freshness.md`.
+Правила актуальности и точечной повторной проверки находятся в `references/revalidation-and-freshness.md`.
 
 ---
 
 # Проверка изменений Skill
 
-Изменение Markdown-инструкций Skill считается изменением поведения.
+Изменение Markdown-инструкций Skill считается изменением поведения, даже если технически production code не меняется.
 
-Поэтому существенные изменения проходят дисциплину:
+Поэтому существенные изменения проходят последовательность:
 
 ```text
-design
-  -> implementation plan
+проектирование
+  -> план реализации
   -> RED pressure contract
-  -> implementation
-  -> fresh independent pressure execution
-  -> independent review
-  -> targeted remediation
+  -> реализация
+  -> свежий независимый pressure run
+  -> независимый review
+  -> точечное исправление замечаний
   -> fresh re-review
   -> promotion readiness
   -> merge
@@ -1102,32 +1174,38 @@ design
 Для Test Engineering в репозитории есть отдельные pressure scenarios:
 
 ```text
-PS-81  BC vs MAT/RF/GAP/TM boundary
-PS-82  contract authority / no automatic Swagger winner
-PS-83  contract drift vs assurance gap
-PS-84  minimum dependency slice
-PS-85  impact-driven revalidation
-PS-86  Service Simulator / E2E boundaries
-PS-87  persisted independent output selection
+PS-81  границы BC относительно MAT/RF/GAP/TM
+PS-82  authority контракта и запрет автоматического приоритета Swagger
+PS-83  различие между contract drift и assurance gap
+PS-84  минимально необходимая цепочка зависимостей
+PS-85  точечная повторная проверка по влиянию изменений
+PS-86  границы Service Simulator и E2E
+PS-87  сохранение независимого выбора результатов
 ```
 
-Validation evidence revision-bound. Нельзя считать старый GREEN вечным доказательством для любого будущего `main`.
+Результат проверки всегда относится к конкретной ревизии и конкретному сценарию. Старый `GREEN` нельзя считать вечным доказательством для любого будущего `main`.
 
-Статическая проверка contract text и fresh independent agent execution — разные виды evidence и должны отмечаться отдельно.
+Статическая проверка текста контрактов и свежий независимый запуск агента — разные виды доказательств и должны фиксироваться отдельно.
 
-Для этого Markdown Skill application/coordinator runtime может быть `NOT_APPLICABLE`; это не мешает выполнять fresh agent-level behavioral pressure scenarios.
+У этого Markdown Skill может не существовать отдельного исполняемого application/coordinator runtime. В таком случае runtime-проверка имеет состояние `NOT_APPLICABLE`, но это не мешает выполнять реальные agent-level pressure scenarios.
 
 ---
 
 # Язык итоговых документов
 
-Пользовательский язык следует языку текущего запроса пользователя, если он явно не попросил другой.
+Пользовательский язык следует языку текущего запроса, если пользователь явно не выбрал другой.
 
-Для русскоязычного пользователя финальные документы должны быть нормальным связным русским техническим текстом.
+Для русскоязычного пользователя финальные документы должны быть написаны связным русским техническим языком. Английские слова не следует использовать там, где есть естественный русский эквивалент.
 
-Не переводятся exact identifiers, paths, API/IPC/protocol names, formal status tokens и имена файлов.
+При этом не переводятся:
 
-Internal ledger/handoff shorthand используется для traceability, но не должен превращать финальный отчёт в agent scratchpad.
+- точные идентификаторы и status tokens;
+- имена файлов и пути;
+- названия API, IPC и протоколов;
+- названия формальных режимов и сущностей, если они являются частью контракта;
+- имена символов и объектов исходного кода.
+
+Внутренние сокращения и записи ledger/handoff допустимы для трассировки, но не должны превращать финальный отчёт в черновик агента.
 
 ---
 
