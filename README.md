@@ -12,7 +12,134 @@
 
 Skill подходит как для аудита всего репозитория, так и для отдельной подсистемы.
 
-## Что именно он проверяет
+## Как начинается работа
+
+Начиная с Orchestrator v0.3, запуск Skill начинается не с безусловного нового аудита и не с выбора глубины. Сначала Session Orchestrator определяет состояние проекта и уже существующих audit packages.
+
+Упрощённо старт выглядит так:
+
+```text
+repository identity + baseline + dirty state
+  -> previous audit discovery
+  -> authority / lineage reconciliation
+  -> Project Profile
+  -> Session Intent
+  -> Review Suite Configuration
+  -> только затем substantive review work
+```
+
+Это важно для повторных запусков: один и тот же проект не должен автоматически проходить полный аудит заново только потому, что Skill был вызван ещё раз.
+
+### Session Intent
+
+Пользователю доступны ровно пять first-class Session Intent:
+
+- `USE_EXISTING` — использовать уже принятый аудит для того же committed baseline без технического rerun;
+- `NEW` — явно начать новый полный bounded audit;
+- `RESUME` — продолжить незавершённый аудит после проверки authority, revision bindings и freshness;
+- `REVALIDATE` — проверить изменения относительно принятого baseline и перечитать только затронутые evidence slices;
+- `EXTEND` — расширить assurance scope, например добавить Test Review, Target Architecture или Roadmap, не перезапуская несвязанные принятые части.
+
+Типичные рекомендации:
+
+```text
+нет предыдущего audit package       -> NEW
+IN_PROGRESS                         -> RESUME
+COMPLETE + тот же committed HEAD    -> USE_EXISTING
+COMPLETE + изменившийся HEAD        -> REVALIDATE
+новая capability / endpoint         -> EXTEND
+```
+
+Если старый `IN_PROGRESS` audit существует, но baseline изменился, Skill сначала выполняет reconciliation. Это не отдельный шестой Session Intent: `RESUME_WITH_RECONCILIATION` — только flow внутри `RESUME`.
+
+Если найдено несколько audit packages, выбор строится по repository identity, authority/status и lineage/ancestry. Timestamp сам по себе не является достаточным основанием выбрать «самый новый» audit.
+
+### Review Suite Configuration для `NEW`
+
+Для нового аудита пользователь отдельно выбирает архитектурную глубину, архитектурный endpoint и Test Review.
+
+Архитектурная глубина:
+
+```text
+STANDARD_FULL
+FORENSIC
+```
+
+Архитектурный endpoint:
+
+```text
+REVIEW_ONLY
+REVIEW_PLUS_TARGET_ARCHITECTURE
+REVIEW_PLUS_TARGET_AND_ROADMAP
+```
+
+Test Review всегда виден отдельным выбором:
+
+```text
+OFF
+REVIEW_ONLY
+REVIEW_PLUS_TEST_PLAN
+```
+
+Skill может рекомендовать `FORENSIC` или Test Review после лёгкой reconnaissance, но не должен включать их молча. Stack addenda остаются отдельными технологическими линзами и не являются capabilities.
+
+### Повторный запуск не означает повторный аудит
+
+`REVALIDATE` по умолчанию работает по изменённой области, а не по всему репозиторию:
+
+```text
+previous baseline A
+  -> current baseline B
+  -> change inventory
+  -> impact analysis
+  -> LOCAL | BOUNDARY | SYSTEMIC
+  -> minimum dependency slice
+  -> targeted fresh evidence
+  -> revalidation / adjudication
+  -> delta reconciliation
+```
+
+`LOCAL` означает локальное изменение без пересечения существенных контрактов. `BOUNDARY` затрагивает API, auth, persistence, lifecycle, concurrency, ownership, IPC или другую архитектурную границу и требует расширить только соответствующий As-Built/evidence slice. `SYSTEMIC` означает, что изменение затронуло фундаментальную архитектурную модель.
+
+Даже при `SYSTEMIC` Skill не должен сам превращать `REVALIDATE` в новый полный аудит. Он возвращает `FULL_REAUDIT_RECOMMENDED`, а решение остаётся за пользователем.
+
+Если для корректного решения не хватает материала, используется `CONTEXT_EXPANSION_REQUIRED` с конкретной причиной и точным предложением, какой dependency slice нужно дочитать. Diff, список изменённых файлов и Project Profile помогают выбрать evidence, но не заменяют substantive proof.
+
+Сохранённая область (`preserved`) означает только то, что impact analysis не обнаружил зависимости, требующей свежей проверки. Это не новая верификация и не новый GREEN.
+
+### Project Profile
+
+При старте Skill собирает дешёвый локальный Project Profile для маршрутизации и оценки объёма проекта. Это metadata, а не архитектурное доказательство.
+
+Профиль включает:
+
+- количество substantive tracked files;
+- строки;
+- символы;
+- языковой footprint;
+- отдельные категории generated, vendor/dependency, build artifacts и binaries.
+
+Неизвестный текстовый тип учитывается как `Other Text`. Профиль считается локально и не требует отправлять содержимое каждого файла в LLM-контекст только ради статистики.
+
+Project Profile versioned и привязан к baseline/revision. Старый audit package без профиля может получить `METADATA_BACKFILL` без открытия уже принятых технических gates. Если исторический Git baseline недоступен, фиксируется `HISTORICAL_PROFILE_UNAVAILABLE`: текущий профиль всё равно может быть собран, а технический аудит не становится недействительным только из-за отсутствия старой статистики.
+
+При `REVALIDATE` профили старого и нового baseline могут использоваться для компактной delta по files, lines, characters и languages.
+
+### Dirty working tree
+
+Если рабочее дерево изменено, рекомендуемый reproducible baseline — точный committed `HEAD`.
+
+Skill показывает явный выбор:
+
+```text
+1. Audit committed HEAD only — recommended
+2. Include working-tree changes as EPHEMERAL snapshot
+3. Stop
+```
+
+`EPHEMERAL` фиксирует commit, baseline type и детерминированный `working_tree_snapshot` с версией алгоритма. Такой baseline не должен представляться как обычная воспроизводимая Git-ревизия.
+
+## Что именно проверяет Architecture Review
 
 В зависимости от проекта аудит охватывает:
 
@@ -34,7 +161,7 @@ Ansible здесь именно stack addendum, а не отдельная capab
 
 ## Чем этот подход отличается от обычного code review
 
-Обычный ревью легко скатывается в набор локальных замечаний: большой файл, `TODO`, mock, `unwrap`, широкая функция, отсутствие теста, странный `clone`, неидеальная структура каталогов.
+Обычный review легко скатывается в набор локальных замечаний: большой файл, `TODO`, mock, `unwrap`, широкая функция, отсутствие теста, странный `clone`, неидеальная структура каталогов.
 
 Само по себе это ещё не дефект.
 
@@ -58,9 +185,9 @@ severity
 
 Для серьёзных security-выводов недостаточно написать «это небезопасно». Нужна правдоподобная attack chain: кто атакует, через какую поверхность, при каких предпосылках и к какому результату это приводит.
 
-## Как устроен аудит
+## Как устроен новый полный аудит
 
-Базовый поток выглядит так:
+После Start Gate и выбора `NEW` базовый архитектурный поток выглядит так:
 
 ```text
 baseline
@@ -78,7 +205,7 @@ baseline
   -> editorial review / correction / re-review
 ```
 
-### 1. Сначала восстанавливается As-Built Architecture
+### 1. As-Built Architecture
 
 До поиска проблем агент должен понять фактическую систему: основные компоненты, процессы, владельцев состояния, ключевые границы, потоки данных и важные сценарии выполнения.
 
@@ -86,21 +213,21 @@ baseline
 
 As-Built проходит отдельную независимую проверку. Автор архитектурной реконструкции не может сам объявить её принятой.
 
-### 2. Затем проводится discovery
+### 2. Discovery
 
 После принятия As-Built исследуются значимые области: lifecycle, ownership, concurrency, persistence, API/IPC-контракты, security, error handling и другие применимые механизмы.
 
 Discovery создаёт кандидатов на проблемы, но ещё не окончательные findings.
 
-### 3. Полнота проверяется отдельно
+### 3. Discovery Coverage
 
 Полнота аудита не измеряется количеством просмотренных файлов, найденных замечаний или зелёных тестов.
 
 Перед общим выводом формируется ограниченный перечень существенных областей и механизмов в заявленном scope. Для каждого должно быть понятно, чем он покрыт, почему неприменим либо почему остался неизвестным.
 
-Отдельный Independent Coverage Review проверяет эту матрицу. Если есть пробел, выполняется точечное доисследование, а не автоматический перезапуск всего аудита.
+Independent Coverage Review проверяет эту матрицу отдельно. Если есть пробел, выполняется точечное доисследование, а не автоматический перезапуск всего аудита.
 
-### 4. Каждый кандидат независимо проверяется
+### 4. Independent candidate verification
 
 Кандидат должен выдержать проверку на достижимость, фактическое владение, существующие guards, альтернативные пути и конкретное последствие.
 
@@ -108,7 +235,7 @@ Discovery создаёт кандидатов на проблемы, но ещё
 
 Только после этой стадии назначается severity.
 
-## Два режима глубины
+## Глубина Architecture Review
 
 ### `STANDARD_FULL`
 
@@ -122,7 +249,7 @@ Discovery создаёт кандидатов на проблемы, но ещё
 
 Skill может рекомендовать `FORENSIC`, но не должен выбирать его молча.
 
-## Какой результат нужен
+## Architecture Review endpoint
 
 Глубина аудита и итоговый результат выбираются независимо.
 
@@ -146,9 +273,9 @@ Architecture Review — основной umbrella workflow. **Test Review** по
 
 Её можно:
 
-- выбрать сразу;
+- выбрать сразу в Review Suite Configuration;
 - подключить по рекомендации discovery, если в проекте есть существенная поверхность автоматизированных тестов;
-- добавить позже, возобновив уже начатый аудит через `working/INDEX.md`.
+- добавить позже через `EXTEND`.
 
 Test Review отвечает не на вопрос «тесты зелёные или нет», а на более строгий вопрос:
 
@@ -160,73 +287,7 @@ Endpoint Test Review выбирается независимо от архите
 
 Подключение Test Review позже не означает автоматический перезапуск уже принятых частей архитектурного аудита. Capability получает только тот объём актуального контекста, который нужен для её собственных решений.
 
-## Повторный запуск и Session Intent
-
-Повторный запуск Skill сначала сверяет repository identity, состояние и lineage
-предыдущего audit package с выбранным baseline. Он не означает автоматический
-повтор всего аудита. Пользователю доступны ровно пять Session Intent:
-
-- `USE_EXISTING` — принятый аудит уже соответствует тому же committed baseline;
-- `NEW` — намеренно начать новый полный ограниченный аудит;
-- `RESUME` — продолжить незавершённый аудит после reconciliation authority и
-  freshness; при изменившемся baseline сначала выполняется reconciliation;
-- `REVALIDATE` — проверить изменения относительно принятого baseline и заново
-  прочитать только затронутые evidence slices;
-- `EXTEND` — добавить Test Review, Target Architecture или Roadmap без повтора
-  несвязанных принятых частей.
-
-По умолчанию нет предыдущего аудита означает `NEW`, `IN_PROGRESS` означает
-`RESUME`, а `COMPLETE` на том же HEAD — `USE_EXISTING`. Изменившийся committed
-HEAD обычно означает targeted `REVALIDATE`, а не полный rerun. Если затронута
-системная архитектурная модель, Skill может показать
-`FULL_REAUDIT_RECOMMENDED`, но полный аудит не начинается без явного решения
-пользователя. `EXTEND` показывает только доступные additions.
-
-При `NEW` Test Review всегда виден в стартовой конфигурации:
-
-```text
-Test Review: OFF | REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN
-```
-
-Результат лёгкой reconnaissance может быть рекомендацией, но capability нельзя
-включить молча. Stack addenda по-прежнему являются отдельными технологическими
-линзами, а не capabilities.
-
-### Project Profile и изменения проекта
-
-Project Profile — дешёвая локальная metadata для маршрутизации и оценки, а не
-доказательство архитектурной materiality. Он показывает для substantive tracked
-files количество файлов, строк, символов и языковой footprint. Generated,
-vendor/dependency, build artifact и binary категории считаются отдельно и не
-загрязняют основные totals; неизвестный текстовый тип попадает в `Other Text`.
-Профиль вычисляется локально и не требует передавать содержимое каждого файла в
-контекст модели.
-
-В старом v0.2 audit package профиль можно сделать через `METADATA_BACKFILL` или
-migration без открытия принятых technical gates. При `REVALIDATE`, если доступны
-оба профиля, показывается delta по files, lines, characters и языковому footprint.
-Если исторический commit недоступен, фиксируется
-`HISTORICAL_PROFILE_UNAVAILABLE`: текущий профиль остаётся пригодным, а
-технический аудит не становится недействительным только из-за отсутствия этой
-metadata.
-
-Если рабочее дерево изменено, рекомендуемый baseline — точный committed `HEAD`;
-незакоммиченные файлы в него не входят, хотя dirty-state записывается. Явные
-варианты запуска:
-
-```text
-1. Audit committed HEAD only — recommended
-2. Include working-tree changes as EPHEMERAL snapshot
-3. Stop
-```
-
-`EPHEMERAL` записывает commit, baseline type и детерминированный fingerprint
-отсортированных путей, статуса tracked/untracked и digest содержимого. Это не
-эквивалент воспроизводимого commit baseline.
-
-## Общие правила для всех capabilities
-
-Umbrella review suite использует несколько общих assurance-принципов.
+## Общие assurance-принципы
 
 **Сначала authority, потом verdict.** Если два значимых источника противоречат друг другу и непонятно, какой из них имеет приоритет, нельзя произвольно выбрать более свежий, удобный или похожий на истину. До разрешения authority-конфликта результат остаётся `UNKNOWN / AUTHORITY_UNRESOLVED`.
 
@@ -238,9 +299,9 @@ Umbrella review suite использует несколько общих assuran
 
 Эти правила зафиксированы в `references/shared-assurance-principles.md`.
 
-## Состояние длинного ревью
+## Состояние длинного review
 
-Для больших аудитов используется `working/INDEX.md`. Это не просто список задач, а сохраняемое состояние workflow: что принято, что требует проверки, что устарело и что блокирует следующий этап.
+Для больших аудитов используется `working/INDEX.md`. Это сохраняемое состояние workflow: что принято, что требует проверки, что устарело и что блокирует следующий этап.
 
 Типичные состояния:
 
@@ -258,7 +319,7 @@ NOT_APPLICABLE
 
 Артефакт со статусом `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED` или `BLOCKED` нельзя использовать дальше как уже подтверждённую истину.
 
-Сводка или handoff также не получает автоматический приоритет над исходным техническим артефактом: перед использованием проверяется её свежесть и привязка к актуальной ревизии.
+`INDEX.md` — workflow projection/state authority, но не substantive technical authority. Сводка или handoff также не получает автоматический приоритет над исходным техническим артефактом: перед использованием проверяется её свежесть и привязка к актуальной ревизии.
 
 ## Итоговые артефакты
 
@@ -332,27 +393,43 @@ git pull --ff-only
 
 Откройте новую сессию агента в репозитории, который нужно проверить, и явно попросите использовать skill.
 
-Например:
+Минимальный запрос:
 
 ```text
-Используй architecture-code-review и проведи полный архитектурный аудит этого проекта.
+Используй architecture-code-review для этого проекта.
 ```
 
-Если нужен не только аудит:
+Дальше Skill сам проверит наличие предыдущего audit package и предложит подходящий Session Intent.
 
-```text
-Используй architecture-code-review.
-Нужен полный аудит, целевая архитектура и план исправлений.
-```
-
-Для Test Review можно сразу уточнить требование:
+Если вы точно хотите новый полный аудит, можно сказать явно:
 
 ```text
 Используй architecture-code-review.
-Проведи архитектурный аудит и отдельно проверь, насколько существующие тесты действительно подтверждают существенные контракты системы.
+Начни NEW аудит этого проекта.
 ```
 
-Перед глубоким исследованием skill сначала предложит режим аудита и уточнит требуемый endpoint.
+Если нужен полный аудит с целевой архитектурой и roadmap:
+
+```text
+Используй architecture-code-review.
+Начни NEW аудит. Нужны Architecture Review, Target Architecture и remediation roadmap.
+```
+
+Если нужно проверить, что изменилось после уже принятого аудита:
+
+```text
+Используй architecture-code-review.
+Проверь предыдущий audit package и предложи REVALIDATE для текущего HEAD.
+```
+
+Если хочется добавить Test Review к существующему аудиту:
+
+```text
+Используй architecture-code-review.
+EXTEND существующий аудит: добавь Test Review.
+```
+
+Даже если prompt заранее подсказывает желаемое направление, выбранный Session Intent и Review Suite Configuration должны быть явно reconciled и записаны в `working/INDEX.md`.
 
 ## Структура репозитория
 
@@ -360,11 +437,12 @@ git pull --ff-only
 .
 ├── README.md
 ├── LICENSE
-├── SKILL.md                         # основной orchestrator
+├── SKILL.md                         # компактный umbrella orchestrator
 ├── capabilities/
 │   └── test-review/
 │       └── SKILL.md                 # методология Test Review
 ├── references/
+│   ├── session-orchestration.md     # Start Gate, Session Intent, Project Profile
 │   ├── review-modes-and-orchestration.md
 │   ├── revalidation-and-freshness.md
 │   ├── shared-assurance-principles.md
@@ -393,19 +471,21 @@ git pull --ff-only
     └── superpowers/                  # design и implementation-документы
 ```
 
-`SKILL.md` намеренно остаётся компактным orchestrator. Подробная методология разнесена по authoritative reference-файлам и capabilities, чтобы основной entrypoint не превращался в монолит.
+`SKILL.md` намеренно остаётся компактным orchestrator. Startup/session policy живёт в `references/session-orchestration.md`, execution workflow и capability state — в `references/review-modes-and-orchestration.md`, а freshness/project-change evidence semantics — в `references/revalidation-and-freshness.md`.
 
 ## О validation
 
 В `tests/` хранятся pressure scenarios и записи отдельных validation-проходов. Они нужны для проверки конкретных изменений методологии и поведения агента.
 
-Важно: validation record относится к той ревизии и тому сценарию, для которых он был получен. Его нельзя автоматически трактовать как вечное доказательство для любого будущего `main`.
+Validation record относится к той ревизии и тому сценарию, для которых он был получен. Его нельзя автоматически трактовать как вечное доказательство для любого будущего `main`.
 
-Поэтому README намеренно не публикует одно общее число вроде «N/N scenarios PASS» как универсальный текущий статус всего skill. Для проверки конкретного изменения нужно смотреть соответствующий validation record и его revision binding.
+README намеренно не публикует одно общее число вроде «N/N scenarios PASS» как универсальный текущий статус всего Skill. Для проверки конкретного изменения нужно смотреть соответствующий validation record и его revision binding.
+
+Если executable coordinator/collector отсутствует, runtime pressure result может оставаться `INCONCLUSIVE`. Static/contract verification в таком случае не должен называться runtime GREEN.
 
 ## Разработка
 
-Изменение инструкций skill считается изменением поведения, даже если технически это Markdown.
+Изменение инструкций Skill считается изменением поведения, даже если технически это Markdown.
 
 Для существенных изменений используется дисциплина:
 
