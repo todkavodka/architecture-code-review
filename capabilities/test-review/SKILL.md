@@ -7,6 +7,14 @@ description: Use when assessing whether an existing software test suite actually
 
 Core question: which material system contracts are actually supported by executable evidence, which are only partly supported, which are not supported, and which evidence may mislead the reviewer?
 
+## User-facing language
+
+When Test Review is attached to `architecture-code-review`, inherit the umbrella Skill's user-facing language contract.
+
+When invoked standalone, use the language of the user's current substantive request unless the user explicitly asks for another language. Menus, questions, recommendations, explanations, progress/status messages, and final user-facing narrative all use that language consistently.
+
+Keep formal identifiers, status tokens, exact code identifiers, paths, API/IPC names, and contract field names unchanged. A formal token may be followed by a natural explanation in the user's language. Do not switch to English merely because this Skill document is written in English, and do not translate canonical tokens into localized substitutes.
+
 ## Assurance completeness gate
 
 Before making an overall test-assurance, test-system-quality, or release-readiness claim, establish:
