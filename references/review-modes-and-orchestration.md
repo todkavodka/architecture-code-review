@@ -248,6 +248,12 @@ For Test Engineering, `outputs` is the persisted configuration authority; the
 legacy `endpoint` is retained only for backward-compatible Test Review packages
 and must not be used as the sole output selection. When normalizing legacy state:
 
+`NEW` writes the user's independent Test Engineering selection directly to
+`outputs`. `RESUME`, `EXTEND`, `USE_EXISTING`, and `REVALIDATE` read that
+persisted independent selection; `EXTEND` adds only outputs explicitly
+requested for the extension. The legacy endpoint is not the primary `NEW` UI or
+source of truth.
+
 ```text
 REVIEW_ONLY
   → test_assurance=true; every optional output=false

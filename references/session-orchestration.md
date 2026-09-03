@@ -94,14 +94,30 @@ Architecture Review
   depth: STANDARD_FULL | FORENSIC
   endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
 
-Capabilities
-  Test Review: OFF | REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN
+Test Engineering
+  OFF
+  or independent output selection:
+    Test Assurance: required core
+    Test Plan: optional
+    Contract Consistency Report: optional
+    Test Environment Design: optional
+    Service Simulator Design: optional
+    Service Simulator Implementation Plan: optional
+    E2E Test Plan: optional
 
 Stack Addenda
   detected automatically; confirmed before substantive use
 ```
 
-Test Review is a visible capability choice. Lightweight reconnaissance may recommend it when a material automated-test surface exists, but it must never be silently enabled. Stack addenda are lenses, not capabilities. `RESUME` reuses reconciled persisted configuration by default; `REVALIDATE` shows the previous suite as default; `EXTEND` shows only additions. `PROJECTION_REPAIR` reuses the accepted suite only to locate and constrain the projections being repaired; it does not reopen configuration choices by default.
+Test Engineering is a separate startup choice from Architecture Review. When it
+is enabled, `Test Assurance` is the required core and each other listed output
+is selected independently. Lightweight reconnaissance may recommend Test
+Engineering when a material automated-test surface exists, but it must never be
+silently enabled. Stack addenda are lenses, not capabilities. `RESUME` reuses
+reconciled persisted configuration by default; `REVALIDATE` shows the previous
+suite as default; `EXTEND` shows only additions. `PROJECTION_REPAIR` reuses the
+accepted suite only to locate and constrain the projections being repaired; it
+does not reopen configuration choices by default.
 
 When Test Review is selected, its optional Test Engineering outputs are
 persisted as independent booleans, never as a compound mode:
@@ -122,7 +138,10 @@ Verification is automatic when materially applicable. `EXTEND` and
 `REVALIDATE` reuse only the minimum accepted, fresh dependency slice; they do
 not restart unrelated accepted stages.
 
-For legacy Test Review configuration, normalize only the existing endpoint:
+For `NEW`, persist the selected Test Engineering outputs directly as the
+independent `outputs` fields. Do not encode a new selection as a legacy
+endpoint. Legacy Test Review configuration is input for old persisted packages
+only; normalize only the existing endpoint:
 
 ```text
 REVIEW_ONLY → test_assurance=true; all optional outputs=false
