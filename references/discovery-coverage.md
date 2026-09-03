@@ -10,7 +10,7 @@
 
 ## 1. Core invariant
 
-Количество и критичность найденных замечаний не являются доказательством полноты аудита.
+Количество и критичность найденных замечаний не являются доказательством полноты аудита. Это architecture-review реализация общего bounded material accounting принципа из `shared-assurance-principles.md`; она не заменяет и не поглощает отдельный bounded target universe Test Review.
 
 Полнота discovery доказывается:
 

@@ -1,62 +1,65 @@
 # Architecture Code Review Skill
 
-A reusable agent skill for evidence-first architecture and code reviews of existing software systems.
+Переиспользуемый agent skill для evidence-first (сначала доказательства) архитектурного и кодового ревью существующих программных систем.
 
-Instead of producing a lint-style list of smells, the skill reconstructs how the system actually works, traces ownership and lifecycle, verifies candidate findings independently, separates root causes from projections, and only then assigns severity and recommends remediation.
+Skill не превращает ревью в список запахов кода. Он помогает восстановить фактическую архитектуру системы, проследить владение состоянием и lifecycle, независимо проверить кандидатов на проблемы, отделить корневые причины от их проявлений и только после этого оценить severity и предложить направление исправления.
 
-The default final narrative is written in Russian technical prose, while exact code identifiers, protocol names, paths, API/IPC names, and formal status tokens remain unchanged.
+Итоговый пользовательский отчёт по умолчанию пишется связным русским техническим текстом. Точные идентификаторы кода, названия протоколов, пути, API/IPC-имена и формальные status markers сохраняются без перевода.
 
-## What it reviews
+## Что проверяет Skill
 
-The skill is intended for whole-project or subsystem reviews where one or more of these areas matter:
+Используйте его для ревью всего проекта или отдельной подсистемы, когда существенны:
 
-- architecture and responsibility boundaries;
-- state and resource ownership;
-- startup, steady-state, recovery, reconnect, cancellation, and shutdown lifecycle;
-- concurrency and background work;
-- IPC/API/native boundary contracts;
-- security and trust boundaries;
-- configuration and persistence;
-- error contracts and observability;
-- maintainability and testability;
-- target architecture and remediation planning when explicitly requested.
+- границы ответственности и архитектура;
+- владение состоянием и ресурсами;
+- lifecycle запуска, штатной работы, восстановления, reconnect, cancellation и shutdown;
+- concurrency и фоновые операции;
+- контракты IPC/API/native boundaries;
+- security и trust boundaries;
+- configuration и persistence;
+- контракты ошибок и observability;
+- maintainability и testability;
+- Target Architecture и remediation roadmap, если они явно запрошены.
 
-Technology-specific review lenses are included for:
+В репозитории есть technology-specific lenses для:
 
 - Tauri;
 - Electron;
 - React;
 - Django;
 - FastAPI;
-- Litestar.
+- Litestar;
+- Ansible (stack addendum).
 
-The common review method is technology-independent. Stack files add checks; they do not replace the core workflow.
+Общий метод ревью technology-independent. Stack addenda добавляют вопросы для сбора evidence, но не заменяют основной workflow.
 
-## Key v0.2 capabilities
+Ansible подключается через обычный механизм stack addenda. Это не отдельная capability, endpoint, группа артефактов или lifecycle.
 
-Version 0.2 introduces a gated multi-pass review workflow:
+## Основные возможности v0.2
 
-- explicit `STANDARD_FULL` and `FORENSIC` depth selection;
-- independent selection of the requested endpoint;
-- detailed As-Built Architecture reconstruction before thematic findings;
-- mandatory independent As-Built review in both modes;
-- ownership matrices, invariants, and adversarial scenarios;
-- explicit IPC/API/native boundary-contract analysis;
-- candidate findings that must be independently verified before becoming authoritative;
-- root/projection/SER separation before severity assignment;
-- evidence-backed security attack-chain requirements for serious security claims;
-- persistent `working/INDEX.md` workflow state and resumable agent handoffs;
-- architecture-correction and `REVALIDATION_REQUIRED` handling;
-- optional Target Architecture with an independent feasibility review;
-- optional dependency-driven remediation roadmap with execution-consistency review;
-- fresh-context final editorial review that cannot silently change technical meaning;
-- chunked document writing and recovery under context pressure.
+Версия 0.2 вводит управляемый многоступенчатый workflow:
 
-## Installation
+- явный выбор глубины `STANDARD_FULL` или `FORENSIC`;
+- независимый выбор требуемого endpoint;
+- подробная реконструкция As-Built Architecture до поиска тематических проблем;
+- обязательное независимое ревью As-Built в обоих режимах;
+- матрицы владения, инвариантов и неблагоприятных сценариев;
+- отдельный анализ контрактов IPC/API/native boundaries;
+- независимая проверка кандидатов до превращения их в authoritative findings;
+- разделение root, projection и SER до назначения severity;
+- требование evidence-backed attack chain для серьёзных security-утверждений;
+- постоянное состояние workflow в `working/INDEX.md` и возобновляемые handoff-артефакты;
+- обработка архитектурных corrections и `REVALIDATION_REQUIRED`;
+- опциональные Target Architecture и независимое ревью её реализуемости;
+- опциональный remediation roadmap с проверкой согласованности порядка выполнения;
+- свежий editorial review, который не может незаметно изменить технический смысл;
+- chunked writing и восстановление работы при ограничении контекста.
 
-### OpenCode / Codex and other agents using `~/.agents/skills`
+## Установка
 
-Clone the repository directly into your personal skills directory:
+### OpenCode / Codex и другие агенты, использующие `~/.agents/skills`
+
+Клонируйте репозиторий непосредственно в каталог персональных skills:
 
 ```bash
 git clone \
@@ -64,9 +67,9 @@ git clone \
   ~/.agents/skills/architecture-code-review
 ```
 
-Then start a new agent session so the installed skill is discovered from disk.
+Затем начните новую сессию агента, чтобы Skill был обнаружен с диска.
 
-If the directory already exists, update it instead of cloning again:
+Если каталог уже существует, обновите его вместо повторного клонирования:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
@@ -74,16 +77,16 @@ git switch main
 git pull --ff-only
 ```
 
-Verify the installed revision:
+Проверьте установленную ревизию:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
 git rev-parse HEAD
 ```
 
-### Install a specific released version
+### Установка конкретной опубликованной версии
 
-After a release tag is available, pin the installation to that version:
+Когда появится release tag, для воспроизводимости можно закрепить установку на нём:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
@@ -91,75 +94,92 @@ git fetch --tags
 git checkout v0.2.0
 ```
 
-To return to the latest production version later:
+Чтобы позже вернуться к последней production-версии:
 
 ```bash
 git switch main
 git pull --ff-only
 ```
 
-## How to use
+## Использование
 
-Start a new agent session in the repository you want to review and ask it to use the skill explicitly.
-
-For example:
+Начните новую сессию агента в репозитории, который хотите проверить, и явно попросите использовать Skill:
 
 ```text
 Use architecture-code-review to perform a full architecture review of this repository.
 ```
 
-Or in Russian:
+Или по-русски:
 
 ```text
 Используй architecture-code-review и проведи полный архитектурный аудит этого проекта.
 ```
 
-You can also state the desired result immediately:
+Результат можно указать сразу:
 
 ```text
 Используй architecture-code-review.
 Нужен полный аудит плюс целевая архитектура и план исправлений.
 ```
 
-The skill should not immediately start a deep review. Its Start Gate first separates two decisions: review depth and requested final result.
+Skill не должен сразу начинать глубокое исследование. Сначала Start Gate разделяет два независимых решения: глубину ревью и требуемый итоговый результат.
 
-## Review depth
+Architecture Review — основной umbrella workflow. Test Review — composable capability, которую можно выбрать в начале, подключить по рекомендации discovery, если обнаружена существенная поверхность автоматизированных тестов, или добавить позже, возобновив существующий audit из `working/INDEX.md`.
+
+Пример выбора capability:
+
+```text
+Architecture Review: REVIEW_ONLY
+Test Review: REVIEW_PLUS_TEST_PLAN
+```
+
+Endpoint Test Review независим от endpoint Architecture Review и может быть `REVIEW_ONLY` или `REVIEW_PLUS_TEST_PLAN`. Позднее подключение Test Review по умолчанию не перезапускает уже принятые этапы архитектурного ревью. Детальная assurance map и evidence остаются в authoritative артефакте Test Review, а umbrella report связывает и синтезирует принятые cross-capability выводы.
+
+Коротко:
+
+```text
+Use architecture-code-review for a full architecture review.
+Add Test Review now when test assurance is requested.
+Later, resume the existing audit and add Test Review to its capability registry.
+```
+
+## Глубина ревью
 
 ### `STANDARD_FULL`
 
-A complete architecture review with the full verification and adjudication chain, but with thematic investigation kept reasonably compact.
+Полное архитектурное ревью с цепочкой verification и adjudication, но с достаточно компактным тематическим исследованием.
 
-This is the normal default for most production repositories.
+Это обычный режим для большинства production-репозиториев.
 
 ### `FORENSIC`
 
-A deeper investigation with separate thematic passes, expanded evidence trails, adversarial scenario analysis, and more working artifacts.
+Более глубокое расследование с раздельными тематическими проходами, расширенным evidence trail, неблагоприятными сценариями и дополнительными рабочими артефактами.
 
-Use it when architecture defects are subtle, cross-process, concurrency-heavy, security-sensitive, or difficult to reproduce from a conventional review.
+Выбирайте его, когда проблемы тонкие, связаны с несколькими процессами, concurrency, security или плохо воспроизводятся обычным ревью.
 
-The skill may recommend a depth, but it must not silently choose `FORENSIC` for the user.
+Skill может рекомендовать глубину, но не должен молча выбирать `FORENSIC`.
 
-## Requested endpoint
+## Требуемый endpoint
 
-Depth and endpoint are independent choices.
+Глубина и endpoint выбираются независимо.
 
 ### `REVIEW_ONLY`
 
-Produces the architecture review and authoritative findings ledger.
+Формирует архитектурный review и authoritative findings ledger.
 
 ### `REVIEW_PLUS_TARGET_ARCHITECTURE`
 
-Adds a reviewed Target Architecture / To-Be design derived from verified findings, invariants, positive controls, and explicit product decisions.
+Дополнительно формирует Target Architecture / To-Be design и проводит её ревью. Она строится на verified findings, инвариантах, положительных механизмах и явных product decisions.
 
 ### `REVIEW_PLUS_TARGET_AND_ROADMAP`
 
-Adds both Target Architecture and a dependency-driven remediation roadmap with an execution-consistency review.
+Дополнительно формирует Target Architecture и remediation roadmap с зависимостями и проверкой согласованности порядка исправлений.
 
-Choosing `FORENSIC` does not automatically request a target architecture or roadmap.
+Выбор `FORENSIC` сам по себе не означает, что нужна Target Architecture или Roadmap.
 
-## What the workflow looks like
+## Как устроен workflow
 
-At a high level:
+В общих чертах:
 
 ```text
 baseline
@@ -176,57 +196,53 @@ baseline
   -> fresh editorial review / correction / re-review
 ```
 
-The important distinction is that discovery does not directly create final findings. A candidate must survive independent verification, root-boundary adjudication, and severity adjudication first.
+Ключевой принцип: discovery не создаёт final findings напрямую. Кандидат должен пройти independent verification, root-boundary adjudication и severity adjudication.
 
-## Output
+## Evidence-first подход
 
-The default output package is created under:
+Для material finding разделяйте:
 
-```text
-docs/reviews/architecture-review/
-```
+1. observation — что система фактически делает;
+2. interpretation — почему это важно;
+3. concrete mechanism — какой механизм создаёт проблему;
+4. impact — к какому последствию он приводит;
+5. recommendation — в каком направлении исправлять.
 
-Depending on the selected endpoint, the final package contains:
+Утверждения должны ссылаться на конкретное evidence в формате `path:line-range`. Для cross-layer findings обычно нужны доказательства с каждой существенно затронутой границы.
 
-```text
-docs/reviews/architecture-review/
-├── 01-architecture-review.md
-├── 02-authoritative-findings-ledger.md
-├── 03-target-architecture.md       # when requested
-├── 04-remediation-roadmap.md       # when requested
-└── working/
-    └── ... intermediate evidence and review artifacts
-```
+Claim scope не может быть шире evidence scope: один handler не доказывает system-wide authorization isolation, успешный nominal path не доказывает retry/idempotency/restart/concurrency, а read-path не доказывает write, enumeration, background или export paths. Если область не исследована, результатом должны быть `PARTIAL`, `NOT_PROVEN` или `UNKNOWN`, а не выдуманный дефект.
 
-`working/` is intentional. It contains intermediate evidence, candidate analysis, independent reviews, corrections, and persisted handoffs. Intermediate claims may later be corrected or refuted, so the authoritative state is tracked through the workflow registry and final documents.
+Поэтому Skill намеренно отвергает типичные shortcuts:
 
-## Evidence rules
+- имена директорий не доказывают архитектуру;
+- размер файла сам по себе не является дефектом;
+- `unwrap`, `clone`, mocks, TODOs и hardcoded values не становятся findings без доказанного impact;
+- отсутствие тестов не доказывает, что production behavior сломан;
+- широкие privileged APIs сами по себе не доказывают RCE;
+- security severity не повышается без правдоподобной attacker chain;
+- rewrite не предлагается только потому, что можно вообразить более «чистую» архитектуру.
 
-Material findings are expected to distinguish:
+## Discovery coverage
 
-1. observation;
-2. interpretation;
-3. concrete mechanism;
-4. impact;
-5. recommendation.
+Полнота discovery определяется не числом файлов, тестов или findings, а bounded material accounting — ограниченным учётом всех существенных domains и механизмов в заявленной области.
 
-Claims should cite concrete `path:line-range` evidence. Cross-layer findings should normally include evidence from every materially affected boundary.
+Перед общим выводом capability формирует bounded inventory material targets/domains. Каждый применимый элемент получает evidence, disposition или явное ограничение. Selective deep inspection допустимо; sample, test count, line coverage и зелёный CI не являются доказательством полноты.
 
-The skill intentionally rejects common review shortcuts:
+Architecture Discovery Coverage ведёт свою domain matrix. Test Review ведёт собственный bounded target universe; одна матрица не подменяет другую.
 
-- directory names are not proof of architecture;
-- file length is not automatically a defect;
-- `unwrap`, `clone`, mocks, TODOs, or hardcoded values are not findings without demonstrated impact;
-- missing tests do not prove production behavior is broken;
-- broad privileged APIs do not automatically prove RCE;
-- security severity is not promoted without a plausible attacker chain;
-- a rewrite is not recommended merely because a cleaner design can be imagined.
+## Независимая проверка и корневые причины
 
-## Persistent multi-agent workflow
+Автор discovery не является окончательным судьёй. Кандидаты проходят отдельную falsification/verification-проверку: проверяется достижимость, ownership, guards, альтернативные пути, concrete effect и наличие противоречащего evidence.
 
-For long reviews, `working/INDEX.md` is the persistent workflow authority.
+После этого root-boundary adjudication отвечает на вопрос, является ли наблюдаемое поведение одной корневой проблемой, projection того же механизма, supporting engineering risk или отдельным finding. Несвязанные механизмы не объединяются только по тематическому сходству.
 
-Agent results are not considered complete merely because an agent said it finished. Independently consumable artifacts move through explicit states such as:
+Severity назначается только после того, как correctness кандидата подтверждена и корневая граница определена. Высокая уверенность в том, что проблема существует, не означает автоматически высокую severity.
+
+## Persistent workflow и артефакты
+
+Для длинных ревью `working/INDEX.md` — persistent authority состояния workflow. Результат агента не считается принятым только потому, что агент сообщил о завершении.
+
+Рабочие артефакты проходят явные состояния:
 
 ```text
 PENDING
@@ -240,11 +256,29 @@ COMPLETE
 NOT_APPLICABLE
 ```
 
-A downstream stage must not consume `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, or `BLOCKED` as accepted truth.
+Downstream stage не должен использовать `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED` или `BLOCKED` как accepted truth.
 
-Important workflow state must be persisted to files; it must not exist only in chat history.
+Типовой итоговый пакет создаётся в:
 
-## Repository structure
+```text
+docs/reviews/architecture-review/
+```
+
+В зависимости от endpoint он содержит:
+
+```text
+docs/reviews/architecture-review/
+├── 01-architecture-review.md
+├── 02-authoritative-findings-ledger.md
+├── 03-target-architecture.md       # when requested
+├── 04-remediation-roadmap.md       # when requested
+└── working/
+    └── ... intermediate evidence and review artifacts
+```
+
+`working/` содержит промежуточные evidence, разбор кандидатов, независимые проверки, corrections и persisted handoffs. Промежуточные claims могут быть исправлены или опровергнуты; authoritative state отслеживается через workflow registry и итоговые документы.
+
+## Структура репозитория
 
 ```text
 .
@@ -270,13 +304,13 @@ Important workflow state must be persisted to files; it must not exist only in c
     └── pressure-validation-matrix.md
 ```
 
-`SKILL.md` is intentionally a compact orchestrator. Heavy normative guidance lives in the authoritative reference files instead of being duplicated in the entry point.
+`SKILL.md` — намеренно компактный orchestrator. Подробные нормативные правила находятся в authoritative reference files, а не дублируются в entrypoint.
 
 ## Validation
 
-The v0.2 implementation was pressure-tested with fresh isolated agent contexts.
+Реализация v0.2 была проверена pressure scenarios в свежих изолированных контекстах агентов.
 
-Runtime validation result:
+Результат runtime validation:
 
 ```text
 32 / 32 required scenarios PASS
@@ -285,18 +319,18 @@ Runtime validation result:
 0 inconclusive
 ```
 
-The independent implementation review reported:
+Независимое implementation review сообщило:
 
 ```text
 BLOCKER 0
 HIGH    0
 ```
 
-The development repository retains the internal benchmark, design, review, and raw validation evidence. This public repository intentionally contains only the distributable Skill package and its pressure-test contracts.
+Development repository сохраняет внутренние benchmarks, design documents, review materials и raw validation evidence. Этот public repository содержит только распространяемый Skill package и его pressure-test contracts.
 
-## Updating the Skill
+## Обновление Skill
 
-For a normal installation tracking `main`:
+Для обычной установки, отслеживающей `main`:
 
 ```bash
 cd ~/.agents/skills/architecture-code-review
@@ -304,15 +338,15 @@ git switch main
 git pull --ff-only
 ```
 
-Start a new agent session after updating so the runtime reloads the Skill from disk.
+После обновления начните новую сессию агента, чтобы runtime заново загрузил Skill с диска.
 
-For production environments where reproducibility matters, prefer pinning a release tag rather than continuously following `main`.
+В production-средах, где важна воспроизводимость, предпочтительно закреплять release tag, а не постоянно следовать за `main`.
 
-## Development and contribution
+## Разработка и contribution
 
-Changes to the Skill should be treated like behavior changes, not ordinary prose edits. The project uses pressure scenarios and fresh-context validation to verify that new guidance changes agent behavior without introducing contradictory authority or workflow regressions.
+Изменения Skill следует рассматривать как изменения поведения, а не как обычную правку текста. Для новых указаний используются pressure scenarios и fresh-context validation, чтобы проверить изменение поведения агента и отсутствие конфликтующей authority или workflow regression.
 
-Before promoting a substantial change, preserve the sequence:
+Перед продвижением существенного изменения сохраняйте последовательность:
 
 ```text
 design
@@ -325,8 +359,8 @@ design
 -> release
 ```
 
-Do not treat a documentation-only appearance as evidence that a Skill change is behavior-neutral.
+Сам по себе внешний вид documentation-only изменения не доказывает, что поведение Skill осталось неизменным.
 
-## License
+## Лицензия
 
-This project is licensed under the MIT License. See `LICENSE` for the full text.
+Проект распространяется по лицензии MIT. Полный текст находится в `LICENSE`.

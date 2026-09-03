@@ -17,23 +17,56 @@
 Покрой, где применимо:
 
 1. назначение системы и ключевые сценарии;
-2. процессы/applications/runtime components;
-3. основные компоненты и responsibilities;
-4. ownership state/resources;
-5. major data/control flows;
-6. external systems/native/child processes;
-7. interaction/interpreter/resource/authority boundaries;
-8. startup/initialization/steady-state/background/failure/recovery/shutdown;
-9. concurrency model;
-10. storage/configuration;
-11. trust boundaries/security model;
-12. platform-specific behavior;
-13. positive controls;
-14. краткие архитектурные свойства/ограничения.
+2. deployment topology и runtime components/processes;
+3. ownership state, lifecycle и authority;
+4. API/IPC/process/persistence/trust/deployment boundaries;
+5. command/write, read/query, async/background и external-integration flows;
+6. state machines и lifecycle transitions;
+7. startup/readiness/shutdown, cancellation, retry и recovery;
+8. concurrency, shared state, serialization и idempotency;
+9. failure domains и partial failure;
+10. authentication/authorization и trust contracts;
+11. configuration/secrets;
+12. persistence, migrations и consistency;
+13. observability/operability, где они material;
+14. platform-specific behavior и positive controls;
+15. краткие архитектурные свойства/ограничения.
+
+Это materiality-driven модель, а не универсальный checklist с одинаковой глубиной
+для каждого пункта. Discovery Coverage и materiality map определяют, что
+применимо, что получает bounded evidence, а что фиксируется как `NOT_APPLICABLE`
+или `UNKNOWN` с причиной.
 
 Используй ownership matrix и evidence-driven diagrams, если они улучшают понимание.
 
 As-Built проходит независимое fresh-context review в обоих режимах. Только accepted As-Built является базой зависимых thematic passes.
+
+### Evidence-bounded architecture claims
+
+Architecture claim scope must not exceed directly investigated evidence scope:
+
+```text
+supported claim scope <= directly exercised / directly evidenced material scope
+```
+
+Read-path authorization evidence does not prove write, enumeration, background,
+or export authorization. Nominal success does not prove retry, unknown-outcome
+recovery, restart durability, or concurrent duplicate safety. Missing evidence
+alone is not an implementation defect; preserve `PARTIAL`, `NOT_PROVEN`, or
+`UNKNOWN` where the wider claim was not exercised.
+
+Search explicitly for material contradictions across:
+
+- application code ↔ deployment/configuration;
+- API contract ↔ persistence behavior;
+- documented ownership ↔ actual state mutation path;
+- auth middleware ↔ background/export paths;
+- lifecycle assumptions ↔ service/container/Ansible definitions;
+- retry claims ↔ persistence/queue semantics.
+
+Contradictions first become an `OQ-*` or `ARCH-CORRECTION-CANDIDATE` with
+provenance and impact. They are not automatic final findings and do not silently
+rewrite the accepted As-Built.
 
 ## 3. Representative flows
 

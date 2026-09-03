@@ -42,6 +42,12 @@ Subagents могут исследовать независимые domains и с
 
 ## Required Review Flow
 
+Test Review is a composable capability. It may be selected initially, recommended
+when discovery identifies a material automated-test surface, or attached later to
+an existing audit. Its specialist methodology lives in
+`capabilities/test-review/SKILL.md`; the umbrella orchestrator retains shared
+authority, freshness, artifact-ownership, and completion gates.
+
 1. Зафиксируй repository baseline и применимые stack addenda.
 2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
 3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.
@@ -68,6 +74,8 @@ Subagents могут исследовать независимые domains и с
 - Тематический агент не переписывает As-Built: он создаёт `ARCH-CORRECTION-CANDIDATE`.
 - `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED` нельзя использовать как accepted downstream input.
 - Compact persisted semantic state usable downstream только если он связан с текущей accepted owning-artifact revision; mismatch требует `AUTHORITY_RECONCILIATION_REQUIRED`.
+- Shared assurance principles apply across capabilities: resolve material authority before a substantive verdict, and keep claim scope within directly evidenced material scope.
+- Context Orchestration v0.3 loads minimum fresh decision evidence through dependency-sliced routing; see `references/revalidation-and-freshness.md`.
 - Presentation-only correction не перезапускает technical audit автоматически: используй `PROJECTION_REVALIDATION`; semantic drift требует `TECHNICAL_REVALIDATION_REQUIRED`.
 - Major artifact author ≠ final judge. Review/correction/re-review — отдельные роли.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
@@ -94,6 +102,8 @@ Subagents могут исследовать независимые domains и с
 
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
+- shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
+- capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
 - core method / As-Built-first flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
 - ownership / invariants / adversarial scenarios → `references/ownership-and-scenarios.md`

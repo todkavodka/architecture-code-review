@@ -116,6 +116,54 @@ REVALIDATION_REQUIRED
 BLOCKED
 ```
 
+## 4.1 Context Orchestration v0.3
+
+Canonical principle:
+
+```text
+Load the minimum fresh authoritative evidence needed for the current decision.
+```
+
+Optimization is subordinate to correctness and freshness; a shorter or newer
+projection is never substantive authority merely because it is compact.
+
+Routing context decides where to look and may contain `INDEX`, handoffs,
+registries, candidate/evidence pointers, materiality/coverage projections, and
+revision bindings. Decision evidence supports a substantive claim and includes
+owning code/configuration, the accepted owning artifact, exact authority/contract
+evidence, and targeted runtime/test evidence. Routing context is not proof when
+owning evidence is required.
+
+Progressive retrieval is:
+
+```text
+structure/inventory
+→ materiality map
+→ evidence pointers
+→ targeted reads
+→ deeper reads only for unresolved material questions
+```
+
+Do not blanket-preload all references, working artifacts, or repository contents.
+If a bounded review discovers a material omitted cross-boundary path, record
+`CONTEXT_EXPANSION_REQUIRED`, inspect that path, and preserve the reason and exact
+evidence pointer.
+
+Dependency-sliced capability/subagent dispatch records:
+
+```text
+exact baseline/revision
+exact mission/scope
+forbidden scope
+accepted dependency artifact pointers + revisions
+required shared/reference contracts
+output path
+HANDOFF SUMMARY contract
+```
+
+Unrelated accepted artifacts are excluded by default. Expansion requires a
+concrete correctness trigger and is persisted in the handoff.
+
 ## 5. Resume
 
 При resume compact routing state сначала проверяется на freshness относительно referenced owning authority. Сам факт того, что запись находится в более новом файле, INDEX или handoff, не делает её свежей.
