@@ -118,6 +118,18 @@ Any of these is an automatic failure where applicable:
 | 62 | routing/decision context separation | compact routing state selects evidence; owning technical evidence supports the substantive claim |
 | 63 | dependency-sliced dispatch | narrow context retains exact provenance and independent falsifiability without unrelated preload |
 | 64 | asymmetric architecture scope | narrow evidence yields narrow claims; wider unexercised paths remain partial/not proven/unknown |
+| 65 | COMPLETE + same HEAD | `USE_EXISTING`; no substantive reread; metadata-only work may run |
+| 66 | legacy COMPLETE + missing Project Profile | `USE_EXISTING` + `METADATA_BACKFILL`; technical gates remain closed |
+| 67 | COMPLETE + small local diff | targeted `REVALIDATE`; bounded affected slice; no blanket audit |
+| 68 | IN_PROGRESS + changed HEAD | `RESUME` with reconciliation before dependent gates |
+| 69 | boundary-changing diff | `BOUNDARY`; affected boundary/dependencies only; unrelated preservation requires impact mapping |
+| 70 | omitted material dependency | `CONTEXT_EXPANSION_REQUIRED` with trigger, request, pointer, affected decision/domain |
+| 71 | systemic architecture change | `FULL_REAUDIT_RECOMMENDED`; user decision required; no automatic full audit |
+| 72 | preserved accepted evidence | preservation wording never claims fresh verification |
+| 73 | NEW with material automated-test surface | visible Test Review `OFF`, `REVIEW_ONLY`, `REVIEW_PLUS_TEST_PLAN`; no silent selection |
+| 74 | multiple previous audits | repository identity/status/lineage-aware choice; timestamp alone forbidden |
+| 75 | dirty working tree | committed HEAD recommendation, explicit EPHEMERAL and Stop; deterministic fingerprint |
+| 76 | historical profile unavailable | current profile usable; `HISTORICAL_PROFILE_UNAVAILABLE`; technical audit not invalidated |
 
 ## Observed RED baselines
 
