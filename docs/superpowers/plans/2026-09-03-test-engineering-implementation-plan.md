@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Extend the existing Test Review capability into the approved Test Engineering capability with Behavior Contracts (`BC-*`), Contract Consistency records (`CC-*`), contract verification against declared/implemented/consumed/tested views, dependency-sliced outputs, simulator/E2E design, and impact-driven revalidation.
+**Goal:** Extend the existing Test Review capability into the approved Test Engineering capability with Behavior Contracts (`BC-*`), Contract Consistency records (`CC-*`), contract verification across declared/implemented/consumed/tested views, dependency-sliced outputs, simulator/E2E design, and impact-driven revalidation.
 
-**Architecture:** Keep `capabilities/test-review/SKILL.md` as the discoverable capability entrypoint and move the heavier Test Engineering semantic contract into a focused capability reference. Preserve the existing umbrella orchestrator as owner of shared session, freshness, artifact, and completion rules. Implement the design through fail-first pressure scenarios: record RED behavior on the current skill before changing capability guidance, then add the minimum rules needed to turn those same scenarios GREEN.
+**Architecture:** Keep `capabilities/test-review/SKILL.md` as the concise discoverable entrypoint. Put the heavier semantic contract in `capabilities/test-review/references/test-engineering-contract.md`. Preserve the umbrella orchestrator as owner of shared session, freshness, artifact, and completion rules. Implement with fail-first pressure scenarios: record RED behavior before guidance changes, then make the smallest guidance changes required to turn the same scenarios GREEN.
 
 **Tech Stack:** Markdown Skill contracts, repository-owned pressure scenarios, Git, existing architecture-code-review orchestration/reference system.
 
@@ -12,22 +12,22 @@
 
 ## Global Constraints
 
-- Preserve existing Test Assurance semantics and compatibility outputs `00-test-assurance-summary.md`, `01-test-assurance-map.md`, and optional `02-test-plan.md`.
-- `BC-*` is a reusable behavioral semantic entity; it is not `MAT-*`, `RF-*`, `GAP-*`, or test evidence.
+- Preserve existing Test Assurance behavior and compatibility outputs `00-test-assurance-summary.md`, `01-test-assurance-map.md`, and optional `02-test-plan.md`.
+- `BC-*` is a reusable behavior entity, not `MAT-*`, `RF-*`, `GAP-*`, or executable evidence.
 - One `BC-*` expresses one independently verifiable material behavior.
-- Test evidence belongs to `TM-*`; do not store executable-evidence verdicts inside `BC-*`.
+- Test evidence belongs to `TM-*`; do not put executable-evidence verdicts inside `BC-*`.
 - Contract views are `DECLARED`, `IMPLEMENTED`, `CONSUMED`, and `TESTED`.
-- Contract Verification records observable mismatch in `CC-*` and does not automatically choose Swagger/OpenAPI, code, consumer, or tests as truth.
-- `CC-*` and `GAP-*` are orthogonal; contract drift is not automatically a test gap.
-- Behavior Model is the only writer of accepted `BC-*`; Contract Verification is the only writer of accepted/classified `CC-*`.
-- Separate semantic lifecycle, freshness, and authority axes.
-- Contract Verification runs automatically when a materially relevant declared external contract exists; the human-readable Contract Consistency Report remains optional.
+- Contract Verification records mismatch in `CC-*` and does not automatically choose Swagger/OpenAPI, code, consumer, or tests as truth.
+- `CC-*` and `GAP-*` are independent axes.
+- Behavior Model is the only writer of accepted `BC-*`; Contract Verification is the owner/writer of `CC-*`.
+- Keep lifecycle, freshness, and authority as separate axes.
+- Contract Verification runs automatically when a materially relevant declared external contract exists; Contract Consistency Report remains optional.
 - Capabilities form a dependency DAG; execute only the minimum required dependency slice.
-- `REVALIDATE` is impact-driven; test-only change does not automatically invalidate `BC-*`, while consumer changes may invalidate consumer-facing simulator/E2E projections without a service-repository change.
+- `REVALIDATE` is impact-driven. Test-only changes do not automatically invalidate `BC-*`; consumer-only changes may invalidate consumer-facing simulator/E2E projections without a service-repository change.
 - Service Simulator has separate consumer and test-control planes.
 - E2E Design does not require Service Simulator Design when the selected topology does not need a simulator.
-- No production/project implementation code is written by the review capability; Service Simulator implementation remains a separately authorized action after an accepted simulator specification and implementation plan.
-- Follow RED-GREEN-REFACTOR for Skill changes: every behavior-changing guidance edit requires an observed failing pressure scenario first.
+- No project production code is written during review; simulator implementation remains separately authorized.
+- Follow RED-GREEN-REFACTOR for Skill changes.
 
 ---
 
@@ -35,44 +35,38 @@
 
 **Create:**
 
-- `capabilities/test-review/references/test-engineering-contract.md` — authoritative detailed semantics for `BC-*`, `CC-*`, Contract Verification, output DAG, Test Environment Design, Service Simulator Design, E2E Design, ownership, lifecycle, and revalidation.
-- `tests/pressure-scenario-81-behavior-contract-boundary.md` — RED/GREEN contract for keeping `BC-*` distinct from `MAT/RF/GAP/TM` and keeping evidence in `TM-*`.
-- `tests/pressure-scenario-82-contract-verification-authority.md` — RED/GREEN contract for Swagger/OpenAPI vs code/consumer/tests without automatic winner selection.
-- `tests/pressure-scenario-83-contract-drift-vs-test-gap.md` — RED/GREEN contract proving `CC-*` and `GAP-*` are independent.
-- `tests/pressure-scenario-84-test-engineering-dependency-slice.md` — RED/GREEN contract for explicit outputs and minimum dependency DAG.
-- `tests/pressure-scenario-85-test-engineering-revalidation.md` — RED/GREEN contract for implementation/test/consumer-specific freshness impact.
-- `tests/pressure-scenario-86-service-simulator-e2e-boundaries.md` — RED/GREEN contract for dependency substitutes vs reviewed-service simulator, consumer/control planes, and E2E selection.
-- `tests/test-engineering-capability-validation.md` — consolidated static/behavioral validation checklist covering PS-81..86 and existing Test Assurance compatibility.
+- `capabilities/test-review/references/test-engineering-contract.md` — detailed Test Engineering semantic contract.
+- `tests/pressure-scenario-81-behavior-contract-boundary.md`
+- `tests/pressure-scenario-82-contract-verification-authority.md`
+- `tests/pressure-scenario-83-contract-drift-vs-test-gap.md`
+- `tests/pressure-scenario-84-test-engineering-dependency-slice.md`
+- `tests/pressure-scenario-85-test-engineering-revalidation.md`
+- `tests/pressure-scenario-86-service-simulator-e2e-boundaries.md`
+- `tests/test-engineering-capability-validation.md`
 
 **Modify:**
 
-- `capabilities/test-review/SKILL.md` — concise discoverable Test Engineering entrypoint, Test Assurance compatibility, required reference loading, user-selectable outputs, and hard gates.
-- `SKILL.md` — umbrella integration wording so Test Review/Test Engineering can be selected/extended while umbrella retains shared authority/freshness/artifact ownership.
-- `references/session-orchestration.md` — startup/output selection rules for Test Engineering.
-- `references/review-modes-and-orchestration.md` — capability state, minimum dependency-slice execution, `EXTEND`, and persisted artifact ownership.
-- `references/revalidation-and-freshness.md` — `BC/CC` source bindings and impact-driven invalidation rules including multi-repository consumer freshness.
-- `references/report-contract.md` — capability-owned output package and final-package linking rules.
-- `README.md` — user-facing capability description and output examples after the behavioral contract is GREEN.
+- `capabilities/test-review/SKILL.md`
+- `SKILL.md`
+- `references/session-orchestration.md`
+- `references/review-modes-and-orchestration.md`
+- `references/revalidation-and-freshness.md`
+- `references/report-contract.md`
+- `README.md`
 
 ---
 
 ### Task 1: Establish fail-first Test Engineering pressure scenarios
 
-**Files:**
-- Create: `tests/pressure-scenario-81-behavior-contract-boundary.md`
-- Create: `tests/pressure-scenario-82-contract-verification-authority.md`
-- Create: `tests/pressure-scenario-83-contract-drift-vs-test-gap.md`
-- Create: `tests/pressure-scenario-84-test-engineering-dependency-slice.md`
-- Create: `tests/pressure-scenario-85-test-engineering-revalidation.md`
-- Create: `tests/pressure-scenario-86-service-simulator-e2e-boundaries.md`
+**Files:** create PS-81 through PS-86 listed above.
 
 **Interfaces:**
 - Consumes: current `capabilities/test-review/SKILL.md`, current umbrella orchestration, approved design spec.
-- Produces: six observed RED baselines and stable GREEN verdict tokens used by all later tasks.
+- Produces: six observed RED baselines and stable GREEN verdict tokens.
 
-- [ ] **Step 1: Write PS-81 and run it against the unchanged capability**
+- [ ] **Step 1: Write and run PS-81 against the unchanged capability**
 
-Use a scenario where the agent is asked to extend a Test Review and is tempted to put `existing_test_evidence` inside a broad behavior record or reuse `MAT-*` as the behavior identifier.
+Scenario pressure: reuse `MAT-*` as the behavior ID or store `existing_test_evidence` inside a broad behavior record.
 
 Required GREEN contract:
 
@@ -90,7 +84,7 @@ BC != GAP
 BC does not own test-evidence verdicts
 ```
 
-Record the actual pre-change failure and one of:
+Verdicts:
 
 ```text
 PS81_RED_BEHAVIOR_IDENTITY_COLLAPSED
@@ -99,20 +93,18 @@ PS81_GREEN_BEHAVIOR_BOUNDARY
 PS81_INCONCLUSIVE
 ```
 
-- [ ] **Step 2: Write PS-82 and run it against the unchanged capability**
+- [ ] **Step 2: Write and run PS-82 against the unchanged capability**
 
-Scenario: OpenAPI declares `201/400`; code additionally returns `409`; frontend handles `409`; tests cover only `201/400`. Pressure the reviewer to "trust Swagger" or "trust production code".
-
-Required GREEN response must preserve four views:
+Fixture behavior:
 
 ```text
-DECLARED
-IMPLEMENTED
-CONSUMED
-TESTED
+OpenAPI: POST /orders -> 201, 400
+Implementation: POST /orders -> 201, 400, 409 DuplicateOrder
+Consumer: handles 409 DuplicateOrder
+Tests: cover 201 and 400 only
 ```
 
-and create a `CC-*` record with unresolved authority until evidence adjudicates it. Explicitly prohibit automatic winner selection.
+Pressure the reviewer to "trust Swagger" or "trust production code". GREEN must preserve `DECLARED`, `IMPLEMENTED`, `CONSUMED`, `TESTED`, create `CC-*`, and keep authority unresolved until adjudicated.
 
 Verdicts:
 
@@ -123,11 +115,11 @@ PS82_GREEN_CONTRACT_AUTHORITY_PRESERVED
 PS82_INCONCLUSIVE
 ```
 
-- [ ] **Step 3: Write PS-83 and run it against the unchanged capability**
+- [ ] **Step 3: Write and run PS-83 against the unchanged capability**
 
-Scenario A: Swagger omits `409`, but implementation/consumer behavior is fully tested. Expected: `CC-*` exists, no automatic `GAP-*`.
+Case A: Swagger omits `409`, but implementation/consumer behavior is fully tested. Expected: `CC-*`, no automatic `GAP-*`.
 
-Scenario B: same drift plus missing executable evidence. Expected: `CC-*` and a separate `GAP-*` through `BC -> MAT -> TM/GAP`.
+Case B: same drift plus missing executable evidence. Expected: `CC-*` plus a separate `GAP-*` through `BC -> MAT -> TM/GAP`.
 
 Verdicts:
 
@@ -138,11 +130,11 @@ PS83_GREEN_ORTHOGONAL_DRIFT_AND_GAP
 PS83_INCONCLUSIVE
 ```
 
-- [ ] **Step 4: Write PS-84 and run it against the unchanged capability**
+- [ ] **Step 4: Write and run PS-84 against the unchanged capability**
 
-Scenario: user selects only `E2E Test Plan`. Expected implicit dependencies are Test Assurance + Behavior Model + Contract Verification when applicable; Service Simulator Design must not be enabled unless the topology needs it.
+Case A: user selects only `E2E Test Plan`. Required dependency slice: Test Assurance + Behavior Model + Contract Verification when applicable + E2E Design. Service Simulator Design is added only when topology requires it.
 
-Add a second case for `EXTEND accepted Test Review -> Service Simulator Design`, which must reuse the accepted upstream slice rather than restart the whole review.
+Case B: `EXTEND` accepted Test Review -> Service Simulator Design. Reuse accepted upstream work; do not restart the full review.
 
 Verdicts:
 
@@ -153,9 +145,9 @@ PS84_GREEN_MINIMUM_DEPENDENCY_SLICE
 PS84_INCONCLUSIVE
 ```
 
-- [ ] **Step 5: Write PS-85 and run it against the unchanged capability**
+- [ ] **Step 5: Write and run PS-85 against the unchanged capability**
 
-Use three change sets:
+Change sets:
 
 ```text
 A: tests only changed
@@ -163,12 +155,12 @@ B: service implementation/OpenAPI changed
 C: consumer repository changed while service repository stayed unchanged
 ```
 
-Expected:
+Required GREEN routing:
 
 ```text
 A -> TM/MAT/GAP impact; BC not automatically invalidated
 B -> affected IMPLEMENTED/DECLARED views -> CC/BC impact analysis
-C -> CONSUMED view and consumer-facing simulator/E2E freshness impact
+C -> affected CONSUMED view -> consumer-facing simulator/E2E impact
 ```
 
 Verdicts:
@@ -180,16 +172,16 @@ PS85_GREEN_IMPACT_DRIVEN_REVALIDATION
 PS85_INCONCLUSIVE
 ```
 
-- [ ] **Step 6: Write PS-86 and run it against the unchanged capability**
+- [ ] **Step 6: Write and run PS-86 against the unchanged capability**
 
-Scenario must distinguish:
+Require explicit distinction:
 
 ```text
 A) substitutes for dependencies OF the reviewed service
 B) Service Simulator OF the reviewed service for its consumers
 ```
 
-Require consumer plane to match relevant real protocols and require a separate test-control plane. E2E must prefer a smaller boundary when equivalent assurance exists and must be selectable without a simulator when topology does not need one.
+GREEN requires a real consumer-protocol plane where relevant, a separate test-control plane, smaller-boundary preference, and E2E without mandatory simulator use.
 
 Verdicts:
 
@@ -213,7 +205,7 @@ git add tests/pressure-scenario-81-behavior-contract-boundary.md \
 git commit -m "test: add fail-first test engineering scenarios"
 ```
 
-Expected: commit contains scenario definitions plus observed RED evidence; no capability guidance changed yet.
+Expected: scenario files contain actual observed RED evidence; no capability guidance changed yet.
 
 ---
 
@@ -224,12 +216,12 @@ Expected: commit contains scenario definitions plus observed RED evidence; no ca
 - Modify: `capabilities/test-review/SKILL.md`
 
 **Interfaces:**
-- Consumes: PS-81..86 failure modes and approved design spec.
-- Produces: one focused semantic reference loaded by Test Review/Test Engineering and a concise discoverable entrypoint.
+- Consumes: PS-81..86 RED failures and approved spec.
+- Produces: detailed semantic contract plus concise capability entrypoint.
 
-- [ ] **Step 1: Add the minimal reference contract required to address PS-81..86**
+- [ ] **Step 1: Create the detailed reference**
 
-The new reference must define these exact sections:
+Required sections:
 
 ```text
 Behavior Contract Model
@@ -246,7 +238,7 @@ Output Package
 Reuse / Extend / Revalidate
 ```
 
-Required `BC-*` axes:
+Required BC axes:
 
 ```text
 status: CANDIDATE | UNDER_REVIEW | ACCEPTED | SUPERSEDED | REJECTED
@@ -254,7 +246,7 @@ freshness: VALID | REVALIDATION_REQUIRED | UNKNOWN
 authority: RESOLVED | UNRESOLVED
 ```
 
-Required `CC-*` axes:
+Required CC axes:
 
 ```text
 status: OPEN | CLASSIFIED | RESOLVED | WONT_RESOLVE | SUPERSEDED
@@ -270,7 +262,7 @@ CONSUMED
 TESTED
 ```
 
-Required unresolved/drift classifications include at least:
+Required classifications:
 
 ```text
 AUTHORITY_UNRESOLVED
@@ -282,16 +274,16 @@ INTENTIONAL_COMPATIBILITY_BEHAVIOR
 CONTRACT_UNRESOLVED
 ```
 
-State explicitly:
+Required invariants:
 
 ```text
 Resolution of CC-* does not silently rewrite BC-*.
 Contract drift and assurance gaps are independent axes.
 ```
 
-- [ ] **Step 2: Keep `capabilities/test-review/SKILL.md` concise and route heavy detail to the reference**
+- [ ] **Step 2: Route the capability entrypoint to the new reference**
 
-Add a required-reference instruction similar to:
+Add to `capabilities/test-review/SKILL.md`:
 
 ```markdown
 For Test Engineering outputs beyond the existing Test Assurance core, read
@@ -300,7 +292,7 @@ constructing Behavior Contracts, Contract Verification records, environment
 strategy, simulator design, or E2E design.
 ```
 
-Add the explicit user-selectable outputs:
+Expose these selectable outputs:
 
 ```text
 Test Assurance [required]
@@ -312,7 +304,7 @@ Service Simulator Implementation Plan [optional; requires accepted simulator spe
 E2E Test Plan [optional]
 ```
 
-Do not expose Behavior Model as a user checkbox; it is an internal dependency when extended outputs require it. Contract Verification is automatic when a materially relevant declared external contract exists.
+Do not expose Behavior Model as a checkbox. Contract Verification is automatic when materially applicable.
 
 - [ ] **Step 3: Re-run PS-81, PS-82, and PS-83**
 
@@ -324,8 +316,6 @@ PS82_GREEN_CONTRACT_AUTHORITY_PRESERVED
 PS83_GREEN_ORTHOGONAL_DRIFT_AND_GAP
 ```
 
-If a scenario finds a new rationalization, update only the smallest relevant wording and re-run the same scenario.
-
 - [ ] **Step 4: Commit semantic contract**
 
 ```bash
@@ -336,7 +326,7 @@ git commit -m "feat: define test engineering semantic contract"
 
 ---
 
-### Task 3: Integrate Test Engineering into umbrella orchestration and output ownership
+### Task 3: Integrate output selection, dependency slicing, and artifact ownership
 
 **Files:**
 - Modify: `SKILL.md`
@@ -345,14 +335,12 @@ git commit -m "feat: define test engineering semantic contract"
 - Modify: `references/report-contract.md`
 
 **Interfaces:**
-- Consumes: user-selectable output list and dependency DAG from Task 2.
-- Produces: startup selection, persisted capability state, artifact ownership, and minimum dependency-slice orchestration.
+- Consumes: selectable outputs and dependency DAG from Task 2.
+- Produces: startup selection, persisted capability state, artifact ownership, and `EXTEND` behavior.
 
-- [ ] **Step 1: Add startup/output-selection contract**
+- [ ] **Step 1: Persist explicit selected outputs**
 
-Persist explicit selected outputs; never encode them as a compound mode such as `REVIEW_PLUS_SIMULATOR_PLUS_E2E`.
-
-Use this conceptual stored set:
+Canonical stored shape:
 
 ```text
 outputs:
@@ -365,11 +353,9 @@ outputs:
   e2e_test_plan: true
 ```
 
-The orchestrator may recommend outputs but must not silently enable substantial optional work.
+Never encode a compound mode such as `REVIEW_PLUS_SIMULATOR_PLUS_E2E`.
 
-- [ ] **Step 2: Define dependency-slice rules**
-
-Required examples:
+- [ ] **Step 2: Encode minimum dependency slices**
 
 ```text
 E2E Test Plan
@@ -377,7 +363,7 @@ E2E Test Plan
   -> Behavior Model
   -> Contract Verification if applicable
   -> E2E Design
-  -> Service Simulator Design only if selected topology requires it
+  -> Service Simulator Design only when the chosen topology requires it
 
 Service Simulator Implementation Plan
   -> accepted + fresh Service Simulator Spec
@@ -385,9 +371,7 @@ Service Simulator Implementation Plan
 
 `EXTEND` reuses the minimum accepted fresh upstream slice and does not restart unrelated gates.
 
-- [ ] **Step 3: Define persisted output ownership**
-
-Preserve compatibility numbering and add:
+- [ ] **Step 3: Encode persisted output ownership**
 
 ```text
 00-test-assurance-summary.md
@@ -401,9 +385,9 @@ Preserve compatibility numbering and add:
 08-e2e-test-plan.md                          # optional
 ```
 
-Persist authoritative ledgers under capability `working/`, including `BC-*` and `CC-*`; human-readable numbered files are projections and must not silently become semantic authority.
+Authoritative `BC-*` and `CC-*` ledgers live under capability `working/`; numbered files are human-facing projections.
 
-Represent these states distinctly:
+Distinguish:
 
 ```text
 NOT_APPLICABLE
@@ -413,17 +397,12 @@ VERIFIED_NO_MATERIAL_DRIFT
 
 - [ ] **Step 4: Re-run PS-84**
 
-Expected:
-
-```text
-PS84_GREEN_MINIMUM_DEPENDENCY_SLICE
-```
+Expected: `PS84_GREEN_MINIMUM_DEPENDENCY_SLICE`.
 
 - [ ] **Step 5: Commit orchestration integration**
 
 ```bash
-git add SKILL.md \
-        references/session-orchestration.md \
+git add SKILL.md references/session-orchestration.md \
         references/review-modes-and-orchestration.md \
         references/report-contract.md
 git commit -m "feat: orchestrate test engineering outputs"
@@ -438,41 +417,37 @@ git commit -m "feat: orchestrate test engineering outputs"
 - Modify: `capabilities/test-review/references/test-engineering-contract.md`
 
 **Interfaces:**
-- Consumes: `BC-*`/`CC-*` source bindings and umbrella freshness model.
-- Produces: precise change-impact rules for Test Engineering and multi-repository consumer bindings.
+- Consumes: BC/CC source bindings and umbrella freshness model.
+- Produces: service/test/consumer-specific impact routing.
 
-- [ ] **Step 1: Define source bindings for accepted BC and CC records**
+- [ ] **Step 1: Define revision-bound source bindings**
 
-Use revision-bound references rather than only one repository HEAD:
+Canonical field names:
 
 ```text
 BC-042
 source_bindings:
-  architecture: RF-012@rev4
-  declared: openapi.yaml@<service-baseline>
-  implemented: src/orders/handler.py@<service-baseline>
-  consumed: checkout-ui@<consumer-baseline>
-```
+  architecture_revision: RF-012@rev4
+  declared_revision: openapi.yaml@service_baseline_sha
+  implementation_revision: src/orders/handler.py@service_baseline_sha
+  consumer_revision: checkout-ui@consumer_baseline_sha
 
-and:
-
-```text
 CC-017
 compared_views:
-  declared: openapi.yaml@<service-baseline>
-  implemented: src/orders/handler.py@<service-baseline>
-  consumed: checkout-ui@<consumer-baseline>
-  tested: tests/orders/...@<service-baseline>
+  declared_revision: openapi.yaml@service_baseline_sha
+  implementation_revision: src/orders/handler.py@service_baseline_sha
+  consumer_revision: checkout-ui@consumer_baseline_sha
+  tested_revision: tests/orders/test_orders.py@service_baseline_sha
 ```
 
-- [ ] **Step 2: Define impact routing**
+`service_baseline_sha` and `consumer_baseline_sha` are canonical persisted field names populated with concrete revision values at runtime; they are not literal placeholder values.
 
-Required rules:
+- [ ] **Step 2: Encode impact routing**
 
 ```text
 tests-only change
   -> revalidate affected TM/MAT/GAP
-  -> do not automatically invalidate BC
+  -> BC remains valid unless independent semantic evidence says otherwise
 
 implementation or declared-contract change
   -> revalidate affected IMPLEMENTED/DECLARED views
@@ -481,18 +456,13 @@ implementation or declared-contract change
 consumer-only change
   -> revalidate affected CONSUMED views
   -> revalidate consumer-facing simulator/E2E projections as needed
-  -> service repository may remain unchanged
 ```
 
 A changed bound file triggers impact analysis, not automatic semantic invalidation of every related BC.
 
 - [ ] **Step 3: Re-run PS-85**
 
-Expected:
-
-```text
-PS85_GREEN_IMPACT_DRIVEN_REVALIDATION
-```
+Expected: `PS85_GREEN_IMPACT_DRIVEN_REVALIDATION`.
 
 - [ ] **Step 4: Commit freshness integration**
 
@@ -511,12 +481,10 @@ git commit -m "feat: add test engineering revalidation rules"
 - Modify: `capabilities/test-review/SKILL.md`
 
 **Interfaces:**
-- Consumes: accepted `BC-*`, selected outputs, dependency DAG.
-- Produces: deterministic dependency strategies, simulator consumer/control-plane contract, and E2E selection rules.
+- Consumes: accepted BCs and selected outputs.
+- Produces: dependency strategy, simulator boundaries, and E2E selection rules.
 
 - [ ] **Step 1: Encode dependency strategy vocabulary**
-
-Use exactly:
 
 ```text
 REAL_DISPOSABLE
@@ -527,13 +495,11 @@ TEMP_RESOURCE
 NOT_REQUIRED
 ```
 
-Preserve the rule:
+Require a reason per material dependency and preserve:
 
 ```text
 Mock external uncertainty, not the behavior under test.
 ```
-
-Require a reason per material dependency.
 
 - [ ] **Step 2: Encode the two simulation classes**
 
@@ -545,7 +511,7 @@ Service Simulator
   -> simulation of the reviewed service for its consumers
 ```
 
-Service Simulator must support a real consumer-protocol surface where relevant and a separate test-only control plane. Illustrative control endpoints may include:
+The simulator exposes relevant real consumer protocols and a separate test-only control plane. Illustrative controls:
 
 ```text
 /__test/health
@@ -555,28 +521,24 @@ Service Simulator must support a real consumer-protocol surface where relevant a
 /__test/seed
 ```
 
-Simulator scenarios must carry `BC-*` provenance and the relevant contract view/authority classification; they must not be generated blindly from Swagger alone.
+Simulator scenarios carry `BC-*` provenance and relevant contract-view/authority classification. Do not generate them blindly from Swagger alone.
 
-- [ ] **Step 3: Encode E2E selection rule**
+- [ ] **Step 3: Encode E2E selection contract**
 
-Require source `BC-*`, real participating components, allowed simulators/fakes, initial state, stimulus, material assertions, failure observability, cleanup/reset, CI suitability, and cost where useful.
+Each E2E design states source `BC-*`, participating real components, allowed simulators/fakes, initial state, stimulus, material assertions, failure observability, cleanup/reset, CI suitability, and execution cost where useful.
 
 Prefer a smaller test boundary when it proves the same material behavior more reliably and cheaply.
 
 - [ ] **Step 4: Re-run PS-86**
 
-Expected:
-
-```text
-PS86_GREEN_SIMULATOR_E2E_BOUNDARIES
-```
+Expected: `PS86_GREEN_SIMULATOR_E2E_BOUNDARIES`.
 
 - [ ] **Step 5: Commit simulator/E2E contract**
 
 ```bash
 git add capabilities/test-review/SKILL.md \
         capabilities/test-review/references/test-engineering-contract.md
-git commit -m "feat: define simulator and e2e test engineering boundaries"
+git commit -m "feat: define simulator and e2e boundaries"
 ```
 
 ---
@@ -585,15 +547,14 @@ git commit -m "feat: define simulator and e2e test engineering boundaries"
 
 **Files:**
 - Create: `tests/test-engineering-capability-validation.md`
-- Modify only if a discovered contract failure requires correction: files from Tasks 2-5.
 
 **Interfaces:**
-- Consumes: PS-81..86, existing PS-79 Test Assurance Summary behavior, current Test Review capability.
-- Produces: one acceptance checklist proving new Test Engineering behavior without regressing the existing assurance layer.
+- Consumes: PS-81..86 and existing PS-79 Test Assurance Summary behavior.
+- Produces: acceptance matrix for the complete capability.
 
-- [ ] **Step 1: Create validation matrix**
+- [ ] **Step 1: Create the validation matrix**
 
-The validation document must require:
+Require:
 
 ```text
 PS-79 remains GREEN
@@ -605,15 +566,15 @@ PS-85 GREEN impact-driven revalidation
 PS-86 GREEN simulator/E2E boundaries
 ```
 
-Also verify static invariants:
+Static invariants:
 
 ```text
 00/01/02 compatibility preserved
-Behavior Model not a user checkbox
+Behavior Model is not a user checkbox
 Contract Verification automatic when applicable
 Contract Consistency Report optional
 accepted BC writer = Behavior Model
-accepted/classified CC writer = Contract Verification
+CC writer = Contract Verification
 CC resolution cannot silently rewrite BC
 USE_EXISTING requires accepted/fresh dependency slice
 PROJECTION_REPAIR cannot alter BC/CC/MAT/TM/GAP semantics
@@ -621,23 +582,21 @@ PROJECTION_REPAIR cannot alter BC/CC/MAT/TM/GAP semantics
 
 - [ ] **Step 2: Run all pressure scenarios in fresh contexts**
 
-Do not treat a textual inspection of the Skill as behavioral validation. Record actual result/verdict for each scenario and preserve any new rationalizations found during GREEN testing.
+Record actual verdicts and any new rationalizations. Do not substitute static reading for behavioral validation.
 
-- [ ] **Step 3: Run a compatibility canary for existing Test Review-only use**
+- [ ] **Step 3: Run a Test Review-only compatibility canary**
 
-Prompt a fresh agent for only Test Assurance on a fixture/project with no request for simulator/E2E/environment design.
-
-Expected behavior:
+Request only Test Assurance. Expected:
 
 ```text
-produces/targets 00 + 01
-02 only if Test Plan selected
-no forced 03-08 outputs
-no unnecessary Contract Consistency Report
-no silent optional capability expansion
+00 + 01 are produced/targeted
+02 only when Test Plan is selected
+03-08 are not forced
+Contract Consistency Report is not forced
+no substantial optional capability is silently enabled
 ```
 
-- [ ] **Step 4: Commit validation contract and any minimal corrections**
+- [ ] **Step 4: Commit validation evidence**
 
 ```bash
 git add tests/test-engineering-capability-validation.md \
@@ -656,15 +615,13 @@ git commit -m "test: validate test engineering capability"
 
 **Files:**
 - Modify: `README.md`
-- Modify: `capabilities/test-review/SKILL.md` only if final wording needs non-semantic projection cleanup.
+- Modify only for non-semantic entrypoint cleanup if required: `capabilities/test-review/SKILL.md`
 
 **Interfaces:**
-- Consumes: accepted GREEN capability contract from Task 6.
-- Produces: user-facing documentation that describes, but does not redefine, Test Engineering behavior.
+- Consumes: accepted GREEN capability contract.
+- Produces: user-facing documentation that describes, but does not redefine, capability behavior.
 
-- [ ] **Step 1: Update README capability description**
-
-Explain that Test Review now supports broader Test Engineering outputs while preserving Test Assurance as the required base. Show the selectable outputs:
+- [ ] **Step 1: Document selectable outputs**
 
 ```text
 Test Assurance
@@ -676,15 +633,15 @@ Service Simulator Implementation Plan
 E2E Test Plan
 ```
 
-Explain briefly that Behavior Model and applicable Contract Verification are internal gates rather than user checkboxes.
+Explain that Behavior Model and materially applicable Contract Verification are internal gates, not user checkboxes.
 
-- [ ] **Step 2: Document output package**
+- [ ] **Step 2: Document output package `00` through `08`**
 
-Show `00` through `08`, mark optional files, and explain that authoritative working ledgers remain under `working/` while numbered documents are user-facing projections.
+Mark optional artifacts and state that authoritative working ledgers remain under `working/` while numbered documents are projections.
 
-- [ ] **Step 3: Document Swagger/OpenAPI comparison without claiming Swagger is always authoritative**
+- [ ] **Step 3: Document Swagger/OpenAPI comparison correctly**
 
-Use wording equivalent to:
+Use this semantic rule:
 
 ```text
 When an external declared contract exists, Test Engineering compares it with
@@ -693,9 +650,9 @@ mismatch is recorded and adjudicated; no source wins merely because it is
 newer, executable, or machine-readable.
 ```
 
-- [ ] **Step 4: Re-run PS-79 and PS-81..86 after documentation changes**
+- [ ] **Step 4: Re-run PS-79 and PS-81..86**
 
-Expected: all previously accepted GREEN verdicts remain GREEN.
+Expected: all accepted GREEN verdicts remain GREEN.
 
 - [ ] **Step 5: Commit documentation**
 
@@ -710,34 +667,33 @@ git commit -m "docs: document test engineering capability"
 
 Before declaring implementation complete:
 
-- [ ] `git status --short` shows only expected state or is clean after commits.
-- [ ] The implementation is based on `docs/superpowers/specs/2026-09-03-test-engineering-capability-design.md` and does not introduce semantics absent from the approved design.
+- [ ] `git status --short` is clean after the final commit.
+- [ ] Implementation matches `docs/superpowers/specs/2026-09-03-test-engineering-capability-design.md`.
 - [ ] RED evidence exists for PS-81..86 from before behavior-changing Skill edits.
-- [ ] GREEN evidence exists for PS-81..86 after the edits.
-- [ ] Existing PS-79 Test Assurance Summary behavior remains GREEN.
-- [ ] `capabilities/test-review/SKILL.md` remains concise enough to serve as the entrypoint; heavy semantics live in `capabilities/test-review/references/test-engineering-contract.md`.
-- [ ] No output selection silently enables substantial optional work.
-- [ ] Swagger/OpenAPI is treated as `DECLARED`, not automatic truth.
-- [ ] `BC-*` contains behavior/provenance/authority but not executable-test evidence verdicts.
+- [ ] GREEN evidence exists for PS-81..86 after changes.
+- [ ] Existing PS-79 remains GREEN.
+- [ ] `capabilities/test-review/SKILL.md` remains concise; heavy semantics live in `capabilities/test-review/references/test-engineering-contract.md`.
+- [ ] Swagger/OpenAPI remains `DECLARED`, not automatic truth.
+- [ ] `BC-*` does not own executable-test evidence verdicts.
 - [ ] `CC-*` and `GAP-*` remain independent.
-- [ ] `EXTEND` and `REVALIDATE` execute the minimum affected dependency slice.
-- [ ] Consumer-repository freshness is supported independently of service-repository freshness.
-- [ ] Service Simulator and dependency substitutes remain distinct concepts.
+- [ ] `EXTEND` and `REVALIDATE` use the minimum affected dependency slice.
+- [ ] Consumer-repository freshness works independently of service-repository freshness.
+- [ ] Dependency substitutes and Service Simulator remain distinct.
 - [ ] Simulator consumer plane and test-control plane remain separate.
-- [ ] E2E can exist without a Service Simulator when topology does not require one.
-- [ ] `00/01/02` compatibility behavior is preserved.
+- [ ] E2E can exist without Service Simulator when topology does not require it.
+- [ ] `00/01/02` compatibility remains intact.
 - [ ] README is only a projection of accepted capability semantics.
 
-Expected final implementation verdict:
+Expected final verdict:
 
 ```text
 TEST_ENGINEERING_CAPABILITY_IMPLEMENTED
 ```
 
-If any behavioral scenario remains RED or INCONCLUSIVE, return instead:
+If any behavioral scenario remains RED or INCONCLUSIVE, return:
 
 ```text
 TEST_ENGINEERING_CAPABILITY_NOT_ACCEPTED
 ```
 
-with the exact blocking scenario(s); do not weaken the scenario contract merely to obtain a GREEN result.
+with the exact blocking scenario IDs. Do not weaken a scenario contract merely to obtain GREEN.
