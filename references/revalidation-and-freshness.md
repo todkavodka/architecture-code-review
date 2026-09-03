@@ -1,9 +1,10 @@
 # Revalidation and compact-state freshness
 
-Этот файл является авторитетным контрактом для двух cross-cutting случаев, подтверждённых pressure validation:
+Этот файл является авторитетным контрактом для трёх cross-cutting случаев, подтверждённых pressure validation:
 
 1. projection-only correction не должна автоматически перезапускать technical audit;
-2. compact persisted state не может использоваться downstream, если он stale относительно owning accepted authority.
+2. compact persisted state не может использоваться downstream, если он stale относительно owning accepted authority;
+3. отдельный `PROJECTION_REPAIR` intent должен исправлять только пользовательскую проекцию принятого аудита и останавливаться при semantic drift.
 
 Не применяй этот контракт для переопределения обычной scope discipline, fresh-context review или As-Built coverage: эти поведения уже покрываются существующими reference contracts.
 
@@ -39,6 +40,92 @@ Fresh-context означает независимое judgement, а не обя�
 ```text
 TECHNICAL_REVALIDATION_REQUIRED
 ```
+
+## 1.1 `PROJECTION_REPAIR` session flow
+
+`PROJECTION_REPAIR` — orchestration intent для повторного входа в уже принятый audit package, когда пользователь хочет исправить только качество финальных/пользовательских документов.
+
+Он использует `PROJECTION_REVALIDATION` как validation mechanism, но отличается от обычного editorial correction loop тем, что является отдельным startup intent и может быть выбран позже, уже после `COMPLETE`.
+
+Предусловия:
+
+```text
+accepted audit package exists
+accepted technical authority is reusable and revision-bound
+selected project baseline has no unresolved source change requiring REVALIDATE
+requested work is presentation/projection-only
+```
+
+Минимальный flow:
+
+```text
+PROJECTION_REPAIR
+→ identify requested/broken final projections
+→ bind each projection to current accepted authority refs
+→ build projection issue list
+→ repair only allowed presentation surface
+→ validate links/Markdown/terminology/Mermaid/reference consistency
+→ PROJECTION_REVALIDATION per changed projection
+→ PROJECTION_REPAIR_COMPLETE | TECHNICAL_REVALIDATION_REQUIRED
+```
+
+Разрешённая область включает:
+
+- язык, грамматику и читаемость;
+- структуру заголовков и секций;
+- Markdown tables/lists/navigation;
+- relative links и cross-links;
+- orphan/malformed references к уже существующим RF/SER/TASK/target identifiers;
+- дубликаты и stale presentation, если current accepted authority однозначно указывает замену;
+- Mermaid syntax/renderability и layout без изменения изображённого accepted mechanism;
+- согласование терминологии и названий между финальными документами;
+- пересборку summary/index/navigation как projection accepted authority.
+
+Не разрешено без возврата в technical gate:
+
+- менять evidence;
+- менять root identity/boundary;
+- менять severity/exploitability;
+- менять owner или lifecycle/target invariant;
+- менять product-intent status;
+- менять finding disposition;
+- добавлять новый finding/root/target mechanism;
+- менять roadmap prerequisite/dependency/gate;
+- менять security assumption или safe-activation semantics;
+- скрывать source/baseline changes, которые требуют `REVALIDATE`.
+
+Для каждого изменённого artifact/section зафиксируй:
+
+```text
+artifact
+changed_section_or_range
+projection_issue_ids
+accepted_authority_refs
+validation_checks
+projection_revalidation_result
+```
+
+Projection-level verification выбирается по изменению, но включает применимые проверки:
+
+- relative links resolve;
+- Markdown structure coherent;
+- identifiers/references exist and point to current accepted authority;
+- no stale/superseded projection survives;
+- terminology/language consistent;
+- Mermaid blocks parse/render when compatible tooling is available;
+- final status/summary wording remains consistent with accepted technical gates.
+
+Если совместимый Mermaid validator/renderer отсутствует, сохрани `MERMAID_RENDER_VALIDATION_UNAVAILABLE`; не называй render validation успешной.
+
+Успешный projection repair возвращает:
+
+```text
+PROJECTION_REPAIR_COMPLETE
+technical_semantics_changed: false
+technical_gates_reopened: false
+```
+
+Это не означает fresh technical verification. Project baseline не меняется только потому, что review-документы были исправлены.
 
 ## 2. Semantic drift gate
 
@@ -172,10 +259,11 @@ concrete correctness trigger and is persisted in the handoff.
 
 ## 6. Pressure-regression mapping
 
-Этот контракт существует только для подтверждённых baseline gaps:
+Этот контракт существует для подтверждённых baseline gaps:
 
 - PS-41 → `PROJECTION_REVALIDATION` предотвращает source/technical-gate restart для presentation-only correction;
-- PS-42B → revision/status binding блокирует stale compact projection до downstream dispatch.
+- PS-42B → revision/status binding блокирует stale compact projection до downstream dispatch;
+- PS-80 → `PROJECTION_REPAIR` делает projection-only repair first-class startup intent и сохраняет semantic drift gate.
 
 PS-39, PS-40 и PS-43 были baseline-compliant и не являются основанием для добавления новых orchestration restrictions.
 
