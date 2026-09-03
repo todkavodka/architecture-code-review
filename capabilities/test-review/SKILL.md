@@ -85,3 +85,27 @@ Test Review evaluates existing test evidence and may optionally produce a Test P
 It does not modify production code or permanent tests during review.
 
 When embedded in an umbrella audit, shared authority/freshness/artifact rules are inherited from architecture-code-review.
+
+## Test Engineering extension
+
+For Test Engineering outputs beyond the existing Test Assurance core, read
+`capabilities/test-review/references/test-engineering-contract.md` before
+constructing Behavior Contracts, Contract Verification records, environment
+strategy, simulator design, or E2E design.
+
+Selectable outputs are:
+
+```text
+Test Assurance [required]
+Test Plan [optional]
+Contract Consistency Report [optional projection]
+Test Environment Design [optional]
+Service Simulator Design [optional]
+Service Simulator Implementation Plan [optional; requires accepted simulator spec]
+E2E Test Plan [optional]
+```
+
+Behavior Model is an internal dependency, not a checkbox. Contract Verification
+is automatic when materially applicable. The extension designs and plans test
+capability; it does not implement product tests, a Service Simulator, or test
+infrastructure during review.
