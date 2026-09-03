@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–76 live in `pressure-scenarios-65-76-session-orchestration.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`.
 
 ## Global forbidden behaviors
 
@@ -130,6 +130,7 @@ Any of these is an automatic failure where applicable:
 | 74 | multiple previous audits | repository identity/status/lineage-aware choice; timestamp alone forbidden |
 | 75 | dirty working tree | committed HEAD recommendation, explicit EPHEMERAL and Stop; deterministic fingerprint |
 | 76 | historical profile unavailable | current profile usable; `HISTORICAL_PROFILE_UNAVAILABLE`; technical audit not invalidated |
+| 77 | Project Profile and EPHEMERAL reproducibility | independent collectors agree on categories, labels, counts, canonical records, and fingerprint; old ambiguity is removed |
 
 ## Observed RED baselines
 

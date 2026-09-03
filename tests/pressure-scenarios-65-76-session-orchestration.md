@@ -62,3 +62,27 @@ Verdicts: `PS75_GREEN_DIRTY_TREE_BASELINE_CHOICE` | `PS75_RED_DIRTY_TREE_AMBIGUO
 GREEN: current Project Profile remains usable; historical state is `HISTORICAL_PROFILE_UNAVAILABLE`; accepted technical audit is not invalidated solely for this metadata gap.
 RED: invent old statistics or reopen technical gates because historical profile cannot be reconstructed.
 Verdicts: `PS76_GREEN_HISTORICAL_PROFILE_FAILS_OPEN_METADATA_ONLY` | `PS76_RED_HISTORICAL_PROFILE_INVENTED_OR_INVALIDATES` | `PS76_INCONCLUSIVE`
+
+## PS-77 Project Profile and EPHEMERAL reproducibility
+Fixture: tracked source, tracked unknown-extension text, tracked binary,
+generated file, vendored/dependency file, build artifact, deleted tracked file,
+modified tracked file, untracked file, a path containing spaces or non-ASCII
+characters, LF and CRLF text, and UTF-8 text with non-ASCII characters.
+
+GREEN: two independent compliant collectors derive the same classification,
+language labels, file/line/character counts, canonical EPHEMERAL record set, and
+EPHEMERAL fingerprint.
+
+RED: the contract permits multiple different but equally valid results because
+classification, decoding, line/character counting, serialization, digest,
+path/status handling, or deletion/untracked representation is unspecified.
+
+Pre-remediation contract-level RED demonstration: the old contract allowed one
+collector to treat `docs/data.bin` as binary by extension while another used
+content inspection; it also allowed different newline/Unicode counting and
+unspecified path/status serialization, each producing different valid totals or
+fingerprints under the old wording. No executable collector runtime exists, so
+this is not a runtime GREEN result.
+
+Verdicts: `PS77_GREEN_DETERMINISTIC_PROFILE_AND_FINGERPRINT` |
+`PS77_RED_AMBIGUOUS_PROFILE_OR_FINGERPRINT` | `PS77_INCONCLUSIVE`

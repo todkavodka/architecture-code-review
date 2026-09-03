@@ -115,13 +115,116 @@ excluded:
   binaries
 ```
 
-The local collector uses substantive tracked files as its primary inventory. It processes bytes locally and does not require putting each file into model context. Classification is deterministic and ordered:
+The local collector uses substantive tracked files as its primary inventory. For a
+commit-bound baseline, inventory is the exact Git tree at
+`collected_for_revision`; current working-tree content is never substituted. It
+processes bytes locally and does not require putting each file into model
+context. Every file belongs to exactly one primary classification bucket, using
+repository-relative POSIX-style paths with path separators normalized to `/`.
+Paths are not case-folded. Classification precedence is exactly:
 
 ```text
-binary → generated → vendor/dependency → build artifact → substantive text
+1. binary
+2. generated
+3. vendor/dependency
+4. build artifact
+5. substantive text
 ```
 
-Known binary content is excluded from text line/character totals. Known generated, vendor/dependency, and build paths or markers are excluded from primary totals and counted separately. Recognized source, document, and config extensions map to deterministic language labels; unknown text types map to `Other Text`, never silently disappear.
+### Deterministic classification
+
+A tracked or snapshot file is binary when Git identifies it as binary for diff
+purposes while the relevant Git object is available, or when its first 8192 raw
+bytes contain a NUL byte. Binary classification never comes from an extension
+alone. A binary file is counted only in `excluded.binaries`; it contributes no
+text lines or characters.
+
+A non-binary file is generated when its normalized path has a component exactly
+equal to `generated`, `gen`, or `dist-generated`; when repository-declared
+metadata available in the inspected tree marks it
+`.gitattributes linguist-generated=true`; or when one of its first five logical
+text lines contains one of these exact case-insensitive markers:
+`@generated`, `generated file`, `do not edit`, or `code generated`. Explicit
+repository-declared generated/source metadata is evaluated before heuristic
+marker matching and wins over it. Repetitive-looking content is not a rule.
+
+A non-binary, non-generated file is vendor/dependency material when a normalized
+path component exactly equals one of `node_modules`, `vendor`, `vendors`,
+`third_party`, `third-party`, `deps`, `dependencies`, `packages-cache`,
+`.venv`, or `venv`, or when it is Git submodule content in the inspected tree.
+The project-owned source directory `packages/` is not dependency material by
+name alone.
+
+A remaining file is a build artifact when a normalized path component exactly
+equals one of `build`, `dist`, `out`, `target`, `coverage`, `.next`, `.nuxt`, or
+`.cache`. Repository metadata explicitly marking material under such a path as
+non-generated/source-owned overrides this path rule; without that metadata the
+path rule wins.
+
+Everything else that decodes as text is substantive text. If UTF-8 decoding
+fails, a non-binary file is classified as binary for Project Profile purposes.
+
+### Deterministic language mapping and text counts
+
+Language mapping is filename-first, case-sensitive, and never uses model
+inference:
+
+| Filename suffix | Language |
+|---|---|
+| `.py` | Python |
+| `.js`, `.mjs`, `.cjs` | JavaScript |
+| `.ts`, `.tsx` | TypeScript |
+| `.jsx` | JavaScript JSX |
+| `.rs` | Rust |
+| `.go` | Go |
+| `.java` | Java |
+| `.kt`, `.kts` | Kotlin |
+| `.c` | C |
+| `.h` | C Header |
+| `.cpp`, `.cc`, `.cxx` | C++ |
+| `.hpp`, `.hh`, `.hxx` | C++ Header |
+| `.cs` | C# |
+| `.rb` | Ruby |
+| `.php` | PHP |
+| `.swift` | Swift |
+| `.sh`, `.bash` | Shell |
+| `.ps1` | PowerShell |
+| `.sql` | SQL |
+| `.html`, `.htm` | HTML |
+| `.css` | CSS |
+| `.scss` | SCSS |
+| `.less` | Less |
+| `.vue` | Vue |
+| `.svelte` | Svelte |
+| `.md`, `.markdown` | Markdown |
+| `.rst` | reStructuredText |
+| `.json` | JSON |
+| `.yaml`, `.yml` | YAML |
+| `.toml` | TOML |
+| `.xml` | XML |
+
+Exact filenames map as follows: `Dockerfile` → Dockerfile, `Makefile` → Make,
+`CMakeLists.txt` → CMake, `requirements.txt` → Requirements,
+`pyproject.toml` → TOML, and `package.json` → JSON. For text files not matched
+by these exact filename or suffix rules, language is `Other Text`; unknown text
+extensions are never discarded.
+
+Decode text as UTF-8. Remove a UTF-8 BOM before counting, then normalize CRLF
+and lone CR to LF. Character count is Unicode scalar value/code point count
+after those transformations, not byte count. Empty text has zero lines;
+otherwise line count is the number of LF characters plus one when normalized
+text does not end in LF. Thus `""` → 0, `"a"` → 1, `"a\\n"` → 1,
+`"a\\nb"` → 2, and `"a\\nb\\n"` → 2.
+
+Each substantive text file contributes exactly one to `substantive.files` and
+one to exactly one `languages.<language>.files` bucket. Excluded files
+contribute only their exclusion-category file count; the approved schema does
+not invent excluded line/character totals.
+
+For historical backfill, collect from the historical Git tree/object content.
+If required Git objects are unavailable, record
+`HISTORICAL_PROFILE_UNAVAILABLE`; do not substitute current filesystem content
+or partially reconstruct historical statistics.
 
 Profile lifecycle is:
 
@@ -151,10 +254,65 @@ Committed-HEAD-only records dirty state but excludes uncommitted paths from the 
 ```text
 git_revision: <commit>
 working_tree_snapshot: <deterministic fingerprint>
+working_tree_snapshot_algorithm: sha256-v1
 baseline_type: EPHEMERAL
 ```
 
-The fingerprint is a digest over sorted bytewise repository-relative changed or untracked paths, their content digests, and tracked-file status. Timestamps are not inputs. EPHEMERAL is never equivalent to a reproducible commit baseline. If the snapshot cannot later be reconstructed, resume/revalidation reports that limitation rather than claiming full recoverability.
+### Canonical EPHEMERAL snapshot
+
+The snapshot record set contains modified, added, deleted, renamed, and
+type-changed tracked files, plus untracked files not ignored by Git. Ignored
+files are excluded. Use repository-relative POSIX-style paths, with separators
+normalized to `/`, and do not case-fold them. Normalize Git status letters to
+these canonical states: modified `M`, tracked addition `A`, deletion `D`,
+rename `R`, type change `T`, and untracked `U`. A rename is one record with the
+old and new path and the new-content digest. A deletion has
+`content_digest = -`; no digest is computed for it. If Git exposes composite
+status letters, map them to the applicable canonical semantic state before
+serialization.
+
+For status inventory, use Git's porcelain status with rename detection fixed at
+50% similarity. A reported rename is normalized to `R`; a copy is represented
+as a tracked addition `A`. Otherwise apply
+the first matching state in this order when composite status letters occur:
+`D`, `T`, `A`, `M`. Untracked entries are `U`. This makes the status mapping
+independent of index/worktree column placement; a rename record always carries
+the old path, new path, and new-content digest.
+
+Content digests are SHA-256 over raw working-tree bytes exactly as present;
+there is no newline normalization. Render digests as lowercase hexadecimal,
+exactly 64 characters. The snapshot fingerprint does not include timestamps,
+inode numbers, filesystem ordering, absolute paths, or other filesystem
+metadata.
+
+Serialize ordinary records as the UTF-8 bytes of:
+
+```text
+STATUS<TAB>PATH<TAB>CONTENT_SHA256<LF>
+```
+
+Serialize a rename as:
+
+```text
+R<TAB>OLD_PATH<TAB>NEW_PATH<TAB>CONTENT_SHA256<LF>
+```
+
+`<TAB>` is ASCII 0x09 and `<LF>` is ASCII 0x0A. Do not escape ordinary spaces
+or non-ASCII UTF-8 path bytes. If a path contains TAB or LF, encode that path
+field using a JSON string with `ensure_ascii=false`, including surrounding
+quotes; apply the rule independently to old and new rename paths. Sort records
+by their complete serialized UTF-8 byte sequence in ascending byte order and
+concatenate them without a header or footer. The final
+`working_tree_snapshot` is the lowercase hexadecimal SHA-256 of those
+concatenated bytes.
+
+If there are no included dirty records, the baseline is not EPHEMERAL and no
+snapshot fingerprint is created. `working_tree_snapshot_algorithm: sha256-v1`
+is stable under `collector_version: 1`; incompatible future hashing changes
+require a new fingerprint algorithm version. EPHEMERAL is never equivalent to
+a reproducible commit baseline. If the snapshot cannot later be reconstructed,
+resume/revalidation reports that limitation rather than claiming full
+recoverability.
 
 ## INDEX projection and reconciliation
 
@@ -170,6 +328,7 @@ previous_baseline
 current_baseline
 baseline_type
 working_tree_snapshot
+working_tree_snapshot_algorithm
 review_suite
 stack_addenda
 project_profile:
