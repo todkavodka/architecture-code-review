@@ -204,3 +204,28 @@ implementation/declared changes affect corresponding views and BC impact; and
 consumer-only changes affect `CONSUMED` views plus consumer-facing
 simulator/E2E projections. A changed file is routing context, not proof of
 semantic impact. No whole-package replay occurs without impact evidence.
+
+Source bindings are revision-bound and populated with concrete values at
+runtime, not literal placeholders:
+
+```yaml
+BC-042:
+  source_bindings:
+    architecture_revision: RF-012@rev4
+    declared_revision: openapi.yaml@service_baseline_sha
+    implementation_revision: src/orders/handler.py@service_baseline_sha
+    consumer_revision: checkout-ui@consumer_baseline_sha
+  service_baseline_sha: <concrete service revision>
+  consumer_baseline_sha: <concrete consumer revision>
+
+CC-017:
+  compared_views:
+    declared_revision: openapi.yaml@service_baseline_sha
+    implementation_revision: src/orders/handler.py@service_baseline_sha
+    consumer_revision: checkout-ui@consumer_baseline_sha
+    tested_revision: tests/orders/test_orders.py@service_baseline_sha
+```
+
+The placeholder names explain the binding shape only; persisted records contain
+actual revisions. A changed binding triggers impact analysis rather than
+automatic invalidation of every related BC.

@@ -359,3 +359,42 @@ Link this overlay to the previous authoritative review rather than regenerating
 the entire report by default. `previous_accepted_evidence_preserved` means the
 impact analysis found no dependency requiring fresh verification. It does not
 mean freshly reread, runtime tested, independently reviewed, or newly proven.
+
+### Test Engineering source-view routing
+
+Test Engineering records concrete revision bindings for each accepted BC and
+CC. A service and consumer may therefore have independent baselines:
+
+```text
+BC-042.source_bindings:
+  architecture_revision
+  declared_revision
+  implementation_revision
+  consumer_revision
+
+CC-017.compared_views:
+  declared_revision
+  implementation_revision
+  consumer_revision
+  tested_revision
+```
+
+For a changed binding, route only the affected view and dependent slice:
+
+```text
+tests-only change
+  → revalidate affected TM/MAT/GAP
+  → BC remains valid unless independent semantic evidence says otherwise
+
+implementation or declared-contract change
+  → revalidate affected IMPLEMENTED/DECLARED views
+  → run CC/BC impact analysis
+
+consumer-only change with unchanged service repository
+  → revalidate affected CONSUMED views
+  → revalidate consumer-facing simulator/E2E projections as needed
+```
+
+A file/path diff is routing context, not semantic proof. Do not restart the
+whole Test Engineering package or unrelated architecture review without impact
+evidence.
