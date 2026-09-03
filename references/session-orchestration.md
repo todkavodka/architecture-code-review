@@ -50,10 +50,10 @@ An unsafe or ambiguous package yields `PREVIOUS_AUDIT_RECONCILIATION_REQUIRED`; 
 
 ## Session Intent
 
-Persist exactly these five intents:
+Persist exactly these six intents:
 
 ```text
-USE_EXISTING | NEW | RESUME | REVALIDATE | EXTEND
+USE_EXISTING | NEW | RESUME | REVALIDATE | EXTEND | PROJECTION_REPAIR
 ```
 
 The recommendation matrix is:
@@ -63,13 +63,27 @@ The recommendation matrix is:
 | no previous audit | `NEW` |
 | `IN_PROGRESS` + same baseline | `RESUME` |
 | `IN_PROGRESS` + changed baseline | `RESUME` with reconciliation |
-| `COMPLETE` + same committed baseline | `USE_EXISTING` |
+| `COMPLETE` + same committed baseline, consume accepted result | `USE_EXISTING` |
+| `COMPLETE` + same committed baseline, repair only final/user-facing documents | `PROJECTION_REPAIR` |
 | `COMPLETE` + changed committed baseline | `REVALIDATE` |
 | new assurance scope/capability/endpoint | `EXTEND` |
 
-`RESUME_WITH_RECONCILIATION` is a flow/recommendation under `RESUME`, never a sixth persisted intent. Explicit `NEW` remains available in every reusable case.
+`RESUME_WITH_RECONCILIATION` is a flow/recommendation under `RESUME`, never a separate persisted intent. Explicit `NEW` remains available in every reusable case.
 
 `USE_EXISTING` performs no technical stage transition solely for startup. It may run metadata-only actions. `REVALIDATE` delegates impact and fresh-evidence semantics to `revalidation-and-freshness.md`; it does not imply a full audit. `EXTEND` adds only the requested assurance scope and does not reopen unrelated accepted stages.
+
+`PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
+
+Typical `PROJECTION_REPAIR` targets include broken relative links, malformed Markdown structure, bad navigation/headings/tables, invalid Mermaid syntax/renderability, inconsistent terminology/language, duplicated or stale presentation text whose accepted replacement is already known, and malformed cross-references to accepted identifiers.
+
+For `PROJECTION_REPAIR`, do not reopen technical discovery, candidate verification, root/severity adjudication, As-Built verification, Target technical review, or Roadmap technical review merely because final documents are being corrected. Load only the accepted authority refs needed to constrain the changed projection. If a requested correction requires changing accepted evidence, root identity/boundary, severity/exploitability, owner, invariant, product-intent status, target mechanism, roadmap prerequisite/dependency/gate, security assumption, or safe-activation semantics, stop the projection path and return:
+
+```text
+SEMANTIC_DRIFT_DETECTED
+TECHNICAL_REVALIDATION_REQUIRED
+```
+
+A completed projection repair does not make preserved technical evidence freshly verified and does not change the project baseline merely because review documents changed.
 
 ## Review Suite Configuration
 
@@ -87,7 +101,7 @@ Stack Addenda
   detected automatically; confirmed before substantive use
 ```
 
-Test Review is a visible capability choice. Lightweight reconnaissance may recommend it when a material automated-test surface exists, but it must never be silently enabled. Stack addenda are lenses, not capabilities. `RESUME` reuses reconciled persisted configuration by default; `REVALIDATE` shows the previous suite as default; `EXTEND` shows only additions.
+Test Review is a visible capability choice. Lightweight reconnaissance may recommend it when a material automated-test surface exists, but it must never be silently enabled. Stack addenda are lenses, not capabilities. `RESUME` reuses reconciled persisted configuration by default; `REVALIDATE` shows the previous suite as default; `EXTEND` shows only additions. `PROJECTION_REPAIR` reuses the accepted suite only to locate and constrain the projections being repaired; it does not reopen configuration choices by default.
 
 ## Project Profile
 
@@ -348,6 +362,12 @@ revalidation:
   affected_capabilities
   preserved_domains
   context_expansions
+projection_repair:
+  requested_artifacts
+  changed_artifacts
+  accepted_authority_refs
+  projection_validation_status
+  semantic_escalation_status
 ```
 
 Legacy packages missing these fields are legacy state requiring additive reconciliation/backfill, not automatically corrupt state. Before downstream use validate owning-artifact freshness and authority as required by `revalidation-and-freshness.md`.
