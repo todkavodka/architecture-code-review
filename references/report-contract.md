@@ -31,6 +31,13 @@ The specialist artifact remains authoritative for its detailed evidence and
 assurance map. The umbrella report may synthesize and link an adjudicated
 cross-capability conclusion, but must not copy the complete specialist report.
 
+For Test Engineering, preserve the compatible `00-test-assurance-summary.md`,
+`01-test-assurance-map.md`, and optional `02-test-plan.md` projections. Extended
+outputs are capability-owned projections `03` through `08`; authoritative
+`BC-*`, `CC-*`, `TM-*`, and `GAP-*` ledgers remain under capability `working/`.
+The numbered files do not become product-behavior authority merely because they
+are generated later.
+
 ## 2. Authority map
 
 - Технические факты As-Built во время исследования: accepted `working/00-...as-built.md`.

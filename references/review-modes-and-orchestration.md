@@ -229,12 +229,37 @@ registry. The following statuses reuse the existing workflow state vocabulary:
 capabilities:
   - id: test-review
     status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
-    endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN
+    endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN  # legacy Test Review input/projection
+    outputs:
+      test_assurance: true
+      test_plan: false
+      contract_consistency_report: false
+      test_environment_design: false
+      service_simulator_design: false
+      service_simulator_implementation_plan: false
+      e2e_test_plan: false
     owning_artifact: <path>
     owning_artifact_revision: <revision>
     dependencies:
       - <artifact/ref + revision>
 ```
+
+For Test Engineering, `outputs` is the persisted configuration authority; the
+legacy `endpoint` is retained only for backward-compatible Test Review packages
+and must not be used as the sole output selection. When normalizing legacy state:
+
+```text
+REVIEW_ONLY
+  → test_assurance=true; every optional output=false
+
+REVIEW_PLUS_TEST_PLAN
+  → test_assurance=true; test_plan=true; every other optional output=false
+```
+
+Normalization is additive and conservative: it never infers an extended output.
+`test_assurance` is required when the capability is enabled. Behavior Model is
+an internal dependency and materially applicable Contract Verification is an
+automatic gate; neither is a persisted user-selected output.
 
 Test Review may be selected initially, recommended from a discovered material test
 surface, or attached to an existing audit. Later attachment resumes from `INDEX`:
@@ -252,6 +277,30 @@ resume INDEX
 
 Adding a capability does not restart unrelated accepted stages by default. A stale
 or disputed dependency blocks downstream use under the freshness contract.
+
+For the Test Engineering extension, the capability registry may project these
+separate outputs and their owning artifacts:
+
+```text
+00-test-assurance-summary.md
+01-test-assurance-map.md
+02-test-plan.md                              # optional compatibility output
+03-behavior-contract-model.md                # when extended model is required
+04-contract-consistency-report.md            # optional projection
+05-test-environment-design.md                # optional
+06-service-simulator-spec.md                 # optional
+07-service-simulator-implementation-plan.md  # optional
+08-e2e-test-plan.md                          # optional
+working/                                     # authoritative BC/CC/TM/GAP ledgers
+```
+
+The registry stores output selection as the independent `outputs` fields above.
+An E2E Test Plan
+requires Test Assurance, the internal Behavior Model, applicable Contract
+Verification, and E2E Design; Service Simulator Design is added only when the
+selected topology requires it. A Service Simulator Implementation Plan requires
+an accepted and fresh simulator specification. `EXTEND` reuses the accepted
+upstream slice instead of replaying the full review.
 
 Capability-owned artifacts may use project-local paths, for example:
 

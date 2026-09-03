@@ -103,6 +103,34 @@ Stack Addenda
 
 Test Review is a visible capability choice. Lightweight reconnaissance may recommend it when a material automated-test surface exists, but it must never be silently enabled. Stack addenda are lenses, not capabilities. `RESUME` reuses reconciled persisted configuration by default; `REVALIDATE` shows the previous suite as default; `EXTEND` shows only additions. `PROJECTION_REPAIR` reuses the accepted suite only to locate and constrain the projections being repaired; it does not reopen configuration choices by default.
 
+When Test Review is selected, its optional Test Engineering outputs are
+persisted as independent booleans, never as a compound mode:
+
+```text
+outputs:
+  test_assurance: true
+  test_plan: false
+  contract_consistency_report: false
+  test_environment_design: false
+  service_simulator_design: false
+  service_simulator_implementation_plan: false
+  e2e_test_plan: false
+```
+
+Behavior Model is an internal dependency, not a user checkbox. Contract
+Verification is automatic when materially applicable. `EXTEND` and
+`REVALIDATE` reuse only the minimum accepted, fresh dependency slice; they do
+not restart unrelated accepted stages.
+
+For legacy Test Review configuration, normalize only the existing endpoint:
+
+```text
+REVIEW_ONLY → test_assurance=true; all optional outputs=false
+REVIEW_PLUS_TEST_PLAN → test_assurance=true; test_plan=true; all other optional outputs=false
+```
+
+The legacy endpoint never implies an extended Test Engineering output.
+
 ## Project Profile
 
 Project Profile is cheap local routing/estimation metadata, not architecture evidence. For v0.3 it uses `schema_version: 1` and `collector_version: 1` and contains:
