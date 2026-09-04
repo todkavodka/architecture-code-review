@@ -123,6 +123,15 @@ COMPLETE + изменившийся HEAD                   -> REVALIDATE
 
 `PROJECTION_REPAIR` не заменяет `REVALIDATE`. Если для исправления Markdown-документа требуется изменить evidence, root cause, severity, ownership, invariant, `BC-*`, `CC-*`, Target Architecture или Roadmap, Skill должен остановить редакционный путь с `SEMANTIC_DRIFT_DETECTED` и `TECHNICAL_REVALIDATION_REQUIRED`.
 
+### Shared Technical Model Foundation
+
+Stage A разделяет общий слой evidence (`WS-*`/`EV-*`), factual Shared
+Technical Model, capability-specific interpretations и human-readable
+projections. `STANDARD_FULL` требует `FULL/COMPACT`, а `FORENSIC` —
+`FULL/FORENSIC`; forensic режим обогащает ту же модель. Technical
+Documentation и As-Built — проекции, не semantic authority. Stage A не
+включает developer onboarding, local setup или “how to run/modify”.
+
 ### Новый аудит (`NEW`)
 
 Architecture Review и Test Engineering настраиваются независимо.
