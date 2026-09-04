@@ -89,8 +89,9 @@ When embedded in an umbrella audit, shared authority/freshness/artifact rules ar
 Before creating or materially revising any behavior, contract, assurance,
 mapping, environment, simulator, or E2E artifact, Test Engineering must derive
 and persist its minimum factual STM dependency slice. The slice must be
-accepted, sufficiently fresh and resolved, and have targeted coverage accepted
-by the Technical Model Gate. For `NEW` this follows STM bootstrap; for
+accepted, sufficiently fresh and resolved, and have its targeted coverage
+accepted by an independent Technical Model Coverage Review after the facts
+pass through the Technical Model Gate. For `NEW` this follows STM bootstrap; for
 `EXTEND` it reuses qualifying existing facts and builds only missing ones; for
 stale or disputed facts it performs Technical Model revalidation first. An
 accepted/fresh `FULL` model satisfies the slice without a duplicate targeted

@@ -202,3 +202,62 @@ reason: final branch contains all Technical Documentation authority dependencies
   changing ancestry would require history rewrite without semantic benefit.
 publication_requirement: before promotion, verify dependencies and relative links.
 ```
+
+## Named legacy regression records
+
+These are static/contract checks (`validation_type: STATIC_CONTRACT`) in the
+local feature worktree. `observed_behavior` is recorded explicitly; no row is
+an application-runtime claim.
+
+| scenario_id | run_id | authoritative_files_inspected | check_or_probe | expected_behavior | observed_behavior | violations | verdict |
+|---|---|---|---|---|---|---|---|
+| PS-39 | static-ps39-2026-09-04-01 | `SKILL.md`; `references/session-orchestration.md` | inspect bounded initial read set | route from persisted state | contract present | none | PASS |
+| PS-40 | static-ps40-2026-09-04-01 | `references/session-orchestration.md`; `references/revalidation-and-freshness.md` | inspect Context Envelope/expansion wording | expansion is reason-bound | contract present | none | PASS |
+| PS-41 | static-ps41-2026-09-04-01 | `references/revalidation-and-freshness.md` | inspect projection fingerprint path | presentation repair preserves semantic fingerprint | contract present | none | PASS |
+| PS-42 | static-ps42-2026-09-04-01 | `references/revalidation-and-freshness.md` | inspect stale owning revision handling | stale compact state is rejected | contract present | none | PASS |
+| PS-43 | static-ps43-2026-09-04-01 | `references/review-method.md`; `references/session-orchestration.md` | inspect omitted-path expansion trigger | narrow review can request bounded expansion | contract present | none | PASS |
+| PS-45 | static-ps45-2026-09-04-01 | `references/discovery-coverage.md` | inspect interpreter inventory/provenance | coverage distinguishes safe/unsafe/ambiguous | contract present | none | PASS |
+| PS-46 | static-ps46-2026-09-04-01 | `references/discovery-coverage.md` | inspect auth/object-scope traces | authentication does not replace authorization | contract present | none | PASS |
+| PS-47 | static-ps47-2026-09-04-01 | `references/discovery-coverage.md` | inspect outbound target/redirect trace | target control is evidence-bound | contract present | none | PASS |
+| PS-48 | static-ps48-2026-09-04-01 | `references/discovery-coverage.md` | inspect cross-version root grouping | versions do not inflate roots | contract present | none | PASS |
+| PS-49 | static-ps49-2026-09-04-01 | `references/discovery-coverage.md` | inspect secret propagation contract | storage does not prove propagation safety | contract present | none | PASS |
+| PS-50 | static-ps50-2026-09-04-01 | `references/discovery-coverage.md` | inspect replay/order/idempotency trace | duplicate effects are material when evidenced | contract present | none | PASS |
+| PS-51 | static-ps51-2026-09-04-01 | `references/discovery-coverage.md` | inspect raw-looking classification | safe constants are not inflated | contract present | none | PASS |
+| PS-52 | static-ps52-2026-09-04-01 | `references/discovery-coverage.md` | inspect amplification/resource trace | exhaustion is distinguished from slowness | contract present | none | PASS |
+| PS-53 | static-ps53-2026-09-04-01 | `references/discovery-coverage.md` | inspect conditional crypto/TLS coverage | absent mechanisms become evidence-backed N/A | contract present | none | PASS |
+| PS-54 | static-ps54-2026-09-04-01 | `references/discovery-coverage.md`; `SKILL.md` | inspect coverage authority reconciliation | contradictory coverage blocks completion | contract present | none | PASS |
+| PS-55 | static-ps55-2026-09-04-01 | `references/discovery-coverage.md` | inspect materiality/precision rules | findings count is not completeness | contract present | none | PASS |
+| PS-56 | static-ps56-2026-09-04-01 | `references/discovery-coverage.md`; `references/revalidation-and-freshness.md` | inspect late correction impact | dependent artifacts stale without global restart | contract present | none | PASS |
+| PS-57 | static-ps57-2026-09-04-01 | `references/review-modes-and-orchestration.md` | inspect capability registry/INDEX resume | later capability uses dependency slice | contract present | none | PASS |
+| PS-58 | static-ps58-2026-09-04-01 | `references/revalidation-and-freshness.md` | inspect owning revision comparison | stale projection reconciles before dispatch | contract present | none | PASS |
+| PS-59 | static-ps59-2026-09-04-01 | `references/shared-assurance-principles.md` | inspect authority conflict state | unresolved conflict remains explicit | contract present | none | PASS |
+| PS-60 | static-ps60-2026-09-04-01 | `references/review-modes-and-orchestration.md` | inspect capability artifact ownership | Test Review owns detailed assurance evidence | contract present | none | PASS |
+| PS-61 | static-ps61-2026-09-04-01 | `references/review-modes-and-orchestration.md` | inspect normal stack routing | stack addenda remain references | contract present | none | PASS |
+| PS-62 | static-ps62-2026-09-04-01 | `references/review-modes-and-orchestration.md` | inspect routing/decision separation | routing context is not substantive evidence | contract present | none | PASS |
+| PS-63 | static-ps63-2026-09-04-01 | `references/review-modes-and-orchestration.md` | inspect dependency-sliced dispatch | narrow context retains provenance | contract present | none | PASS |
+| PS-64 | static-ps64-2026-09-04-01 | `references/review-modes-and-orchestration.md` | inspect asymmetric scope | claims do not exceed exercised scope | contract present | none | PASS |
+| PS-65 | static-ps65-2026-09-04-01 | `references/session-orchestration.md` | inspect COMPLETE/same HEAD route | USE_EXISTING avoids substantive reread | contract present | none | PASS |
+| PS-66 | static-ps66-2026-09-04-01 | `references/session-orchestration.md` | inspect legacy missing profile | metadata backfill does not open technical gates | contract present | none | PASS |
+| PS-67 | static-ps67-2026-09-04-01 | `references/session-orchestration.md` | inspect small-diff route | targeted REVALIDATE only | contract present | none | PASS |
+| PS-68 | static-ps68-2026-09-04-01 | `references/session-orchestration.md` | inspect IN_PROGRESS changed HEAD | RESUME reconciles before dependent gates | contract present | none | PASS |
+| PS-69 | static-ps69-2026-09-04-01 | `references/session-orchestration.md` | inspect boundary-changing diff | affected boundaries only | contract present | none | PASS |
+| PS-70 | static-ps70-2026-09-04-01 | `references/session-orchestration.md` | inspect omitted dependency trigger | CONTEXT_EXPANSION_REQUIRED is explicit | contract present | none | PASS |
+| PS-71 | static-ps71-2026-09-04-01 | `references/session-orchestration.md` | inspect systemic-change route | full re-audit is not automatic | contract present | none | PASS |
+| PS-72 | static-ps72-2026-09-04-01 | `references/revalidation-and-freshness.md` | inspect preservation wording | preserved evidence is not fresh verification | contract present | none | PASS |
+| PS-73 | static-ps73-2026-09-04-01 | `references/session-orchestration.md` | inspect Test Review selection | selection remains visible | contract present | none | PASS |
+| PS-74 | static-ps74-2026-09-04-01 | `references/session-orchestration.md` | inspect previous-audit choice | identity/status/lineage drive choice | contract present | none | PASS |
+| PS-75 | static-ps75-2026-09-04-01 | `references/session-orchestration.md` | inspect dirty-tree handling | committed baseline is recommended | contract present | none | PASS |
+| PS-76 | static-ps76-2026-09-04-01 | `references/session-orchestration.md` | inspect unavailable historical profile | limitation is explicit | contract present | none | PASS |
+| PS-77 | static-ps77-2026-09-04-01 | `references/session-orchestration.md` | inspect profile reproducibility | collectors agree on canonical records | contract present | none | PASS |
+| PS-78 | static-ps78-2026-09-04-01 | `tests/pressure-scenario-78-user-facing-language.md` | inspect language contract | user language and exact IDs coexist | contract present | none | PASS |
+| PS-79 | static-ps79-2026-09-04-01 | `tests/pressure-scenario-79-test-assurance-summary.md`; test-review contracts | inspect assurance summary ownership | summary is projection of accepted evidence | contract present | none | PASS |
+| PS-80 | static-ps80-2026-09-04-01 | `tests/pressure-scenario-80-projection-repair.md`; `references/revalidation-and-freshness.md` | inspect projection-only repair | repair does not change semantics | contract present | none | PASS |
+| PS-81 | static-ps81-2026-09-04-01 | `capabilities/test-review/SKILL.md` | inspect behavior contract boundary | BC remains Test Engineering-owned | contract present | none | PASS |
+| PS-82 | static-ps82-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect CC authority | CC remains contract-verification-owned | contract present | none | PASS |
+| PS-83 | static-ps83-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect drift-vs-gap distinction | contract drift is not auto GAP | contract present | none | PASS |
+| PS-84 | static-ps84-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect dependency slice | minimum upstream slice is reused | contract present | none | PASS |
+| PS-85 | static-ps85-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect revalidation routing | changed views impact only dependent semantics | contract present | none | PASS |
+| PS-86 | static-ps86-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect simulator boundary | simulator is not automatic | contract present | none | PASS |
+| PS-87 | static-ps87-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect output persistence | outputs are independent fields | contract present | none | PASS |
+| PS-88 | static-ps88-2026-09-04-01 | `capabilities/test-review/SKILL.md` | inspect NEW selection | output selection remains explicit | contract present | none | PASS |
+| PS-89 | static-ps89-2026-09-04-01 | `capabilities/test-review/references/test-engineering-contract.md` | inspect EXTEND selection | extension remains minimum-slice | contract present | none | PASS |
