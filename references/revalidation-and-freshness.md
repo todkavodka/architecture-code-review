@@ -280,6 +280,17 @@ PS-39, PS-40 и PS-43 были baseline-compliant и не являются ос�
 
 ## 7. Project-change targeted revalidation
 
+After the semantic delta reaches a stabilized accepted state, projection
+freshness is accounted for by [Projection impact accounting](projection-impact.md).
+That pass consumes revision-bound semantic identities, selector resolution
+snapshots, and contract revisions; changed paths remain routing context rather
+than semantic proof. It persists direct impact and reverse-graph propagation
+before any separately requested regeneration. A successful pass returns
+`PROJECTION_IMPACT_ACCOUNTED`, which means impact is recorded, not that all
+projections are `CURRENT`. If accounting fails technically, accepted semantic
+authority is not rolled back, but projection-sensitive gates remain blocked
+until the impact record is durably reconciled.
+
 `REVALIDATE` binds the previous accepted baseline to the selected current
 baseline and produces a bounded, delta-oriented overlay:
 

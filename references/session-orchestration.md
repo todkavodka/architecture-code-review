@@ -75,6 +75,18 @@ The recommendation matrix is:
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
 
+For `REVALIDATE`, once semantic changes are stabilized, the coordinator runs
+Projection Impact Analysis as a separate accounting step using
+`references/projection-impact.md`. It persists direct exact/selector/contract/
+drift impact and propagates `STALE`/`BLOCKED` through the derived reverse graph
+while preserving the declared `CONSUMER -> PREREQUISITE` edge direction.
+`PROJECTION_IMPACT_ACCOUNTED` records that this evaluation and its freshness
+results were persisted; it does not assert that all projections are current or
+that regeneration occurred. A technical accounting failure does not undo
+accepted semantic work, but blocks projection-sensitive downstream gates until
+accounting succeeds. Repeated passes retain unresolved reasons without
+duplicating them.
+
 Legacy package reconciliation is conservative: an accepted As-Built with no
 STM is valid legacy state, not corruption. `USE_EXISTING` may consume it without
 modernizing; `RESUME` reconciles only the first unfinished dependency;
