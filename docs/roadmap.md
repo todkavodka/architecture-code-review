@@ -54,7 +54,7 @@ capabilities и отдельную модель Test Engineering outputs. `Behav
 ```text
 Current Foundation
        |
-       +--> Stage A Developer Documentation
+       +--> Stage A Shared Technical Model Foundation
        |
        +--> Stage B Audit Projection & Regeneration
        |
@@ -71,33 +71,37 @@ Current Foundation
 Stage B особенно важен для надёжности генерируемых результатов Stage A, C и D,
 но его наличие не отменяет независимые authority и freshness gates этих этапов.
 
-## Stage A — Developer Documentation
+## Stage A — Shared Technical Model Foundation
 
-**Status: `PLANNED`**
+**Status: `COMPLETE`**
 
 ### Purpose
 
-Исследовать возможность создавать и поддерживать техническую документацию для
-разработчиков на основе проверенных сведений о проекте. Документация должна
-помогать незнакомому с проектом разработчику понять систему, не расширяя
-утверждения за пределы доказательств.
+Создать общий слой evidence и устойчивую factual Shared Technical Model (STM),
+которую могут использовать Architecture Review, Test Engineering и Technical
+Documentation. Факты отделены от capability-specific interpretation, а
+человеческие документы остаются проекциями.
 
-### Candidate Discovery scope
+Принятые подэтапы:
 
-Discovery может рассмотреть:
+```text
+A1 Shared Evidence Layer
+A2 Shared Technical Model
+A3 Technical Model Coverage
+A4 Dependency / Index Infrastructure
+A5 Technical Documentation
+A6 As-Built Projection Migration
+A7 Architecture Review Integration
+A8 Legacy Audit Reconciliation
+```
 
-- обзор архитектуры для разработчиков;
-- документацию модулей и компонентов;
-- onboarding и локальную настройку разработки;
-- справочник конфигурации;
-- API и integration documentation;
-- extension points;
-- operational/developer troubleshooting;
-- существенные data/control flows;
-- developer-facing architecture decisions.
+### Scope boundary
 
-Точная taxonomy документов должна быть определена на Stage A Discovery, а не
-предписана этим roadmap.
+Stage A не включает developer onboarding, local setup, “how to run/modify”,
+туториалы или operations handbook. Factual Technical Documentation может
+описывать topology, interfaces, integrations, persistence, trust, flows,
+configuration и failure contracts. Эти ограничения являются частью принятого
+Stage A контракта.
 
 ### Success direction
 
