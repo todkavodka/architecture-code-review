@@ -110,6 +110,13 @@ Stack Addenda
   detected automatically; confirmed before substantive use
 ```
 
+For a full Architecture Review, the selected depth fixes the required Shared
+Technical Model coverage/depth projection: `STANDARD_FULL` requires
+`FULL/COMPACT` and `FORENSIC` requires `FULL/FORENSIC`. Persist the selected
+requirement, but do not represent it as accepted coverage at startup. The
+authoritative matrix, review, and acceptance semantics are in
+[`technical-model-coverage.md`](technical-model-coverage.md).
+
 Test Engineering is a separate startup choice from Architecture Review. When it
 is enabled, `Test Assurance` is the required core and each other listed output
 is selected independently. Lightweight reconnaissance may recommend Test

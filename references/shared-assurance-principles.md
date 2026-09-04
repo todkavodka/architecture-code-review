@@ -41,9 +41,12 @@ of the applicable material targets/domains and account for every item. Selective
 deep inspection is compatible with bounded accounting; sampling, file count,
 test count, or finding count is not a completeness proof.
 
-Architecture Discovery Coverage owns the architecture-domain matrix. A capability
-such as Test Review owns its own assurance-target universe; neither inventory is
-silently substituted for the other.
+Technical Model Coverage owns the bounded factual-domain matrix for the Shared
+Technical Model; Architecture Discovery Coverage owns the architecture-domain
+matrix. A capability such as Test Review owns its own assurance-target universe.
+Neither inventory is silently substituted for another. A full Architecture
+Review needs the accepted factual coverage gate before its architecture
+mechanism analysis; see [Technical Model Coverage](technical-model-coverage.md).
 
 ## 4. Candidate decomposition preserves material contracts
 

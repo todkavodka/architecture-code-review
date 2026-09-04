@@ -2,7 +2,7 @@
 
 Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса. Семантика Shared Technical Model (STM), её factual authority и Technical Model Gate определены в `shared-technical-model.md`.
 
-Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation.
+Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.
 
 ## 1. Стартовый выбор
 
@@ -13,6 +13,11 @@ Discovery Coverage semantics определены в `discovery-coverage.md`; з
 `STANDARD_FULL (полный стандартный аудит)` — полный evidence-first аудит с подробной фактической архитектурой, thematic discovery, Discovery Coverage closeout, независимой проверкой кандидатов, проверкой корневых причин и отдельной оценкой критичности. Рабочие артефакты компактнее, чем в forensic-режиме.
 
 `FORENSIC (углублённое архитектурное расследование)` — максимальная глубина для сложных, конкурентных, security-sensitive или спорных систем. Тематические области исследуются отдельными рабочими проходами, Discovery Coverage имеет отдельный independent gate, история исправлений/опровержений сохраняется подробнее, а gates разделены явно.
+
+Оба режима требуют `FULL` factual STM coverage до full-model downstream use:
+`STANDARD_FULL` — `COMPACT`, `FORENSIC` — `FORENSIC`. Полная семантика
+coverage/depth, сохранение единой schema и independent review принадлежат
+`technical-model-coverage.md`.
 
 Skill может рекомендовать режим, но не должен молча выбирать `FORENSIC`.
 
@@ -110,6 +115,7 @@ working/
 | Концепт | Авторитетный источник |
 |---|---|
 | mode / endpoint / workflow state / resume / subagent handoff | `review-modes-and-orchestration.md` |
+| STM factual domain coverage / mode projection / technical coverage review | `technical-model-coverage.md` |
 | общая evidence-first методика | `review-method.md` |
 | discovery coverage matrix / domains / coverage verdicts / coverage review | `discovery-coverage.md` |
 | ownership/invariants/adversarial scenarios | `ownership-and-scenarios.md` |
@@ -618,6 +624,15 @@ REVALIDATION_REQUIRED on material affected coverage
 ```
 
 Coverage Review не проверяет correctness каждого кандидата; candidate verification не используется как замена coverage review.
+
+## 10a. Technical Model Coverage precondition
+
+For a full Architecture Review, `TECHNICAL_MODEL_COVERAGE_ACCEPTED` from
+`technical-model-coverage.md` is required before Architecture thematic
+discovery or another capability that needs the complete factual substrate.
+`PARTIAL`, `BLOCKED`, or `UNKNOWN` material technical-domain rows block that
+transition; a prose reviewer verdict cannot override them. This is separate
+from the later Architecture Discovery Coverage gate above.
 
 ## 11. As-Built authority
 

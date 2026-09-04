@@ -55,6 +55,14 @@ core; `Behavior Model` is an internal dependency and applicable `Contract
 Verification` is automatic. Optional output projections and ownership are
 defined by the capability contract and registered in `working/INDEX.md`.
 
+For a full Architecture Review, construct the required `FULL` Shared Technical
+Model and accept `TECHNICAL_MODEL_COVERAGE_ACCEPTED` before Architecture
+thematic discovery or another consumer that requires complete factual
+substrate. `STANDARD_FULL` requires `FULL/COMPACT`; `FORENSIC` requires
+`FULL/FORENSIC`. The factual coverage matrix and independent gate are separate
+from Architecture Discovery Coverage and are authoritative in
+`references/technical-model-coverage.md`.
+
 1. Зафиксируй repository baseline и применимые stack addenda. Для `NEW` до запуска capability создай persistent Shared Technical Model baseline по `references/shared-technical-model.md`; создание модели не означает обязательное полное заполнение всех factual slices.
 2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
 3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.
@@ -89,6 +97,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
 - Количество и severity найденных `CAND-*`/`RF-*` не являются evidence полноты discovery.
 - `DISCOVERY_COMPLETE` без `COVERAGE_ACCEPTED` не является accepted downstream input для candidate verification.
+- Для full Architecture Review `TECHNICAL_MODEL_COVERAGE_ACCEPTED` обязателен до thematic discovery; `PARTIAL`, `BLOCKED` или `UNKNOWN` material STM coverage нельзя override prose verdict.
 - Coverage gap исправляется targeted pass/re-review; не перезапускай весь technical audit без impact evidence.
 - `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` не являются принятым coverage state.
 - Independent Coverage Review валидирует owning matrix, но не отменяет её hard row semantics: prose `COVERAGE_ACCEPTED` не может сделать material `PARTIALLY_COVERED`, `BLOCKED` или `REVALIDATION_REQUIRED` accepted downstream state.
@@ -122,6 +131,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
 - shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
 - Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`
+- STM factual-domain coverage / `STANDARD_FULL` and `FORENSIC` projection / Technical Model Coverage Review → `references/technical-model-coverage.md`
 - capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
 - core method / As-Built-first flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
@@ -138,7 +148,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 
 ## Completion Gate
 
-Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
+Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
 
 Если material coverage остаётся `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` запрещён.
 
