@@ -63,3 +63,18 @@ they do not duplicate one observation into capability evidence silos. `WS-*`
 and `EV-*` remain observational records, while capability-owned semantic
 artifacts retain ownership of conclusions. See
 [Shared Evidence Model](shared-evidence-model.md).
+
+## 6. Projection lifecycle does not demote authority
+
+Stage B projections are explicitly classified derived artifacts, not a second
+semantic model. Stable `PRJ-*` identity, verified projection revision, and
+`CURRENT`/`STALE`/`BLOCKED` freshness are lifecycle metadata owned by the
+projection contract. They do not transfer meaning from STM, Architecture
+findings/semantic ledgers, or Test Engineering BC/CC/MAT/TM/GAP authorities.
+
+`working/INDEX.md` remains coordinator-owned workflow authority and is outside
+automatic projection classification. A semantic workflow may finish while a
+dependent projection is `STALE`; projection staleness is loss of freshness
+proof, not proof that the semantic authority is false. Regeneration follows
+authority and never changes it to match projection prose. See
+[Projection lifecycle authority](projection-lifecycle.md).

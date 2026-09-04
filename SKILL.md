@@ -109,6 +109,10 @@ from Architecture Discovery Coverage and are authoritative in
 - Working artifacts могут быть terse/machine-oriented; пользовательские финальные документы обязаны объяснять `что происходит → почему → к чему приводит → что менять` связным человеческим текстом. IDs и shorthand поддерживают объяснение, но не заменяют его.
 - Не меняй production code проекта во время review.
 
+Stage B projections are explicitly classified, stable `PRJ-*` identities; lifecycle state and verified revisions follow `references/projection-lifecycle.md`. `working/INDEX.md` and semantic authorities are outside automatic projection classification.
+
+Semantic workflow may complete with projections `STALE`; projection freshness is not semantic truth, and regeneration never mutates semantic authority.
+
 ## Language Contract
 
 Язык пользовательского интерфейса Skill определяется текущим языком пользователя. Явная просьба использовать конкретный язык имеет приоритет. Если явной просьбы нет, используй язык последнего содержательного запроса пользователя; не переходи на английский только потому, что инструкции Skill или reference-файлы написаны по-английски.
@@ -128,6 +132,7 @@ from Architecture Discovery Coverage and are authoritative in
 - startup / previous-audit selection / session intent / Review Suite startup / Project Profile / dirty baseline → `references/session-orchestration.md`
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
+- Stage B projection identity, lifecycle, revision, freshness, drift, and required-action authority → `references/projection-lifecycle.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
 - shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
 - Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`

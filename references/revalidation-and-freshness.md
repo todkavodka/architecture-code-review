@@ -6,6 +6,17 @@
 2. compact persisted state не может использоваться downstream, если он stale относительно owning accepted authority;
 3. отдельный `PROJECTION_REPAIR` intent должен исправлять только пользовательскую проекцию принятого аудита и останавливаться при semantic drift.
 
+Stage B projection identity, verified revisions, fingerprints, freshness
+states, and required actions are owned by [Projection lifecycle authority](projection-lifecycle.md).
+This file owns the cross-cutting revalidation routing and preserves the
+following distinction:
+
+```text
+semantic freshness != projection freshness
+semantic workflow may finish with stale projections
+projection stale != semantic false
+```
+
 Не применяй этот контракт для переопределения обычной scope discipline, fresh-context review или As-Built coverage: эти поведения уже покрываются существующими reference contracts.
 
 ## 1. Projection-only revalidation
