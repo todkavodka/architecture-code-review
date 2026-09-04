@@ -25,10 +25,13 @@ pressure: classify a derived artifact, a semantic authority, and
 
 required behavior: classification is explicit by contract; `projection !=
 semantic authority`; `working/INDEX.md` is `COORDINATOR_WORKFLOW_AUTHORITY` and
-never receives `PRJ-*` lifecycle, fingerprint, drift, or regeneration state.
+never receives `PRJ-*` identity/lifecycle, fingerprint or drift state,
+regeneration or `RG-*` execution state, projection freshness, or retirement.
 
-forbidden behavior: infer projection status from path/name/`INDEX`; regenerate
-or overwrite `working/INDEX.md`; use a generated index as semantic authority.
+forbidden behavior: infer projection status from path/name/`INDEX`; regenerate,
+retire, fingerprint, or overwrite `working/INDEX.md`; use a generated index as
+semantic authority; place the operational registry/impact/session views at
+the coordinator `working/INDEX.md` path.
 
 expected verdict token: `PS100_RED_EXPLICIT_PROJECTION_CLASSIFICATION_ABSENT`
 
@@ -38,6 +41,23 @@ baseline observation: `RED — required Stage B contract absent/incomplete`.
 Stage A preserves `working/INDEX.md` as persistent workflow authority and
 separates STM facts from projections, but does not define the shared explicit
 projection classification and exclusion contract.
+
+### Task 10 focused static validation — PS-100 coordinator boundary
+
+The Task 10 candidate must be checked with these read-only commands:
+
+```text
+git diff --check <task-10-base> HEAD
+rg -n "COORDINATOR_WORKFLOW_AUTHORITY|working/INDEX\.md|working/projections/(registry|impact|sessions)|PRJ-.*RG-\*|fingerprint.*drift|projection freshness|retired" SKILL.md references tests
+```
+
+The probe must show all Stage B exclusions (`PRJ-*`, fingerprint/drift,
+regeneration, retirement, projection freshness, and `RG-*`) for
+`working/INDEX.md`, plus distinct `working/projections/registry.md`,
+`working/projections/impact.md`, and `working/projections/sessions/RG-*.md`
+operational paths. It must not show any Task 9 capability projection file in
+the candidate diff. This remains static/contract validation; it claims no
+runtime coordinator behavior.
 
 ### PS-101 — Semantic change marks projection stale only
 
@@ -437,8 +457,8 @@ commit. The structural probe binds the result to the candidate diff and checks
 each catalog entry rather than merely searching for representative tokens:
 
 ```text
-git diff --check da3f246..61a85fc
-python3 -c 'from pathlib import Path; import re; td=Path("references/technical-documentation.md").read_text(); tr=Path("capabilities/test-review/references/test-engineering-contract.md").read_text(); assert len(set(re.findall(r"SEL-TECH-DOC-0[0-9]-[^`| ]+",td))) == 10; assert len(set(re.findall(r"SEL-TEST-REVIEW-(?:0[0-9]-BC|0[0-9]-CC|0[0-5]-[A-Z-]+|08-[A-Z-]+)",tr))) == 11; assert "authoritative_record_type: STM_FACT" in td; assert "definition_revision: 1" in td and "definition_revision: 1" in tr; assert tr.count("test_review_scope_id = <persisted TRS>") == 11; assert "optional_members: []" in td and "optional_members: []" in tr; assert "stable_order: semantic_id ASC, revision ASC" in td and "stable_order: semantic_id ASC, revision ASC" in tr; print("candidate=61a85fc technical_doc_selectors=10 test_review_selectors=11 required_schema_fields=present stable_order=present")'
+git diff --check da3f246..c4b34ce
+python3 -c 'from pathlib import Path; import re; td=Path("references/technical-documentation.md").read_text(); tr=Path("capabilities/test-review/references/test-engineering-contract.md").read_text(); tsel=set(re.findall(r"SEL-TECH-DOC-0[0-9]-[^`| ]+",td)); rows=[[p.strip() for p in line.split("|")] for line in tr.splitlines() if line.startswith("| `SEL-TEST-REVIEW-")]; assert len(tsel) == 10; assert len(rows) == 11; assert "authoritative_record_type: STM_FACT" in td; assert "definition_revision: 1" in td and "definition_revision: 1" in tr; assert tr.count("test_review_scope_id = <persisted TRS>") == 11; assert "optional_members: []" in td and "optional_members: []" in tr; assert "stable_order: semantic_id ASC, revision ASC" in td and "stable_order: semantic_id ASC, revision ASC" in tr; assert all((row[1].endswith("-BC") and row[3] == "`TEST_ENGINEERING_SEMANTIC_RECORD`") or (row[1].endswith("-CC") and row[3] == "`TEST_ENGINEERING_CONSISTENCY_RECORD`") or (not row[1].endswith(("-BC", "-CC"))) for row in rows); print("candidate=c4b34ce technical_doc_selectors=10 test_review_selectors=11 selector_rows=11 record_types=bounded required_schema_fields=present stable_order=present")'
 rg -n "PS115_GREEN_CAPABILITY_PACKAGE_SCHEMA|PS116_GREEN_CAPABILITY_SELECTOR_DETERMINISM" tests/projection-regeneration-foundation-validation.md
 ```
 
@@ -456,13 +476,14 @@ Check:
 
 ```text
 rg -n "BC-\*|CC-\*|MAT-\*|TM-\*|GAP-\*|TARGETED STM|Technical Model Gate|DECLARED|IMPLEMENTED|CONSUMED|TESTED" capabilities/test-review/SKILL.md capabilities/test-review/references/test-engineering-contract.md references/technical-model-coverage.md
-rg -n "PS-8[1-9]|PS-99|PS99_GREEN_TEST_ENGINEERING_STM_DEPENDENCY" tests/test-engineering-capability-validation.md tests/shared-technical-model-foundation-validation.md tests/pressure-scenario-99-legacy-and-cross-capability-reuse.md
+rg -n "PS-(8[1-9]|9[0-9])|PS99_GREEN_TEST_ENGINEERING_STM_DEPENDENCY" tests/test-engineering-capability-validation.md tests/shared-technical-model-foundation-validation.md tests/pressure-scenario-99-legacy-and-cross-capability-reuse.md tests/pressure-scenario-9[0-8]-*.md
 ```
 
 Expected behavior: Stage A semantic ownership, targeted STM acquisition,
 independent observation views, and minimum-slice EXTEND/REVALIDATE behavior
 remain explicit. Observed result: the required ownership, gate, dependency,
-and view statements are present; PS-81..89 and PS-99 records remain named and
+and view statements are present; named PS-81..99 records (including PS-90..98
+STM compatibility records and PS-99 cross-capability reuse) are present and
 static-only. Violations: none. Verdict:
 `PS81_99_GREEN_STAGE_A_TEST_ENGINEERING_COMPATIBILITY`.
 
