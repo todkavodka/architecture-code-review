@@ -1,6 +1,6 @@
 # Режимы и управление процессом аудита
 
-Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса.
+Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса. Семантика Shared Technical Model (STM), её factual authority и Technical Model Gate определены в `shared-technical-model.md`.
 
 Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation.
 
@@ -50,6 +50,8 @@ docs/reviews/architecture-review/
 working/
 ├── README.md
 ├── INDEX.md
+├── evidence/                         # shared WS-* worksets
+├── technical-model/                  # persistent STM manifest and facts
 ├── 00-baseline-and-as-built.md
 ├── 00a-as-built-review.md
 ├── 01-discovery-and-scenarios.md
@@ -70,6 +72,8 @@ working/
 working/
 ├── README.md
 ├── INDEX.md
+├── evidence/                         # shared WS-* worksets
+├── technical-model/                  # persistent STM manifest and facts
 ├── 00-baseline-as-built.md
 ├── 00a-as-built-independent-review.md
 ├── 01-invariants-ownership-isolation.md
@@ -150,6 +154,14 @@ project_profile:
   collected_for_revision
   status
   artifact_or_projection_ref
+technical_model:
+  owning_manifest
+  model_revision
+  baseline
+  coverage_requirement
+  depth_requirement
+  coverage_status
+  freshness
 revalidation:
   change_range
   impact_status
@@ -174,6 +186,12 @@ REVALIDATE → delegate project-change evidence semantics to revalidation-and-fr
 EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
 ```
+
+For `NEW`, create the persistent STM manifest and this compact routing
+projection before capability execution. The manifest, not `INDEX.md`, owns the
+model. Model creation does not require complete population: the selected
+downstream requirement determines the initially required factual slice. See
+`shared-technical-model.md` for fact authority and persistence.
 
 Test Review methodology remains in `capabilities/test-review/SKILL.md`; startup
 visibility and selection remain in Session Orchestration.

@@ -30,6 +30,7 @@ START
 → reuse/refresh/backfill Project Profile
 → recommend/select Session Intent
 → context-sensitive Review Suite Configuration
+→ for NEW, persistent STM baseline bootstrap
 → persist/reconcile INDEX
 → substantive workflow
 ```
@@ -165,6 +166,21 @@ and must be explained before execution. In particular, requesting
 first. Requesting only `E2E Test Plan` does not add Service Simulator Design
 unless the selected topology requires it. Behavior Model and applicable
 Contract Verification remain internal dependencies.
+
+## Shared Technical Model bootstrap
+
+After `NEW` configuration is resolved and before any selected capability begins
+substantive execution, create the persistent Shared Technical Model baseline and
+register its compact routing projection in `working/INDEX.md`. This establishes
+the model manifest and selected baseline; it does not require population of a
+complete model when the requested downstream scope needs only a bounded factual
+slice.
+
+STM fact authority, the Technical Model Gate, and persisted model shape belong
+to [Shared Technical Model](shared-technical-model.md). Startup records only
+the routing projection defined by
+[Review Modes and Orchestration](review-modes-and-orchestration.md); it must not
+copy the technical model into `INDEX.md`.
 
 ## Project Profile
 

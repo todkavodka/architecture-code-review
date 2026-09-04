@@ -55,7 +55,7 @@ core; `Behavior Model` is an internal dependency and applicable `Contract
 Verification` is automatic. Optional output projections and ownership are
 defined by the capability contract and registered in `working/INDEX.md`.
 
-1. Зафиксируй repository baseline и применимые stack addenda.
+1. Зафиксируй repository baseline и применимые stack addenda. Для `NEW` до запуска capability создай persistent Shared Technical Model baseline по `references/shared-technical-model.md`; создание модели не означает обязательное полное заполнение всех factual slices.
 2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
 3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.
 4. После принятия As-Built проведи thematic discovery. Используй:
@@ -121,6 +121,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
 - shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
+- Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`
 - capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
 - core method / As-Built-first flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
