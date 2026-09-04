@@ -675,10 +675,12 @@ projection accepted/fresh STM плюс architecture-oriented synthesis, не в�
 technical source of truth.
 
 `01-architecture-review.md` содержит user-facing projection factual STM и
-Architecture Review authority. Если STM revision/coverage или projection
-selector меняется после сборки, зависимые sections считаются stale до повторной
-synthesis/review. `PROJECTION_REPAIR` исправляет только presentation from
-unchanged accepted authority; semantic drift требует technical revalidation.
+рендерит Architecture Review authority из именованных upstream semantic owners;
+он не является единственным местом persistence этой authority. Если STM
+revision/coverage или projection selector меняется после сборки, зависимые
+sections считаются stale до повторной synthesis/review. `PROJECTION_REPAIR`
+исправляет только presentation from unchanged accepted authority; semantic
+drift требует technical revalidation.
 
 Technical Model Coverage Review обязателен в обоих режимах; в `STANDARD_FULL`
 его evidence depth может быть compact. As-Built parity/projection review также
