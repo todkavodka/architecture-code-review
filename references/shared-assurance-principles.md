@@ -52,3 +52,11 @@ separately material behavioral/architectural contract. Rejecting a mechanism doe
 not discard a material contract discovered inside it. Record an explicit
 disposition: represented, unresolved, non-material with reason, or promoted
 through the applicable verification and adjudication gates.
+
+## 5. Shared evidence is reusable, not semantic authority
+
+Capabilities and the STM reuse shared baseline-bound observations by reference;
+they do not duplicate one observation into capability evidence silos. `WS-*`
+and `EV-*` remain observational records, while capability-owned semantic
+artifacts retain ownership of conclusions. See
+[Shared Evidence Model](shared-evidence-model.md).

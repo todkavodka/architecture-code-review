@@ -120,6 +120,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
+- shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
 - capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
 - core method / As-Built-first flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
