@@ -59,8 +59,9 @@ The static checks confirm:
 - persisted output selections distinguish Test Assurance-only, Test Plan, E2E,
   Simulator+E2E, and Contract Consistency Report combinations; legacy endpoints
   normalize without inferring optional outputs.
-- `NEW` exposes direct independent Test Engineering output selection; legacy
-  `REVIEW_ONLY` and `REVIEW_PLUS_TEST_PLAN` are reconciliation inputs only.
+- `NEW` and `EXTEND` expose direct independent Test Engineering output
+  selection; legacy `REVIEW_ONLY` and `REVIEW_PLUS_TEST_PLAN` are reconciliation
+  inputs only.
 
 ## Test Review-only compatibility canary
 
@@ -189,7 +190,7 @@ scenario: PS-88 — NEW Test Engineering output selection
 execution_context: fresh independent read-only Skill pressure run against unchanged current Skill
 observed_response_summary: NEW exposed `Capabilities → Test Review: OFF | REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN`; independent Test Engineering outputs were hidden. No internal-gate exposure or silent enablement was observed.
 expected_behavior: NEW exposes Architecture Review separately from Test Engineering and allows independent output selection persisted directly as `outputs`; legacy endpoint values remain reconciliation-only.
-violations: legacy NEW menu; output selection hidden
+violations: PS88_RED_LEGACY_NEW_MENU; PS88_RED_OUTPUT_SELECTION_HIDDEN
 verdict: PS88_RED_LEGACY_NEW_MENU
 ```
 
@@ -206,11 +207,51 @@ violations: none
 verdict: PS88_GREEN_NEW_OUTPUT_SELECTION
 ```
 
+### PS-89
+
+```text
+run_id: 01a06a53-722e-7643-bd9c-f9152d778f5f
+feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+scenario: PS-89 Case A — EXTEND with Test Engineering OFF
+execution_context: fresh independent read-only Skill pressure run
+observed_response_summary: EXTEND exposed the complete independent Test Engineering output selection, with Behavior Model and applicable Contract Verification hidden as internal dependencies.
+expected_behavior: Allow modern independent output selection when Test Engineering was previously disabled.
+violations: none
+verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
+
+run_id: 01a06a53-71e8-75b3-9674-6f08c3c079eb
+feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+scenario: PS-89 Case B — existing Test Assurance and Test Plan
+execution_context: fresh independent read-only Skill pressure run
+observed_response_summary: Existing Test Assurance and Test Plan were shown separately from the remaining available additions; accepted upstream work was reused and unrelated stages were not restarted.
+expected_behavior: Reconstruct existing outputs, show only additions, and persist the existing selection plus explicit additions.
+violations: none
+verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
+
+run_id: 01a06a53-7273-7642-9197-86688367a495
+feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+scenario: PS-89 Case C — add E2E Test Plan only
+execution_context: fresh independent read-only Skill pressure run
+observed_response_summary: E2E Test Plan was an independent addition; Service Simulator Design remained unselected unless topology required it.
+expected_behavior: Add E2E without automatically adding Service Simulator Design.
+violations: none
+verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
+
+run_id: 01a06a53-7253-7b51-a3c4-bc8b1862fc47
+feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+scenario: PS-89 Case D — add Service Simulator Implementation Plan
+execution_context: fresh independent read-only Skill pressure run
+observed_response_summary: Missing Service Simulator Design was identified as the explained minimum upstream dependency; the implementation plan proceeds only after accepted and fresh simulator design, with no unrelated outputs enabled.
+expected_behavior: Resolve and explain the required simulator-design dependency and persist only the required slice.
+violations: none
+verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
+```
+
 The first PS-84/PS-85 attempts stopped at static inspection; they were not
 scored as final runs. The records above are the subsequent fixture-application
 runs. No private chain-of-thought is retained.
 
-Fresh Skill pressure result: PS-81 through PS-87 GREEN.
+Fresh Skill pressure result: PS-81 through PS-89 GREEN.
 
 Fresh Test Assurance compatibility canary:
 
