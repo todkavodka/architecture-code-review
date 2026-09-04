@@ -21,15 +21,21 @@ semantic_delta:
     - semantic_id: <stable accepted RF/STM/BC/etc. identity>
       previous_revision: <revision or ABSENT>
       current_revision: <revision or ABSENT>
-      change_kind: ADDED | REMOVED | REVISION_CHANGED | STATUS_CHANGED
+      change_kind: ADDED | REMOVED | SUPERSEDED | REVISION_CHANGED | STATUS_CHANGED
       authority_ref: <owning accepted artifact + revision>
   contract_changes:
-    - contract_id: <stable projection contract identity>
+    - contract_change_id: <stable contract-change identity>
+      contract_id: <stable projection contract identity>
+      contract_kind: PROJECTION | SELECTOR
+      selector_id: <selector identity when contract_kind is SELECTOR>
       previous_revision: <revision>
       current_revision: <revision>
       authority_ref: <owning contract authority + revision>
   selector_resolutions:
     - selector_id: <controlled selector identity>
+      contract_change_id: <matching contract_changes identity, or NONE>
+      previous_contract_revision: <revision>
+      current_contract_revision: <revision>
       contract_revision: <revision>
       previous_membership: [<semantic_id>@<revision> ...]
       current_membership: [<semantic_id>@<revision> ...]
@@ -57,22 +63,43 @@ directly impacted when any of these conditions holds:
 
 | Input difference or observation | Required reason | Result |
 |---|---|---|
-| An exact semantic dependency's accepted revision changes, is added, removed, or is no longer fresh | `SEMANTIC_DEPENDENCY_CHANGED` | `STALE`, `REGENERATE` when inputs remain usable |
-| A selector contract revision changes | `PROJECTION_CONTRACT_CHANGED` | `STALE`, `REGENERATE` |
-| Selector resolved membership adds a member | `SELECTOR_MEMBER_ADDED` | `STALE`, `REGENERATE` |
-| Selector resolved membership removes a member | `SELECTOR_MEMBER_REMOVED` | `STALE`, `REGENERATE` |
+| An exact semantic dependency is newly present | `DEPENDENCY_ADDED` | `STALE`, `REGENERATE` when inputs remain usable |
+| An exact semantic dependency is no longer present | `DEPENDENCY_REMOVED` | `STALE`, `REGENERATE` when inputs remain usable |
+| An exact semantic dependency is superseded by another accepted identity | `DEPENDENCY_SUPERSEDED` | `STALE`, `REGENERATE` when inputs remain usable |
+| An exact semantic dependency's accepted revision changes | `DEPENDENCY_REVISION_CHANGED` | `STALE`, `REGENERATE` when inputs remain usable |
+| An exact semantic dependency's accepted freshness/status changes | `DEPENDENCY_FRESHNESS_CHANGED` | `STALE`, `REGENERATE` when inputs remain usable |
+| A projection contract revision changes | `PROJECTION_CONTRACT_CHANGED` | `STALE`, `REGENERATE` |
+| A selector contract revision changes | `SELECTOR_CONTRACT_CHANGED` | `STALE`, `REGENERATE` |
+| Selector resolved membership changes (addition or removal) | `SELECTOR_MEMBERSHIP_CHANGED` | `STALE`, `REGENERATE` |
 | A retained selector member's consumed revision changes | `SELECTOR_MEMBER_REVISION_CHANGED` | `STALE`, `REGENERATE` |
-| A required upstream projection revision changes or freshness is no longer proven | `UPSTREAM_PROJECTION_REVISION_CHANGED` or `UPSTREAM_PROJECTION_STALE` | `STALE`, `REGENERATE` when usable |
+| A required upstream projection revision changes | `UPSTREAM_PROJECTION_REVISION_CHANGED` | `STALE`, `REGENERATE` when usable |
+| A required upstream projection is no longer fresh | `UPSTREAM_PROJECTION_STALE` | `STALE`, `REGENERATE` when usable |
+| A required upstream projection is `BLOCKED` | `UPSTREAM_PROJECTION_BLOCKED` | `BLOCKED`, same owning semantic/contract action as the blocker |
 | Current content differs from the verified fingerprint | `PROJECTION_CONTENT_DIVERGED` | `STALE`, `REGENERATE` |
 | The classified projection file is absent | `PROJECTION_FILE_MISSING` | `STALE`, `REGENERATE` |
-| Required authority is missing, stale, conflicting, or unresolved | `SEMANTIC_AUTHORITY_UNAVAILABLE` | `BLOCKED`, `SEMANTIC_REVALIDATION` |
-| Classification/contract is disputed or insufficient to determine build behavior | `PROJECTION_CONTRACT_UNRESOLVED` | `BLOCKED`, `CONTRACT_ADJUDICATION` |
+| Required authority is missing, stale, conflicting, or unresolved | `DEPENDENCY_FRESHNESS_CHANGED` | `BLOCKED`, `SEMANTIC_REVALIDATION` |
+| Classification/contract is disputed or insufficient to determine build behavior | `PROJECTION_METADATA_INVALID` | `BLOCKED`, `CONTRACT_ADJUDICATION` |
 
-The exact semantic reason may include the affected dependency ID and
-`previous_revision -> current_revision`; the reason code remains stable. A
-selector is re-resolved against accepted authority every pass. Comparing only
-the old member IDs is insufficient because additions, removals, and member
-revision changes all invalidate the consumer's freshness proof.
+The mapping above is deterministic: `accepted_changes.change_kind` maps
+`ADDED` to `DEPENDENCY_ADDED`, `REMOVED` to `DEPENDENCY_REMOVED`,
+`SUPERSEDED` to `DEPENDENCY_SUPERSEDED`, `REVISION_CHANGED` to
+`DEPENDENCY_REVISION_CHANGED`, and `STATUS_CHANGED` to
+`DEPENDENCY_FRESHNESS_CHANGED`. A change that cannot be classified by this
+mapping is unresolved authority and uses `DEPENDENCY_FRESHNESS_CHANGED` with
+`SEMANTIC_REVALIDATION`.
+The exact reason may include the affected dependency ID and
+`previous_revision -> current_revision`; the reason code remains stable.
+
+Selector contract detection is explicit. For every selector resolution, the
+analyzer compares `previous_contract_revision` with
+`current_contract_revision`, requires `contract_change_id` to identify the
+matching `contract_changes` record when they differ, and emits
+`SELECTOR_CONTRACT_CHANGED` for that bound change. `contract_revision` is the
+current consumed revision and must equal `current_contract_revision`; a
+mismatch is `PROJECTION_METADATA_INVALID` with `CONTRACT_ADJUDICATION`. A selector is re-resolved
+against accepted authority every pass. Comparing only old member IDs is
+insufficient because membership and member-revision changes also invalidate
+the consumer's freshness proof.
 
 Direct impact does not rewrite the projection file or create a projection
 revision. It persists at least:
@@ -106,9 +133,12 @@ Propagation rules are:
    `STALE` with `UPSTREAM_PROJECTION_STALE`, unless that dependent is already
    `BLOCKED` for a stronger structural reason.
 2. A required prerequisite that is `BLOCKED` makes each downstream consumer
-   `BLOCKED`; it cannot be regenerated from stale, missing, or conflicting
-   authority. The dependent records the prerequisite and routes to the owning
-   semantic or contract gate.
+   `BLOCKED` with `UPSTREAM_PROJECTION_BLOCKED`; it cannot be regenerated from
+   stale, missing, or conflicting authority. The dependent records the direct
+   prerequisite, preserves the blocker’s owning semantic/contract action, and
+   routes to that same owning gate. This applies both when the prerequisite is
+   observed as blocked during direct evaluation and when `BLOCKED` is reached
+   through reverse-graph propagation.
 3. Optional or informational dependencies do not structurally block a
    consumer. Their impact remains visible and follows the dependency contract's
    declared impact strength.
