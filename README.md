@@ -1151,6 +1151,7 @@ PROJECTION_REPAIR принятого пакета аудита.
 │   ├── pressure-scenario-86-service-simulator-e2e-boundaries.md
 │   ├── pressure-scenario-87-output-selection-persistence.md
 │   ├── pressure-scenario-88-new-test-engineering-selection.md
+│   ├── pressure-scenario-89-extend-test-engineering-selection.md
 │   └── test-engineering-capability-validation.md
 └── docs/
     └── superpowers/
@@ -1200,6 +1201,7 @@ PS-85  точечная повторная проверка по влиянию 
 PS-86  границы Service Simulator и E2E
 PS-87  сохранение независимого выбора результатов
 PS-88  независимый выбор Test Engineering при NEW
+PS-89  выбор Test Engineering при EXTEND
 ```
 
 Результат проверки всегда относится к конкретной ревизии и конкретному сценарию. Старый `GREEN` нельзя считать вечным доказательством для любого будущего `main`.
