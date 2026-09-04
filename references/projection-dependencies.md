@@ -139,11 +139,11 @@ Handle membership and revision changes separately:
 
 ```text
 member added
-  -> record SELECTOR_MEMBER_ADDED
+  -> record SELECTOR_MEMBERSHIP_CHANGED (addition)
   -> mark every dependent projection STALE
 
 member removed
-  -> record SELECTOR_MEMBER_REMOVED
+  -> record SELECTOR_MEMBERSHIP_CHANGED (removal)
   -> mark every dependent projection STALE
 
 member revision changed
