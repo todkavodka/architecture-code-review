@@ -113,6 +113,12 @@ Stage B projections are explicitly classified, stable `PRJ-*` identities; lifecy
 
 Semantic workflow may complete with projections `STALE`; projection freshness is not semantic truth, and regeneration never mutates semantic authority.
 
+`01-architecture-review.md` may be fully generated only after
+`report-contract.md` maps every persistent Architecture meaning to an accepted
+upstream owner; otherwise return
+`PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY` and do not regenerate the
+unmapped content.
+
 ## Language Contract
 
 Язык пользовательского интерфейса Skill определяется текущим языком пользователя. Явная просьба использовать конкретный язык имеет приоритет. Если явной просьбы нет, используй язык последнего содержательного запроса пользователя; не переходи на английский только потому, что инструкции Skill или reference-файлы написаны по-английски.
