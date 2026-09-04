@@ -149,6 +149,46 @@ acceptance. Extracted legacy facts are candidates until evidence and baseline
 validation pass through the Technical Model Gate. A forensic upgrade builds the
 required forensic depth and never relabels compact prose as forensic evidence.
 
+This package-reconciliation compatibility rule is separate from legacy
+projection registration. A pre-Stage-B generated or human-readable artifact
+without accepted `PRJ-*` lifecycle metadata follows the projection registration
+path:
+
+```text
+legacy artifact
+→ identify capability owner
+→ assign PRJ identity
+→ define contract
+→ resolve dependencies
+→ verify against accepted authority
+→ establish fingerprint/revision
+→ CURRENT
+```
+
+`USE_EXISTING` may reuse the surrounding accepted package state, but it does
+not make an unregistered artifact `CURRENT`. The coordinator records the
+registration work and routes it to the owning capability; projection-sensitive
+closeout may consume the artifact only after its registration record, accepted
+dependencies, authority bindings, fingerprint/revision, and `V1`–`V4` evidence
+are present. A readable file, path, age, Git history, or prior human acceptance
+never substitutes for that evidence.
+
+If required authority is absent, stale, conflicting, or unresolved, preserve
+the legacy artifact as non-current context and route
+`SEMANTIC_REVALIDATION`/migration to the owning semantic gate. Do not weaken
+the projection verification gate, infer authority from historical prose, or
+silently convert a legacy As-Built into STM. If the artifact's contract or
+classification is insufficient, route `CONTRACT_ADJUDICATION`; neither outcome
+permits `CURRENT`.
+
+For the legacy Architecture final report, apply the authority inventory in
+[`report-contract.md`](report-contract.md) before registering
+`01-architecture-review.md`. Its historical As-Built, `RF-*`/`SER-*`, Target,
+and Roadmap wording remains non-authoritative until each persistent meaning is
+mapped to a current accepted owner. An unmapped meaning blocks registration;
+the coordinator must not infer an owner from the report or preserve it as a
+hidden authority island.
+
 Typical `PROJECTION_REPAIR` targets include broken relative links, malformed Markdown structure, bad navigation/headings/tables, invalid Mermaid syntax/renderability, inconsistent terminology/language, duplicated or stale presentation text whose accepted replacement is already known, and malformed cross-references to accepted identifiers.
 
 For `PROJECTION_REPAIR`, do not reopen technical discovery, candidate verification, root/severity adjudication, As-Built verification, Target technical review, or Roadmap technical review merely because final documents are being corrected. Load only the accepted authority refs needed to constrain the changed projection. If a requested correction requires changing accepted evidence, root identity/boundary, severity/exploitability, owner, invariant, product-intent status, target mechanism, roadmap prerequisite/dependency/gate, security assumption, or safe-activation semantics, stop the projection path and return:
@@ -528,6 +568,12 @@ projection_repair:
   accepted_authority_refs
   projection_validation_status
   semantic_escalation_status
+legacy_projection_registration:
+  artifact_refs
+  owning_capability
+  registration_status: NOT_REGISTERED | IN_PROGRESS | BLOCKED | REGISTERED
+  blocking_action
+  verified_projection_refs
 ```
 
 Legacy packages missing these fields are legacy state requiring additive reconciliation/backfill, not automatically corrupt state. Before downstream use validate owning-artifact freshness and authority as required by `revalidation-and-freshness.md`.

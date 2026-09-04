@@ -39,6 +39,41 @@ can affect persistent projection lifecycle state:
 the first failing condition (and may record all independent failures) against
 the candidate and its frozen input snapshot.
 
+## 2.1 Legacy registration gate
+
+For a pre-Stage-B artifact without accepted `PRJ-*` lifecycle metadata, the
+existing content is only a registration candidate. The verifier must receive
+the capability owner, stable projection identity, complete projection contract,
+resolved exact dependencies/selectors, and accepted authority references before
+it can evaluate the candidate. The legacy path is:
+
+```text
+legacy artifact
+-> identify capability owner
+-> assign PRJ identity
+-> define contract
+-> resolve dependencies
+-> verify against accepted authority
+-> establish fingerprint/revision
+-> CURRENT
+```
+
+The initial canonical fingerprint and accepted projection revision are persisted
+only after `V1 STRUCTURAL`, `V2 DEPENDENCY / PROVENANCE`, `V3 CONTRACT
+COMPLETENESS`, and `V4 AUTHORITY CONSISTENCY` pass. A readable or parseable
+Markdown file, its path or age, a Git commit, or historical human acceptance is
+not verification evidence and cannot establish `CURRENT`.
+
+If the artifact contains persistent meaning that is not mapped to an accepted
+owning authority, registration fails with
+`PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY` where applicable. Historical
+manual prose remains candidate/context material; it cannot be promoted into
+semantic authority or used to resolve a V4 mismatch. Missing, stale, or
+conflicting required authority leaves the legacy projection `BLOCKED` with
+`SEMANTIC_REVALIDATION` routed to the owning semantic gate. An insufficient or
+disputed contract/classification uses `CONTRACT_ADJUDICATION`. Both outcomes
+publish no accepted revision and cannot be relabeled as `CURRENT`.
+
 ## 3. Bound on V4 and authority blocking
 
 `V4` is a comparison, not semantic adjudication. The verifier may compare

@@ -57,6 +57,59 @@ it a `PRJ-*` identity, or copy/derive its resume-critical coordinator state.
 The path is intentionally distinct from `working/INDEX.md`; neither path nor
 the word `registry` changes explicit classification.
 
+## 1.2 Legacy projection registration
+
+A pre-Stage-B generated or human-readable artifact without accepted `PRJ-*`
+lifecycle metadata is legacy state, not an implicitly current projection. Its
+registration is an additive migration of identity, contract, dependencies, and
+verification metadata; it does not rewrite the artifact or reopen unrelated
+semantic work.
+
+The registration path is:
+
+```text
+legacy artifact
+→ identify capability owner
+→ assign PRJ identity
+→ define contract
+→ resolve dependencies
+→ verify against accepted authority
+→ establish fingerprint/revision
+→ CURRENT
+```
+
+The registration record must bind, at minimum, the artifact kind and declared
+path, owning capability, stable active `PRJ-*` identity, projection contract and
+contract revision, exact dependencies and selector-resolution snapshot, accepted
+authority references and revisions, baseline, and the canonical content
+fingerprint. A retired identity cannot be reused for a different meaning, and
+a Git commit, file timestamp, readable Markdown file, or prior human
+acceptance is not a projection revision.
+
+The existing artifact may be used as the registration candidate, but only after
+the contract and all required authority/dependency bindings are explicit. The
+first accepted `PRJ-*@revN` and fingerprint are established only after the
+candidate passes the applicable `V1`–`V4` verification gates. Therefore:
+
+```text
+readable legacy file != CURRENT
+registered identity != CURRENT
+verified fingerprint/revision + V1..V4 = CURRENT
+```
+
+Historical or human-edited wording remains a candidate or historical context;
+it cannot create, revise, resolve, or strengthen semantic authority merely by
+appearing in the legacy artifact. If persistent meaning has no accepted owning
+authority, record `PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY` where that
+contract applies and do not infer an owner from the artifact's prose.
+
+Registration with missing, stale, conflicting, or otherwise unresolved
+authority does not weaken verification. The artifact remains without an
+accepted projection revision, is `BLOCKED`, and routes to
+`SEMANTIC_REVALIDATION` and the owning semantic migration/revalidation gate.
+An insufficient or disputed projection contract/classification routes to
+`CONTRACT_ADJUDICATION` instead. Neither route permits `CURRENT`.
+
 ## 2. Stable identity and lifecycle
 
 Each independently regeneratable projection receives a stable logical identity

@@ -97,6 +97,47 @@ delete, resolve, strengthen, weaken, merge, suppress, or reinterpret `RF-*`,
 semantics. `V4 AUTHORITY CONSISTENCY` compares the candidate with those owners;
 it does not adjudicate or repair them.
 
+### 2.2 Registration of a legacy Architecture report
+
+An existing `01-architecture-review.md` without accepted `PRJ-*` lifecycle
+metadata is a legacy delivery artifact. It is not `CURRENT` merely because it
+is readable, complete-looking, old, committed, or previously accepted by a
+human. Register it only through the shared legacy path:
+
+```text
+legacy artifact
+→ identify capability owner
+→ assign PRJ identity
+→ define contract
+→ resolve dependencies
+→ verify against accepted authority
+→ establish fingerprint/revision
+→ CURRENT
+```
+
+For this report, “identify capability owner” means the Architecture owner is
+recorded and the inventory in §2.1 is complete for every persistent section.
+The registration must bind the accepted/fresh STM and coverage records, the
+Architecture findings ledger, and the selected Target Architecture and
+Roadmap authorities when those endpoint outputs are in scope, including their
+exact revisions and selector/dependency resolutions. Presentation-only prose
+may remain generated assembly, but it cannot supply a missing semantic owner.
+
+The report's existing human-edited wording is only a candidate or historical
+context during registration. It must not promote itself into `RF-*`, `SER-*`,
+property/invariant, Target, Roadmap, or factual STM authority, and it must not
+resolve a conflict among those owners. If any persistent meaning remains
+unmapped, record `PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY`, leave the
+legacy report non-current, and route the missing mapping to the Architecture
+owner. Do not overwrite the unmapped content, infer an owner from its prose,
+or preserve it as a hidden human-owned authority island.
+
+Only after the registration contract is complete and the candidate passes the
+applicable `V1`–`V4` gates may its canonical fingerprint and first accepted
+`PRJ-*@revN` be established and the report become `CURRENT`. Insufficient,
+stale, or conflicting authority blocks registration and requires semantic
+revalidation/migration; it never justifies weakening verification.
+
 ## 3. `01-architecture-review.md`
 
 Основной читаемый документ. После завершённой Stage B migration это fully
