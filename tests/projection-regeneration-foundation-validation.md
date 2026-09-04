@@ -370,3 +370,81 @@ invariant.
 Validation type is static/contract only. No runtime coordinator, projection
 registry, regeneration executor, or verifier exists in this repository, so
 these records do not claim scenario execution or GREEN Stage B behavior.
+
+## Task 9 capability projection-contract validation
+
+Inspection target: the Task 9 correction candidate in the Stage B audit
+projection/regeneration worktree. The pre-correction baseline is
+`da3f246` (`feat: integrate capability projection contracts`). This is an
+auditable static contract check; it neither invokes nor implies a runtime
+coordinator, generator, package resolver, or verifier.
+
+### PS-115 — Capability packages are finite schema declarations
+
+Baseline observation: `PKG-TECHNICAL-DOCUMENTATION` and
+`PKG-TEST-REVIEW-DELIVERY` named owners, gates, and policies, but omitted their
+`package_id`, had no explicit `optional_members` list, and represented members
+as shorthand identities/arrows rather than the member objects required by
+`projection-gates-and-packages.md`.
+
+Candidate static checks inspect the two capability-owned declarations for:
+
+```text
+package_id
+owner
+gate
+freshness_policy
+required_members: projection_id + purpose + mandatory_prerequisites
+optional_members: explicit finite list
+conditional_members: condition_id + bounded when + projection_id + purpose
+                     + mandatory_prerequisites
+```
+
+The candidate declares only the ten registered Technical Documentation
+projections and the nine registered Test Review projections. Technical
+Documentation section membership is bounded by persisted `documentation_sections.01`
+through `.09`; Test Review membership is bounded by the named persisted output
+booleans or the persisted Behavior Model document-requirement result. Package
+membership is not calculated by selector, path, title, or file presence.
+
+Static verdict: `PS115_GREEN_CAPABILITY_PACKAGE_SCHEMA`.
+
+### PS-116 — Capability selectors are deterministic
+
+Baseline observation: Technical Documentation used phrases such as "material"
+and "documented scope" in its dynamic dependency description; Test Review used
+"reviewed scope", "relevant", and "qualifying" without a formally bounded
+selector predicate. Neither declaration supplied a complete selector catalog
+with authoritative record type, closed dimensions/operators, and ordering.
+
+Candidate static checks inspect that every `SEL-TECH-DOC-*` and
+`SEL-TEST-REVIEW-*` catalog entry has a consumer projection, authoritative
+record type, `definition_revision: 1`, inherited closed allowed dimensions and
+operators, a finite family/property/relation predicate, and
+`semantic_id ASC, revision ASC` resolved-member ordering. Technical
+Documentation selectors operate only on accepted, valid STM facts and the
+closed STM relation vocabulary. Test Review selectors operate only on accepted,
+valid, resolved Test Engineering records or valid `CC-*` records carrying the
+persisted `TRS-*` scope binding; STM slices for Test Review projections 05, 06,
+and 08 remain exact dependencies rather than prose-derived selectors.
+
+Static verdict: `PS116_GREEN_CAPABILITY_SELECTOR_DETERMINISM`.
+
+### Focused static check record
+
+The candidate must be checked with the following read-only commands before its
+commit:
+
+```text
+git diff --check
+rg -n "package_id: PKG-TECHNICAL-DOCUMENTATION|package_id: PKG-TEST-REVIEW-DELIVERY|optional_members: \[\]|condition_id:|mandatory_prerequisites:|SEL-TECH-DOC-|SEL-TEST-REVIEW-|stable_order:" references/technical-documentation.md capabilities/test-review/references/test-engineering-contract.md
+rg -n "PS115_GREEN_CAPABILITY_PACKAGE_SCHEMA|PS116_GREEN_CAPABILITY_SELECTOR_DETERMINISM" tests/projection-regeneration-foundation-validation.md
+```
+
+Observed candidate result: all three commands exited `0`; the selector catalogs
+resolve to ten `SEL-TECH-DOC-*` entries and nine `SEL-TEST-REVIEW-*` entries,
+matching their respective finite registered projection sets.
+
+No runtime result is recorded. The repository still has no executable Stage B
+coordinator or projection runtime, so `PS-115` and `PS-116` are static contract
+results only.

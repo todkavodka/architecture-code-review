@@ -59,41 +59,70 @@ stable identities are independent of output path or section title:
 
 | Projection | Human-readable output | Controlled STM dependency focus |
 |---|---|---|
-| `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `00-system-overview.md` | system context and the material cross-domain facts selected for the documented scope |
-| `PRJ-TECH-DOC-01-COMPONENTS` | `01-components.md` | `COMP-*` runtime-unit facts and their material relations |
+| `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `00-system-overview.md` | accepted STM facts across the registered families |
+| `PRJ-TECH-DOC-01-COMPONENTS` | `01-components.md` | accepted `COMP-*` facts and their controlled runtime relations |
 | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `02-provided-interfaces.md` | `IF-*` where `direction = PROVIDED` |
 | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `03-consumed-interfaces.md` | `IF-*` where `direction = CONSUMED` |
-| `PRJ-TECH-DOC-04-INTEGRATIONS` | `04-integrations.md` | material `INT-*` and `EVENT-*` facts |
-| `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `05-data-and-persistence.md` | material `DS-*` facts and their data relations |
-| `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `06-runtime-and-deployment.md` | material `COMP-*`, `CFG-*`, and runtime relations |
-| `PRJ-TECH-DOC-07-AUTH-AND-TRUST` | `07-auth-and-trust.md` | material `AUTH-*`, `IF-*`, and `CFG-*` trust facts |
-| `PRJ-TECH-DOC-08-MATERIAL-FLOWS` | `08-material-flows.md` | material `FLOW-*`, `INT-*`, and `EVENT-*` facts |
-| `PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` | `09-failure-behavior.md` | material `ERR-*`, `IF-*`, `INT-*`, and `EVENT-*` failure facts |
+| `PRJ-TECH-DOC-04-INTEGRATIONS` | `04-integrations.md` | accepted `INT-*` and `EVENT-*` facts |
+| `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `05-data-and-persistence.md` | accepted `DS-*` facts and controlled data relations |
+| `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `06-runtime-and-deployment.md` | accepted `COMP-*`, `CFG-*`, and controlled runtime relations |
+| `PRJ-TECH-DOC-07-AUTH-AND-TRUST` | `07-auth-and-trust.md` | accepted `AUTH-*`, `IF-*`, `CFG-*`, and controlled trust relations |
+| `PRJ-TECH-DOC-08-MATERIAL-FLOWS` | `08-material-flows.md` | accepted `FLOW-*`, `INT-*`, `EVENT-*`, and controlled flow relations |
+| `PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` | `09-failure-behavior.md` | accepted `ERR-*`, `IF-*`, `INT-*`, `EVENT-*`, and controlled failure relations |
 
 The projection itself owns its direct outbound metadata. For every fact it
 names individually, that metadata records a revision-bound `SEMANTIC_EXACT`
-dependency. For every dynamic fact set in the table, it records a
-`SEMANTIC_SELECTOR` dependency with all of the following:
+dependency. Each dynamic fact set below instead records the named
+`SEMANTIC_SELECTOR` contract. STM inclusion has already applied its
+evidence/materiality boundary; these selectors do not make a second subjective
+materiality or prose-scope decision.
+
+All `SEL-TECH-DOC-*` contracts use only the following authoritative record and
+formal fields:
 
 ```text
-selector_id: <stable projection-local selector ID>
-definition_revision: <revision of the selector predicate>
-predicate: STM family/relation/direction and documented scope
-eligibility: ACCEPTED + VALID freshness + RESOLVED authority
-resolved_members: [<STM-ID>@<revision> ...]
+authoritative_record_type: STM_FACT
+allowed_dimensions:
+  entity_type | status | freshness | authority | structured_properties |
+  formal_relations
+allowed_operators: = | IN | HAS_ANY
+logical_connectors: AND | OR
+base_predicate:
+  status = ACCEPTED
+  AND freshness = VALID
+  AND authority = RESOLVED when that formal field is present on the STM record
+stable_order: semantic_id ASC, revision ASC
+resolved_members: [<STM-ID>@<revision> ...] in stable_order
 ```
 
-For example, `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` owns a selector whose
-predicate is accepted, fresh, resolved `IF-*` facts in its documented scope
-where `direction = PROVIDED`; its verified projection revision stores the
-resulting `IF-*` identities and revisions. A later matching interface, a
-removed member, or a member revision change is selector impact, even when no
-previously named exact dependency changed. The selector and snapshot follow
+`HAS_ANY` applies only to the closed STM relation vocabulary in
+[`shared-technical-model.md`](shared-technical-model.md). A fact without an
+applicable authority axis is evaluated only on `status = ACCEPTED` and
+`freshness = VALID`; it is not excluded or promoted by prose interpretation.
+Every selector definition is revisioned as `definition_revision: 1`.
+
+| Selector | Consumer projection | Authoritative record type | Additional bounded predicate |
+|---|---|---|---|
+| `SEL-TECH-DOC-00-SYSTEM-OVERVIEW` | `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `STM_FACT` | `entity_type IN [COMP, IF, INT, DS, EVENT, FLOW, AUTH, CFG, ERR]` |
+| `SEL-TECH-DOC-01-COMPONENTS` | `PRJ-TECH-DOC-01-COMPONENTS` | `STM_FACT` | `entity_type = COMP OR formal_relations HAS_ANY [DEPENDS_ON, DEPLOYS_AS]` |
+| `SEL-TECH-DOC-02-PROVIDED-INTERFACES` | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = PROVIDED` |
+| `SEL-TECH-DOC-03-CONSUMED-INTERFACES` | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = CONSUMED` |
+| `SEL-TECH-DOC-04-INTEGRATIONS` | `PRJ-TECH-DOC-04-INTEGRATIONS` | `STM_FACT` | `entity_type IN [INT, EVENT]` |
+| `SEL-TECH-DOC-05-DATA-AND-PERSISTENCE` | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `STM_FACT` | `entity_type = DS OR formal_relations HAS_ANY [READS_FROM, WRITES_TO, OWNS_STATE]` |
+| `SEL-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `STM_FACT` | `entity_type IN [COMP, CFG] OR formal_relations HAS_ANY [DEPLOYS_AS, DEPENDS_ON, CONFIGURED_BY]` |
+| `SEL-TECH-DOC-07-AUTH-AND-TRUST` | `PRJ-TECH-DOC-07-AUTH-AND-TRUST` | `STM_FACT` | `entity_type IN [AUTH, IF, CFG] OR formal_relations HAS_ANY [PROTECTED_BY, CONFIGURED_BY]` |
+| `SEL-TECH-DOC-08-MATERIAL-FLOWS` | `PRJ-TECH-DOC-08-MATERIAL-FLOWS` | `STM_FACT` | `entity_type IN [FLOW, INT, EVENT] OR formal_relations HAS_ANY [CALLS, PUBLISHES, SUBSCRIBES, PARTICIPATES_IN]` |
+| `SEL-TECH-DOC-09-FAILURE-BEHAVIOR` | `PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` | `STM_FACT` | `entity_type IN [ERR, IF, INT, EVENT] OR formal_relations HAS_ANY [EMITS_ERROR]` |
+
+A later matching fact, a removed member, or a member revision change is
+selector impact even when no individually named exact dependency changed. The
+selector and snapshot follow
 [`projection-dependencies.md`](projection-dependencies.md); a filename,
-directory listing, or generated index is never a substitute for either.
+directory listing, generated index, or the phrase "documented scope" is never
+a substitute for the recorded predicate and snapshot.
 
 Each selected projection also records a `SEMANTIC_EXACT` dependency on the
-accepted Technical Model Coverage record for the documented scope. A `FULL`
+accepted Technical Model Coverage record bound to that projection. A `FULL`
 coverage record may satisfy that binding; a bounded document records its
 accepted targeted-coverage record instead. The coverage binding preserves
 `NOT_APPLICABLE`, partial, unknown, stale, and authority-unresolved states as
@@ -103,30 +132,61 @@ turn incomplete coverage into accepted system knowledge.
 `PKG-TECHNICAL-DOCUMENTATION` is the capability-owned publication package:
 
 ```text
+package_id: PKG-TECHNICAL-DOCUMENTATION
 owner: Technical Documentation
 gate: Technical Documentation publication
 freshness_policy: ALL_SCOPED_CURRENT
 required_members:
-  - PRJ-TECH-DOC-00-SYSTEM-OVERVIEW
+  - projection_id: PRJ-TECH-DOC-00-SYSTEM-OVERVIEW
+    purpose: required entry projection for the accepted system context
+    mandatory_prerequisites: []
+optional_members: []
 conditional_members:
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:01
-    -> PRJ-TECH-DOC-01-COMPONENTS
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:02
-    -> PRJ-TECH-DOC-02-PROVIDED-INTERFACES
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:03
-    -> PRJ-TECH-DOC-03-CONSUMED-INTERFACES
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:04
-    -> PRJ-TECH-DOC-04-INTEGRATIONS
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:05
-    -> PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:06
-    -> PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:07
-    -> PRJ-TECH-DOC-07-AUTH-AND-TRUST
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:08
-    -> PRJ-TECH-DOC-08-MATERIAL-FLOWS
-  - TECHNICAL_DOCUMENTATION_SECTION_SELECTED:09
-    -> PRJ-TECH-DOC-09-FAILURE-BEHAVIOR
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_01_SELECTED
+    when: persisted documentation_sections.01 = true
+    projection_id: PRJ-TECH-DOC-01-COMPONENTS
+    purpose: publish the selected component/runtime-unit section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_02_SELECTED
+    when: persisted documentation_sections.02 = true
+    projection_id: PRJ-TECH-DOC-02-PROVIDED-INTERFACES
+    purpose: publish the selected provided-interface section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_03_SELECTED
+    when: persisted documentation_sections.03 = true
+    projection_id: PRJ-TECH-DOC-03-CONSUMED-INTERFACES
+    purpose: publish the selected consumed-interface section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_04_SELECTED
+    when: persisted documentation_sections.04 = true
+    projection_id: PRJ-TECH-DOC-04-INTEGRATIONS
+    purpose: publish the selected integration section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_05_SELECTED
+    when: persisted documentation_sections.05 = true
+    projection_id: PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE
+    purpose: publish the selected data-and-persistence section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_06_SELECTED
+    when: persisted documentation_sections.06 = true
+    projection_id: PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT
+    purpose: publish the selected runtime-and-deployment section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_07_SELECTED
+    when: persisted documentation_sections.07 = true
+    projection_id: PRJ-TECH-DOC-07-AUTH-AND-TRUST
+    purpose: publish the selected authentication-and-trust section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_08_SELECTED
+    when: persisted documentation_sections.08 = true
+    projection_id: PRJ-TECH-DOC-08-MATERIAL-FLOWS
+    purpose: publish the selected material-flow section
+    mandatory_prerequisites: []
+  - condition_id: TECHNICAL_DOCUMENTATION_SECTION_09_SELECTED
+    when: persisted documentation_sections.09 = true
+    projection_id: PRJ-TECH-DOC-09-FAILURE-BEHAVIOR
+    purpose: publish the selected failure-behavior section
+    mandatory_prerequisites: []
 ```
 
 The controlled section-selection conditions resolve to a finite list of the
@@ -161,12 +221,11 @@ stale even when no recorded object changed.
 For example, a projection package can record dependencies equivalent to:
 
 ```text
-PROJECTS_FROM accepted/fresh STM facts selected for system overview
-PROJECTS_FROM accepted/fresh component facts
-PROJECTS_FROM accepted/fresh interface facts where direction = PROVIDED
-PROJECTS_FROM accepted/fresh interface facts where direction = CONSUMED
-PROJECTS_FROM accepted/fresh facts for integrations, data, runtime, auth, flows,
-              and failure behavior when their sections are included
+PROJECTS_FROM the recorded SEL-TECH-DOC-00-SYSTEM-OVERVIEW resolution
+PROJECTS_FROM the recorded SEL-TECH-DOC-01-COMPONENTS resolution
+PROJECTS_FROM the recorded SEL-TECH-DOC-02-PROVIDED-INTERFACES resolution
+PROJECTS_FROM the recorded SEL-TECH-DOC-03-CONSUMED-INTERFACES resolution
+PROJECTS_FROM the recorded selected-section selector resolutions
 PROJECTS_FROM the accepted required-domain coverage record
 ```
 

@@ -123,28 +123,76 @@ chooses a different output directory.
 
 | Projection | Human-readable output | Direct semantic inputs |
 |---|---|---|
-| `PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY` | `00-test-assurance-summary.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` accounting for the reviewed scope |
-| `PRJ-TEST-REVIEW-01-ASSURANCE-MAP` | `01-test-assurance-map.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` records for the reviewed scope |
-| `PRJ-TEST-REVIEW-02-TEST-PLAN` | `02-test-plan.md` | accepted `BC-*`, `MAT-*`, `TM-*`, and `GAP-*` records relevant to planned remediation |
+| `PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY` | `00-test-assurance-summary.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` accounting in the persisted Test Review scope |
+| `PRJ-TEST-REVIEW-01-ASSURANCE-MAP` | `01-test-assurance-map.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` records in the persisted Test Review scope |
+| `PRJ-TEST-REVIEW-02-TEST-PLAN` | `02-test-plan.md` | accepted `BC-*`, `MAT-*`, `TM-*`, and `GAP-*` records in the persisted Test Review scope |
 | `PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL` | `03-behavior-contract-model.md` | accepted `BC-*` records |
 | `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` | `04-contract-consistency-report.md` | accepted `CC-*` records and their referenced `BC-*` revisions |
-| `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN` | `05-test-environment-design.md` | accepted behavior/assurance semantics and the qualifying factual STM dependency slice |
-| `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `06-service-simulator-spec.md` | accepted `BC-*`, applicable `CC-*`, and qualifying consumer-boundary STM facts |
+| `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN` | `05-test-environment-design.md` | accepted behavior/assurance semantics and its exact accepted STM dependency slice |
+| `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `06-service-simulator-spec.md` | accepted `BC-*`, current `CC-*`, and its exact accepted consumer-boundary STM slice |
 | `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `07-service-simulator-implementation-plan.md` | accepted `BC-*`/`CC-*` provenance plus `PROJECTION_EXACT PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` at its verified revision |
-| `PRJ-TEST-REVIEW-08-E2E-TEST-PLAN` | `08-e2e-test-plan.md` | accepted `BC-*`, relevant assurance semantics, and qualifying multi-component STM facts |
+| `PRJ-TEST-REVIEW-08-E2E-TEST-PLAN` | `08-e2e-test-plan.md` | accepted `BC-*`, assurance semantics, and its exact accepted multi-component STM slice |
 
 Every projection owns direct Stage B dependency metadata. Individually named
 semantic records are `SEMANTIC_EXACT` dependencies at their accepted revision.
-Dynamic scoped sets are `SEMANTIC_SELECTOR` dependencies with a stable selector
-ID, selector-definition revision, bounded reviewed scope, eligibility
-predicate (`ACCEPTED`, sufficiently fresh, and resolved), and a verified
-snapshot of concrete `<ID>@<revision>` members. A selector addition, removal,
-or member revision change is projection impact; it must not be hidden by a
-previously generated map or report.
+Dynamic sets use only the following deterministic `SEMANTIC_SELECTOR` form.
+
+```text
+test_review_scope_id: TRS-<stable scope identity>
+scope_source: persisted Test Review capability scope record
+scope_membership: every selected Test Engineering record carries the exact
+                  test_review_scope_id; no filename, prose topic, or inferred
+                  "relevance" may add a member
+
+TEST_ENGINEERING_SEMANTIC_RECORD:
+  authoritative record families: BC | MAT | TM | GAP
+  allowed dimensions: family | status | freshness | authority |
+                      capability_owner | test_review_scope_id
+  allowed operators: = | IN
+  logical connectors: AND | OR
+  eligibility: status = ACCEPTED AND freshness = VALID
+               AND authority = RESOLVED AND capability_owner = TEST_REVIEW
+
+TEST_ENGINEERING_CONSISTENCY_RECORD:
+  authoritative record family: CC
+  allowed dimensions: family | status | freshness | capability_owner |
+                      test_review_scope_id
+  allowed operators: = | IN
+  logical connectors: AND | OR
+  eligibility: status IN [OPEN, CLASSIFIED, RESOLVED, WONT_RESOLVE]
+               AND freshness = VALID AND capability_owner = TEST_REVIEW
+
+stable_order: semantic_id ASC, revision ASC
+resolved_members: [<ID>@<revision> ...] in stable_order
+definition_revision: 1
+```
+
+The `test_review_scope_id` is an explicit persisted scope binding owned by Test
+Review. It only bounds projection dependency resolution; it does not promote a
+projection or its scope record to `BC/CC/MAT/TM/GAP` semantic authority.
+
+| Selector | Consumer projection | Authoritative record type | Additional bounded predicate |
+|---|---|---|---|
+| `SEL-TEST-REVIEW-00-ASSURANCE` | `PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-01-ASSURANCE` | `PRJ-TEST-REVIEW-01-ASSURANCE-MAP` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-02-TEST-PLAN` | `PRJ-TEST-REVIEW-02-TEST-PLAN` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [BC, MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-03-BEHAVIOR-MODEL` | `PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family = BC AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-04-CONSISTENCY` | `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` | `TEST_ENGINEERING_CONSISTENCY_RECORD` | `family = CC AND test_review_scope_id = <persisted TRS>`; each referenced `BC-*` is a `SEMANTIC_EXACT` dependency |
+| `SEL-TEST-REVIEW-05-ENVIRONMENT` | `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [BC, MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-06-SIMULATOR` | `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `TEST_ENGINEERING_SEMANTIC_RECORD` and `TEST_ENGINEERING_CONSISTENCY_RECORD` | `(family = BC OR family = CC) AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-07-SIMULATOR-PLAN` | `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `TEST_ENGINEERING_SEMANTIC_RECORD` and `TEST_ENGINEERING_CONSISTENCY_RECORD` | `(family = BC OR family = CC) AND test_review_scope_id = <persisted TRS>`; the simulator specification remains the declared `PROJECTION_EXACT` prerequisite |
+| `SEL-TEST-REVIEW-08-E2E` | `PRJ-TEST-REVIEW-08-E2E-TEST-PLAN` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [BC, MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
+
+A selector addition, removal, or member revision change is projection impact;
+it must not be hidden by a previously generated map or report. The exact
+accepted STM slice and targeted-coverage acceptance consumed by projections
+`05`, `06`, and `08` are `SEMANTIC_EXACT` dependencies. They are not
+open-ended selectors that re-interpret a topology, consumer boundary, or
+"qualifying" fact set from prose.
 
 Any Test Review projection that presents factual system boundaries also records
-the exact accepted STM dependency-slice and targeted-coverage acceptance it
-consumed, plus controlled selectors for the required STM families. The
+the exact accepted STM dependency slice and targeted-coverage acceptance it
+consumed. It does not use a Stage B selector to infer that slice. The
 precondition remains:
 
 ```text
@@ -160,29 +208,54 @@ targeted coverage review.
 `PKG-TEST-REVIEW-DELIVERY` is the Test Review publication package:
 
 ```text
+package_id: PKG-TEST-REVIEW-DELIVERY
 owner: Test Review
 gate: Test Review publication/closeout
 freshness_policy: ALL_SCOPED_CURRENT
 required_members:
-  - PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
-  - PRJ-TEST-REVIEW-01-ASSURANCE-MAP
+  - projection_id: PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
+    purpose: required decision-facing summary of accepted Test Assurance
+    mandatory_prerequisites: []
+  - projection_id: PRJ-TEST-REVIEW-01-ASSURANCE-MAP
+    purpose: required detailed map supporting the Test Assurance summary
+    mandatory_prerequisites: []
+optional_members: []
 conditional_members:
-  - BEHAVIOR_CONTRACT_MODEL_DOCUMENT_REQUIRED
-    -> PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL
-  - TEST_PLAN_SELECTED
-    -> PRJ-TEST-REVIEW-02-TEST-PLAN
-  - CONTRACT_CONSISTENCY_REPORT_SELECTED
-    -> PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT
-  - TEST_ENVIRONMENT_DESIGN_SELECTED
-    -> PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN
-  - SERVICE_SIMULATOR_DESIGN_SELECTED
-    -> PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC
-  - SERVICE_SIMULATOR_IMPLEMENTATION_PLAN_SELECTED
-    -> PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN
-       mandatory_prerequisites:
-         [PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC]
-  - E2E_TEST_PLAN_SELECTED
-    -> PRJ-TEST-REVIEW-08-E2E-TEST-PLAN
+  - condition_id: BEHAVIOR_CONTRACT_MODEL_DOCUMENT_REQUIRED
+    when: persisted behavior_model_document_requirement = REQUIRED
+    projection_id: PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL
+    purpose: publish the required human-readable Behavior Contract Model
+    mandatory_prerequisites: []
+  - condition_id: TEST_PLAN_SELECTED
+    when: persisted outputs.test_plan = true
+    projection_id: PRJ-TEST-REVIEW-02-TEST-PLAN
+    purpose: publish the selected Test Plan
+    mandatory_prerequisites: []
+  - condition_id: CONTRACT_CONSISTENCY_REPORT_SELECTED
+    when: persisted outputs.contract_consistency_report = true
+    projection_id: PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT
+    purpose: publish the selected Contract Consistency Report
+    mandatory_prerequisites: []
+  - condition_id: TEST_ENVIRONMENT_DESIGN_SELECTED
+    when: persisted outputs.test_environment_design = true
+    projection_id: PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN
+    purpose: publish the selected Test Environment Design
+    mandatory_prerequisites: []
+  - condition_id: SERVICE_SIMULATOR_DESIGN_SELECTED
+    when: persisted outputs.service_simulator_design = true
+    projection_id: PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC
+    purpose: publish the selected Service Simulator Design
+    mandatory_prerequisites: []
+  - condition_id: SERVICE_SIMULATOR_IMPLEMENTATION_PLAN_SELECTED
+    when: persisted outputs.service_simulator_implementation_plan = true
+    projection_id: PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN
+    purpose: publish the selected Service Simulator Implementation Plan
+    mandatory_prerequisites: [PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC]
+  - condition_id: E2E_TEST_PLAN_SELECTED
+    when: persisted outputs.e2e_test_plan = true
+    projection_id: PRJ-TEST-REVIEW-08-E2E-TEST-PLAN
+    purpose: publish the selected E2E Test Plan
+    mandatory_prerequisites: []
 ```
 
 Each condition is an explicit persisted output-selection or capability-gate
