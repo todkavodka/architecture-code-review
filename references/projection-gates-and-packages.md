@@ -175,3 +175,22 @@ projection_gate:
 `PERMITTED` is valid only when every required condition for the selected policy
 is satisfied. `BLOCKED` preserves the blocking projection and owning action;
 it is not a semantic verdict about the projection's visible content.
+
+## 7. Capability-owned declaration placement
+
+This shared reference defines package mechanics; a capability owns the actual
+finite projection identities, direct dependencies, and package declaration for
+its own outputs. The following capability declarations are registered here for
+gate routing only:
+
+| Package | Owning declaration | Gate-relevant boundary |
+|---|---|---|
+| `PKG-TECHNICAL-DOCUMENTATION` | [`technical-documentation.md`](technical-documentation.md) | selected documentation sections are finite controlled members; STM remains factual authority |
+| `PKG-TEST-REVIEW-DELIVERY` | [`test-engineering-contract.md`](../capabilities/test-review/references/test-engineering-contract.md) | selected Test Engineering outputs are conditional members; `BC/CC/MAT/TM/GAP` remain semantic authority |
+
+The table is navigation, not a global projection registry or a second package
+authority. Each named capability declaration must still supply the explicit
+required, optional, and conditional member contract and its resolved snapshot
+from section 3. In particular, a controlled semantic selector inside a
+`PRJ-*` dependency contract detects factual membership changes; it must never
+be repurposed as an open-ended package-membership query.

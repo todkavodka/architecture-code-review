@@ -134,6 +134,30 @@ Persist the selected outputs as independent fields. Existing `REVIEW_ONLY` and
 the former selects only Test Assurance; the latter selects Test Assurance plus
 Test Plan. Neither legacy value silently enables an extended output.
 
+## Stage B projection boundary
+
+The numbered, human-readable Test Review outputs are `PRJ-*` projections of
+accepted Test Engineering semantics and the qualifying factual STM slice. They
+may summarize, organize, and cross-link that authority, but cannot accept,
+revise, classify, or resolve it. `BC-*`, `CC-*`, `MAT-*`, `TM-*`, and `GAP-*`
+remain capability-owned semantic authority; their generated renderings do not
+replace the authoritative records.
+
+`working/INDEX.md` remains coordinator workflow authority. It is never a
+projection, package member, semantic dependency substitute, fingerprinted
+output, or regeneration target. Do not infer either projection status or
+semantic authority from an output filename, an index, or a generated document.
+
+The Test Review publication package always requires the Test Assurance Summary
+and Map. Test Plan, Contract Consistency Report, Test Environment Design,
+Service Simulator Design and Implementation Plan, E2E Test Plan, and the
+human-readable Behavior Contract Model join the package only through their
+explicit selected-output or capability-required conditions. Resolve that finite
+membership snapshot before the package gate; an unselected optional document
+does not block closeout. The projection IDs, direct exact/selector dependencies,
+and condition-to-member rules are defined in
+[`test-engineering-contract.md`](references/test-engineering-contract.md).
+
 Select a dependency strategy per material dependency and justify it. Keep
 dependency substitutes separate from a Service Simulator of the reviewed
 service; simulator consumer protocols and its test-only control plane remain

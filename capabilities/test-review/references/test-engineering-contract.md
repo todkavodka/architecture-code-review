@@ -100,12 +100,97 @@ accepted, fresh, and sufficiently resolved.
 
 ## Ownership
 
-Test Review retains ownership of Test Assurance Summary and Map. Behavior Model
-owns accepted `BC-*`; Contract Verification owns `CC-*`; Test Assurance owns
-`MAT-*`, `TM-*`, and `GAP-*` evidence accounting. Numbered documents are
-human-facing projections. Authoritative ledgers live under the capability's
-`working/` directory and do not become product-behavior authority merely by
-being generated later.
+Test Review retains ownership of the Test Assurance semantics rendered by its
+Summary and Map; the numbered Summary and Map remain human-facing projections.
+Behavior Model owns accepted `BC-*`; Contract Verification owns `CC-*`; Test
+Assurance owns `MAT-*`, `TM-*`, and `GAP-*` evidence accounting. Those
+`BC/CC/MAT/TM/GAP` records are capability semantic authority. Authoritative
+ledgers live under the capability's `working/` directory and do not become
+product-behavior authority merely by being generated later.
+
+`working/INDEX.md` is coordinator workflow authority for the capability. It is
+not a `PRJ-*` artifact and is excluded from projection identity, dependency
+snapshots, package membership, fingerprints, drift detection, freshness,
+regeneration, retirement, and `RG-*` execution. A generated document or index
+does not become a substitute for the accepted `BC-*`, `CC-*`, `MAT-*`, `TM-*`,
+or `GAP-*` records it renders.
+
+## Stage B Test Review projection contracts
+
+The numbered files in the Output Package are registered as the following
+capability-owned projections. The identities are stable even if a repository
+chooses a different output directory.
+
+| Projection | Human-readable output | Direct semantic inputs |
+|---|---|---|
+| `PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY` | `00-test-assurance-summary.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` accounting for the reviewed scope |
+| `PRJ-TEST-REVIEW-01-ASSURANCE-MAP` | `01-test-assurance-map.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` records for the reviewed scope |
+| `PRJ-TEST-REVIEW-02-TEST-PLAN` | `02-test-plan.md` | accepted `BC-*`, `MAT-*`, `TM-*`, and `GAP-*` records relevant to planned remediation |
+| `PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL` | `03-behavior-contract-model.md` | accepted `BC-*` records |
+| `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` | `04-contract-consistency-report.md` | accepted `CC-*` records and their referenced `BC-*` revisions |
+| `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN` | `05-test-environment-design.md` | accepted behavior/assurance semantics and the qualifying factual STM dependency slice |
+| `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `06-service-simulator-spec.md` | accepted `BC-*`, applicable `CC-*`, and qualifying consumer-boundary STM facts |
+| `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `07-service-simulator-implementation-plan.md` | accepted `BC-*`/`CC-*` provenance plus `PROJECTION_EXACT PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` at its verified revision |
+| `PRJ-TEST-REVIEW-08-E2E-TEST-PLAN` | `08-e2e-test-plan.md` | accepted `BC-*`, relevant assurance semantics, and qualifying multi-component STM facts |
+
+Every projection owns direct Stage B dependency metadata. Individually named
+semantic records are `SEMANTIC_EXACT` dependencies at their accepted revision.
+Dynamic scoped sets are `SEMANTIC_SELECTOR` dependencies with a stable selector
+ID, selector-definition revision, bounded reviewed scope, eligibility
+predicate (`ACCEPTED`, sufficiently fresh, and resolved), and a verified
+snapshot of concrete `<ID>@<revision>` members. A selector addition, removal,
+or member revision change is projection impact; it must not be hidden by a
+previously generated map or report.
+
+Any Test Review projection that presents factual system boundaries also records
+the exact accepted STM dependency-slice and targeted-coverage acceptance it
+consumed, plus controlled selectors for the required STM families. The
+precondition remains:
+
+```text
+present + ACCEPTED + sufficiently fresh + sufficiently resolved
+  + TARGETED STM COVERAGE ACCEPTED
+```
+
+An accepted/fresh `FULL` STM may satisfy that exact binding. A projection never
+creates a private factual model, reuses its own prose as a factual source, or
+bypasses targeted STM acquisition, the Technical Model Gate, or independent
+targeted coverage review.
+
+`PKG-TEST-REVIEW-DELIVERY` is the Test Review publication package:
+
+```text
+owner: Test Review
+gate: Test Review publication/closeout
+freshness_policy: ALL_SCOPED_CURRENT
+required_members:
+  - PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
+  - PRJ-TEST-REVIEW-01-ASSURANCE-MAP
+conditional_members:
+  - BEHAVIOR_CONTRACT_MODEL_DOCUMENT_REQUIRED
+    -> PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL
+  - TEST_PLAN_SELECTED
+    -> PRJ-TEST-REVIEW-02-TEST-PLAN
+  - CONTRACT_CONSISTENCY_REPORT_SELECTED
+    -> PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT
+  - TEST_ENVIRONMENT_DESIGN_SELECTED
+    -> PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN
+  - SERVICE_SIMULATOR_DESIGN_SELECTED
+    -> PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC
+  - SERVICE_SIMULATOR_IMPLEMENTATION_PLAN_SELECTED
+    -> PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN
+       mandatory_prerequisites:
+         [PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC]
+  - E2E_TEST_PLAN_SELECTED
+    -> PRJ-TEST-REVIEW-08-E2E-TEST-PLAN
+```
+
+Each condition is an explicit persisted output-selection or capability-gate
+result, never an inference from a file's presence. Resolve the package's finite
+required and conditional membership snapshot before its gate runs. Optional
+output selection makes the corresponding projection required for that package
+instance; an unselected Test Plan, Service Simulator Design, E2E Test Plan, or
+other optional output is not silently required and cannot block closeout.
 
 ## Test Environment Design
 
