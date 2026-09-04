@@ -211,7 +211,7 @@ verdict: PS88_GREEN_NEW_OUTPUT_SELECTION
 
 ```text
 run_id: 01a06a53-722e-7643-bd9c-f9152d778f5f
-feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+feature_head: d36d921dc08e1936422e301f19f0d95d2ecae164
 scenario: PS-89 Case A — EXTEND with Test Engineering OFF
 execution_context: fresh independent read-only Skill pressure run
 observed_response_summary: EXTEND exposed the complete independent Test Engineering output selection, with Behavior Model and applicable Contract Verification hidden as internal dependencies.
@@ -220,7 +220,7 @@ violations: none
 verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
 
 run_id: 01a06a53-71e8-75b3-9674-6f08c3c079eb
-feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+feature_head: d36d921dc08e1936422e301f19f0d95d2ecae164
 scenario: PS-89 Case B — existing Test Assurance and Test Plan
 execution_context: fresh independent read-only Skill pressure run
 observed_response_summary: Existing Test Assurance and Test Plan were shown separately from the remaining available additions; accepted upstream work was reused and unrelated stages were not restarted.
@@ -229,7 +229,7 @@ violations: none
 verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
 
 run_id: 01a06a53-7273-7642-9197-86688367a495
-feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+feature_head: d36d921dc08e1936422e301f19f0d95d2ecae164
 scenario: PS-89 Case C — add E2E Test Plan only
 execution_context: fresh independent read-only Skill pressure run
 observed_response_summary: E2E Test Plan was an independent addition; Service Simulator Design remained unselected unless topology required it.
@@ -238,7 +238,7 @@ violations: none
 verdict: PS89_GREEN_EXTEND_OUTPUT_SELECTION
 
 run_id: 01a06a53-7253-7b51-a3c4-bc8b1862fc47
-feature_head: d36d921e1eb4e61af4be607d1cead0cf358db7d9
+feature_head: d36d921dc08e1936422e301f19f0d95d2ecae164
 scenario: PS-89 Case D — add Service Simulator Implementation Plan
 execution_context: fresh independent read-only Skill pressure run
 observed_response_summary: Missing Service Simulator Design was identified as the explained minimum upstream dependency; the implementation plan proceeds only after accepted and fresh simulator design, with no unrelated outputs enabled.
