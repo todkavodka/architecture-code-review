@@ -133,6 +133,7 @@ Semantic workflow may complete with projections `STALE`; projection freshness is
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - Stage B projection identity, lifecycle, revision, freshness, drift, and required-action authority → `references/projection-lifecycle.md`
+- Stage B projection dependency kinds, selector contracts, resolution snapshots, and projection DAG → `references/projection-dependencies.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
 - shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
 - Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`

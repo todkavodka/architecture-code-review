@@ -139,13 +139,43 @@ stale or eligible for regeneration even if the object did not exist at the
 projection's prior revision. This establishes Stage A dependency foundations;
 it does not implement the Stage B regeneration engine.
 
-For Stage B, use `SEMANTIC_EXACT`, `SEMANTIC_SELECTOR`, and
-`PROJECTION_EXACT` as the projection dependency vocabulary. The projection
-dependency reference defines the controlled selector and resolved-membership
-snapshot required to detect member additions, removals, and revision changes,
-as well as the canonical `CONSUMER -> PREREQUISITE` direction. These are a
-specialization of this section, not a replacement for consumer-owned direct
-metadata or derived reverse indexes.
+For Stage B, map each Stage A `PROJECTS_FROM` record to exactly one of
+`SEMANTIC_EXACT`, `SEMANTIC_SELECTOR`, or `PROJECTION_EXACT` before using it in
+projection regeneration:
+
+```text
+PROJECTS_FROM <accepted semantic object ID>@<revision>
+  -> SEMANTIC_EXACT <object ID>@<revision>
+
+PROJECTS_FROM <controlled selector/set>
+  -> SEMANTIC_SELECTOR <selector contract> + resolved membership snapshot
+
+PROJECTS_FROM PRJ-<upstream>@<verified revision>
+  -> PROJECTION_EXACT PRJ-<upstream>@<verified revision>
+```
+
+The mapping is lossless: preserve the consuming projection, target identity,
+impact strength, and any Stage A selector meaning while adding the Stage B
+revision or resolution snapshot required by the mapped kind. `PRJ-*` targets
+are mapped to `PROJECTION_EXACT` only when the target is an upstream generated
+projection; semantic object IDs remain `SEMANTIC_EXACT`, even when the object
+is mentioned by a projection. The canonical edge remains
+`CONSUMER -> PREREQUISITE`; migration must not reverse it or copy transitive
+semantic dependencies from an upstream projection.
+
+Until a legacy `PROJECTS_FROM` record is classified, it remains valid Stage A
+metadata for dependency discovery and reverse-index reconstruction, but it is
+not executable Stage B regeneration input. An unclassifiable or revisionless
+record requires targeted migration/contract adjudication before regeneration;
+do not infer its kind from prose, filenames, or generated indexes. After
+classification, the Stage A spelling may be retained as a compatibility alias
+for audit history, while the Stage B kind is authoritative for regeneration.
+
+The projection dependency reference defines the controlled selector and
+resolved-membership snapshot required to detect member additions, removals,
+and revision changes, as well as the canonical edge direction. These Stage B
+specializations do not replace consumer-owned direct metadata or derived
+reverse indexes.
 
 ## 6. Minimum dependency context
 
