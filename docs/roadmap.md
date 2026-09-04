@@ -54,9 +54,9 @@ capabilities и отдельную модель Test Engineering outputs. `Behav
 ```text
 Current Foundation
        |
-       +--> Stage A Shared Technical Model Foundation
+       +--> Stage A Shared Technical Model Foundation [DONE]
        |
-       +--> Stage B Audit Projection & Regeneration
+       +--> Stage B Audit Projection & Regeneration [NEXT]
        |
        +--> Stage C Test Engineering Execution
        |
@@ -73,7 +73,7 @@ Stage B особенно важен для надёжности генериру
 
 ## Stage A — Shared Technical Model Foundation
 
-**Status: `COMPLETE`**
+**Status: `DONE`**
 
 ### Purpose
 
@@ -103,24 +103,26 @@ Stage A не включает developer onboarding, local setup, “how to run/m
 configuration и failure contracts. Эти ограничения являются частью принятого
 Stage A контракта.
 
-### Success direction
+### Completion evidence
 
-Будущая возможность должна позволять понять:
+Stage A delivered the Shared Evidence Layer, persistent Shared Technical Model,
+STM coverage and Technical Model Gate, dependency/index infrastructure,
+Technical Documentation projections, As-Built projection migration,
+Architecture Review integration, mandatory targeted STM acquisition for Test
+Engineering, conservative legacy reconciliation, and impact-driven `EXTEND` /
+`REVALIDATE` foundations.
 
-- что представляет собой система;
-- как связаны её основные части;
-- где находится важное поведение;
-- как запускать и развивать проект;
-- как компоненты взаимодействуют;
-- какие контракты и настройки существенны;
-- где находятся extension points и известные риски.
-
-Каждый существенный фрагмент документации должен иметь понятную provenance и
-возможность проверки актуальности. Documentation не равна raw code summary.
+Promotion merge: `6759539ef8eb1b7d8634bb648772168715e02785`.
+Promoted feature HEAD: `ce9e1c410bc4924568d6e68f1c82875b90371161`.
+Static/contract validation passed. Executable coordinator/runtime validation
+remains `UNAVAILABLE` and is an environment limitation, not a runtime pass.
 
 ## Stage B — Audit Projection & Regeneration
 
 **Status: `PLANNED`**
+
+Stage B is the next planned stage and will be handled by a separate
+Discovery/design gate.
 
 ### Purpose
 
