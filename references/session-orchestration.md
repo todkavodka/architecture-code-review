@@ -2,6 +2,36 @@
 
 This reference is the sole authority for startup/session orchestration.
 
+## Coordinator workflow authority boundary
+
+`working/INDEX.md` is the explicit `COORDINATOR_WORKFLOW_AUTHORITY`. It owns
+resume-critical session, gate, handoff, and coordinator routing state under the
+Stage A workflow. Only the coordinator updates that authority through the
+workflow reconciliation rules; its meaning is not reconstructed from a
+projection view.
+
+The authoritative `working/INDEX.md` is excluded from every Stage B projection
+mechanic. It is never classified as `PRJ-*`, fingerprinted for projection
+drift, regenerated, retired, assigned projection freshness, or given `RG-*`
+execution/session state. Projection Impact Analysis must not overwrite its
+gate state, resume routing, or handoff/coordinator state. A filename containing
+`INDEX` does not change this boundary.
+
+Stage B operational views are separate, non-authoritative records under
+`working/projections/`:
+
+```text
+working/projections/registry.md       # generated active projection registry view
+working/projections/impact.md         # generated impact-accounting view
+working/projections/sessions/RG-*.md  # one frozen regeneration session view
+```
+
+These views are scoped projections of their owning lifecycle, impact, or
+regeneration records. They are reconstructable and disposable, must not reuse
+the path or identity of `working/INDEX.md`, and cannot be used to mutate or
+replace coordinator authority. The focused Stage B references define their
+record contents; this startup contract defines only the authority boundary.
+
 ## Ownership
 
 Owns:

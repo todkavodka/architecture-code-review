@@ -53,7 +53,9 @@ Test Engineering output selection is persisted as independent booleans and
 executes a minimum dependency slice. `Test Assurance` remains the compatibility
 core; `Behavior Model` is an internal dependency and applicable `Contract
 Verification` is automatic. Optional output projections and ownership are
-defined by the capability contract and registered in `working/INDEX.md`.
+defined by the capability contract and recorded as coordinator routing state
+in `working/INDEX.md`; that record is not the generated Stage B projection
+registry.
 
 For a full Architecture Review, construct the required `FULL` Shared Technical
 Model and accept `TECHNICAL_MODEL_COVERAGE_ACCEPTED` before Architecture
@@ -109,7 +111,14 @@ from Architecture Discovery Coverage and are authoritative in
 - Working artifacts могут быть terse/machine-oriented; пользовательские финальные документы обязаны объяснять `что происходит → почему → к чему приводит → что менять` связным человеческим текстом. IDs и shorthand поддерживают объяснение, но не заменяют его.
 - Не меняй production code проекта во время review.
 
-Stage B projections are explicitly classified, stable `PRJ-*` identities; lifecycle state and verified revisions follow `references/projection-lifecycle.md`. `working/INDEX.md` and semantic authorities are outside automatic projection classification.
+Stage B projections are explicitly classified, stable `PRJ-*` identities; lifecycle state and verified revisions follow `references/projection-lifecycle.md`. `working/INDEX.md` is `COORDINATOR_WORKFLOW_AUTHORITY`: it owns resume-critical session, gate, handoff, and coordinator state and is outside every Stage B projection mechanic. It must not receive a `PRJ-*` identity, projection fingerprint or drift result, regeneration or `RG-*` execution state, projection freshness state, or `ACTIVE`/`RETIRED` lifecycle transition. Semantic authorities are likewise outside automatic projection classification.
+
+Operational Stage B views are non-authoritative projections and use clearly
+scoped paths under `working/projections/`, such as the generated registry,
+impact view, and per-session `RG-*.md` records. They summarize their owning
+projection/impact/regeneration records; they never replace `working/INDEX.md`,
+the direct dependency authority, or semantic authority. Path and filename do
+not classify an artifact as a projection.
 
 Semantic workflow may complete with projections `STALE`; projection freshness is not semantic truth, and regeneration never mutates semantic authority.
 

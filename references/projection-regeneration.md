@@ -32,6 +32,23 @@ An `RG-*` record preserves the plan that was actually executed. Retrying after
 an execution failure creates a new `RG-*` plan rather than mutating the old
 history into a different execution.
 
+Each session may have a focused operational view at:
+
+```text
+working/projections/sessions/RG-<stable-session-id>.md
+```
+
+The view is reconstructable from the `RG-*` record and contains the frozen
+request/scope, dependency snapshot, execution order, per-projection states,
+drift observations, and session outcome. It is an operational history/readout,
+not a Session Intent, semantic stage transition, projection registry
+authority, or replacement for `working/INDEX.md`. A retry gets a new `RG-*`
+view; an old view is not rewritten into a different execution.
+
+The session view must not include `working/INDEX.md` in its scope or treat it
+as a projection prerequisite. Coordinator resume, gate, and handoff state
+remain exclusively under the `COORDINATOR_WORKFLOW_AUTHORITY` boundary.
+
 ## 2. Planning modes and scope
 
 Planning operates only on active, explicitly classified `PRJ-*` identities and

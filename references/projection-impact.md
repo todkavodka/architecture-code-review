@@ -7,6 +7,27 @@ and selector rules in [Projection dependency contracts](projection-dependencies.
 It records which projections lost a freshness proof; it does not regenerate
 projections, change semantic authority, or treat projection prose as evidence.
 
+## 0.1 Operational impact view
+
+Impact accounting may publish a generated, non-authoritative summary at:
+
+```text
+working/projections/impact.md
+```
+
+The view is a routing/readout projection of persisted direct and propagated
+impact records. It may group `PRJ-*` identities by freshness, reason,
+required action, analyzed input revision, and propagation relationship. The
+impact records and their owning semantic/projection authorities remain the
+source of truth; the view must not invent reasons, resolve authority
+conflicts, or rewrite `working/INDEX.md`.
+
+`working/INDEX.md` is not an impact subject. It receives no impact record,
+fingerprint-drift result, projection freshness, regeneration, retirement, or
+`RG-*` state, even when its filename or Markdown shape resembles an index or
+generated report. The impact view's separate `working/projections/` path is
+required to prevent collision with coordinator workflow authority.
+
 ## 1. Stabilized semantic-delta input
 
 Impact analysis runs once the semantic workflow has reached a stabilized

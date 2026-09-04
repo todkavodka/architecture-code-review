@@ -37,6 +37,26 @@ may consume an authority or another projection, but its prose cannot resolve a
 semantic conflict, promote manual content into authority, or mutate the
 authority to make the projection consistent.
 
+## 1.1 Operational registry view
+
+The shared lifecycle may publish a generated registry view at:
+
+```text
+working/projections/registry.md
+```
+
+This is a reconstructable navigation/status view over explicitly registered
+active and historical `PRJ-*` identities. Its rows may include the projection
+ID, owning contract, declared path, identity lifecycle, accepted revision,
+freshness, required action, and owning record revision. It is not a second
+registry authority: the projection contract and its lifecycle records remain
+authoritative, and direct dependency metadata remains owned by each consumer.
+
+The registry view must not include `working/INDEX.md` as a projection, assign
+it a `PRJ-*` identity, or copy/derive its resume-critical coordinator state.
+The path is intentionally distinct from `working/INDEX.md`; neither path nor
+the word `registry` changes explicit classification.
+
 ## 2. Stable identity and lifecycle
 
 Each independently regeneratable projection receives a stable logical identity
