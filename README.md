@@ -152,6 +152,8 @@ REVIEW_PLUS_TARGET_AND_ROADMAP
 Современная модель Test Engineering хранит каждый запрошенный результат отдельно:
 
 ```text
+Test Engineering: OFF
+или:
 [x] Test Assurance
 [ ] Test Plan
 [ ] Contract Consistency Report
@@ -160,6 +162,11 @@ REVIEW_PLUS_TARGET_AND_ROADMAP
 [ ] Service Simulator Implementation Plan
 [ ] E2E Test Plan
 ```
+
+Например, в первом запуске пользователь может включить Test Engineering и
+выбрать `Test Assurance`, `Test Environment Design` и `E2E Test Plan`, оставив
+остальные результаты выключенными. Этот выбор сохраняется напрямую в
+независимых полях `outputs`; он не кодируется через legacy endpoint.
 
 `Test Assurance` остаётся обязательным ядром Test Engineering.
 
@@ -1026,10 +1033,20 @@ EXTEND существующий принятый Test Assurance.
 ```text
 Используй architecture-code-review.
 EXTEND существующий принятый пакет аудита.
+Уже включено:
+- Test Assurance
+- Test Plan
 Добавь:
 - E2E Test Plan
 Не включай Service Simulator Design автоматически, если выбранная топология его не требует.
 ```
+
+При `EXTEND` уже выбранные результаты показываются отдельно и переиспользуются;
+пользователь выбирает только доступные добавления. Если Test Engineering ещё
+не был включён, показывается современный независимый список результатов с
+обязательным `Test Assurance` при включении. `Service Simulator Design` может
+добавиться автоматически только как явно объяснённая структурная зависимость
+для `Service Simulator Implementation Plan`.
 
 ## Продолжить незавершённый аудит (`RESUME`)
 
@@ -1133,6 +1150,8 @@ PROJECTION_REPAIR принятого пакета аудита.
 │   ├── pressure-scenario-85-test-engineering-revalidation.md
 │   ├── pressure-scenario-86-service-simulator-e2e-boundaries.md
 │   ├── pressure-scenario-87-output-selection-persistence.md
+│   ├── pressure-scenario-88-new-test-engineering-selection.md
+│   ├── pressure-scenario-89-extend-test-engineering-selection.md
 │   └── test-engineering-capability-validation.md
 └── docs/
     └── superpowers/
@@ -1181,6 +1200,8 @@ PS-84  минимально необходимая цепочка зависим
 PS-85  точечная повторная проверка по влиянию изменений
 PS-86  границы Service Simulator и E2E
 PS-87  сохранение независимого выбора результатов
+PS-88  независимый выбор Test Engineering при NEW
+PS-89  выбор Test Engineering при EXTEND
 ```
 
 Результат проверки всегда относится к конкретной ревизии и конкретному сценарию. Старый `GREEN` нельзя считать вечным доказательством для любого будущего `main`.

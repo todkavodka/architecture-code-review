@@ -248,6 +248,13 @@ For Test Engineering, `outputs` is the persisted configuration authority; the
 legacy `endpoint` is retained only for backward-compatible Test Review packages
 and must not be used as the sole output selection. When normalizing legacy state:
 
+`NEW` writes the user's independent Test Engineering selection directly to
+`outputs`. `RESUME`, `EXTEND`, `USE_EXISTING`, and `REVALIDATE` read that
+persisted independent selection; `EXTEND` preserves accepted selected outputs
+and adds only explicitly requested outputs plus structurally required upstream
+dependencies. The legacy endpoint is not the primary `NEW` or `EXTEND` UI or
+source of truth.
+
 ```text
 REVIEW_ONLY
   → test_assurance=true; every optional output=false
@@ -295,11 +302,15 @@ working/                                     # authoritative BC/CC/TM/GAP ledger
 ```
 
 The registry stores output selection as the independent `outputs` fields above.
-An E2E Test Plan
+For `EXTEND`, the coordinator first separates accepted/fresh selected outputs
+from available additions, then persists the union of the existing selection and
+the requested additions. It explains any structurally required dependency
+addition before execution. An E2E Test Plan
 requires Test Assurance, the internal Behavior Model, applicable Contract
 Verification, and E2E Design; Service Simulator Design is added only when the
 selected topology requires it. A Service Simulator Implementation Plan requires
-an accepted and fresh simulator specification. `EXTEND` reuses the accepted
+an accepted and fresh simulator specification, so a missing simulator design is
+the minimum upstream addition for that request. `EXTEND` reuses the accepted
 upstream slice instead of replaying the full review.
 
 Capability-owned artifacts may use project-local paths, for example:
