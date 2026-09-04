@@ -46,13 +46,18 @@ are generated later.
 
 ## 2. Authority map
 
-- Технические факты As-Built во время исследования: accepted `working/00-...as-built.md`.
-- `01-architecture-review.md`: authoritative user-facing report, но As-Built section является производной проекцией технической базы.
+- Технические факты во время исследования: accepted/fresh Shared Technical Model по `shared-technical-model.md` и required coverage acceptance по `technical-model-coverage.md`.
+- Human-readable As-Built: substantial projection accepted/fresh STM плюс architecture-oriented synthesis; она не является competing factual authority.
+- `01-architecture-review.md`: authoritative user-facing report; его factual As-Built chapter — производная STM projection, а architectural properties/findings — Architecture Review authority.
 - `02-authoritative-findings-ledger.md`: единственный авторитетный источник final RF wording, evidence status, severity, projections, SER/open questions и supersessions.
 - `03-target-architecture.md`: авторитетный источник target mechanisms/invariants/feasibility, когда endpoint это включает.
 - `04-remediation-roadmap.md`: авторитетный источник implementation sequence/tasks/gates, когда endpoint это включает.
 
-Если технический As-Built меняется, все производные final sections, которые на него опираются, считаются stale до повторной synthesis/review.
+Если accepted STM revision, required factual coverage или projection selector меняется,
+все зависимые As-Built/final sections считаются stale до повторной
+synthesis/review. `PROJECTION_REPAIR` может исправлять presentation только по
+неизменённой accepted authority; semantic drift маршрутизируется в technical
+revalidation, а не скрывается prose repair.
 
 ## 3. `01-architecture-review.md`
 
@@ -88,7 +93,13 @@ are generated later.
 ## 12. Итоговый статус
 ```
 
-Фактическая архитектура — substantial first-class chapter. Для medium project ориентир по информационной плотности примерно соответствует 5–10 страницам, но gate — semantic completeness, а не количество строк.
+Фактическая архитектура — substantial first-class chapter, traceable to
+accepted/fresh STM facts and required coverage. Для medium project ориентир по
+информационной плотности примерно соответствует 5–10 страницам, но gate —
+semantic completeness, а не количество строк. Она сохраняет purpose/scenarios,
+topology, ownership, boundaries, flows, lifecycle, concurrency, failure,
+trust, configuration, persistence, observability и platform-specific material;
+architecture properties and findings остаются отдельной Architecture authority.
 
 Основной отчёт обычно раскрывает 10–20 наиболее важных RF в читаемом виде и ссылается на полный ledger вместо копирования всех деталей.
 

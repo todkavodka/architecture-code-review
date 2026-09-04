@@ -185,3 +185,38 @@ authority, and freshness bindings remain suitable for the requested decision.
 Legacy Architecture Review As-Built authority and its migration to an STM
 projection are governed by the dedicated migration work; this foundation does
 not silently relabel existing As-Built material as accepted STM fact.
+
+## 8. Architecture Review and As-Built projection
+
+Architecture Review consumes accepted/fresh required STM facts and the accepted
+Technical Model Coverage decision before full thematic discovery. It is a
+consumer of factual components, topology, ownership, interfaces/boundaries,
+flows, lifecycle, concurrency, failure, trust, configuration, persistence,
+observability and platform behavior; it does not maintain an equivalent factual
+system model.
+
+The existing substantial As-Built material remains required, but changes role:
+
+```text
+accepted/fresh STM + required factual coverage
+→ human-readable As-Built projection with architecture-oriented synthesis
+```
+
+The projection preserves material factual parity: purpose/key scenarios,
+runtime/deployment topology, state ownership, API/IPC/process/persistence/trust
+boundaries, command/read/async/external flows, state/lifecycle transitions,
+startup/readiness/shutdown/retry/recovery, concurrency/shared-state/
+serialization/idempotency, failure/partial-failure, auth/authz/trust,
+configuration/secrets, persistence/migration/consistency, observability and
+platform-specific behavior. It exposes `PARTIAL`, `UNKNOWN`, stale and
+unresolved limitations rather than turning them into certainty.
+
+As-Built is useful human documentation, not factual authority. Architecture
+properties/invariants, adverse-scenario and race interpretation, `SER-*`,
+findings, root-boundary adjudication, severity and remediation implications
+remain Architecture Review authority. A capability that sees a factual gap or
+contradiction emits `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` or
+`TECH_FACT_REVALIDATION_REQUEST`; only the Technical Model Gate changes accepted
+facts. Projection repair may fix presentation from unchanged accepted authority,
+but semantic drift follows technical revalidation and never promotes a
+projection into STM authority.

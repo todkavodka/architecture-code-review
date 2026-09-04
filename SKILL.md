@@ -64,9 +64,9 @@ from Architecture Discovery Coverage and are authoritative in
 `references/technical-model-coverage.md`.
 
 1. Зафиксируй repository baseline и применимые stack addenda. Для `NEW` до запуска capability создай persistent Shared Technical Model baseline по `references/shared-technical-model.md`; создание модели не означает обязательное полное заполнение всех factual slices.
-2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
-3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.
-4. После принятия As-Built проведи thematic discovery. Используй:
+2. Собери/revalidate required Shared Evidence и factual STM slices по `references/shared-evidence-model.md` и `references/shared-technical-model.md`.
+3. Пройди independent Technical Model Coverage Review и прими required full STM; автор factual model не self-accepts.
+4. Только после accepted/fresh required STM проведи Architecture thematic discovery. Используй:
    - `references/ownership-and-scenarios.md`;
    - `references/boundary-contract-audit.md`;
    - `references/lifecycle-and-mermaid.md`;
@@ -77,7 +77,7 @@ from Architecture Discovery Coverage and are authoritative in
 7. Независимо проверь кандидатов по `references/independent-verification.md`.
 8. Проведи root-boundary adjudication по `references/root-boundary-adjudication.md`.
 9. Только после этого назначь severity по `references/evidence-and-severity.md` и сформируй authoritative ledger.
-10. Собери main review по `references/report-contract.md`.
+10. Собери As-Built и main review projections по `references/report-contract.md` из accepted/fresh STM и accepted Architecture Review authority.
 11. Если endpoint включает Target Architecture — создай её и проведи review/correction/re-review по `references/target-architecture-review.md`.
 12. Если endpoint включает Roadmap — создай его и проведи execution-consistency review/correction/re-review по `references/remediation-roadmap-review.md`.
 13. После принятия всех requested artifacts собери final package.
@@ -85,8 +85,8 @@ from Architecture Discovery Coverage and are authoritative in
 
 ## Non-Negotiable Gates
 
-- Technical As-Built working file — source of truth; финальный As-Built prose является производной проекцией.
-- Тематический агент не переписывает As-Built: он создаёт `ARCH-CORRECTION-CANDIDATE`.
+- Accepted/fresh Shared Technical Model — factual technical authority. Human-readable As-Built — projection accepted/fresh STM плюс architecture-oriented synthesis.
+- Capability не переписывает accepted STM или As-Built projection как способ исправить факт: он создаёт `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` или `TECH_FACT_REVALIDATION_REQUEST` для Technical Model Gate. `ARCH-CORRECTION-CANDIDATE` остаётся только для Architecture-owned interpretation.
 - `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED` нельзя использовать как accepted downstream input.
 - Compact persisted semantic state usable downstream только если он связан с текущей accepted owning-artifact revision; mismatch требует `AUTHORITY_RECONCILIATION_REQUIRED`.
 - Shared assurance principles apply across capabilities: resolve material authority before a substantive verdict, and keep claim scope within directly evidenced material scope.
@@ -133,7 +133,7 @@ from Architecture Discovery Coverage and are authoritative in
 - Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`
 - STM factual-domain coverage / `STANDARD_FULL` and `FORENSIC` projection / Technical Model Coverage Review → `references/technical-model-coverage.md`
 - capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
-- core method / As-Built-first flow → `references/review-method.md`
+- core method / STM-first Architecture Review flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
 - ownership / invariants / adversarial scenarios → `references/ownership-and-scenarios.md`
 - boundary contracts → `references/boundary-contract-audit.md`
