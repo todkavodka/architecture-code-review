@@ -3,6 +3,8 @@
 Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса. Семантика Shared Technical Model (STM), её factual authority и Technical Model Gate определены в `shared-technical-model.md`.
 
 Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.
+Direct STM/capability/projection dependency metadata, generated indexes, and
+impact semantics are owned by `technical-model-dependencies.md`.
 
 ## 1. Стартовый выбор
 
@@ -116,6 +118,7 @@ working/
 |---|---|
 | mode / endpoint / workflow state / resume / subagent handoff | `review-modes-and-orchestration.md` |
 | STM factual domain coverage / mode projection / technical coverage review | `technical-model-coverage.md` |
+| Dependency/index semantics / impact traversal | `technical-model-dependencies.md` |
 | общая evidence-first методика | `review-method.md` |
 | discovery coverage matrix / domains / coverage verdicts / coverage review | `discovery-coverage.md` |
 | ownership/invariants/adversarial scenarios | `ownership-and-scenarios.md` |
@@ -192,6 +195,12 @@ REVALIDATE → delegate project-change evidence semantics to revalidation-and-fr
 EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
 ```
+
+For a dependency-sliced capability dispatch, request the current semantic
+object, its HARD dependencies, unresolved CONDITIONAL dependencies, and
+required evidence. Resolve this bounded set through the generated indexes and
+owning direct metadata; do not preload unrelated accepted artifacts. The
+dependency contract owns the detailed traversal and impact rules.
 
 For `NEW`, create the persistent STM manifest and this compact routing
 projection before capability execution. The manifest, not `INDEX.md`, owns the

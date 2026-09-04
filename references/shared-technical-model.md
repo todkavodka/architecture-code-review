@@ -6,7 +6,9 @@ observations from the [Shared Evidence Model](shared-evidence-model.md) and is
 separate from capability interpretations and human-readable projections.
 
 This contract owns STM families, relations, lifecycle, fact authority, and
-persistence. Session routing and compact workflow state belong to
+persistence. Direct dependency metadata, generated dependency indexes, and
+impact traversal belong to [Technical Model dependencies and impact](technical-model-dependencies.md).
+Session routing and compact workflow state belong to
 [Session Orchestration](session-orchestration.md) and
 [Review Modes and Orchestration](review-modes-and-orchestration.md). Freshness
 decisions remain subject to
@@ -78,8 +80,10 @@ OBSERVABILITY
 Each STM artifact has stable semantic identity, a revision, baseline binding,
 and references to its supporting `WS-*` / `EV-*` observations. A minimum
 semantic record includes its family ID, revision, status, freshness, applicable
-authority state, and relevant relations. The evidence contract owns the
-observation record itself; the STM records only its provenance reference.
+authority state, relevant relations, and direct outbound dependency metadata.
+The evidence contract owns the observation record itself; the STM records only
+its provenance reference. Dependency/index authority and impact semantics are
+defined in `technical-model-dependencies.md`.
 
 Lifecycle, freshness, and authority are independent axes:
 
