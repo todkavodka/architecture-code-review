@@ -5,6 +5,12 @@ impact strength, selector dependencies, and bounded dependency traversal. It
 applies to authoritative evidence, STM, capability, and projection artifacts.
 It does not make an index, a projection, or an impact route semantic authority.
 
+Projection-specific dependency kinds, controlled selector contracts, selector
+resolution snapshots, and the projection regeneration DAG are specialized in
+[Projection dependency contracts](projection-dependencies.md). That reference
+adds Stage B rules without changing the Stage A direct-metadata authority
+defined here.
+
 Each authoritative artifact owns its direct outbound dependency metadata. A
 generated registry may aggregate that metadata, but direct metadata remains the
 source of truth for the artifact's semantic dependencies.
@@ -132,6 +138,14 @@ A newly accepted object that matches a recorded selector makes the projection
 stale or eligible for regeneration even if the object did not exist at the
 projection's prior revision. This establishes Stage A dependency foundations;
 it does not implement the Stage B regeneration engine.
+
+For Stage B, use `SEMANTIC_EXACT`, `SEMANTIC_SELECTOR`, and
+`PROJECTION_EXACT` as the projection dependency vocabulary. The projection
+dependency reference defines the controlled selector and resolved-membership
+snapshot required to detect member additions, removals, and revision changes,
+as well as the canonical `CONSUMER -> PREREQUISITE` direction. These are a
+specialization of this section, not a replacement for consumer-owned direct
+metadata or derived reverse indexes.
 
 ## 6. Minimum dependency context
 
