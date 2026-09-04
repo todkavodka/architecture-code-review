@@ -166,6 +166,27 @@ The baseline correctly adjudicated the supplied A–E sites after they were pres
 
 ## Candidate validation status
 
+## Stage A candidate validation status
+
+The Stage A candidate has no executable coordinator in this repository. PS-90
+through PS-99 were checked as static/contract validations only; these are not
+runtime pressure results. The detailed record is
+`tests/shared-technical-model-foundation-validation.md`.
+
+```text
+PS90 GREEN — PS90_GREEN_PERSISTENT_STM_BOOTSTRAP
+PS91 GREEN — PS91_GREEN_MODE_PROJECTION
+PS92 GREEN — PS92_GREEN_FACT_INTERPRETATION_BOUNDARY
+PS93 GREEN — PS93_GREEN_SHARED_EVIDENCE_LAYER
+PS94 GREEN — PS94_GREEN_COVERAGE_SEPARATION
+PS95 GREEN — PS95_GREEN_HYBRID_DEPENDENCY_GRAPH
+PS96 GREEN — PS96_GREEN_STM_INCREMENTAL_REUSE
+PS97 GREEN — PS97_GREEN_TECHNICAL_DOCUMENTATION_PROJECTION
+PS98 GREEN — PS98_GREEN_AS_BUILT_PROJECTION_MIGRATION
+PS99 GREEN — PS99_GREEN_LEGACY_AND_CROSS_CAPABILITY_REUSE
+execution: static/contract only; runtime unavailable
+```
+
 Fresh-context candidate validation completed against:
 
 ```text
