@@ -75,6 +75,15 @@ The recommendation matrix is:
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
 
+Legacy package reconciliation is conservative: an accepted As-Built with no
+STM is valid legacy state, not corruption. `USE_EXISTING` may consume it without
+modernizing; `RESUME` reconciles only the first unfinished dependency;
+`EXTEND` backfills/builds only the requested STM slice; `REVALIDATE` uses old
+As-Built/evidence as historical context and requires impact-driven fresh STM
+acceptance. Extracted legacy facts are candidates until evidence and baseline
+validation pass through the Technical Model Gate. A forensic upgrade builds the
+required forensic depth and never relabels compact prose as forensic evidence.
+
 Typical `PROJECTION_REPAIR` targets include broken relative links, malformed Markdown structure, bad navigation/headings/tables, invalid Mermaid syntax/renderability, inconsistent terminology/language, duplicated or stale presentation text whose accepted replacement is already known, and malformed cross-references to accepted identifiers.
 
 For `PROJECTION_REPAIR`, do not reopen technical discovery, candidate verification, root/severity adjudication, As-Built verification, Target technical review, or Roadmap technical review merely because final documents are being corrected. Load only the accepted authority refs needed to constrain the changed projection. If a requested correction requires changing accepted evidence, root identity/boundary, severity/exploitability, owner, invariant, product-intent status, target mechanism, roadmap prerequisite/dependency/gate, security assumption, or safe-activation semantics, stop the projection path and return:
