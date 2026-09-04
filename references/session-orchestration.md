@@ -87,6 +87,12 @@ accepted semantic work, but blocks projection-sensitive downstream gates until
 accounting succeeds. Repeated passes retain unresolved reasons without
 duplicating them.
 
+When requested output freshness requires regeneration, start a separate
+`RG-*` session under [Projection regeneration workflow](projection-regeneration.md).
+Its `TARGETED` or `ALL_STALE` plan is a frozen operational execution record,
+not a Session Intent, semantic stage transition, or `working/INDEX.md`
+authority. Projection Impact Analysis never starts regeneration implicitly.
+
 Legacy package reconciliation is conservative: an accepted As-Built with no
 STM is valid legacy state, not corruption. `USE_EXISTING` may consume it without
 modernizing; `RESUME` reconciles only the first unfinished dependency;
