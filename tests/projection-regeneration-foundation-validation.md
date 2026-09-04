@@ -433,17 +433,38 @@ Static verdict: `PS116_GREEN_CAPABILITY_SELECTOR_DETERMINISM`.
 ### Focused static check record
 
 The candidate must be checked with the following read-only commands before its
-commit:
+commit. The structural probe binds the result to the candidate diff and checks
+each catalog entry rather than merely searching for representative tokens:
 
 ```text
-git diff --check
-rg -n "package_id: PKG-TECHNICAL-DOCUMENTATION|package_id: PKG-TEST-REVIEW-DELIVERY|optional_members: \[\]|condition_id:|mandatory_prerequisites:|SEL-TECH-DOC-|SEL-TEST-REVIEW-|stable_order:" references/technical-documentation.md capabilities/test-review/references/test-engineering-contract.md
+git diff --check da3f246..61a85fc
+python3 -c 'from pathlib import Path; import re; td=Path("references/technical-documentation.md").read_text(); tr=Path("capabilities/test-review/references/test-engineering-contract.md").read_text(); assert len(set(re.findall(r"SEL-TECH-DOC-0[0-9]-[^`| ]+",td))) == 10; assert len(set(re.findall(r"SEL-TEST-REVIEW-(?:0[0-9]-BC|0[0-9]-CC|0[0-5]-[A-Z-]+|08-[A-Z-]+)",tr))) == 11; assert "authoritative_record_type: STM_FACT" in td; assert "definition_revision: 1" in td and "definition_revision: 1" in tr; assert tr.count("test_review_scope_id = <persisted TRS>") == 11; assert "optional_members: []" in td and "optional_members: []" in tr; assert "stable_order: semantic_id ASC, revision ASC" in td and "stable_order: semantic_id ASC, revision ASC" in tr; print("candidate=61a85fc technical_doc_selectors=10 test_review_selectors=11 required_schema_fields=present stable_order=present")'
 rg -n "PS115_GREEN_CAPABILITY_PACKAGE_SCHEMA|PS116_GREEN_CAPABILITY_SELECTOR_DETERMINISM" tests/projection-regeneration-foundation-validation.md
 ```
 
-Observed candidate result: all three commands exited `0`; the selector catalogs
-resolve to ten `SEL-TECH-DOC-*` entries and nine `SEL-TEST-REVIEW-*` entries,
-matching their respective finite registered projection sets.
+Observed candidate result: all three commands exited `0`; the revision-bound
+probe reported `candidate=61a85fc`, exactly ten Technical Documentation
+selectors and exactly eleven Test Review selectors (the simulator and simulator
+plan each use separate BC and CC selectors), the required schema fields, and
+stable ordering. The catalogs match their finite registered projection sets.
+
+### PS-81..99 — Stage A Test Engineering compatibility
+
+Validation type: `STATIC_CONTRACT`.
+
+Check:
+
+```text
+rg -n "BC-\*|CC-\*|MAT-\*|TM-\*|GAP-\*|TARGETED STM|Technical Model Gate|DECLARED|IMPLEMENTED|CONSUMED|TESTED" capabilities/test-review/SKILL.md capabilities/test-review/references/test-engineering-contract.md references/technical-model-coverage.md
+rg -n "PS-8[1-9]|PS-99|PS99_GREEN_TEST_ENGINEERING_STM_DEPENDENCY" tests/test-engineering-capability-validation.md tests/shared-technical-model-foundation-validation.md tests/pressure-scenario-99-legacy-and-cross-capability-reuse.md
+```
+
+Expected behavior: Stage A semantic ownership, targeted STM acquisition,
+independent observation views, and minimum-slice EXTEND/REVALIDATE behavior
+remain explicit. Observed result: the required ownership, gate, dependency,
+and view statements are present; PS-81..89 and PS-99 records remain named and
+static-only. Violations: none. Verdict:
+`PS81_99_GREEN_STAGE_A_TEST_ENGINEERING_COMPATIBILITY`.
 
 No runtime result is recorded. The repository still has no executable Stage B
 coordinator or projection runtime, so `PS-115` and `PS-116` are static contract

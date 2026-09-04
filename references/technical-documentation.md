@@ -131,6 +131,13 @@ turn incomplete coverage into accepted system knowledge.
 
 `PKG-TECHNICAL-DOCUMENTATION` is the capability-owned publication package:
 
+The conditional `documentation_sections.01..09` values are a persisted
+`TECH-DOC-SCOPE-*` section-selection record owned by Technical Documentation.
+`NEW` initializes the record from the requested documentation scope, `EXTEND`
+preserves it, and legacy registration must create or explicitly block until it
+can create the binding. A path, filename, or inferred prose relevance cannot
+resolve conditional membership.
+
 ```text
 package_id: PKG-TECHNICAL-DOCUMENTATION
 owner: Technical Documentation

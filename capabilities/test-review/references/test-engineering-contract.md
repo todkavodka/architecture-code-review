@@ -127,7 +127,7 @@ chooses a different output directory.
 | `PRJ-TEST-REVIEW-01-ASSURANCE-MAP` | `01-test-assurance-map.md` | accepted `MAT-*`, `TM-*`, and `GAP-*` records in the persisted Test Review scope |
 | `PRJ-TEST-REVIEW-02-TEST-PLAN` | `02-test-plan.md` | accepted `BC-*`, `MAT-*`, `TM-*`, and `GAP-*` records in the persisted Test Review scope |
 | `PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL` | `03-behavior-contract-model.md` | accepted `BC-*` records |
-| `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` | `04-contract-consistency-report.md` | accepted `CC-*` records and their referenced `BC-*` revisions |
+| `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` | `04-contract-consistency-report.md` | current, non-superseded `CC-*` records and their referenced `BC-*` revisions |
 | `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN` | `05-test-environment-design.md` | accepted behavior/assurance semantics and its exact accepted STM dependency slice |
 | `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `06-service-simulator-spec.md` | accepted `BC-*`, current `CC-*`, and its exact accepted consumer-boundary STM slice |
 | `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `07-service-simulator-implementation-plan.md` | accepted `BC-*`/`CC-*` provenance plus `PROJECTION_EXACT PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` at its verified revision |
@@ -179,8 +179,10 @@ projection or its scope record to `BC/CC/MAT/TM/GAP` semantic authority.
 | `SEL-TEST-REVIEW-03-BEHAVIOR-MODEL` | `PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family = BC AND test_review_scope_id = <persisted TRS>` |
 | `SEL-TEST-REVIEW-04-CONSISTENCY` | `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` | `TEST_ENGINEERING_CONSISTENCY_RECORD` | `family = CC AND test_review_scope_id = <persisted TRS>`; each referenced `BC-*` is a `SEMANTIC_EXACT` dependency |
 | `SEL-TEST-REVIEW-05-ENVIRONMENT` | `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [BC, MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
-| `SEL-TEST-REVIEW-06-SIMULATOR` | `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `TEST_ENGINEERING_SEMANTIC_RECORD` and `TEST_ENGINEERING_CONSISTENCY_RECORD` | `(family = BC OR family = CC) AND test_review_scope_id = <persisted TRS>` |
-| `SEL-TEST-REVIEW-07-SIMULATOR-PLAN` | `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `TEST_ENGINEERING_SEMANTIC_RECORD` and `TEST_ENGINEERING_CONSISTENCY_RECORD` | `(family = BC OR family = CC) AND test_review_scope_id = <persisted TRS>`; the simulator specification remains the declared `PROJECTION_EXACT` prerequisite |
+| `SEL-TEST-REVIEW-06-BC` | `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family = BC AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-06-CC` | `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC` | `TEST_ENGINEERING_CONSISTENCY_RECORD` | `family = CC AND test_review_scope_id = <persisted TRS>` |
+| `SEL-TEST-REVIEW-07-BC` | `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family = BC AND test_review_scope_id = <persisted TRS>`; the simulator specification remains the declared `PROJECTION_EXACT` prerequisite |
+| `SEL-TEST-REVIEW-07-CC` | `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN` | `TEST_ENGINEERING_CONSISTENCY_RECORD` | `family = CC AND test_review_scope_id = <persisted TRS>`; the simulator specification remains the declared `PROJECTION_EXACT` prerequisite |
 | `SEL-TEST-REVIEW-08-E2E` | `PRJ-TEST-REVIEW-08-E2E-TEST-PLAN` | `TEST_ENGINEERING_SEMANTIC_RECORD` | `family IN [BC, MAT, TM, GAP] AND test_review_scope_id = <persisted TRS>` |
 
 A selector addition, removal, or member revision change is projection impact;
@@ -205,7 +207,13 @@ creates a private factual model, reuses its own prose as a factual source, or
 bypasses targeted STM acquisition, the Technical Model Gate, or independent
 targeted coverage review.
 
-`PKG-TEST-REVIEW-DELIVERY` is the Test Review publication package:
+`PKG-TEST-REVIEW-DELIVERY` is the Test Review publication package.
+
+The `test_review_scope_id` used by selectors is a persisted `TRS-*`
+scope-binding record owned by Test Review. `NEW` initializes it from the
+selected Test Review scope, `EXTEND` preserves it, and legacy migration must
+create or explicitly block until it can create the binding. A filename or
+prose topic cannot supply one.
 
 ```text
 package_id: PKG-TEST-REVIEW-DELIVERY
