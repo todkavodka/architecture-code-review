@@ -61,7 +61,21 @@ every private helper or local function.
 For interfaces and interactions, `FULL` means all known material externally
 visible or architecturally relevant surfaces within the evidence-bounded scope.
 
-## 4. Architecture mode projection
+## 4. `TARGETED` semantics
+
+`TARGETED` is the bounded coverage mode for a capability or endpoint that does
+not require a complete factual system surface. Its matrix contains only the
+material domains and fact families required by the declared dependency slice.
+The requested slice, baseline, evidence pointers, and downstream impact are
+recorded; unrelated domains are not silently treated as accepted or rebuilt.
+
+An independent Technical Model Coverage Review may accept a targeted slice
+only when every required row is `ACCEPTED` (or evidence-backed
+`NOT_APPLICABLE`) and the gate is explicitly scoped to that slice. Targeted
+acceptance does not satisfy the `FULL` requirement of a full Architecture
+Review.
+
+## 5. Architecture mode projection
 
 Both modes use one STM schema. They differ only in required population depth,
 evidence granularity, flow detail, contradiction treatment, and review rigor.
@@ -88,7 +102,7 @@ FORENSIC:
 `FORENSIC` enriches the same accepted model; it does not restart factual
 discovery or create a second schema.
 
-## 5. Technical Model Coverage Review gate
+## 6. Technical Model Coverage Review gate
 
 For a full Architecture Review, every material applicable row must be
 `ACCEPTED` before the independent Technical Model Coverage Review can emit
@@ -102,7 +116,7 @@ An editor, projection, or reviewer prose verdict cannot override
 `PARTIAL`, `BLOCKED`, or `UNKNOWN` rows; correct the bounded matrix and repeat
 the required review instead.
 
-## 6. Separate coverage authorities
+## 7. Separate coverage authorities
 
 Technical Model Coverage answers whether factual discovery bounded the required
 technical system surface. [Architecture Discovery Coverage](discovery-coverage.md)
