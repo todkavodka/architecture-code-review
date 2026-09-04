@@ -189,6 +189,12 @@ V3 CONTRACT COMPLETENESS
 V4 AUTHORITY CONSISTENCY
 ```
 
+The normative gate definitions, V4 authority boundary, failure routing, and
+revision-publication algorithm are in [Projection verification and revision
+publication](projection-verification.md). After all four gates pass, an
+unchanged canonical fingerprint records `NO_CHANGE` and retains the existing
+revision; only a changed fingerprint publishes `PRJ-*@rev(N+1)`.
+
 `REGENERATED` is an execution/result observation, not a freshness state and not
 an alias for `CURRENT`. A verifier checks the candidate against accepted
 authority and contract; it does not adjudicate or rewrite semantic authority.

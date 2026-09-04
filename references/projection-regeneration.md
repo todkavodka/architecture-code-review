@@ -194,9 +194,13 @@ PENDING -> BLOCKED_UPSTREAM | SKIPPED_CURRENT
 ```
 
 `FAILED` never creates an accepted projection revision. A downstream consumer
-cannot use a failed candidate as an upstream revision. The lifecycle contract
-alone determines whether the persistent freshness after a terminal state is
-`CURRENT`, `STALE`, or `BLOCKED`.
+cannot use any candidate as an upstream revision, whether verification is
+pending, failed, or has not yet published a changed verified revision. Only the
+publication result defined in [Projection verification and revision
+publication](projection-verification.md) may become a dependency input or
+trigger downstream impact. The lifecycle contract alone determines whether the
+persistent freshness after a terminal state is `CURRENT`, `STALE`, or
+`BLOCKED`.
 
 ## 6. Failure isolation and session outcome
 
