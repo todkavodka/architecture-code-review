@@ -150,6 +150,22 @@ REVIEW_PLUS_TEST_PLAN → test_assurance=true; test_plan=true; all other optiona
 
 The legacy endpoint never implies an extended Test Engineering output.
 
+For `EXTEND`, first read the accepted capability registry and its freshness and
+authority bindings. Show already selected outputs separately from available
+additions; do not reopen the full `NEW` configuration. If Test Engineering was
+previously `OFF`, show the complete independent output selection. If it was
+already enabled, preserve its selected outputs and show only outputs that can
+still be added. Persist the result as the previous `outputs` union the user's
+explicit additions.
+
+Required upstream dependencies may be added only when structurally necessary
+and must be explained before execution. In particular, requesting
+`Service Simulator Implementation Plan` without an accepted and fresh
+`Service Simulator Design` means the minimum extension includes that design
+first. Requesting only `E2E Test Plan` does not add Service Simulator Design
+unless the selected topology requires it. Behavior Model and applicable
+Contract Verification remain internal dependencies.
+
 ## Project Profile
 
 Project Profile is cheap local routing/estimation metadata, not architecture evidence. For v0.3 it uses `schema_version: 1` and `collector_version: 1` and contains:
