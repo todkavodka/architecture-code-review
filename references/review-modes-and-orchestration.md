@@ -1,8 +1,10 @@
 # Режимы и управление процессом аудита
 
-Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса.
+Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса. Семантика Shared Technical Model (STM), её factual authority и Technical Model Gate определены в `shared-technical-model.md`.
 
-Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation.
+Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.
+Direct STM/capability/projection dependency metadata, generated indexes, and
+impact semantics are owned by `technical-model-dependencies.md`.
 
 ## 1. Стартовый выбор
 
@@ -13,6 +15,11 @@ Discovery Coverage semantics определены в `discovery-coverage.md`; з
 `STANDARD_FULL (полный стандартный аудит)` — полный evidence-first аудит с подробной фактической архитектурой, thematic discovery, Discovery Coverage closeout, независимой проверкой кандидатов, проверкой корневых причин и отдельной оценкой критичности. Рабочие артефакты компактнее, чем в forensic-режиме.
 
 `FORENSIC (углублённое архитектурное расследование)` — максимальная глубина для сложных, конкурентных, security-sensitive или спорных систем. Тематические области исследуются отдельными рабочими проходами, Discovery Coverage имеет отдельный independent gate, история исправлений/опровержений сохраняется подробнее, а gates разделены явно.
+
+Оба режима требуют `FULL` factual STM coverage до full-model downstream use:
+`STANDARD_FULL` — `COMPACT`, `FORENSIC` — `FORENSIC`. Полная семантика
+coverage/depth, сохранение единой schema и independent review принадлежат
+`technical-model-coverage.md`.
 
 Skill может рекомендовать режим, но не должен молча выбирать `FORENSIC`.
 
@@ -50,8 +57,10 @@ docs/reviews/architecture-review/
 working/
 ├── README.md
 ├── INDEX.md
-├── 00-baseline-and-as-built.md
-├── 00a-as-built-review.md
+├── evidence/                         # shared WS-* worksets
+├── technical-model/                  # persistent STM facts + coverage/review
+├── 00-baseline-and-as-built-projection.md
+├── 00a-as-built-projection-review.md
 ├── 01-discovery-and-scenarios.md
 ├── 01a-discovery-coverage-matrix.md
 ├── 01b-independent-coverage-review.md
@@ -70,8 +79,10 @@ working/
 working/
 ├── README.md
 ├── INDEX.md
-├── 00-baseline-as-built.md
-├── 00a-as-built-independent-review.md
+├── evidence/                         # shared WS-* worksets
+├── technical-model/                  # persistent STM facts + coverage/review
+├── 00-baseline-as-built-projection.md
+├── 00a-as-built-projection-review.md
 ├── 01-invariants-ownership-isolation.md
 ├── 02-lifecycle-cancellation-concurrency.md
 ├── 03-boundary-contracts.md
@@ -106,6 +117,9 @@ working/
 | Концепт | Авторитетный источник |
 |---|---|
 | mode / endpoint / workflow state / resume / subagent handoff | `review-modes-and-orchestration.md` |
+| factual STM families / fact lifecycle / Technical Model Gate | `shared-technical-model.md` |
+| STM factual domain coverage / mode projection / technical coverage review | `technical-model-coverage.md` |
+| Dependency/index semantics / impact traversal | `technical-model-dependencies.md` |
 | общая evidence-first методика | `review-method.md` |
 | discovery coverage matrix / domains / coverage verdicts / coverage review | `discovery-coverage.md` |
 | ownership/invariants/adversarial scenarios | `ownership-and-scenarios.md` |
@@ -150,6 +164,14 @@ project_profile:
   collected_for_revision
   status
   artifact_or_projection_ref
+technical_model:
+  owning_manifest
+  model_revision
+  baseline
+  coverage_requirement
+  depth_requirement
+  coverage_status
+  freshness
 revalidation:
   change_range
   impact_status
@@ -174,6 +196,18 @@ REVALIDATE → delegate project-change evidence semantics to revalidation-and-fr
 EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
 ```
+
+For a dependency-sliced capability dispatch, request the current semantic
+object, its HARD dependencies, unresolved CONDITIONAL dependencies, and
+required evidence. Resolve this bounded set through the generated indexes and
+owning direct metadata; do not preload unrelated accepted artifacts. The
+dependency contract owns the detailed traversal and impact rules.
+
+For `NEW`, create the persistent STM manifest and this compact routing
+projection before capability execution. The manifest, not `INDEX.md`, owns the
+model. Model creation does not require complete population: the selected
+downstream requirement determines the initially required factual slice. See
+`shared-technical-model.md` for fact authority and persistence.
 
 Test Review methodology remains in `capabilities/test-review/SKILL.md`; startup
 visibility and selection remain in Session Orchestration.
@@ -528,17 +562,26 @@ not a blindfold or an unbounded restart.
 - exact baseline;
 - mode/endpoint;
 - `INDEX.md`;
-- принятую As-Built базу;
+- accepted/fresh required STM factual slice and its coverage/revision binding;
+- As-Built projection only when its human-readable context is useful, never as factual authority;
 - узкий scope;
 - forbidden scope;
 - собственный output path;
 - `HANDOFF SUMMARY` contract.
 
-Coverage Reviewer дополнительно получает bounded factual packet по `discovery-coverage.md`: accepted As-Built, matrix, thematic artifact registry, candidate/PC/OQ registries и baseline binding. Он не получает predecessor reasoning как authority.
+Technical Model Coverage Reviewer получает bounded STM factual packet, owning
+technical coverage matrix и baseline/revision binding. Architecture Coverage
+Reviewer получает accepted/fresh required STM slice, Architecture Discovery
+Coverage matrix, thematic artifact registry, candidate/PC/OQ registries и
+baseline binding. Ни один reviewer не получает predecessor reasoning или
+As-Built prose как factual authority.
 
 Один файл — один активный writer. Параллельные агенты не редактируют один файл.
 
-Сначала Baseline → As-Built → независимое As-Built review. Только после принятия As-Built запускай зависимые thematic passes.
+Сначала Baseline/session orchestration → required Shared Evidence/STM build →
+independent STM coverage/review gate → accepted full STM. Только после этого
+запускай Architecture thematic passes. As-Built projection собирается из
+accepted/fresh STM и проходит parity/projection review, не заменяя factual gate.
 
 После thematic discovery обязательный порядок:
 
@@ -553,9 +596,13 @@ discovery artifacts complete
 
 Параллельность ограниченная и адаптивная. При сомнении выполняй последовательно. Stability-first.
 
-## 9. Architecture correction
+## 9. Factual reconciliation and Architecture correction
 
-Тематический агент не исправляет As-Built напрямую. Он создаёт `ARCH-CORRECTION-CANDIDATE` с текущим утверждением, противоречием, evidence и предполагаемым влиянием.
+Тематический агент не исправляет STM или As-Built projection напрямую. Factual
+contradiction создаёт `TECH_FACT_CONFLICT`; new fact — `TECH_FACT_CANDIDATE`;
+stale or impact-affected fact — `TECH_FACT_REVALIDATION_REQUEST`. Запрос
+содержит current STM fact/revision, contradiction or candidate, evidence,
+expected impact и affected technical domains/projections.
 
 Отдельный fresh-context reviewer выдаёт:
 
@@ -566,17 +613,24 @@ PARTIALLY_CORRECT
 INSUFFICIENT_EVIDENCE
 ```
 
-При подтверждении отдельный correction pass изменяет технический As-Built, затем выполняется impact scan.
+Technical Model Gate подтверждает/rejects/revises factual STM artifact и затем
+выполняет impact scan. Architecture Review может продолжать только в unaffected
+scope; disputed required fact не является accepted downstream input.
 
 Impact scan обязан включать Discovery Coverage:
 
 ```text
-confirmed As-Built change
-→ determine affected coverage domains
+confirmed STM change
+→ determine affected technical and architecture coverage domains
 → only affected accepted rows/stages become REVALIDATION_REQUIRED
 ```
 
 Не сбрасывай unrelated accepted coverage без concrete impact.
+
+`ARCH-CORRECTION-CANDIDATE` сохраняется для correction Architecture-owned
+invariant, adverse-scenario/race interpretation, finding/root/severity или
+remediation implication. Он не является factual correction record и не меняет
+STM owner/writer/boundary inventory.
 
 ## 10. Candidate verification gate
 
@@ -601,13 +655,31 @@ REVALIDATION_REQUIRED on material affected coverage
 
 Coverage Review не проверяет correctness каждого кандидата; candidate verification не используется как замена coverage review.
 
-## 11. As-Built authority
+## 10a. Technical Model Coverage precondition
 
-Во время исследования контролируемый working As-Built (`00-...as-built.md`) — **технический источник истины** для фактов архитектуры.
+For a full Architecture Review, `TECHNICAL_MODEL_COVERAGE_ACCEPTED` from
+`technical-model-coverage.md` is required before Architecture thematic
+discovery or another capability that needs the complete factual substrate.
+`PARTIAL`, `BLOCKED`, or `UNKNOWN` material technical-domain rows block that
+transition; a prose reviewer verdict cannot override them. This is separate
+from the later Architecture Discovery Coverage gate above.
 
-`01-architecture-review.md` содержит производную пользовательскую проекцию. Если технический As-Built меняется после её сборки, зависимые разделы финального отчёта считаются stale до повторной synthesis/review.
+## 11. As-Built projection authority
 
-Независимое As-Built review обязательно в обоих режимах; в `STANDARD_FULL` оно может быть компактнее.
+Accepted/fresh required STM — **technical factual authority**. Controlled
+working As-Built (`00-...as-built-projection.md`) — substantial human-readable
+projection accepted/fresh STM плюс architecture-oriented synthesis, не второй
+technical source of truth.
+
+`01-architecture-review.md` содержит user-facing projection factual STM и
+Architecture Review authority. Если STM revision/coverage или projection
+selector меняется после сборки, зависимые sections считаются stale до повторной
+synthesis/review. `PROJECTION_REPAIR` исправляет только presentation from
+unchanged accepted authority; semantic drift требует technical revalidation.
+
+Technical Model Coverage Review обязателен в обоих режимах; в `STANDARD_FULL`
+его evidence depth может быть compact. As-Built parity/projection review также
+обязателен, но не принимает factual STM.
 
 ## 12. Recovery
 
@@ -617,13 +689,16 @@ Coverage Review не проверяет correctness каждого кандид�
 read INDEX
 → verify baseline and referenced artifacts
 → reconcile any persisted handoff not reflected in INDEX
-→ validate coverage_artifact and coverage_review baseline/revision binding
+→ validate STM facts, technical coverage, Architecture coverage and projection baseline/revision bindings
 → reconstruct true workflow state
 → call native todo/task/plan tool with reconstructed state, if available
 → identify first non-accepted required gate
 → continue
 ```
 
-Если INDEX утверждает `COVERAGE_ACCEPTED`, но owning matrix/review stale, missing или bound to another accepted As-Built/baseline, не доверяй compact projection. Используй freshness/reconciliation contract и верни соответствующий coverage stage в non-accepted state.
+Если INDEX утверждает accepted coverage, но owning technical/Architecture
+matrix/review stale, missing или bound to another STM revision/baseline, не
+доверяй compact projection. Используй freshness/reconciliation contract и
+верни соответствующий coverage stage в non-accepted state.
 
 Не полагайся на память предыдущего чата и не используй stale native UI как authority.

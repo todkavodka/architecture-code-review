@@ -8,11 +8,19 @@
 
 Не выводи архитектуру из названий директорий. Проследи реальные entry points, object/service construction, state ownership, boundaries и side effects.
 
-## 2. As-Built Architecture — первый крупный результат
+## 2. Factual STM и As-Built projection — первый крупный результат
 
-До глубокого thematic discovery создай технический As-Built source of truth в `working/00-...as-built.md`.
+До глубокого thematic discovery собери/revalidate required Shared Evidence и
+Shared Technical Model (STM) facts. Accepted/fresh STM, а не As-Built prose,
+является factual technical authority. Для full Architecture Review сначала
+требуется `FULL` STM и `TECHNICAL_MODEL_COVERAGE_ACCEPTED` по
+`technical-model-coverage.md`.
 
-Он должен позволять техническому лидеру понять систему без повторного открытия source tree. Для medium project глубина обычно эквивалентна substantial 5–10 page chapter, но acceptance определяется содержанием, а не page count.
+После этого собери human-readable As-Built projection из accepted/fresh STM
+плюс architecture-oriented synthesis. Она должна позволять техническому лидеру
+понять систему без повторного открытия source tree. Для medium project глубина
+обычно эквивалентна substantial 5–10 page chapter, но acceptance определяется
+содержанием, а не page count.
 
 Покрой, где применимо:
 
@@ -32,14 +40,23 @@
 14. platform-specific behavior и positive controls;
 15. краткие архитектурные свойства/ограничения.
 
-Это materiality-driven модель, а не универсальный checklist с одинаковой глубиной
-для каждого пункта. Discovery Coverage и materiality map определяют, что
-применимо, что получает bounded evidence, а что фиксируется как `NOT_APPLICABLE`
-или `UNKNOWN` с причиной.
+Пункты 1–14 — factual STM coverage/content: purpose/scenarios, topology,
+ownership, boundaries, flows, lifecycle, concurrency, failure, trust,
+configuration, persistence, observability и platform facts. Пункт 15 —
+Architecture-owned interpretation, не STM fact. Это materiality-driven модель,
+а не универсальный checklist с одинаковой глубиной для каждого пункта.
+Technical Model Coverage и materiality map определяют, что применимо, что
+получает bounded evidence, а что фиксируется как `NOT_APPLICABLE` или `UNKNOWN`
+с причиной. As-Built projection сохраняет эту factual parity, provenance и
+видимые limitations; она не нормализует `PARTIAL`, stale или unresolved input в
+certainty.
 
 Используй ownership matrix и evidence-driven diagrams, если они улучшают понимание.
 
-As-Built проходит независимое fresh-context review в обоих режимах. Только accepted As-Built является базой зависимых thematic passes.
+Technical Model Coverage Review независимо принимает factual substrate в обоих
+режимах. Только accepted/fresh required STM является базой зависимых thematic
+passes. As-Built projection проходит отдельную projection/parity review, но не
+становится factual authority.
 
 ### Evidence-bounded architecture claims
 
@@ -64,9 +81,11 @@ Search explicitly for material contradictions across:
 - lifecycle assumptions ↔ service/container/Ansible definitions;
 - retry claims ↔ persistence/queue semantics.
 
-Contradictions first become an `OQ-*` or `ARCH-CORRECTION-CANDIDATE` with
-provenance and impact. They are not automatic final findings and do not silently
-rewrite the accepted As-Built.
+Factual contradictions first become `TECH_FACT_CANDIDATE`,
+`TECH_FACT_CONFLICT` или `TECH_FACT_REVALIDATION_REQUEST` with provenance and
+impact. They are not automatic final findings and do not silently rewrite
+accepted STM or an As-Built projection. An Architecture-owned interpretation
+contradiction may instead become `OQ-*` or `ARCH-CORRECTION-CANDIDATE`.
 
 ## 3. Representative flows
 
@@ -190,11 +209,23 @@ Independent Verification: реален ли уже существующий CAND
 
 Не назначай окончательную severity во время discovery или coverage review.
 
-## 7. Architecture corrections
+## 7. Factual reconciliation and Architecture corrections
 
-Если thematic pass опровергает accepted As-Built, он создаёт `ARCH-CORRECTION-CANDIDATE` и продолжает в рамках собственного scope. Исправление базы выполняется отдельным review/correction/impact/revalidation loop из orchestration contract.
+Если thematic pass обнаруживает factual contradiction с accepted/fresh STM, он
+создаёт `TECH_FACT_CONFLICT` (или `TECH_FACT_CANDIDATE` /
+`TECH_FACT_REVALIDATION_REQUEST`) и продолжает только в unaffected scope.
+Technical Model Gate выполняет evidence review, revision/rejection и impact
+analysis; capability не изменяет STM и не «чинит» As-Built projection как
+factual authority.
 
-Подтверждённая As-Built correction требует coverage impact scan; не сбрасывай unrelated accepted coverage без evidence влияния.
+Подтверждённая STM correction требует targeted technical-coverage и projection
+impact scan; не сбрасывай unrelated accepted coverage без evidence влияния.
+
+Если correction относится к Architecture-owned invariant, causal interpretation,
+race conclusion, finding/root/severity или remedy implication, а не к факту STM,
+используй `ARCH-CORRECTION-CANDIDATE` и существующий architecture
+review/correction/adjudication loop. Такой correction не делает factual matrix
+finding и не переписывает STM.
 
 ## 8. Positive controls и non-findings
 

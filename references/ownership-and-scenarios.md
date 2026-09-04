@@ -1,15 +1,25 @@
 # Владение, инварианты и неблагоприятные сценарии
 
-Этот файл является авторитетным источником для ownership (владения состоянием и ресурсами), derivation of invariants (вывода инвариантов) и adversarial scenarios (неблагоприятных сценариев конкурентности/жизненного цикла).
+Этот файл является авторитетным источником для Architecture Review interpretation
+ownership (владения состоянием и ресурсами), derivation of invariants (вывода
+инвариантов) и adversarial scenarios (неблагоприятных сценариев
+конкурентности/жизненного цикла). Factual owner/writer/reader/lifetime/scope
+records принадлежат accepted/fresh Shared Technical Model (STM), а здесь
+используются как factual input для architecture analysis.
 
 ## 1. Матрица владения
 
-Для значимых сущностей/ресурсов фиксируй:
+Для значимых сущностей/ресурсов STM фиксирует factual matrix:
 
 | Entity/resource | Authoritative owner | Writers | Readers | Lifetime | Scope |
 |---|---|---|---|---|---|
 
-Владение выводится из реальных путей кода и runtime-поведения, а не из названий директорий или желаемой архитектуры.
+Владение выводится из реальных путей кода и runtime-поведения, а не из названий
+директорий или желаемой архитектуры. Матрица с owner/writers/readers/lifetime/
+scope — STM fact with evidence/provenance, не architecture finding и не
+`SER-*`. Если required factual row missing, stale или conflicting, запроси
+`TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` или
+`TECH_FACT_REVALIDATION_REQUEST`; не создавай parallel ownership inventory.
 
 Особенно проверяй:
 
@@ -100,27 +110,39 @@ A starts
 
 Positive Control не является «похвалой ради баланса»; это механизм, который целевая архитектура и remediation не должны случайно сломать.
 
-## 6. Architecture correction candidate
+## 6. Factual correction request
 
-Если тематическое исследование противоречит принятой As-Built Architecture, **не редактируй As-Built напрямую**.
+Если тематическое исследование противоречит accepted/fresh STM ownership fact,
+**не редактируй STM или As-Built projection напрямую**. Запроси Technical Model
+Gate:
 
 Запиши:
 
 ```markdown
-## ARCH-CORRECTION-CANDIDATE AC-###
+## TECH_FACT_CONFLICT TFC-###
 
-**Текущее утверждение:** ...
+**Текущий STM факт/revision:** ...
 **Наблюдаемое противоречие:** ...
 **Доказательства:** ...
 **Предполагаемое влияние:** ...
 **Затронутые области:** ...
 
-Статус: ARCH_CORRECTION_CANDIDATE
+Статус: TECH_FACT_CONFLICT
 ```
 
-Дальше применяется correction protocol из `review-modes-and-orchestration.md`.
+Используй `TECH_FACT_CANDIDATE` для нового factual material и
+`TECH_FACT_REVALIDATION_REQUEST` для stale/impact-affected factual material.
+Дальше применяется Technical Model Gate из `shared-technical-model.md`.
 
-## 7. Supporting Engineering Risks
+## 7. Architecture correction candidate
+
+Если factual input accepted/fresh, но Architecture-owned invariant, adverse
+scenario interpretation, race conclusion, `SER-*`, finding/root/severity или
+remediation implication требует correction, используй
+`ARCH-CORRECTION-CANDIDATE`. Он не меняет factual owner/writer matrix и следует
+architecture correction/adjudication protocol.
+
+## 8. Supporting Engineering Risks
 
 Broad structural patterns могут повышать вероятность повторения дефектов, не являясь сами одним runtime root finding:
 

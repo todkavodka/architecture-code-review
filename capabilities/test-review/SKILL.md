@@ -86,6 +86,25 @@ It does not modify production code or permanent tests during review.
 
 When embedded in an umbrella audit, shared authority/freshness/artifact rules are inherited from architecture-code-review.
 
+Before creating or materially revising any behavior, contract, assurance,
+mapping, environment, simulator, or E2E artifact, Test Engineering must derive
+and persist its minimum factual STM dependency slice. The slice must be
+accepted, sufficiently fresh and resolved, and have its targeted coverage
+accepted by an independent Technical Model Coverage Review after the facts
+pass through the Technical Model Gate. For `NEW` this follows STM bootstrap; for
+`EXTEND` it reuses qualifying existing facts and builds only missing ones; for
+stale or disputed facts it performs Technical Model revalidation first. An
+accepted/fresh `FULL` model satisfies the slice without a duplicate targeted
+model. Until that precondition holds, Test Engineering cannot reach its
+capability semantics.
+
+Test Engineering reuses accepted/fresh STM observations instead of
+reconstructing facts from the As-Built projection. STM facts remain distinct
+from Test Engineering semantics: `IF-*` is not `BC-*`, `INT-*` is not `MAT-*`,
+`ERR-*` is not `GAP-*`, and STM does not classify contract mismatches or test
+gaps. Missing, stale, or disputed facts go through the Technical Model Gate;
+the capability cannot rewrite accepted STM.
+
 ## Test Engineering extension
 
 For Test Engineering outputs beyond the existing Test Assurance core, read

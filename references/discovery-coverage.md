@@ -15,7 +15,7 @@
 Полнота discovery доказывается:
 
 ```text
-accepted As-Built
+accepted/fresh STM and the As-Built projection
 → mechanism coverage
 → evidence trail
 → independent coverage challenge
@@ -24,6 +24,13 @@ accepted As-Built
 Ноль findings допустим, если применимые domains реально исследованы и coverage evidence достаточен.
 
 Много findings не позволяет закрыть нерассмотренный material domain.
+
+Discovery Coverage remains Architecture Review authority. It is distinct from
+the factual STM matrix and `TECHNICAL_MODEL_COVERAGE_ACCEPTED`: STM coverage
+asks whether the required technical surface is represented, while this matrix
+asks whether architecture and risk mechanism classes were investigated. STM
+acceptance does not prove architectural discovery, and `COVERAGE_ACCEPTED`
+does not make `PARTIAL`, `BLOCKED`, or `UNKNOWN` STM rows complete.
 
 ## 2. Discovery Coverage Matrix
 

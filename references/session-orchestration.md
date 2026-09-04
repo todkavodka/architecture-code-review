@@ -30,6 +30,7 @@ START
 → reuse/refresh/backfill Project Profile
 → recommend/select Session Intent
 → context-sensitive Review Suite Configuration
+→ for NEW, persistent STM baseline bootstrap
 → persist/reconcile INDEX
 → substantive workflow
 ```
@@ -74,6 +75,15 @@ The recommendation matrix is:
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
 
+Legacy package reconciliation is conservative: an accepted As-Built with no
+STM is valid legacy state, not corruption. `USE_EXISTING` may consume it without
+modernizing; `RESUME` reconciles only the first unfinished dependency;
+`EXTEND` backfills/builds only the requested STM slice; `REVALIDATE` uses old
+As-Built/evidence as historical context and requires impact-driven fresh STM
+acceptance. Extracted legacy facts are candidates until evidence and baseline
+validation pass through the Technical Model Gate. A forensic upgrade builds the
+required forensic depth and never relabels compact prose as forensic evidence.
+
 Typical `PROJECTION_REPAIR` targets include broken relative links, malformed Markdown structure, bad navigation/headings/tables, invalid Mermaid syntax/renderability, inconsistent terminology/language, duplicated or stale presentation text whose accepted replacement is already known, and malformed cross-references to accepted identifiers.
 
 For `PROJECTION_REPAIR`, do not reopen technical discovery, candidate verification, root/severity adjudication, As-Built verification, Target technical review, or Roadmap technical review merely because final documents are being corrected. Load only the accepted authority refs needed to constrain the changed projection. If a requested correction requires changing accepted evidence, root identity/boundary, severity/exploitability, owner, invariant, product-intent status, target mechanism, roadmap prerequisite/dependency/gate, security assumption, or safe-activation semantics, stop the projection path and return:
@@ -108,6 +118,13 @@ Test Engineering
 Stack Addenda
   detected automatically; confirmed before substantive use
 ```
+
+For a full Architecture Review, the selected depth fixes the required Shared
+Technical Model coverage/depth projection: `STANDARD_FULL` requires
+`FULL/COMPACT` and `FORENSIC` requires `FULL/FORENSIC`. Persist the selected
+requirement, but do not represent it as accepted coverage at startup. The
+authoritative matrix, review, and acceptance semantics are in
+[`technical-model-coverage.md`](technical-model-coverage.md).
 
 Test Engineering is a separate startup choice from Architecture Review. When it
 is enabled, `Test Assurance` is the required core and each other listed output
@@ -165,6 +182,21 @@ and must be explained before execution. In particular, requesting
 first. Requesting only `E2E Test Plan` does not add Service Simulator Design
 unless the selected topology requires it. Behavior Model and applicable
 Contract Verification remain internal dependencies.
+
+## Shared Technical Model bootstrap
+
+After `NEW` configuration is resolved and before any selected capability begins
+substantive execution, create the persistent Shared Technical Model baseline and
+register its compact routing projection in `working/INDEX.md`. This establishes
+the model manifest and selected baseline; it does not require population of a
+complete model when the requested downstream scope needs only a bounded factual
+slice.
+
+STM fact authority, the Technical Model Gate, and persisted model shape belong
+to [Shared Technical Model](shared-technical-model.md). Startup records only
+the routing projection defined by
+[Review Modes and Orchestration](review-modes-and-orchestration.md); it must not
+copy the technical model into `INDEX.md`.
 
 ## Project Profile
 

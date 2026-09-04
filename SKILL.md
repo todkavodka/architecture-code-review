@@ -55,10 +55,18 @@ core; `Behavior Model` is an internal dependency and applicable `Contract
 Verification` is automatic. Optional output projections and ownership are
 defined by the capability contract and registered in `working/INDEX.md`.
 
-1. Зафиксируй repository baseline и применимые stack addenda.
-2. По `references/review-method.md` создай substantive As-Built Architecture (фактическую архитектуру).
-3. Выполни отдельное fresh-context review As-Built; автор не self-accepts.
-4. После принятия As-Built проведи thematic discovery. Используй:
+For a full Architecture Review, construct the required `FULL` Shared Technical
+Model and accept `TECHNICAL_MODEL_COVERAGE_ACCEPTED` before Architecture
+thematic discovery or another consumer that requires complete factual
+substrate. `STANDARD_FULL` requires `FULL/COMPACT`; `FORENSIC` requires
+`FULL/FORENSIC`. The factual coverage matrix and independent gate are separate
+from Architecture Discovery Coverage and are authoritative in
+`references/technical-model-coverage.md`.
+
+1. Зафиксируй repository baseline и применимые stack addenda. Для `NEW` до запуска capability создай persistent Shared Technical Model baseline по `references/shared-technical-model.md`; создание модели не означает обязательное полное заполнение всех factual slices.
+2. Собери/revalidate required Shared Evidence и factual STM slices по `references/shared-evidence-model.md` и `references/shared-technical-model.md`.
+3. Пройди independent Technical Model Coverage Review и прими required full STM; автор factual model не self-accepts.
+4. Только после accepted/fresh required STM проведи Architecture thematic discovery. Используй:
    - `references/ownership-and-scenarios.md`;
    - `references/boundary-contract-audit.md`;
    - `references/lifecycle-and-mermaid.md`;
@@ -69,7 +77,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 7. Независимо проверь кандидатов по `references/independent-verification.md`.
 8. Проведи root-boundary adjudication по `references/root-boundary-adjudication.md`.
 9. Только после этого назначь severity по `references/evidence-and-severity.md` и сформируй authoritative ledger.
-10. Собери main review по `references/report-contract.md`.
+10. Собери As-Built и main review projections по `references/report-contract.md` из accepted/fresh STM и accepted Architecture Review authority.
 11. Если endpoint включает Target Architecture — создай её и проведи review/correction/re-review по `references/target-architecture-review.md`.
 12. Если endpoint включает Roadmap — создай его и проведи execution-consistency review/correction/re-review по `references/remediation-roadmap-review.md`.
 13. После принятия всех requested artifacts собери final package.
@@ -77,8 +85,8 @@ defined by the capability contract and registered in `working/INDEX.md`.
 
 ## Non-Negotiable Gates
 
-- Technical As-Built working file — source of truth; финальный As-Built prose является производной проекцией.
-- Тематический агент не переписывает As-Built: он создаёт `ARCH-CORRECTION-CANDIDATE`.
+- Accepted/fresh Shared Technical Model — factual technical authority. Human-readable As-Built — projection accepted/fresh STM плюс architecture-oriented synthesis.
+- Capability не переписывает accepted STM или As-Built projection как способ исправить факт: он создаёт `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` или `TECH_FACT_REVALIDATION_REQUEST` для Technical Model Gate. `ARCH-CORRECTION-CANDIDATE` остаётся только для Architecture-owned interpretation.
 - `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED` нельзя использовать как accepted downstream input.
 - Compact persisted semantic state usable downstream только если он связан с текущей accepted owning-artifact revision; mismatch требует `AUTHORITY_RECONCILIATION_REQUIRED`.
 - Shared assurance principles apply across capabilities: resolve material authority before a substantive verdict, and keep claim scope within directly evidenced material scope.
@@ -89,6 +97,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 - Large Markdown artifacts записываются logical chunks (логическими частями) с проверкой; не полагайся на один giant write.
 - Количество и severity найденных `CAND-*`/`RF-*` не являются evidence полноты discovery.
 - `DISCOVERY_COMPLETE` без `COVERAGE_ACCEPTED` не является accepted downstream input для candidate verification.
+- Для full Architecture Review `TECHNICAL_MODEL_COVERAGE_ACCEPTED` обязателен до thematic discovery; `PARTIAL`, `BLOCKED` или `UNKNOWN` material STM coverage нельзя override prose verdict.
 - Coverage gap исправляется targeted pass/re-review; не перезапускай весь technical audit без impact evidence.
 - `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` не являются принятым coverage state.
 - Independent Coverage Review валидирует owning matrix, но не отменяет её hard row semantics: prose `COVERAGE_ACCEPTED` не может сделать material `PARTIALLY_COVERED`, `BLOCKED` или `REVALIDATION_REQUIRED` accepted downstream state.
@@ -120,8 +129,11 @@ defined by the capability contract and registered in `working/INDEX.md`.
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
+- shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
+- Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`
+- STM factual-domain coverage / `STANDARD_FULL` and `FORENSIC` projection / Technical Model Coverage Review → `references/technical-model-coverage.md`
 - capability state/resume/artifact ownership → `references/review-modes-and-orchestration.md`
-- core method / As-Built-first flow → `references/review-method.md`
+- core method / STM-first Architecture Review flow → `references/review-method.md`
 - discovery completeness / coverage matrix / independent coverage review → `references/discovery-coverage.md`
 - ownership / invariants / adversarial scenarios → `references/ownership-and-scenarios.md`
 - boundary contracts → `references/boundary-contract-audit.md`
@@ -136,7 +148,7 @@ defined by the capability contract and registered in `working/INDEX.md`.
 
 ## Completion Gate
 
-Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
+Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
 
 Если material coverage остаётся `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` запрещён.
 

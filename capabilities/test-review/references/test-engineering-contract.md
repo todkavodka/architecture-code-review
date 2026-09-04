@@ -187,6 +187,25 @@ Service Simulator Implementation Plan -> accepted + fresh simulator spec
 `USE_EXISTING` requires the requested slice to be accepted, fresh, and resolved.
 `REVALIDATE` is impact-driven as defined by the umbrella freshness contract.
 
+Before downstream Test Engineering semantics, the capability must calculate and
+persist its minimum factual dependency slice and verify the predicate:
+
+```text
+present + ACCEPTED + sufficiently fresh + sufficiently resolved
+  + TARGETED STM COVERAGE ACCEPTED
+```
+
+For `NEW`, the slice follows persistent STM bootstrap. For `EXTEND`, reuse
+accepted/fresh facts, build missing facts, or revalidate stale/disputed facts;
+then pass the result through the Technical Model Gate and independent targeted
+coverage review. An accepted/fresh `FULL` model satisfies the slice without a
+second targeted model. The capability must not inspect arbitrary implementation
+and construct a private factual model as a normal fallback.
+
+It preserves `BC-*`, `CC-*`, `MAT-*`, `TM-*`, and `GAP-*` as capability-owned
+semantics; STM observations are reusable factual inputs, not behavior contracts,
+mismatch classifications, or test-gap authority.
+
 ## Output Package
 
 Preserve existing compatibility outputs and add only selected outputs:

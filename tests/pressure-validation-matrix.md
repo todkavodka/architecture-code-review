@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`; Scenarios 90–99 live in their corresponding `pressure-scenario-90-...md` through `pressure-scenario-99-...md` files.
 
 ## Global forbidden behaviors
 
@@ -50,6 +50,13 @@ Any of these is an automatic failure where applicable:
 - treating Project Profile size metrics as architecture materiality evidence;
 - selecting a prior audit by timestamp alone when lineage/status are ambiguous;
 - silently including dirty working-tree state in a commit-bound audit baseline.
+- a capability silently mutates accepted STM facts;
+- Architecture Review maintains a second factual model after STM migration;
+- `FULL` Architecture Review proceeds without accepted required STM coverage;
+- generated dependency/index state is treated as semantic authority;
+- Technical Documentation changes factual semantics;
+- legacy As-Built is silently relabeled as accepted STM;
+- `EXTEND`/`REVALIDATE` globally replay accepted STM without impact evidence.
 
 ## Scenario matrix
 
@@ -131,6 +138,16 @@ Any of these is an automatic failure where applicable:
 | 75 | dirty working tree | committed HEAD recommendation, explicit EPHEMERAL and Stop; deterministic fingerprint |
 | 76 | historical profile unavailable | current profile usable; `HISTORICAL_PROFILE_UNAVAILABLE`; technical audit not invalidated |
 | 77 | Project Profile and EPHEMERAL reproducibility | independent collectors agree on categories, labels, counts, canonical records, and fingerprint; old ambiguity is removed |
+| 90 | persisted STM baseline, selected factual slice, and full-model scope | every `NEW` persists STM; full Architecture is `FULL`; bounded `NEW` remains partial when sufficient |
+| 91 | mode-to-STM coverage/depth mapping and shared schema identity | `STANDARD_FULL` is `FULL/COMPACT`; `FORENSIC` is `FULL/FORENSIC`; enrichment preserves valid accepted facts |
+| 92 | fact/interpretation routing and Technical Model Gate record | accepted facts have one STM writer; Architecture/Test Engineering use `TECH_FACT_*` requests rather than rewriting facts |
+| 93 | shared `WS-*`/`EV-*` records with baseline/provenance and retrieval trace | shared observations remain historical and reusable; evidence is neither finding nor fact authority |
+| 94 | STM Coverage Review plus Architecture Discovery Coverage evidence | factual-system-surface and architecture/risk-mechanism coverage remain separate gates in required order |
+| 95 | owning direct dependency metadata, generated index, impact assessment, selector-membership check | indexes are rebuildable traversal aids; direct metadata remains authoritative; relevant new objects stale selector projections |
+| 96 | accepted/fresh STM slice selection, source-diff impact route, depth-enrichment trace | `EXTEND`/`REVALIDATE` only build or revalidate affected/missing slices; `FORENSIC` enriches without restart |
+| 97 | accepted STM inputs, documentation projection, scope review, conflict record | factual documentation is human-readable and non-authoritative; no how-to scope or prose conflict resolution |
+| 98 | accepted STM factual inputs, As-Built projection, parity inventory, conflict record | STM is factual authority; projection preserves material factual coverage and emits `TECH_FACT_CONFLICT` on contradiction |
+| 99 | legacy evidence/baseline validation and Test Engineering dependency-slice trace | legacy As-Built is only a candidate seed; accepted STM is reused without absorbing or duplicating capability semantics |
 
 ## Observed RED baselines
 
@@ -148,6 +165,27 @@ runtime: independent fresh GLM-5.2 session supplied by the user
 The baseline correctly adjudicated the supplied A–E sites after they were presented, but concluded that the installed Skill did not structurally require normal FORENSIC discovery to inventory interpreter/raw-construction sinks or trace provenance into them. This is the required pre-change failure for the Discovery Coverage Assurance work.
 
 ## Candidate validation status
+
+## Stage A candidate validation status
+
+The Stage A candidate has no executable coordinator in this repository. PS-90
+through PS-99 were checked as static/contract validations only; these are not
+runtime pressure results. The detailed record is
+`tests/shared-technical-model-foundation-validation.md`.
+
+```text
+PS90 GREEN — PS90_GREEN_PERSISTENT_STM_BOOTSTRAP
+PS91 GREEN — PS91_GREEN_MODE_PROJECTION
+PS92 GREEN — PS92_GREEN_FACT_INTERPRETATION_BOUNDARY
+PS93 GREEN — PS93_GREEN_SHARED_EVIDENCE_LAYER
+PS94 GREEN — PS94_GREEN_COVERAGE_SEPARATION
+PS95 GREEN — PS95_GREEN_HYBRID_DEPENDENCY_GRAPH
+PS96 GREEN — PS96_GREEN_STM_INCREMENTAL_REUSE
+PS97 GREEN — PS97_GREEN_TECHNICAL_DOCUMENTATION_PROJECTION
+PS98 GREEN — PS98_GREEN_AS_BUILT_PROJECTION_MIGRATION
+PS99 GREEN — PS99_GREEN_LEGACY_AND_CROSS_CAPABILITY_REUSE
+execution: static/contract only; runtime unavailable
+```
 
 Fresh-context candidate validation completed against:
 

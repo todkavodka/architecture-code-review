@@ -1,6 +1,11 @@
 # Аудит контрактов границ
 
-Используй этот reference для значимых границ, где данные, identity, authority или dynamic construction переходят из одного semantic contract в другой.
+Используй этот reference для анализа значимых границ, где данные, identity,
+authority или dynamic construction переходят из одного semantic contract в
+другой. Factual boundary objects/views (components, interfaces, interactions,
+flows, auth/trust, stores, configuration and error contracts) потребляются из
+accepted/fresh STM; этот файл не поддерживает параллельный factual boundary
+inventory.
 
 Это включает не только IPC/API/RPC/native/process/event interaction boundaries, но и:
 
@@ -60,7 +65,11 @@ Dynamic text/value construction, который затем интерпрети�
 
 ## Метод
 
-1. Инвентаризируй material channels/endpoints/commands/events/interpreter escapes/resource locators/capability entrypoints в scope данного pass.
+1. Получи accepted/fresh STM boundary objects/views для scope данного pass и
+   проверь их coverage/freshness/provenance. Если factual slice missing, stale
+   или conflicting, запроси `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` или
+   `TECH_FACT_REVALIDATION_REQUEST` у Technical Model Gate; не молча создавай
+   второй inventory.
 2. Для каждого material path проследи producer/source → boundary → consumer/interpreter/resource → side effect → response/event/effect.
 3. Отдельно отметь runtime validation, provenance, sender/origin/trust checks и parameterization/normalization semantics, где они применимы.
 4. Проверь duplicate/in-flight/cancel/late completion сценарии из `ownership-and-scenarios.md` для stateful/async boundaries.

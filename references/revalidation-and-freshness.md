@@ -286,6 +286,23 @@ BASELINE_BINDING
 Git diff, changed paths, and Project Profile delta are routing context only.
 They select where fresh evidence is needed; they are not substantive proof.
 
+For STM and dependent capability/projection artifacts, refine `IMPACT_ANALYSIS`
+through the dependency contract:
+
+```text
+changed source/baseline
+-> affected EV/STM candidates
+-> affected direct dependencies/aspects
+-> impact traversal
+-> only affected capability semantics/projections
+```
+
+Generated indexes locate candidate reverse edges, but owning direct dependency
+metadata remains authoritative. `HARD`, `CONDITIONAL`, and `INFORMATIONAL`
+routes, selector dependencies, and bounded context traversal are defined in
+`technical-model-dependencies.md`. Unknown linkage requires targeted
+investigation and cannot be marked preserved.
+
 ### Impact classification
 
 `LOCAL`, `BOUNDARY`, and `SYSTEMIC` are orchestration labels, not finding
