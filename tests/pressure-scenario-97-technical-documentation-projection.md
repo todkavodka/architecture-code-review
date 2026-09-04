@@ -8,7 +8,9 @@ projection from STM. Its existing final-report projection rules cannot prove
 the future documentation scope, non-authority, or conflict behavior. This is a
 static omission, not evidence that a projection changed facts at runtime.
 
-Observed verdict: `PS97_RED_DOCUMENTATION_BECOMES_AUTHORITY`.
+Observed verdict: `PS97_INCONCLUSIVE`. Static inspection establishes that the
+projection contract is absent, but cannot prove that documentation became
+semantic authority or changed facts.
 
 ## Fixture
 
