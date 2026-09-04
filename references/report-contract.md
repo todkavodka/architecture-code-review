@@ -2,6 +2,12 @@
 
 Финальные документы пишутся на русском связном техническом языке и собираются **только из принятого авторитетного состояния**, а не напрямую из raw discovery notes.
 
+Technical Documentation is a separate human-facing factual projection from
+accepted, fresh Shared Technical Model authority. Its scope, non-authority,
+source, and `PROJECTS_FROM` dependency rules are defined by
+[`technical-documentation.md`](technical-documentation.md). It is not an
+Architecture Review finding ledger or a developer how-to package.
+
 ## 1. Пакет
 
 ```text
