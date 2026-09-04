@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`; Scenarios 90–99 live in their corresponding `pressure-scenario-90-...md` through `pressure-scenario-99-...md` files.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`; Scenarios 90–99 live in their corresponding `pressure-scenario-90-...md` through `pressure-scenario-99-...md` files; Scenarios 100–114 live in `projection-regeneration-foundation-validation.md`.
 
 ## Global forbidden behaviors
 
@@ -148,6 +148,21 @@ Any of these is an automatic failure where applicable:
 | 97 | accepted STM inputs, documentation projection, scope review, conflict record | factual documentation is human-readable and non-authoritative; no how-to scope or prose conflict resolution |
 | 98 | accepted STM factual inputs, As-Built projection, parity inventory, conflict record | STM is factual authority; projection preserves material factual coverage and emits `TECH_FACT_CONFLICT` on contradiction |
 | 99 | legacy evidence/baseline validation and Test Engineering dependency-slice trace | legacy As-Built is only a candidate seed; accepted STM is reused without absorbing or duplicating capability semantics |
+| 100 | explicit projection classification and coordinator boundary | semantic authorities and `working/INDEX.md` remain outside projection lifecycle; classification is contract-owned |
+| 101 | accepted semantic change impact | affected projection becomes `STALE`; no implicit regeneration or authority mutation |
+| 102 | semantic selector membership delta | accepted add/remove membership makes the selector-dependent projection stale |
+| 103 | direct projection dependency direction | dependency metadata is `CONSUMER -> PREREQUISITE`; execution follows prerequisite order |
+| 104 | upstream stale propagation and freshness reconciliation | upstream `STALE` propagates uncertainty; upstream verified `NO_CHANGE` can reconcile a downstream projection |
+| 105 | verified upstream revision change | changed verified upstream revision invalidates downstream freshness |
+| 106 | `TARGETED` closure and `ALL_STALE` planning snapshot | targeted execution includes only required stale prerequisites; `ALL_STALE` freezes its start snapshot |
+| 107 | independent regeneration branch failure | one failed branch does not stop independent branch progress or misreport failed output as current |
+| 108 | manual generated-projection drift | content divergence is detected as disposable projection drift, not semantic input |
+| 109 | semantic-authority prerequisites | missing, stale, or conflicting authority blocks regeneration and routes to semantic revalidation |
+| 110 | verification lifecycle | `V1..V4` are all required before `CURRENT`; `REGENERATED` alone is insufficient |
+| 111 | gate-scoped freshness | unrelated stale projections remain visible but do not block an unrelated capability gate |
+| 112 | legacy projection registration | legacy artifact cannot become `CURRENT` without identity, contract, dependency, and verification records |
+| 113 | projection authority and migration boundary | Architecture meaning survives regeneration only after upstream mapping; unmapped report meaning blocks generation |
+| 114 | bounded projection repair | presentation-only `PROJECTION_REPAIR` preserves semantic meaning and does not become a regeneration or authority path |
 
 ## Observed RED baselines
 
