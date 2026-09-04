@@ -187,6 +187,13 @@ Service Simulator Implementation Plan -> accepted + fresh simulator spec
 `USE_EXISTING` requires the requested slice to be accepted, fresh, and resolved.
 `REVALIDATE` is impact-driven as defined by the umbrella freshness contract.
 
+Test Engineering may consume the minimum accepted/fresh STM dependency slice
+for its requested outputs. It preserves `BC-*`, `CC-*`, `MAT-*`, `TM-*`, and
+`GAP-*` as capability-owned semantics; STM observations are reusable factual
+inputs, not behavior contracts, mismatch classifications, or test-gap
+authority. A missing or stale technical dependency routes to the Technical
+Model Gate for candidate/revalidation handling before downstream conclusions.
+
 ## Output Package
 
 Preserve existing compatibility outputs and add only selected outputs:
