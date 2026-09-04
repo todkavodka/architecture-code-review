@@ -46,6 +46,30 @@ Following outbound edges from a consumer finds its upstream prerequisites.
 Reverse impact edges are not direct dependency authority and never add a
 downstream consumer to a regeneration plan.
 
+### Target resolution before freeze
+
+Before planning, the request must resolve deterministically to active,
+explicitly classified projection identities from exactly one of these forms:
+
+- a projection ID;
+- a named projection package;
+- a well-defined capability projection set; or
+- `ALL_STALE`.
+
+For a projection ID, named package, or capability set, resolve the named
+contract/membership to its member `PRJ-*` identities, reject unknown or
+ambiguous names and unknown identities, then deduplicate and order the result
+by stable projection identity. For `ALL_STALE`, take the active
+stale-at-planning snapshot and order its `PRJ-*` identities the same way. A
+free-form, partially resolved, or otherwise ambiguous scope is rejected before
+an `RG-*` plan exists; it must not be frozen as a selector, prose description,
+or unresolved name.
+
+The frozen `requested_targets` field is always the resulting explicit ordered
+`PRJ-*` set, including for `ALL_STALE`; the request form and the package or
+capability contract/resolution used to obtain it are retained as planning
+provenance. Closure expansion starts only after this resolution.
+
 ### `TARGETED`
 
 `TARGETED` starts with the explicitly requested projection targets. Its scope
@@ -92,20 +116,27 @@ stale_snapshot: ordered PRJ-* set for ALL_STALE
 expanded_prerequisites: ordered PRJ-* set and inclusion reason
 skipped_current_prerequisites: ordered PRJ-* set and freshness proof
 input_revisions: semantic exact revisions, selector contracts/resolutions,
-                 projection contract revisions, and upstream projection revisions
+                 projection contract revisions, external upstream projection
+                 revisions, and in-scope prerequisite resolution obligations
 dependency_snapshot: direct consumer-owned metadata used for the plan
 execution_dag: in-scope vertices and declared prerequisite edges
 execution_order: deterministic prerequisite-first topological order
 ```
 
 The plan also records the input/freshness observations that justified each
-member's inclusion, skip, or pre-execution block. Stable identity ordering is
-the deterministic tie-breaker among independent ready vertices.
+member's inclusion, skip, or pre-execution block. For every in-scope consumer
+edge, its input record says whether the prerequisite is a frozen external
+revision or an in-scope prerequisite whose verified result this `RG-*` must
+produce before the consumer runs. Stable identity ordering is the deterministic
+tie-breaker among independent ready vertices.
 
 No later discovery may rewrite `requested_targets`, expand the closure, replace
-an input revision, or alter the DAG/order of the frozen `RG-*`. Newly stale
-out-of-scope projections are retained as deferred work. A retry or a request
-with a different scope or input snapshot is a new `RG-*` session.
+a frozen external input revision, or alter the DAG/order of the frozen `RG-*`.
+The verified revision published by an in-scope prerequisite is the planned
+result of its frozen resolution obligation, not a replacement for an external
+input. Newly stale out-of-scope projections are retained as deferred work. A
+retry or a request with a different scope or input snapshot is a new `RG-*`
+session.
 
 ## 4. Prerequisite-first DAG execution
 
@@ -127,6 +158,13 @@ reached a successful terminal state. Independent `READY` branches may execute
 concurrently, but their records and outcome are deterministic. A current
 prerequisite outside execution work may satisfy the dependency only when its
 frozen freshness proof and consumed revision still match.
+
+When a required prerequisite is in scope, its consumer resolves that input to
+the verified result produced by this `RG-*`. Thus, for
+`PRJ-C -> PRJ-B -> PRJ-A`, a normal successful `PRJ-A@rev1 -> PRJ-A@rev2`
+publication is consumed by `B`; after `B` succeeds, `C` consumes `B`'s
+produced verified revision. These planned prerequisite-result bindings do not
+change the frozen DAG or scope.
 
 ## 5. Execution states
 
@@ -182,22 +220,28 @@ projections outside the plan are current.
 
 ## 7. Frozen-input drift
 
-Before generation and before accepting a candidate, compare the frozen input
-record with the currently resolved required semantic revisions, selector
-membership/revisions, projection contract revision, and upstream verified
-projection revisions. An unexpected difference is:
+Before generation and before accepting a candidate, compare frozen external
+inputs with the currently resolved required semantic revisions, selector
+membership/revisions, projection contract revision, and every upstream
+projection revision that is not the verified result of an assigned in-scope
+prerequisite. Also verify that each in-scope prerequisite result is the one
+produced and verified by this `RG-*` for that frozen dependency edge. An
+unexpected external difference, or a result that cannot be attributed to that
+frozen in-scope prerequisite obligation, is:
 
 ```text
 REGENERATION_INPUT_DRIFT
 ```
 
-Persist both planned and observed values and the affected `PRJ-*`. Do not
-silently substitute the new value, extend scope, or reorder the plan. The
-affected work item becomes `FAILED`; in-scope consumers that require it become
-`BLOCKED_UPSTREAM`. The changed or newly stale work is deferred to a later
-`RG-*` plan after normal impact accounting establishes its new freshness state.
+Persist both planned and observed values, the source of the observed revision,
+and the affected `PRJ-*`. Do not silently substitute an external value, extend
+scope, or reorder the plan. The affected work item becomes `FAILED`; in-scope
+consumers that require it become `BLOCKED_UPSTREAM`. The changed or newly stale
+work is deferred to a later `RG-*` plan after normal impact accounting
+establishes its new freshness state.
 
 Drift discovered outside frozen scope is recorded/deferred and does not alter
-the running plan. A verified candidate may be accepted only against the exact
-frozen inputs it was generated from; accepting it against observed drift would
+the running plan. A verified candidate may be accepted only against its exact
+frozen external inputs and the verified in-scope prerequisite results assigned
+by the frozen DAG; accepting it against observed external drift would
 misrepresent its dependency snapshot.
