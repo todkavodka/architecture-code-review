@@ -367,7 +367,7 @@ authorization и verification gates.
 Likely dependencies:
 
 ```text
-Stage A Developer Documentation
+Stage A Shared Technical Model Foundation
   depends on:
     existing architecture/evidence model
 
