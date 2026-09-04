@@ -18,6 +18,12 @@ Observed verdict: `PS99_INCONCLUSIVE`.
 - **A:** a legacy `COMPLETE` package has accepted As-Built, no STM, and the
   same baseline.
 - **B:** Test Engineering attaches after an STM exists.
+- **C:** Test Engineering needs `IF-*`/`INT-*`/`ERR-*` facts that are absent
+  from STM during `EXTEND`.
+- **D:** the required `INT-*` exists but has freshness
+  `REVALIDATION_REQUIRED`.
+- **E:** the required STM slice is accepted and `VALID`, including when it is
+  supplied by an already accepted `FULL` model.
 
 ## GREEN contract
 
@@ -29,6 +35,22 @@ legacy As-Built -> candidate STM seed only -> evidence/baseline validation -> ac
 Test Engineering -> reuse relevant accepted STM facts -> preserve BC/CC/MAT/TM/GAP ownership
 ```
 
+For Cases C–E, the mandatory dependency path is:
+
+```text
+derive minimum Test Engineering slice
+-> inspect presence/freshness/resolution
+-> reuse accepted + VALID facts
+-> build/revalidate missing or stale facts
+-> Technical Model Gate
+-> TARGETED STM coverage acceptance
+-> Test Engineering semantics
+```
+
+Test Engineering must not independently reconstruct the missing technical
+surface or self-refresh an accepted fact. An accepted/fresh `FULL` STM may
+satisfy the required slice without creating a duplicate targeted model.
+
 ## Failure conditions
 
 - old As-Built is relabeled as accepted STM without evidence validation;
@@ -36,6 +58,8 @@ Test Engineering -> reuse relevant accepted STM facts -> preserve BC/CC/MAT/TM/G
 - STM replaces Behavior Contracts or Test Assurance semantics;
 - a capability rereads/reconstructs a technical surface already supplied by
   accepted, fresh STM without a correctness trigger.
+- Test Engineering reaches `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, or a
+  dependent design before the required targeted STM slice is accepted.
 
 ## Verdict vocabulary
 
@@ -44,6 +68,7 @@ PS99_RED_LEGACY_AS_BUILT_SILENTLY_PROMOTED
 PS99_RED_STM_ABSORBS_TEST_ENGINEERING
 PS99_RED_DUPLICATE_CROSS_CAPABILITY_DISCOVERY
 PS99_GREEN_LEGACY_AND_CROSS_CAPABILITY_REUSE
+PS99_GREEN_TEST_ENGINEERING_STM_DEPENDENCY
 PS99_INCONCLUSIVE
 ```
 

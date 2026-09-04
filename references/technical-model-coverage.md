@@ -69,9 +69,10 @@ material domains and fact families required by the declared dependency slice.
 The requested slice, baseline, evidence pointers, and downstream impact are
 recorded; unrelated domains are not silently treated as accepted or rebuilt.
 
-An independent Technical Model Coverage Review may accept a targeted slice
-only when every required row is `ACCEPTED` (or evidence-backed
-`NOT_APPLICABLE`) and the gate is explicitly scoped to that slice. Targeted
+An independent Technical Model Coverage Review accepts a targeted slice only
+when every required row is `ACCEPTED` (or evidence-backed `NOT_APPLICABLE`)
+and the gate is explicitly scoped to that slice. Test Engineering cannot reach
+downstream semantics until this targeted acceptance is recorded. Targeted
 acceptance does not satisfy the `FULL` requirement of a full Architecture
 Review.
 
