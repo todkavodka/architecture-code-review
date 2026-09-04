@@ -87,6 +87,23 @@ accepted semantic work, but blocks projection-sensitive downstream gates until
 accounting succeeds. Repeated passes retain unresolved reasons without
 duplicating them.
 
+Projection-sensitive closeout then follows the package gate contract:
+
+```text
+semantic gates accepted
+→ PROJECTION_IMPACT_ACCOUNTED
+→ package membership resolved
+→ required scoped projections CURRENT
+→ closeout/publication permitted
+```
+
+The coordinator applies the package's declared `PERMISSIVE`,
+`REQUIRED_SCOPE_CURRENT`, or `ALL_SCOPED_CURRENT` policy. Stale projections
+outside the resolved required scope remain visible and actionable but do not
+block unrelated capability closeout. See
+[`projection-gates-and-packages.md`](projection-gates-and-packages.md); package
+membership is explicit and is not inferred from arbitrary selector language.
+
 When requested output freshness requires regeneration, start a separate
 `RG-*` session under [Projection regeneration workflow](projection-regeneration.md).
 Its `TARGETED` or `ALL_STALE` plan is a frozen operational execution record,

@@ -5,6 +5,8 @@
 Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.
 Direct STM/capability/projection dependency metadata, generated indexes, and
 impact semantics are owned by `technical-model-dependencies.md`.
+Gate-scoped projection freshness and named package membership are owned by
+[`projection-gates-and-packages.md`](projection-gates-and-packages.md).
 
 ## 1. Стартовый выбор
 
@@ -132,6 +134,7 @@ working/
 | target review | `target-architecture-review.md` |
 | roadmap review | `remediation-roadmap-review.md` |
 | editorial gate | `final-editorial-review.md` |
+| projection packages / freshness gates | `projection-gates-and-packages.md` |
 
 `SKILL.md` оркестрирует эти контракты и не должен переопределять их подробно.
 
@@ -680,6 +683,14 @@ unchanged accepted authority; semantic drift требует technical revalidati
 Technical Model Coverage Review обязателен в обоих режимах; в `STANDARD_FULL`
 его evidence depth может быть compact. As-Built parity/projection review также
 обязателен, но не принимает factual STM.
+
+Projection-sensitive capability or endpoint closeout uses the named package
+and policy in [`projection-gates-and-packages.md`](projection-gates-and-packages.md).
+After semantic gates are accepted, the coordinator must persist
+`PROJECTION_IMPACT_ACCOUNTED`, resolve the package membership, and enforce the
+package's required scoped projections before permitting closeout or publication.
+Unrelated stale projections remain visible but do not block an unrelated gate;
+the coordinator must not apply a repository-wide zero-stale rule.
 
 ## 12. Recovery
 
