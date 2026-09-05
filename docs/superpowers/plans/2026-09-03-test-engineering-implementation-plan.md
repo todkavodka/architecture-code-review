@@ -24,10 +24,16 @@
 - Contract Verification runs automatically when a materially relevant declared external contract exists; Contract Consistency Report remains optional.
 - Capabilities form a dependency DAG; execute only the minimum required dependency slice.
 - `REVALIDATE` is impact-driven. Test-only changes do not automatically invalidate `BC-*`; consumer-only changes may invalidate consumer-facing simulator/E2E projections without a service-repository change.
+- Before extended TE semantics, require the minimum targeted STM slice to be accepted, sufficiently covered, fresh enough, and sufficiently resolved; TE must not privately reconstruct technical truth.
+- `TASK-*` is a Test Engineering-owned actionable work item derived from accepted TE semantic state; it is not a finding, contract, assurance target, evidence record, or generic project-management task.
+- Every generated TE output uses the shared Stage B `PRJ-*` lifecycle, dependency snapshot, V1–V4 verification, fingerprint/revision publication, and persisted freshness state.
+- Accepted semantic changes go through `PROJECTION_IMPACT_ACCOUNTED`; regeneration is a separate explicit `RG-*` workflow under the shared package policy.
+- `RESUME` restores coordinator state from `working/INDEX.md` and owning records, not narrative prose or chat memory.
 - Service Simulator has separate consumer and test-control planes.
 - E2E Design does not require Service Simulator Design when the selected topology does not need a simulator.
 - No project production code is written during review; simulator implementation remains separately authorized.
 - Follow RED-GREEN-REFACTOR for Skill changes.
+- Apply `evidence first → automation second → framework last`; use `DO_NOT_BUILD_HARNESS` unless later concrete uncertainty proves a reusable harness is cheaper and more reliable.
 
 ---
 
@@ -63,6 +69,10 @@
 **Interfaces:**
 - Consumes: current `capabilities/test-review/SKILL.md`, current umbrella orchestration, approved design spec.
 - Produces: six observed RED baselines and stable GREEN verdict tokens.
+
+Validation for these scenarios is a targeted manual or small deterministic
+contract check. Do not create a reusable agent E2E harness, Skill Lab, or test
+infrastructure whose primary subject is the validation infrastructure itself.
 
 - [ ] **Step 1: Write and run PS-81 against the unchanged capability**
 
@@ -219,6 +229,26 @@ Expected: scenario files contain actual observed RED evidence; no capability gui
 - Consumes: PS-81..86 RED failures and approved spec.
 - Produces: detailed semantic contract plus concise capability entrypoint.
 
+- [ ] **Step 0: Establish the factual STM precondition**
+
+Before constructing or materially revising any BC, CC, MAT, TM, GAP, TASK,
+environment, simulator, or E2E semantic artifact, calculate the minimum STM
+slice required by the selected scope. Reuse an accepted/fresh `FULL` model when
+its exact binding satisfies the request; otherwise acquire targeted facts from
+Shared Evidence through the Technical Model Gate. Require:
+
+```text
+present + ACCEPTED + sufficiently covered for scope
++ fresh enough for operation + sufficiently resolved
++ independent targeted STM coverage acceptance
+```
+
+If facts are missing, stale, disputed, or insufficiently covered, emit the
+existing STM request and block only the dependent TE slice. Do not inspect
+repository material and persist a competing private factual model. Record the
+accepted STM revisions and coverage decision as dependencies of downstream TE
+authority/projections.
+
 - [ ] **Step 1: Create the detailed reference**
 
 Required sections:
@@ -338,6 +368,17 @@ git commit -m "feat: define test engineering semantic contract"
 - Consumes: selectable outputs and dependency DAG from Task 2.
 - Produces: startup selection, persisted capability state, artifact ownership, and `EXTEND` behavior.
 
+- [ ] **Step 0: Register the shared Stage B projection contract**
+
+For each generated `00`–`08` output, bind the stable `PRJ-*` identity to the
+Test Review capability and projection-contract revision. Persist exact semantic
+dependencies, applicable `SEMANTIC_SELECTOR` contract/resolution snapshots,
+applicable STM/coverage dependencies, and direct `PROJECTION_EXACT` upstream
+dependencies. Route candidate output through shared `V1`–`V4`, compute the
+canonical fingerprint, publish only verified `PRJ-*@revN`, and persist
+`CURRENT | STALE | BLOCKED`. Do not assign `PRJ-*` to BC/CC/MAT/TM/GAP/TASK
+semantic authority or build a TE-specific projection engine.
+
 - [ ] **Step 1: Persist explicit selected outputs**
 
 Canonical stored shape:
@@ -371,6 +412,16 @@ Service Simulator Implementation Plan
 
 `EXTEND` reuses the minimum accepted fresh upstream slice and does not restart unrelated gates.
 
+Persist projection dependencies in the canonical direction
+`CONSUMER -> PREREQUISITE`; execute prerequisites first. Keep semantic
+dependencies separate from projection dependencies. Initial generation follows
+the same shared lifecycle and is not silently treated as regeneration.
+
+Resolve and persist the finite Test Review package membership before closeout.
+Apply the selected `PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, or
+`ALL_SCOPED_CURRENT` policy; do not impose global projection freshness and do
+not use package membership as a second semantic authority.
+
 - [ ] **Step 3: Encode persisted output ownership**
 
 ```text
@@ -386,6 +437,16 @@ Service Simulator Implementation Plan
 ```
 
 Authoritative `BC-*` and `CC-*` ledgers live under capability `working/`; numbered files are human-facing projections.
+
+- [ ] **Step 3a: Persist resume-critical coordinator state**
+
+Reconcile `working/INDEX.md` with the owning Test Engineering records after
+each material transition. Persist only coordinator state needed to resume:
+selected scope and outputs, current TE phase, STM prerequisite and coverage
+gate, BC/CC/MAT/TM/GAP/TASK registry references, blockers, environment strategy
+references, required verification state, and projection impact/package/
+freshness state. Keep semantic meaning in the owning ledgers; `INDEX.md` is
+workflow authority only and is never a `PRJ-*` projection.
 
 Distinguish:
 
@@ -460,6 +521,15 @@ consumer-only change
 
 A changed bound file triggers impact analysis, not automatic semantic invalidation of every related BC.
 
+- [ ] **Step 2a: Persist the post-semantic projection handoff**
+
+After the affected semantic slice is accepted, run shared Projection Impact
+Analysis once and persist `PROJECTION_IMPACT_ACCOUNTED`, including direct and
+propagated `CURRENT | STALE | BLOCKED` results, selector membership/revision
+changes, projection-contract changes, missing/diverged files, and upstream
+freshness. Do not regenerate content here. A requested fresh output starts a
+separate explicit `RG-*` workflow using the frozen prerequisite-first DAG.
+
 - [ ] **Step 3: Re-run PS-85**
 
 Expected: `PS85_GREEN_IMPACT_DRIVEN_REVALIDATION`.
@@ -483,6 +553,11 @@ git commit -m "feat: add test engineering revalidation rules"
 **Interfaces:**
 - Consumes: accepted BCs and selected outputs.
 - Produces: dependency strategy, simulator boundaries, and E2E selection rules.
+
+Environment strategy is Test Engineering execution configuration and assurance
+strategy. It is not an STM fact, Architecture authority, or Stage B projection
+authority. Persist the decision with the smallest relevant TE artifact and its
+accepted BC/STM dependencies.
 
 - [ ] **Step 1: Encode dependency strategy vocabulary**
 
@@ -552,6 +627,18 @@ git commit -m "feat: define simulator and e2e boundaries"
 - Consumes: PS-81..86 and existing PS-79 Test Assurance Summary behavior.
 - Produces: acceptance matrix for the complete capability.
 
+The validation task is intentionally proportional: evidence first, automation
+second, framework last. It must contain the guard:
+
+```text
+DO_NOT_BUILD_HARNESS
+```
+
+Use targeted deterministic checks, focused contract checks, and manual real-agent
+acceptance where agent behavior is the subject. A reusable harness requires a
+later concrete implementation uncertainty, measured reuse, stable behavior,
+and a demonstrated cost/reliability advantage; it is not pre-authorized here.
+
 - [ ] **Step 1: Create the validation matrix**
 
 Require:
@@ -578,6 +665,12 @@ CC writer = Contract Verification
 CC resolution cannot silently rewrite BC
 USE_EXISTING requires accepted/fresh dependency slice
 PROJECTION_REPAIR cannot alter BC/CC/MAT/TM/GAP semantics
+accepted/fresh targeted STM gate precedes extended TE semantics
+TE cannot privately reconstruct STM facts
+every generated TE output has PRJ identity, dependency snapshot, V1–V4, fingerprint/revision, and freshness
+semantic change -> PROJECTION_IMPACT_ACCOUNTED; regeneration remains explicit RG-*
+RESUME restores workflow state from INDEX/owning records
+TASK-* is TE work-item authority only
 ```
 
 - [ ] **Step 2: Run all pressure scenarios in fresh contexts**
@@ -667,7 +760,7 @@ git commit -m "docs: document test engineering capability"
 
 Before declaring implementation complete:
 
-- [ ] `git status --short` is clean after the final commit.
+- [ ] `git status --short` contains only the known preserved `task-5-report.md` after the final commit.
 - [ ] Implementation matches `docs/superpowers/specs/2026-09-03-test-engineering-capability-design.md`.
 - [ ] RED evidence exists for PS-81..86 from before behavior-changing Skill edits.
 - [ ] GREEN evidence exists for PS-81..86 after changes.
@@ -683,6 +776,13 @@ Before declaring implementation complete:
 - [ ] E2E can exist without Service Simulator when topology does not require it.
 - [ ] `00/01/02` compatibility remains intact.
 - [ ] README is only a projection of accepted capability semantics.
+- [ ] Accepted/fresh targeted STM and independent coverage acceptance precede extended TE semantics.
+- [ ] TE does not privately reconstruct STM facts.
+- [ ] `TASK-*` ownership and non-authority are explicit.
+- [ ] Every generated TE projection has Stage B identity, dependency snapshot, V1–V4, fingerprint/revision, and freshness.
+- [ ] `PROJECTION_IMPACT_ACCOUNTED` precedes package-sensitive closeout and regeneration is explicit `RG-*`.
+- [ ] `RESUME` uses `working/INDEX.md` and owning records rather than prose.
+- [ ] `DO_NOT_BUILD_HARNESS` remains in force absent new evidence.
 
 Expected final verdict:
 

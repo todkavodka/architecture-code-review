@@ -67,6 +67,20 @@ accepted architecture / observed implementation / declared contracts / consumers
 
 Test Plan, Contract Verification, Service Simulator scenarios, and E2E scenarios must not independently invent conflicting models of product behavior.
 
+Before Test Engineering creates or materially revises any semantic artifact, it
+must obtain the minimum factual Shared Technical Model (STM) slice required by
+the selected assurance scope. The slice must be accepted by the Technical Model
+Gate, sufficiently covered for that scope, fresh enough for the requested
+operation, and sufficiently resolved. Shared Evidence observations feed STM;
+they do not become Test Engineering semantics directly.
+
+Test Engineering does not privately reconstruct technical truth from As-Built
+prose or arbitrary repository inspection. If a required fact is absent, stale,
+disputed, or insufficiently covered, the capability emits the existing STM
+candidate, conflict, or revalidation request and waits for the applicable STM
+workflow. TE semantic authority (`BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, and
+`TASK-*`) remains distinct from STM factual authority.
+
 ## 4. Test Engineering layers
 
 ### 4.1 Test Assurance
@@ -92,9 +106,15 @@ Purpose:
 
 Reconstruct a bounded set of material, independently verifiable behaviors relevant to testing.
 
-The model may use evidence such as:
+The model may use accepted/fresh STM facts and their supporting evidence. An
+accepted As-Built projection may provide bounded context and traceability, but
+is not factual authority and must not be used to reconstruct a private TE
+technical model. Missing or disputed facts are routed to the Technical Model
+Gate.
 
-- accepted As-Built architecture;
+Supporting evidence may include:
+
+- accepted As-Built projection for context only;
 - accepted architecture/root findings;
 - real code paths;
 - state transitions;
@@ -197,12 +217,22 @@ TM-*    Test Mapping
 GAP-*   Assurance Gap
         Missing, partial, misleading, or otherwise inadequate evidence for a material target.
 
-TASK-*  Test Engineering remediation task
-        Work required to close an accepted assurance gap or produce required test capability.
+TASK-*  Test Engineering task/work item
+        A Test Engineering-owned actionable item derived from accepted TE semantic state.
 
 WS-*    Working-set / investigation record
         Temporary discovery/evidence state; not product behavior authority.
 ```
+
+`TASK-*` is written by the Test Engineering remediation/workflow owner. It may
+be created from an accepted `GAP-*`, an accepted contract/design decision, or a
+required Test Engineering capability deliverable, and may reference the
+originating `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, accepted STM/`WS-*`/`EV-*`
+provenance, dependencies, and acceptance conditions. A task is actionable
+traceability, not a generic project-management item: it is not an `RF-*`,
+`BC-*`, `MAT-*`, `TM-*`, shared evidence record, or replacement for `GAP-*`.
+Creating or completing a `TASK-*` does not rewrite the authority that it
+references.
 
 Normative separations:
 
@@ -867,6 +897,46 @@ VERIFIED_NO_MATERIAL_ISSUES
 
 For example, a requested Contract Consistency Report may report `NOT_APPLICABLE` when no materially relevant declared contract exists, which is not equivalent to failure to verify.
 
+### 17.1 Stage B projection lifecycle
+
+Every independently regeneratable numbered Test Engineering document is a
+generated `PRJ-*` projection owned by the Test Review capability. Semantic
+ledgers remain outside automatic projection classification. A document is not
+`CURRENT` merely because it is readable, present, or committed.
+
+For each `00`–`08` projection, the shared Stage B lifecycle is:
+
+```text
+stable PRJ-* identity
+→ owning capability
+→ projection contract revision
+→ exact semantic dependencies
+→ upstream PROJECTION_EXACT dependencies where applicable
+→ SEMANTIC_SELECTOR resolution snapshot where applicable
+→ candidate generation
+→ V1 STRUCTURAL
+→ V2 DEPENDENCY / PROVENANCE
+→ V3 CONTRACT COMPLETENESS
+→ V4 AUTHORITY CONSISTENCY
+→ canonical fingerprint
+→ verified PRJ-*@revN publication
+→ persisted CURRENT | STALE | BLOCKED freshness
+```
+
+The projection dependency edge is `CONSUMER -> PREREQUISITE`; for
+`PRJ-C -> PRJ-B -> PRJ-A`, regeneration executes `A → B → C`. Semantic
+dependencies and projection dependencies are separate dimensions. A generated
+candidate is not an accepted revision or dependency input until V1–V4 pass and
+publication succeeds. Initial generation uses the same lifecycle; it is not an
+implicit `RG-*` session unless the shared regeneration contract requires one.
+
+Semantic changes first go through Projection Impact Analysis. The coordinator
+persists `PROJECTION_IMPACT_ACCOUNTED`, resolves the finite package membership,
+and applies the package policy (`PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, or
+`ALL_SCOPED_CURRENT`). Only a separately requested `RG-*` workflow regenerates
+stale projections. Unrelated stale projections remain visible but do not block
+an unrelated package gate.
+
 ## 18. Session and reuse semantics
 
 The umbrella session model remains applicable.
@@ -891,7 +961,16 @@ Do not automatically add Service Simulator Design unless the selected E2E topolo
 
 ### 18.2 `RESUME`
 
-Continue from accepted current artifacts and the first unfinished valid gate. Reuse accepted upstream artifacts whose freshness and authority bindings remain valid.
+Continue from accepted current artifacts and the first unfinished valid gate.
+The coordinator restores resume-critical state from `working/INDEX.md` and
+owning Test Engineering records, not from chat history, model memory, or
+human-readable projection prose. This state includes the selected scope and
+outputs, current TE phase, STM prerequisite/gate binding, BC/CC/MAT/TM/GAP/TASK
+registry references, blockers, environment strategy decisions, required
+verification state, and projection impact/package/freshness state. `INDEX.md`
+remains workflow authority and does not become semantic or projection authority.
+Reuse accepted upstream artifacts only when their freshness and authority
+bindings remain valid.
 
 ### 18.3 `USE_EXISTING`
 
@@ -980,6 +1059,11 @@ consumer changed
 
 Multi-repository source bindings are first-class freshness inputs.
 
+After the affected semantic slice stabilizes, `REVALIDATE` performs the shared
+Projection Impact Analysis handoff and persists `PROJECTION_IMPACT_ACCOUNTED`.
+It does not silently regenerate any projection or create an `RG-*` session.
+Requested freshness is handled by a separate explicit regeneration workflow.
+
 ### 18.6 `PROJECTION_REPAIR`
 
 May repair:
@@ -1003,6 +1087,11 @@ It must not change:
 - E2E topology semantics.
 
 If such meaning must change, return `TECHNICAL_REVALIDATION_REQUIRED`.
+
+`PROJECTION_REPAIR` is therefore limited to an already accepted projection and
+unchanged semantic dependencies. It may not change STM facts, BC/CC/MAT/TM/GAP/
+TASK semantics, projection identity or dependency meaning, package membership,
+or any simulator/E2E semantic behavior.
 
 ## 19. Freshness bindings
 
