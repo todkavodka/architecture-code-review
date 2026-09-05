@@ -187,6 +187,7 @@ gate routing only:
 |---|---|---|
 | `PKG-TECHNICAL-DOCUMENTATION` | [`technical-documentation.md`](technical-documentation.md) | selected documentation sections are finite controlled members; STM remains factual authority |
 | `PKG-TEST-REVIEW-DELIVERY` | [`test-engineering-contract.md`](../capabilities/test-review/references/test-engineering-contract.md) | selected Test Engineering outputs are conditional members; `BC/CC/MAT/TM/GAP` remain semantic authority |
+| `PKG-CODE-QUALITY-DELIVERY` | [`code-quality-projection.md`](../capabilities/code-quality-review/references/code-quality-projection.md) | selected Code Quality projections are finite conditional members; `CQ-*/CQRA-*` remain semantic authority |
 
 The table is navigation, not a global projection registry or a second package
 authority. Each named capability declaration must still supply the explicit
