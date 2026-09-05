@@ -148,9 +148,70 @@ generated-code regeneration, STM revision, and related Architecture or TE
 authority changes. A rename or equivalent refactor may retain identity only
 when semantic bindings remain valid.
 
-`REVALIDATE` marks affected findings/candidates stale and validates the minimum
-impacted CQ slice. It is not a full review rerun and does not regenerate
-projections.
+`REVALIDATE` marks affected findings/candidates `STALE`, identifies the minimum
+impacted CQ slice, and validates only that slice. It is not a full review rerun
+and does not regenerate projections. The impact decision is recorded against
+the changed binding and affected CQ identities; unrelated findings remain
+reusable when their bindings remain valid.
+
+### Operational freshness and revalidation outcomes
+
+For an accepted finding, freshness transitions are driven by its material
+dependencies, not by source change alone:
+
+```text
+CURRENT
+  → STALE       when a material binding changes or its validity is unknown
+STALE
+  → CURRENT     after sufficient targeted evidence preserves the interpretation
+STALE
+  → BLOCKED     when required evidence or factual context cannot be obtained
+BLOCKED
+  → CURRENT     only after the blocking dependency is resolved and rechecked
+```
+
+Targeted revalidation adjudicates each affected finding independently:
+
+- if the same mechanism and material consequence remain supported, preserve the
+  `CQ-*` identity and set freshness to `CURRENT`;
+- if the issue no longer exists, retain its history and transition the finding
+  to `RESOLVED` with resolution evidence;
+- if the mechanism has materially changed, transition the old finding to
+  `SUPERSEDED` only with a replacement authority or explicit adjudication, and
+  allocate a new identity for the distinct issue;
+- if evidence or required context is insufficient, retain the lifecycle and
+  set freshness to `BLOCKED` rather than deleting or resolving the finding.
+
+`STALE` never directly becomes `RESOLVED`. `ACTIVE + STALE` is a valid pending
+state, and `RESOLVED + CURRENT` remains the valid state for an evidenced
+resolution.
+
+### CQRA completion procedure
+
+When a `CQRA-*` action becomes `COMPLETED`, the coordinator records its
+completion evidence and identifies every linked `CQ-*` finding. Each linked
+finding is independently placed in the affected revalidation slice. Completion
+does not itself change any finding lifecycle or resolve a finding; linked
+findings become `STALE` when their post-remediation evidence requires
+revalidation:
+
+```text
+CQRA COMPLETED
+  → identify linked CQ findings
+  → mark only dependent findings STALE
+  → obtain targeted post-remediation evidence
+  → adjudicate each finding independently
+  → CURRENT + ACTIVE, CURRENT + RESOLVED, or SUPERSEDED/BLOCKED as supported
+```
+
+For one action linked to many findings, one finding may become `RESOLVED` while
+another remains `ACTIVE`; the action may remain `COMPLETED`. For many actions
+linked to one finding, completing one action does not resolve the finding while
+the accepted semantic issue remains. `CQRA COMPLETED != CQ RESOLVED`.
+
+The completion record preserves the action's provenance and freshness. If its
+semantic basis or required dependency changes, the action becomes `STALE` or
+requires re-evaluation, but this does not rewrite the linked finding history.
 
 ## Assessment coverage authority
 
