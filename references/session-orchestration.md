@@ -330,14 +330,14 @@ Contract Verification remain internal dependencies.
 
 After `NEW` configuration is resolved and before any selected capability begins
 substantive execution, create the persistent Shared Technical Model baseline and
-register its compact routing projection in `working/INDEX.md`. This establishes
+register its compact routing state in `working/INDEX.md`. This establishes
 the model manifest and selected baseline; it does not require population of a
 complete model when the requested downstream scope needs only a bounded factual
 slice.
 
 STM fact authority, the Technical Model Gate, and persisted model shape belong
 to [Shared Technical Model](shared-technical-model.md). Startup records only
-the routing projection defined by
+the routing state defined by
 [Review Modes and Orchestration](review-modes-and-orchestration.md); it must not
 copy the technical model into `INDEX.md`.
 
@@ -568,7 +568,7 @@ a reproducible commit baseline. If the snapshot cannot later be reconstructed,
 resume/revalidation reports that limitation rather than claiming full
 recoverability.
 
-## INDEX projection and reconciliation
+## INDEX coordinator-state reconciliation
 
 Persist this compact workflow projection, without treating it as substantive technical authority:
 

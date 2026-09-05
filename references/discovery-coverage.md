@@ -712,7 +712,9 @@ new Webhook Dispatcher discovered
 
 Не сбрасывай unrelated accepted rows без evidence impact.
 
-Compact coverage projection в `working/INDEX.md` usable downstream только при корректном freshness/revision binding по `revalidation-and-freshness.md`.
+Compact coverage summary in `working/INDEX.md` is usable downstream only with
+the correct freshness/revision binding from `revalidation-and-freshness.md`;
+the summary is coordinator state, not a Stage B projection artifact.
 
 ## 14. Safe Reproduction / Evidence Validation interaction
 

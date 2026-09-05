@@ -142,11 +142,11 @@ working/
 
 `INDEX.md` — постоянный источник состояния процесса. Он должен оставаться компактным.
 
-### Session Orchestration projection
+### Session Orchestration coordinator state
 
 Startup selection is owned by `references/session-orchestration.md`. Persist its
-compact routing projection here, without turning it into substantive technical
-authority:
+compact coordinator routing state here, without turning it into substantive
+technical authority:
 
 ```text
 orchestrator_version: 0.3
@@ -216,8 +216,8 @@ required evidence. Resolve this bounded set through the generated indexes and
 owning direct metadata; do not preload unrelated accepted artifacts. The
 dependency contract owns the detailed traversal and impact rules.
 
-For `NEW`, create the persistent STM manifest and this compact routing
-projection before capability execution. The manifest, not `INDEX.md`, owns the
+For `NEW`, create the persistent STM manifest and this compact coordinator
+routing state before capability execution. The manifest, not `INDEX.md`, owns the
 model. Model creation does not require complete population: the selected
 downstream requirement determines the initially required factual slice. See
 `shared-technical-model.md` for fact authority and persistence.
@@ -242,9 +242,9 @@ visibility and selection remain in Session Orchestration.
 
 13. capability registry.
 
-### Discovery Coverage projection
+### Discovery Coverage coordinator summary
 
-Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактную projection:
+Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактное coordinator summary:
 
 ```text
 coverage_artifact: working/<coverage-matrix-file>
