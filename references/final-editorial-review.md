@@ -18,7 +18,7 @@ Editorial Review (редакционное ревью) **не редактиру
 - не искажают severity/evidence/target/roadmap semantics при редактуре;
 - не заявляют `REVIEW_COMPLETE`, если Discovery Coverage не имеет принятого `COVERAGE_ACCEPTED` state.
 
-Editorial Review **не является техническим re-audit**. Он не обязан заново искать пропущенные vulnerability/mechanism classes в repository. Проверка полноты thematic discovery и absence-of-investigation gaps принадлежит Independent Coverage Review из `discovery-coverage.md`.
+Editorial Review **не является техническим re-audit**. Он не обязан заново искать пропущенные vulnerability/mechanism classes в repository. Проверка полноты thematic discovery и absence-of-investigation gaps принадлежит Independent Coverage Review из `discovery-coverage.md`. Он также выполняет targeted workflow-authority consistency check against accepted final artifact state and requires the coordinator's `FINAL_WORKFLOW_AUTHORITY_RECONCILED`; this does not turn editorial review into a technical re-audit.
 
 ## 2. Language contract
 
@@ -220,6 +220,8 @@ STATUS-### final status contradicts accepted technical/coverage gate state
 - working superseded claims point forward to current authority where required;
 - no unsupported intensifiers `catastrophic`, `RCE`, `data loss`, `critical` вне adjudicated context;
 - final status соответствует `working/INDEX.md` и accepted Discovery Coverage state;
+- `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted only when final status agrees with all mandatory workflow/gate states; the `INDEX.md` artifact registry agrees with final registered deliverables; candidate/finding mappings, positive-controls aggregates, authoritative-document registry, and selected-package projection lifecycle states agree with their owning authorities;
+- `project_profile.status: PENDING` is not by itself a contradiction because Project Profile is routing-only metadata; any other mandatory `PENDING` or `IN_PROGRESS` state, or an unresolved reconciliation mismatch, blocks the gate;
 - package не утверждает `REVIEW_COMPLETE`, если coverage находится в `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или material `REVALIDATION_REQUIRED`.
 
 ## 7. Semantic safety
@@ -291,7 +293,8 @@ Coverage-related `STATUS-*` не исправляется редактором �
 - все editorial issues closed или explicitly blocked;
 - re-review выполнен;
 - cross-links проверены;
-- no stale authoritative projection remains;
+- no stale authoritative projection remains within the selected endpoint/package required scope; unrelated stale projections remain visible and deferred according to `PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, or `ALL_SCOPED_CURRENT` policy;
+- `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted after the final correction/re-review, including the final `INDEX.md` reconciliation against registered deliverables, owning authoritative artifacts, mandatory workflow/gate states, and selected-package projection lifecycle records;
 - language/prose quality contract соблюдён;
 - material roadmap tasks имеют human-readable titles и явную границу `### Технический контракт реализации`;
 - diagram coverage contract соблюдён либо отсутствие диаграмм обосновано;
