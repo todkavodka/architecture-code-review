@@ -58,7 +58,7 @@ Current Foundation
        |
        +--> Stage B Audit Projection & Regeneration [DONE]
        |
-       +--> Stage C Test Engineering Execution
+       +--> Stage C Test Engineering Execution [DONE]
        |
        +--> Stage D Code Quality Review
        |
@@ -193,13 +193,16 @@ revision.
 
 ## Stage C — Test Engineering Execution
 
-**Status: `PLANNED`**
+**Status: `DONE`**
 
 ### Purpose
 
-Продолжить уже принятую Test Engineering Foundation от
-analysis/design/planning к безопасному исполняемому engineering workflow.
-Текущая foundation не должна описываться как уже реализованное выполнение.
+Завершить принятую Test Engineering Foundation безопасным contract-first
+workflow для assurance, behavior/contract reasoning, revalidation и
+projection-aware orchestration. Реализация сохраняет границу между
+Test Engineering semantic authority и factual STM authority; этот этап не
+включает выполнение продуктовых тестов, реализацию симуляторов или
+provisioning окружения.
 
 ### Candidate Discovery scope
 
@@ -254,6 +257,22 @@ implementation; implementation требует accepted/fresh specification и я
 authorization; E2E не требует simulator автоматически; внешнюю неопределённость
 можно подменять, но не поведение под тестом. Точные execution permissions и
 safety boundaries определяются только на Stage C Discovery/Design.
+
+### Completion evidence
+
+Stage C implementation is accepted in canonical `main`: the fail-first
+PS-81..PS-86 chain is preserved, the Test Engineering semantic and STM
+prerequisite contracts are established, output selection/resume and
+impact-driven revalidation are wired, and Stage B projection lifecycle
+integration is defined and validated. Final acceptance found no blocking
+findings; runtime coordinator/test execution remains `UNAVAILABLE` because
+this repository is a Markdown Skill/reference system, not an executable
+coordinator.
+
+Canonical closeout checkpoint: `f165fb02b9e50971d6180ba495280432d3d0b2ef`.
+The accepted implementation lineage was already present in canonical `main`;
+no implementation merge was required. The separate `smevals` experiment remains
+post-Stage-C and is not part of this completion evidence.
 
 ## Stage D — Code Quality Review
 
