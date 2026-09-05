@@ -570,7 +570,7 @@ recoverability.
 
 ## INDEX coordinator-state reconciliation
 
-Persist this compact workflow projection, without treating it as substantive technical authority:
+Persist this compact workflow state, without treating it as substantive technical authority:
 
 ```text
 orchestrator_version: 0.3
