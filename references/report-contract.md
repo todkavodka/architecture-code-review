@@ -48,8 +48,8 @@ are generated later.
 
 - Технические факты во время исследования: accepted/fresh Shared Technical Model по `shared-technical-model.md` и required coverage acceptance по `technical-model-coverage.md`.
 - Human-readable As-Built: substantial projection accepted/fresh STM плюс architecture-oriented synthesis; она не является competing factual authority.
-- `01-architecture-review.md`: authoritative user-facing report; его factual As-Built chapter — производная STM projection, а architectural properties/findings — Architecture Review authority.
-- `02-authoritative-findings-ledger.md`: единственный авторитетный источник final RF wording, evidence status, severity, projections, SER/open questions и supersessions.
+- `01-architecture-review.md`: user-facing delivery projection. Its factual As-Built chapter is derived from STM, and it is never the sole persistence location for Architecture meaning.
+- `02-authoritative-findings-ledger.md`: Architecture-owned semantic authority for final RF wording, evidence status, severity, projections, `SER-*`/open questions, supersessions, and the accepted architecture properties/invariants registry.
 - `03-target-architecture.md`: авторитетный источник target mechanisms/invariants/feasibility, когда endpoint это включает.
 - `04-remediation-roadmap.md`: авторитетный источник implementation sequence/tasks/gates, когда endpoint это включает.
 
@@ -59,9 +59,90 @@ synthesis/review. `PROJECTION_REPAIR` может исправлять presentati
 неизменённой accepted authority; semantic drift маршрутизируется в technical
 revalidation, а не скрывается prose repair.
 
+### 2.1 Stage B migration of composite Architecture authority
+
+`01-architecture-review.md` remains the authoritative delivery surface for a
+reader, but that does not make its prose the sole semantic persistence
+authority. It may become a fully generated `PRJ-*` projection only after a
+migration inventory maps every persistent meaning that it renders to a current,
+accepted owning authority. The minimum map is:
+
+| Meaning rendered by `01-architecture-review.md` | Upstream owning authority |
+|---|---|
+| factual As-Built architecture, scope, and factual limitations | accepted/fresh STM and required Technical Model Coverage acceptance |
+| final `RF-*`, `SER-*`, open-question, and supersession semantics | `02-authoritative-findings-ledger.md` |
+| accepted architectural properties and invariants | the explicit accepted properties/invariants registry in `02-authoritative-findings-ledger.md` |
+| Target Architecture mechanisms, invariants, and feasibility | accepted `03-target-architecture.md`, when selected |
+| Roadmap tasks, sequence, dependencies, gates, and safe activation | accepted `04-remediation-roadmap.md`, when selected |
+| presentation-only narrative, navigation, layout, and cross-links | no persistent semantic authority; generated assembly only |
+
+The inventory must also name an owning authority for any other report section
+whose meaning must survive regeneration. If a section contains persistent
+meaning without that mapping, record:
+
+```text
+PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY
+```
+
+The final-report projection is then `BLOCKED`: do not overwrite its unmapped
+section, preserve it as a hidden human-owned island, or infer an owner from its
+current prose. Route the missing mapping to the Architecture owner and resume
+generation only after the authority is accepted and revision-bound.
+
+After the inventory is complete, the final report is generated assembly from
+the exact accepted authorities above and permitted factual projections. Stage B
+may render, link, and verify the assembly, but it MUST NOT create, change,
+delete, resolve, strengthen, weaken, merge, suppress, or reinterpret `RF-*`,
+`SER-*`, properties/invariants, Target Architecture semantics, or Roadmap
+semantics. `V4 AUTHORITY CONSISTENCY` compares the candidate with those owners;
+it does not adjudicate or repair them.
+
+### 2.2 Registration of a legacy Architecture report
+
+An existing `01-architecture-review.md` without accepted `PRJ-*` lifecycle
+metadata is a legacy delivery artifact. It is not `CURRENT` merely because it
+is readable, complete-looking, old, committed, or previously accepted by a
+human. Register it only through the shared legacy path:
+
+```text
+legacy artifact
+→ identify capability owner
+→ assign PRJ identity
+→ define contract
+→ resolve dependencies
+→ verify against accepted authority
+→ establish fingerprint/revision
+→ CURRENT
+```
+
+For this report, “identify capability owner” means the Architecture owner is
+recorded and the inventory in §2.1 is complete for every persistent section.
+The registration must bind the accepted/fresh STM and coverage records, the
+Architecture findings ledger, and the selected Target Architecture and
+Roadmap authorities when those endpoint outputs are in scope, including their
+exact revisions and selector/dependency resolutions. Presentation-only prose
+may remain generated assembly, but it cannot supply a missing semantic owner.
+
+The report's existing human-edited wording is only a candidate or historical
+context during registration. It must not promote itself into `RF-*`, `SER-*`,
+property/invariant, Target, Roadmap, or factual STM authority, and it must not
+resolve a conflict among those owners. If any persistent meaning remains
+unmapped, record `PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY`, leave the
+legacy report non-current, and route the missing mapping to the Architecture
+owner. Do not overwrite the unmapped content, infer an owner from its prose,
+or preserve it as a hidden human-owned authority island.
+
+Only after the registration contract is complete and the candidate passes the
+applicable `V1`–`V4` gates may its canonical fingerprint and first accepted
+`PRJ-*@revN` be established and the report become `CURRENT`. Insufficient,
+stale, or conflicting authority blocks registration and requires semantic
+revalidation/migration; it never justifies weakening verification.
+
 ## 3. `01-architecture-review.md`
 
-Основной читаемый документ.
+Основной читаемый документ. После завершённой Stage B migration это fully
+generated assembly accepted STM and Architecture semantic authorities, not a
+competing Architecture semantic ledger.
 
 Рекомендуемая структура:
 
@@ -168,6 +249,13 @@ roadmap task links when applicable
 
 Отдельно сохраняй registries `SER-*`, `PC-*`, `OQ-*` и explicit supersessions.
 
+В этом же Architecture-owned semantic artifact веди explicit registry accepted
+architectural properties/invariants, которые нужны для final report, target
+или roadmap, но не сводятся к одному `RF-*`. Каждая запись имеет stable
+identity/revision, accepted status, evidence/provenance and links to affected
+`RF-*`/`SER-*`/target/roadmap records where applicable. `01-architecture-review.md`
+может только отобразить эту registry; генерация не изменяет её.
+
 Ledger может быть плотным и структурированным. Это не лицензия переносить его terse style в пользовательские narrative sections.
 
 ## 5. Cross-link contract
@@ -204,7 +292,10 @@ Stable headings начинай с ID:
 
 ## 6. Технический черновик vs финальная сборка
 
-После authoritative findings ledger можно создать `MAIN REVIEW TECHNICAL DRAFT` для `01-architecture-review.md`.
+После authoritative findings ledger можно создать `MAIN REVIEW TECHNICAL DRAFT`
+для `01-architecture-review.md`. Этот draft и последующая generated assembly
+не становятся semantic authority: persistent Architecture meaning сначала
+принимается в owning records из §2.1.
 
 Если endpoint включает target/roadmap, этот draft **не является финальным пакетом**.
 

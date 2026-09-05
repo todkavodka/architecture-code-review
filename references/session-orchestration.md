@@ -2,6 +2,36 @@
 
 This reference is the sole authority for startup/session orchestration.
 
+## Coordinator workflow authority boundary
+
+`working/INDEX.md` is the explicit `COORDINATOR_WORKFLOW_AUTHORITY`. It owns
+resume-critical session, gate, handoff, and coordinator routing state under the
+Stage A workflow. Only the coordinator updates that authority through the
+workflow reconciliation rules; its meaning is not reconstructed from a
+projection view.
+
+The authoritative `working/INDEX.md` is excluded from every Stage B projection
+mechanic. It is never classified as `PRJ-*`, fingerprinted for projection
+drift, regenerated, retired, assigned projection freshness, or given `RG-*`
+execution/session state. Projection Impact Analysis must not overwrite its
+gate state, resume routing, or handoff/coordinator state. A filename containing
+`INDEX` does not change this boundary.
+
+Stage B operational views are separate, non-authoritative records under
+`working/projections/`:
+
+```text
+working/projections/registry.md       # generated active projection registry view
+working/projections/impact.md         # generated impact-accounting view
+working/projections/sessions/RG-*.md  # one frozen regeneration session view
+```
+
+These views are scoped projections of their owning lifecycle, impact, or
+regeneration records. They are reconstructable and disposable, must not reuse
+the path or identity of `working/INDEX.md`, and cannot be used to mutate or
+replace coordinator authority. The focused Stage B references define their
+record contents; this startup contract defines only the authority boundary.
+
 ## Ownership
 
 Owns:
@@ -75,6 +105,75 @@ The recommendation matrix is:
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
 
+## Intent lifecycle and projection handoff
+
+The coordinator keeps semantic completion separate from projection freshness.
+For each stabilized semantic delta, the post-semantic handoff runs Projection
+Impact Analysis once, persists its result, and only then evaluates any
+projection-sensitive closeout. Impact accounting is not regeneration.
+
+`NEW` follows the selected semantic workflow and its required STM/capability
+slice to an accepted semantic state. It then accounts for all affected active
+projections with Projection Impact Analysis and persists
+`PROJECTION_IMPACT_ACCOUNTED`. `NEW` may therefore finish with projections
+`STALE`; if a requested deliverable must be fresh, the coordinator starts a
+separate `RG-*` workflow after semantic completion rather than regenerating as
+part of impact analysis.
+
+`EXTEND` preserves accepted Stage A semantic work and derives only the minimum
+fresh dependency slice needed for the explicitly requested capability/output.
+After that extension reaches a stabilized accepted semantic state, run the same
+single impact-accounting handoff. If output freshness is requested, use
+`TARGETED` regeneration for the requested deliverable and its required stale
+upstream prerequisites only; downstream impact is not silently added to the
+execution scope.
+
+`REVALIDATE` uses the impact-driven semantic flow in
+`revalidation-and-freshness.md`. Once its semantic delta is stabilized, the
+coordinator runs Projection Impact Analysis as a separate accounting step using
+`references/projection-impact.md`. It persists direct exact/selector/contract/
+drift impact and propagates `STALE`/`BLOCKED` through the derived reverse graph
+while preserving the declared `CONSUMER -> PREREQUISITE` edge direction. A
+regeneration request is a separate explicit `RG-*` session, never an implicit
+consequence of revalidation or impact accounting.
+`PROJECTION_IMPACT_ACCOUNTED` records that this evaluation and its freshness
+results were persisted; it does not assert that all projections are current or
+that regeneration occurred. A technical accounting failure does not undo
+accepted semantic work, but blocks projection-sensitive downstream gates until
+accounting succeeds. Repeated passes retain unresolved reasons without
+duplicating them.
+
+Projection-sensitive closeout then follows the package gate contract:
+
+```text
+semantic gates accepted
+→ PROJECTION_IMPACT_ACCOUNTED
+→ package membership resolved
+→ required scoped projections CURRENT
+→ closeout/publication permitted
+```
+
+The coordinator applies the package's declared `PERMISSIVE`,
+`REQUIRED_SCOPE_CURRENT`, or `ALL_SCOPED_CURRENT` policy. Stale projections
+outside the resolved required scope remain visible and actionable but do not
+block unrelated capability closeout. See
+[`projection-gates-and-packages.md`](projection-gates-and-packages.md); package
+membership is explicit and is not inferred from arbitrary selector language.
+
+For `PERMISSIVE`, semantic closeout may proceed after successful impact
+accounting while stale projection work remains visible and deferred. For
+`REQUIRED_SCOPE_CURRENT`, the consumed projection and mandatory upstream
+prerequisites must be `CURRENT`. For `ALL_SCOPED_CURRENT`, every resolved
+required package member must be `CURRENT`. If the required scope is not current,
+closeout is blocked until the user explicitly requests the needed regeneration or
+other owning action; the closeout gate does not start it implicitly.
+
+When requested output freshness requires regeneration, start a separate
+`RG-*` session under [Projection regeneration workflow](projection-regeneration.md).
+Its `TARGETED` or `ALL_STALE` plan is a frozen operational execution record,
+not a Session Intent, semantic stage transition, or `working/INDEX.md`
+authority. Projection Impact Analysis never starts regeneration implicitly.
+
 Legacy package reconciliation is conservative: an accepted As-Built with no
 STM is valid legacy state, not corruption. `USE_EXISTING` may consume it without
 modernizing; `RESUME` reconciles only the first unfinished dependency;
@@ -83,6 +182,46 @@ As-Built/evidence as historical context and requires impact-driven fresh STM
 acceptance. Extracted legacy facts are candidates until evidence and baseline
 validation pass through the Technical Model Gate. A forensic upgrade builds the
 required forensic depth and never relabels compact prose as forensic evidence.
+
+This package-reconciliation compatibility rule is separate from legacy
+projection registration. A pre-Stage-B generated or human-readable artifact
+without accepted `PRJ-*` lifecycle metadata follows the projection registration
+path:
+
+```text
+legacy artifact
+→ identify capability owner
+→ assign PRJ identity
+→ define contract
+→ resolve dependencies
+→ verify against accepted authority
+→ establish fingerprint/revision
+→ CURRENT
+```
+
+`USE_EXISTING` may reuse the surrounding accepted package state, but it does
+not make an unregistered artifact `CURRENT`. The coordinator records the
+registration work and routes it to the owning capability; projection-sensitive
+closeout may consume the artifact only after its registration record, accepted
+dependencies, authority bindings, fingerprint/revision, and `V1`–`V4` evidence
+are present. A readable file, path, age, Git history, or prior human acceptance
+never substitutes for that evidence.
+
+If required authority is absent, stale, conflicting, or unresolved, preserve
+the legacy artifact as non-current context and route
+`SEMANTIC_REVALIDATION`/migration to the owning semantic gate. Do not weaken
+the projection verification gate, infer authority from historical prose, or
+silently convert a legacy As-Built into STM. If the artifact's contract or
+classification is insufficient, route `CONTRACT_ADJUDICATION`; neither outcome
+permits `CURRENT`.
+
+For the legacy Architecture final report, apply the authority inventory in
+[`report-contract.md`](report-contract.md) before registering
+`01-architecture-review.md`. Its historical As-Built, `RF-*`/`SER-*`, Target,
+and Roadmap wording remains non-authoritative until each persistent meaning is
+mapped to a current accepted owner. An unmapped meaning blocks registration;
+the coordinator must not infer an owner from the report or preserve it as a
+hidden authority island.
 
 Typical `PROJECTION_REPAIR` targets include broken relative links, malformed Markdown structure, bad navigation/headings/tables, invalid Mermaid syntax/renderability, inconsistent terminology/language, duplicated or stale presentation text whose accepted replacement is already known, and malformed cross-references to accepted identifiers.
 
@@ -94,6 +233,10 @@ TECHNICAL_REVALIDATION_REQUIRED
 ```
 
 A completed projection repair does not make preserved technical evidence freshly verified and does not change the project baseline merely because review documents changed.
+The repaired projection remains governed by its generated/projection contract:
+manual edits are disposable, and no persistent human-owned section may be used to
+carry meaning across a later regeneration. Anything that must survive belongs in
+semantic authority.
 
 ## Review Suite Configuration
 
@@ -187,14 +330,14 @@ Contract Verification remain internal dependencies.
 
 After `NEW` configuration is resolved and before any selected capability begins
 substantive execution, create the persistent Shared Technical Model baseline and
-register its compact routing projection in `working/INDEX.md`. This establishes
+register its compact routing state in `working/INDEX.md`. This establishes
 the model manifest and selected baseline; it does not require population of a
 complete model when the requested downstream scope needs only a bounded factual
 slice.
 
 STM fact authority, the Technical Model Gate, and persisted model shape belong
 to [Shared Technical Model](shared-technical-model.md). Startup records only
-the routing projection defined by
+the routing state defined by
 [Review Modes and Orchestration](review-modes-and-orchestration.md); it must not
 copy the technical model into `INDEX.md`.
 
@@ -425,9 +568,9 @@ a reproducible commit baseline. If the snapshot cannot later be reconstructed,
 resume/revalidation reports that limitation rather than claiming full
 recoverability.
 
-## INDEX projection and reconciliation
+## INDEX coordinator-state reconciliation
 
-Persist this compact workflow projection, without treating it as substantive technical authority:
+Persist this compact workflow state, without treating it as substantive technical authority:
 
 ```text
 orchestrator_version: 0.3
@@ -463,6 +606,12 @@ projection_repair:
   accepted_authority_refs
   projection_validation_status
   semantic_escalation_status
+legacy_projection_registration:
+  artifact_refs
+  owning_capability
+  registration_status: NOT_REGISTERED | IN_PROGRESS | BLOCKED | REGISTERED
+  blocking_action
+  verified_projection_refs
 ```
 
 Legacy packages missing these fields are legacy state requiring additive reconciliation/backfill, not automatically corrupt state. Before downstream use validate owning-artifact freshness and authority as required by `revalidation-and-freshness.md`.

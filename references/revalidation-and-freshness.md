@@ -6,6 +6,17 @@
 2. compact persisted state не может использоваться downstream, если он stale относительно owning accepted authority;
 3. отдельный `PROJECTION_REPAIR` intent должен исправлять только пользовательскую проекцию принятого аудита и останавливаться при semantic drift.
 
+Stage B projection identity, verified revisions, fingerprints, freshness
+states, and required actions are owned by [Projection lifecycle authority](projection-lifecycle.md).
+This file owns the cross-cutting revalidation routing and preserves the
+following distinction:
+
+```text
+semantic freshness != projection freshness
+semantic workflow may finish with stale projections
+projection stale != semantic false
+```
+
 Не применяй этот контракт для переопределения обычной scope discipline, fresh-context review или As-Built coverage: эти поведения уже покрываются существующими reference contracts.
 
 ## 1. Projection-only revalidation
@@ -268,6 +279,24 @@ concrete correctness trigger and is persisted in the handoff.
 PS-39, PS-40 и PS-43 были baseline-compliant и не являются основанием для добавления новых orchestration restrictions.
 
 ## 7. Project-change targeted revalidation
+
+After the semantic delta reaches a stabilized accepted state, projection
+freshness is accounted for by [Projection impact accounting](projection-impact.md).
+That pass consumes revision-bound semantic identities, selector resolution
+snapshots, and contract revisions; changed paths remain routing context rather
+than semantic proof. It persists direct impact and reverse-graph propagation
+before any separately requested regeneration. A successful pass returns
+`PROJECTION_IMPACT_ACCOUNTED`, which means impact is recorded, not that all
+projections are `CURRENT`. If accounting fails technically, accepted semantic
+authority is not rolled back, but projection-sensitive gates remain blocked
+until the impact record is durably reconciled.
+
+This is one explicit post-semantic handoff per stabilized delta for `REVALIDATE`.
+The equivalent handoff is used at the end of `NEW` and `EXTEND` after their
+semantic work has stabilized. A retry after technical accounting failure is
+reconciliation under the idempotent impact rules, not implicit regeneration.
+No intent may turn Projection Impact Analysis into a content writer or start an
+`RG-*` session without a separate explicit output/package freshness request.
 
 `REVALIDATE` binds the previous accepted baseline to the selected current
 baseline and produces a bounded, delta-oriented overlay:

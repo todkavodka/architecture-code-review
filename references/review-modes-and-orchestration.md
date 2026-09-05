@@ -5,6 +5,8 @@
 Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.
 Direct STM/capability/projection dependency metadata, generated indexes, and
 impact semantics are owned by `technical-model-dependencies.md`.
+Gate-scoped projection freshness and named package membership are owned by
+[`projection-gates-and-packages.md`](projection-gates-and-packages.md).
 
 ## 1. Стартовый выбор
 
@@ -132,6 +134,7 @@ working/
 | target review | `target-architecture-review.md` |
 | roadmap review | `remediation-roadmap-review.md` |
 | editorial gate | `final-editorial-review.md` |
+| projection packages / freshness gates | `projection-gates-and-packages.md` |
 
 `SKILL.md` оркестрирует эти контракты и не должен переопределять их подробно.
 
@@ -139,11 +142,11 @@ working/
 
 `INDEX.md` — постоянный источник состояния процесса. Он должен оставаться компактным.
 
-### Session Orchestration projection
+### Session Orchestration coordinator state
 
 Startup selection is owned by `references/session-orchestration.md`. Persist its
-compact routing projection here, without turning it into substantive technical
-authority:
+compact coordinator routing state here, without turning it into substantive
+technical authority:
 
 ```text
 orchestrator_version: 0.3
@@ -195,7 +198,17 @@ RESUME → reconstruct true workflow state, reconcile changed baseline if requir
 REVALIDATE → delegate project-change evidence semantics to revalidation-and-freshness.md.
 EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
+PROJECTION_REPAIR → repair only the selected presentation projections from unchanged accepted authority; semantic drift returns to technical revalidation.
 ```
+
+After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the
+coordinator performs one Projection Impact Analysis handoff and persists
+`PROJECTION_IMPACT_ACCOUNTED`. This is an accounting gate, not a regeneration
+command. A separately requested fresh deliverable starts an explicit `RG-*`
+session; `TARGETED` execution contains the requested projections and required
+stale upstream prerequisites, while downstream impact remains outside execution
+scope. `PROJECTION_REPAIR` does not use this path to carry semantic meaning or
+create persistent manual sections.
 
 For a dependency-sliced capability dispatch, request the current semantic
 object, its HARD dependencies, unresolved CONDITIONAL dependencies, and
@@ -203,8 +216,8 @@ required evidence. Resolve this bounded set through the generated indexes and
 owning direct metadata; do not preload unrelated accepted artifacts. The
 dependency contract owns the detailed traversal and impact rules.
 
-For `NEW`, create the persistent STM manifest and this compact routing
-projection before capability execution. The manifest, not `INDEX.md`, owns the
+For `NEW`, create the persistent STM manifest and this compact coordinator
+routing state before capability execution. The manifest, not `INDEX.md`, owns the
 model. Model creation does not require complete population: the selected
 downstream requirement determines the initially required factual slice. See
 `shared-technical-model.md` for fact authority and persistence.
@@ -229,9 +242,9 @@ visibility and selection remain in Session Orchestration.
 
 13. capability registry.
 
-### Discovery Coverage projection
+### Discovery Coverage coordinator summary
 
-Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактную projection:
+Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактное coordinator summary:
 
 ```text
 coverage_artifact: working/<coverage-matrix-file>
@@ -672,14 +685,31 @@ projection accepted/fresh STM плюс architecture-oriented synthesis, не в�
 technical source of truth.
 
 `01-architecture-review.md` содержит user-facing projection factual STM и
-Architecture Review authority. Если STM revision/coverage или projection
-selector меняется после сборки, зависимые sections считаются stale до повторной
-synthesis/review. `PROJECTION_REPAIR` исправляет только presentation from
-unchanged accepted authority; semantic drift требует technical revalidation.
+рендерит Architecture Review authority из именованных upstream semantic owners;
+он не является единственным местом persistence этой authority. Если STM
+revision/coverage или projection selector меняется после сборки, зависимые
+sections считаются stale до повторной synthesis/review. `PROJECTION_REPAIR`
+исправляет только presentation from unchanged accepted authority; semantic
+drift требует technical revalidation.
 
 Technical Model Coverage Review обязателен в обоих режимах; в `STANDARD_FULL`
 его evidence depth может быть compact. As-Built parity/projection review также
 обязателен, но не принимает factual STM.
+
+Projection-sensitive capability or endpoint closeout uses the named package
+and policy in [`projection-gates-and-packages.md`](projection-gates-and-packages.md).
+After semantic gates are accepted, the coordinator must persist
+`PROJECTION_IMPACT_ACCOUNTED`, resolve the package membership, and enforce the
+package's required scoped projections before permitting closeout or publication.
+Unrelated stale projections remain visible but do not block an unrelated gate;
+the coordinator must not apply a repository-wide zero-stale rule.
+
+The same closeout rule applies to `NEW`, `EXTEND`, and `REVALIDATE`: semantic
+gates stabilize first, impact is accounted once, and only the resolved package
+scope is freshness-gated. `PERMISSIVE` permits semantic closeout with deferred
+stale projections; `REQUIRED_SCOPE_CURRENT` and `ALL_SCOPED_CURRENT` block only
+when their resolved required scope is non-current. The closeout gate never
+implicitly invokes regeneration.
 
 ## 12. Recovery
 

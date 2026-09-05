@@ -27,6 +27,18 @@ cross-references по принятой authority. Каждый changed projectio
 `PROJECTION_REVALIDATION`; semantic drift требует
 `SEMANTIC_DRIFT_DETECTED` + `TECHNICAL_REVALIDATION_REQUIRED`.
 
+Stage B session intents converge on the same explicit projection handoff:
+`NEW` and `EXTEND` finish the requested semantic work first, while
+`REVALIDATE` finishes its impact-driven semantic delta. Once that semantic state
+is stabilized, run Projection Impact Analysis and persist
+`PROJECTION_IMPACT_ACCOUNTED`; this accounts for freshness but never regenerates
+projection content. If a requested output or package requires fresh projection
+content, invoke a separate `RG-*` regeneration workflow with the appropriate
+scope. Closeout uses the named package and gate policy, so unrelated stale
+projections remain visible without blocking an unrelated gate. The detailed
+intent and closeout routing is owned by `references/session-orchestration.md` and
+`references/review-modes-and-orchestration.md`.
+
 ## Persistent Workflow
 
 Создай audit package и `working/INDEX.md` по `references/review-modes-and-orchestration.md`. `INDEX.md` — persistent workflow authority; resume-critical state не хранится только в чате.
@@ -53,7 +65,9 @@ Test Engineering output selection is persisted as independent booleans and
 executes a minimum dependency slice. `Test Assurance` remains the compatibility
 core; `Behavior Model` is an internal dependency and applicable `Contract
 Verification` is automatic. Optional output projections and ownership are
-defined by the capability contract and registered in `working/INDEX.md`.
+defined by the capability contract and recorded as coordinator routing state
+in `working/INDEX.md`; that record is not the generated Stage B projection
+registry.
 
 For a full Architecture Review, construct the required `FULL` Shared Technical
 Model and accept `TECHNICAL_MODEL_COVERAGE_ACCEPTED` before Architecture
@@ -109,6 +123,28 @@ from Architecture Discovery Coverage and are authoritative in
 - Working artifacts могут быть terse/machine-oriented; пользовательские финальные документы обязаны объяснять `что происходит → почему → к чему приводит → что менять` связным человеческим текстом. IDs и shorthand поддерживают объяснение, но не заменяют его.
 - Не меняй production code проекта во время review.
 
+Stage B projections are explicitly classified, stable `PRJ-*` identities; lifecycle state and verified revisions follow `references/projection-lifecycle.md`. `working/INDEX.md` is `COORDINATOR_WORKFLOW_AUTHORITY`: it owns resume-critical session, gate, handoff, and coordinator state and is outside every Stage B projection mechanic. It must not receive a `PRJ-*` identity, projection fingerprint or drift result, regeneration or `RG-*` execution state, projection freshness state, or `ACTIVE`/`RETIRED` lifecycle transition. Semantic authorities are likewise outside automatic projection classification.
+
+Operational Stage B views are non-authoritative projections and use clearly
+scoped paths under `working/projections/`, such as the generated registry,
+impact view, and per-session `RG-*.md` records. They summarize their owning
+projection/impact/regeneration records; they never replace `working/INDEX.md`,
+the direct dependency authority, or semantic authority. Path and filename do
+not classify an artifact as a projection.
+
+Semantic workflow may complete with projections `STALE`; projection freshness is not semantic truth, and regeneration never mutates semantic authority.
+
+`PROJECTION_REPAIR` remains a bounded presentation-only operation. It may repair
+the representation of unchanged accepted meaning, but it cannot mutate semantic
+authority, hide a source/baseline change, or create a persistent human-owned
+section in a fully generated projection.
+
+`01-architecture-review.md` may be fully generated only after
+`report-contract.md` maps every persistent Architecture meaning to an accepted
+upstream owner; otherwise return
+`PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY` and do not regenerate the
+unmapped content.
+
 ## Language Contract
 
 Язык пользовательского интерфейса Skill определяется текущим языком пользователя. Явная просьба использовать конкретный язык имеет приоритет. Если явной просьбы нет, используй язык последнего содержательного запроса пользователя; не переходи на английский только потому, что инструкции Skill или reference-файлы написаны по-английски.
@@ -128,6 +164,8 @@ from Architecture Discovery Coverage and are authoritative in
 - startup / previous-audit selection / session intent / Review Suite startup / Project Profile / dirty baseline → `references/session-orchestration.md`
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
+- Stage B projection identity, lifecycle, revision, freshness, drift, and required-action authority → `references/projection-lifecycle.md`
+- Stage B projection dependency kinds, selector contracts, resolution snapshots, and projection DAG → `references/projection-dependencies.md`
 - shared authority, evidence scope, bounded accounting and candidate decomposition → `references/shared-assurance-principles.md`
 - shared evidence worksets / observations / provenance / cross-capability reuse → `references/shared-evidence-model.md`
 - Shared Technical Model facts / lifecycle / Technical Model Gate / persistence → `references/shared-technical-model.md`
@@ -148,7 +186,7 @@ from Architecture Discovery Coverage and are authoritative in
 
 ## Completion Gate
 
-Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
+Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit. When the selected endpoint has a projection-sensitive package gate, also require `PROJECTION_IMPACT_ACCOUNTED`, resolved package membership, and the package policy's scoped projections to be `CURRENT`; a `PERMISSIVE` gate may close with unrelated projections `STALE` and deferred.
 
 Если material coverage остаётся `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` запрещён.
 

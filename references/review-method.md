@@ -58,6 +58,12 @@ Technical Model Coverage Review независимо принимает factual 
 passes. As-Built projection проходит отдельную projection/parity review, но не
 становится factual authority.
 
+Architecture-owned interpretation is persisted separately from this factual
+projection: accepted `RF-*`/`SER-*` and accepted properties/invariants belong
+to the Architecture semantic authority defined by `report-contract.md`.
+`01-architecture-review.md` may render that meaning, but it cannot be the only
+record that survives a later fully generated assembly.
+
 ### Evidence-bounded architecture claims
 
 Architecture claim scope must not exceed directly investigated evidence scope:
@@ -226,6 +232,14 @@ race conclusion, finding/root/severity или remedy implication, а не к ф�
 используй `ARCH-CORRECTION-CANDIDATE` и существующий architecture
 review/correction/adjudication loop. Такой correction не делает factual matrix
 finding и не переписывает STM.
+
+После acceptance изменение сохраняется сначала в owning Architecture semantic
+authority: `02-authoritative-findings-ledger.md` для `RF-*`, `SER-*` и
+properties/invariants, selected `03-target-architecture.md` for target
+semantics, or selected `04-remediation-roadmap.md` for roadmap semantics.
+It then makes dependent report projections stale. A final-report writer or
+Stage B regeneration cannot apply the correction directly to
+`01-architecture-review.md`, nor use its prose to decide the semantic result.
 
 ## 8. Positive controls и non-findings
 
