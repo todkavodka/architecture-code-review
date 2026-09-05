@@ -56,7 +56,7 @@ Current Foundation
        |
        +--> Stage A Shared Technical Model Foundation [DONE]
        |
-       +--> Stage B Audit Projection & Regeneration [IMPLEMENTATION CANDIDATE]
+       +--> Stage B Audit Projection & Regeneration [DONE]
        |
        +--> Stage C Test Engineering Execution
        |
@@ -119,11 +119,9 @@ remains `UNAVAILABLE` and is an environment limitation, not a runtime pass.
 
 ## Stage B — Audit Projection & Regeneration
 
-**Status: `IMPLEMENTATION CANDIDATE — REVIEW PENDING`**
+**Status: `DONE`**
 
-В изолированной feature branch подготовлен кандидат реализации Stage B.
-Независимое implementation review и promotion ещё не выполнены; этот статус
-не означает, что Stage B получил `DONE`.
+Stage B реализован, независимо проверен и продвинут в canonical `main`.
 
 ### Purpose
 
@@ -134,9 +132,9 @@ semantic records, `PROJECTION_REPAIR` и legacy audit reconciliation.
 Это не reindexing: этап не посвящён vector/RAG indexing. Речь идёт об impact-driven
 regeneration проекций из принятого semantic authority.
 
-### Implemented candidate scope
+### Completed scope
 
-Кандидат реализации фиксирует следующие возможности высокого уровня:
+Завершённая реализация фиксирует следующие возможности высокого уровня:
 
 - explicit projection identity, lifecycle, freshness, revisions, fingerprints,
   and bounded `PROJECTION_REPAIR`;
@@ -154,8 +152,20 @@ Runtime validation координатора остаётся `UNAVAILABLE`, по
 основан на Markdown Skill/reference и не содержит исполняемого координатора
 Stage B.
 
-Последовательность и статусы Stage C, Stage D и Stage E сохраняются; этот
-кандидат не авторизует реализацию Stage C.
+Последовательность и статусы Stage C, Stage D и Stage E сохраняются; Stage B
+не авторизует реализацию Stage C.
+
+### Completion evidence
+
+Promotion merge: `d3f856a948a03b33faafa454e0b6cd7f4f65f491`.
+Promoted feature HEAD: `0c9a4b02d7ac49fcd9c3803fe017b997c290f564`.
+Stage B pressure validation: `PS-100..PS-116` — `PASS_STATIC_CONTRACT`.
+Stage A regressions: `PASS_STATIC_CONTRACT`.
+Independent implementation review: `APPROVED`.
+Critical findings: `0`; Important findings: `0`; Minor findings: `0`.
+Runtime validation remains `UNAVAILABLE` because the repository does not
+contain an executable Stage B coordinator, generator, or verifier; this is not
+a runtime pass.
 
 Целевая схема:
 
