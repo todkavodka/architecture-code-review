@@ -158,6 +158,13 @@ does not block closeout. The projection IDs, direct exact/selector dependencies,
 and condition-to-member rules are defined in
 [`test-engineering-contract.md`](references/test-engineering-contract.md).
 
+Test Review closeout consumes the shared Stage B chain: accepted semantic
+capability gates, `PROJECTION_IMPACT_ACCOUNTED`, resolved package membership,
+and the package's `ALL_SCOPED_CURRENT` required projection set. It may request a
+separate targeted `RG-*` regeneration when a selected output is stale, but the
+package gate never regenerates implicitly and unrelated stale projections do not
+block this package.
+
 Select a dependency strategy per material dependency and justify it. Keep
 dependency substitutes separate from a Service Simulator of the reviewed
 service; simulator consumer protocols and its test-only control plane remain

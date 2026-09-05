@@ -291,6 +291,13 @@ projections are `CURRENT`. If accounting fails technically, accepted semantic
 authority is not rolled back, but projection-sensitive gates remain blocked
 until the impact record is durably reconciled.
 
+This is one explicit post-semantic handoff per stabilized delta for `REVALIDATE`.
+The equivalent handoff is used at the end of `NEW` and `EXTEND` after their
+semantic work has stabilized. A retry after technical accounting failure is
+reconciliation under the idempotent impact rules, not implicit regeneration.
+No intent may turn Projection Impact Analysis into a content writer or start an
+`RG-*` session without a separate explicit output/package freshness request.
+
 `REVALIDATE` binds the previous accepted baseline to the selected current
 baseline and produces a bounded, delta-oriented overlay:
 

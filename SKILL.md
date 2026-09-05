@@ -27,6 +27,18 @@ cross-references по принятой authority. Каждый changed projectio
 `PROJECTION_REVALIDATION`; semantic drift требует
 `SEMANTIC_DRIFT_DETECTED` + `TECHNICAL_REVALIDATION_REQUIRED`.
 
+Stage B session intents converge on the same explicit projection handoff:
+`NEW` and `EXTEND` finish the requested semantic work first, while
+`REVALIDATE` finishes its impact-driven semantic delta. Once that semantic state
+is stabilized, run Projection Impact Analysis and persist
+`PROJECTION_IMPACT_ACCOUNTED`; this accounts for freshness but never regenerates
+projection content. If a requested output or package requires fresh projection
+content, invoke a separate `RG-*` regeneration workflow with the appropriate
+scope. Closeout uses the named package and gate policy, so unrelated stale
+projections remain visible without blocking an unrelated gate. The detailed
+intent and closeout routing is owned by `references/session-orchestration.md` and
+`references/review-modes-and-orchestration.md`.
+
 ## Persistent Workflow
 
 Создай audit package и `working/INDEX.md` по `references/review-modes-and-orchestration.md`. `INDEX.md` — persistent workflow authority; resume-critical state не хранится только в чате.
@@ -122,6 +134,11 @@ not classify an artifact as a projection.
 
 Semantic workflow may complete with projections `STALE`; projection freshness is not semantic truth, and regeneration never mutates semantic authority.
 
+`PROJECTION_REPAIR` remains a bounded presentation-only operation. It may repair
+the representation of unchanged accepted meaning, but it cannot mutate semantic
+authority, hide a source/baseline change, or create a persistent human-owned
+section in a fully generated projection.
+
 `01-architecture-review.md` may be fully generated only after
 `report-contract.md` maps every persistent Architecture meaning to an accepted
 upstream owner; otherwise return
@@ -169,7 +186,7 @@ unmapped content.
 
 ## Completion Gate
 
-Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit.
+Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, final editorial correction/re-review is accepted, and limitations are explicit. When the selected endpoint has a projection-sensitive package gate, also require `PROJECTION_IMPACT_ACCOUNTED`, resolved package membership, and the package policy's scoped projections to be `CURRENT`; a `PERMISSIVE` gate may close with unrelated projections `STALE` and deferred.
 
 Если material coverage остаётся `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` запрещён.
 

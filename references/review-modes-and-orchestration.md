@@ -198,7 +198,17 @@ RESUME → reconstruct true workflow state, reconcile changed baseline if requir
 REVALIDATE → delegate project-change evidence semantics to revalidation-and-freshness.md.
 EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
+PROJECTION_REPAIR → repair only the selected presentation projections from unchanged accepted authority; semantic drift returns to technical revalidation.
 ```
+
+After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the
+coordinator performs one Projection Impact Analysis handoff and persists
+`PROJECTION_IMPACT_ACCOUNTED`. This is an accounting gate, not a regeneration
+command. A separately requested fresh deliverable starts an explicit `RG-*`
+session; `TARGETED` execution contains the requested projections and required
+stale upstream prerequisites, while downstream impact remains outside execution
+scope. `PROJECTION_REPAIR` does not use this path to carry semantic meaning or
+create persistent manual sections.
 
 For a dependency-sliced capability dispatch, request the current semantic
 object, its HARD dependencies, unresolved CONDITIONAL dependencies, and
@@ -693,6 +703,13 @@ After semantic gates are accepted, the coordinator must persist
 package's required scoped projections before permitting closeout or publication.
 Unrelated stale projections remain visible but do not block an unrelated gate;
 the coordinator must not apply a repository-wide zero-stale rule.
+
+The same closeout rule applies to `NEW`, `EXTEND`, and `REVALIDATE`: semantic
+gates stabilize first, impact is accounted once, and only the resolved package
+scope is freshness-gated. `PERMISSIVE` permits semantic closeout with deferred
+stale projections; `REQUIRED_SCOPE_CURRENT` and `ALL_SCOPED_CURRENT` block only
+when their resolved required scope is non-current. The closeout gate never
+implicitly invokes regeneration.
 
 ## 12. Recovery
 
