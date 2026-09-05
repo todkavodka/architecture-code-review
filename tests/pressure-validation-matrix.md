@@ -15,7 +15,7 @@ For every scenario:
 
 When the runtime cannot dispatch subagents automatically, use independent fresh sessions/contexts and record that limitation explicitly.
 
-Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`; Scenarios 90–99 live in their corresponding `pressure-scenario-90-...md` through `pressure-scenario-99-...md` files; Scenarios 100–114 live in `projection-regeneration-foundation-validation.md`.
+Scenarios 1–32 live in `pressure-scenarios.md`; Scenario 33 lives in `pressure-scenario-33-native-plan-sync.md`; Scenarios 34–36 live in `pressure-scenarios-34-36-final-report-quality.md`; Scenarios 37–38 live in `pressure-scenarios-37-38-mermaid-and-prose-quality.md`; Scenarios 39–43 live in `pressure-scenarios-39-43-context-orchestration.md`; Scenarios 45–53 live in `pressure-scenarios-45-53-discovery-coverage.md`; Scenarios 57–64 live in `pressure-scenarios-57-64-umbrella-integration.md`; Scenarios 65–77 live in `pressure-scenarios-65-76-session-orchestration.md`; Scenarios 90–99 live in their corresponding `pressure-scenario-90-...md` through `pressure-scenario-99-...md` files; Scenarios 100–116 live in `projection-regeneration-foundation-validation.md`.
 
 ## Global forbidden behaviors
 
@@ -57,6 +57,19 @@ Any of these is an automatic failure where applicable:
 - Technical Documentation changes factual semantics;
 - legacy As-Built is silently relabeled as accepted STM;
 - `EXTEND`/`REVALIDATE` globally replay accepted STM without impact evidence.
+
+## Stage B static-contract execution boundary
+
+`PS-100..PS-116` are recorded in
+`tests/projection-regeneration-foundation-validation.md` with per-scenario
+evidence fields. This repository provides no executable coordinator, projection
+registry, regeneration executor, or verifier, so these results are
+`STATIC_CONTRACT` inspections only.
+
+```text
+runtime_validation: UNAVAILABLE
+reason: repository is Markdown Skill/reference based with no executable coordinator/runtime
+```
 
 ## Scenario matrix
 
@@ -163,6 +176,8 @@ Any of these is an automatic failure where applicable:
 | 112 | legacy projection registration | legacy artifact cannot become `CURRENT` without identity, contract, dependency, and verification records |
 | 113 | projection authority and migration boundary | Architecture meaning survives regeneration only after upstream mapping; unmapped report meaning blocks generation |
 | 114 | bounded projection repair | presentation-only `PROJECTION_REPAIR` preserves semantic meaning and does not become a regeneration or authority path |
+| 115 | finite capability package schema | package membership uses explicit finite required/optional/conditional member objects and is not inferred from selectors or paths |
+| 116 | deterministic capability selectors | every capability selector has bounded authority, predicate, revision, and stable-order contracts |
 
 ## Observed RED baselines
 

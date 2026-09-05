@@ -2,7 +2,7 @@
 
 ## Scope and execution boundary
 
-This record freezes the Stage B pressure contracts for `PS-100..PS-114`.
+This record freezes the Stage B pressure contracts for `PS-100..PS-116`.
 The range is monotonic: the highest pressure ID found before these edits was
 `99`. These are static/contract scenarios, not runtime executions. The
 repository has no executable Stage B coordinator, so no scenario below claims
@@ -491,3 +491,358 @@ static-only. Violations: none. Verdict:
 No runtime result is recorded. The repository still has no executable Stage B
 coordinator or projection runtime, so `PS-115` and `PS-116` are static contract
 results only.
+
+## Task 13 auditable Stage B candidate validation
+
+The following is the final candidate validation record for this worktree. It is
+bound to the committed candidate head before the Task 13 documentation commit:
+
+```text
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local isolated worktree; fresh read-only repository inspection
+runtime_validation: UNAVAILABLE
+reason: repository is Markdown Skill/reference based with no executable coordinator/runtime
+candidate_result: STATIC_CONTRACT_PASS for PS-100..PS-116
+```
+
+`STATIC_CONTRACT_PASS` records that the candidate contract and its authority
+boundaries satisfy the pressure criterion. It does not assert coordinator
+execution.
+Every scenario below uses the same bounded static run and records the inspected
+authority, probe, expected behavior, observed contract behavior, violations,
+and verdict explicitly.
+
+### PS-100
+
+```text
+scenario_id: PS-100
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: SKILL.md; references/session-orchestration.md; references/projection-lifecycle.md; references/projection-impact.md
+check/probe: inspect explicit projection classification and every exclusion for COORDINATOR_WORKFLOW_AUTHORITY at working/INDEX.md
+expected_behavior: semantic authorities and working/INDEX.md remain outside PRJ lifecycle, fingerprint/drift, freshness, regeneration, retirement, and RG execution; operational views use working/projections/
+observed_behavior: explicit classification is present; working/INDEX.md exclusions are enumerated and registry/impact/session views use distinct working/projections/ paths
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS100_GREEN_EXPLICIT_PROJECTION_CLASSIFICATION
+```
+
+### PS-101
+
+```text
+scenario_id: PS-101
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-impact.md; references/session-orchestration.md; references/revalidation-and-freshness.md
+check/probe: trace an accepted exact semantic revision change through impact accounting and regeneration routing
+expected_behavior: affected projection is persisted as STALE with a reason; impact accounting is separate from explicit regeneration and projection content cannot mutate authority
+observed_behavior: exact dependency revision changes map to STALE plus a reason and regeneration action; the handoff records PROJECTION_IMPACT_ACCOUNTED without implicit regeneration
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS101_GREEN_SEMANTIC_CHANGE_STALE_ONLY
+```
+
+### PS-102
+
+```text
+scenario_id: PS-102
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-dependencies.md; references/projection-impact.md; references/technical-documentation.md; capabilities/test-review/references/test-engineering-contract.md
+check/probe: compare selector contract and resolved membership for both addition and removal, including retained-member revision change
+expected_behavior: every dependent projection becomes STALE for selector membership add/remove or member revision change; selectors are not open-ended or path-derived
+observed_behavior: SELECTOR_MEMBERSHIP_CHANGED and SELECTOR_MEMBER_REVISION_CHANGED are explicit impact reasons, with dependent projections routed to STALE/REGENERATE
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS102_GREEN_SELECTOR_MEMBERSHIP_IMPACT
+```
+
+### PS-103
+
+```text
+scenario_id: PS-103
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-dependencies.md; references/projection-regeneration.md; references/projection-impact.md
+check/probe: inspect declared edge meaning, owner of direct dependency metadata, derived reverse graph, and the PRJ-C -> PRJ-B -> PRJ-A execution example
+expected_behavior: the arrow means CONSUMER -> PREREQUISITE; direct metadata remains consumer-owned; execution order is PRJ-A, PRJ-B, PRJ-C
+observed_behavior: the canonical edge direction and topological execution order are explicit; generated reverse indexes are traversal aids, not authority
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS103_GREEN_PROJECTION_EDGE_DIRECTION
+```
+
+### PS-104
+
+```text
+scenario_id: PS-104
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-impact.md; references/projection-verification.md; references/projection-lifecycle.md
+check/probe: trace upstream STALE propagation followed by verified identical-output NO_CHANGE and downstream reconciliation predicates
+expected_behavior: downstream becomes uncertain on upstream STALE; verified NO_CHANGE retains the existing revision and may reconcile downstream only when all inputs still match
+observed_behavior: UPSTREAM_PROJECTION_STALE propagation, NO_CHANGE retention, and exact downstream reconciliation checks are explicit; independent stale/blocked reasons are not cleared
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS104_GREEN_UPSTREAM_FRESHNESS_RECONCILIATION
+```
+
+### PS-105
+
+```text
+scenario_id: PS-105
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-dependencies.md; references/projection-impact.md; references/projection-verification.md
+check/probe: trace a verified upstream revision publication into the reverse dependency graph before downstream regeneration
+expected_behavior: a changed verified upstream revision marks the dependent STALE with UPSTREAM_PROJECTION_REVISION_CHANGED; downstream revision is unchanged until its own verification
+observed_behavior: only successfully published changed revisions trigger reverse impact; failed candidates and NO_CHANGE do not create the revision-change reason
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS105_GREEN_UPSTREAM_REVISION_IMPACT
+```
+
+### PS-106
+
+```text
+scenario_id: PS-106
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-dependencies.md; references/projection-regeneration.md; references/session-orchestration.md
+check/probe: inspect TARGETED(PRJ-C) closure and the frozen ALL_STALE planning snapshot for mixed freshness and concurrent changes
+expected_behavior: TARGETED includes only the requested target and required stale upstream prerequisites in topological order; ALL_STALE freezes stale-at-plan membership
+observed_behavior: target closure excludes downstream impact and already-current prerequisites; ALL_STALE is a frozen plan and does not loop to global cleanliness
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS106_GREEN_REGENERATION_SCOPE
+```
+
+### PS-107
+
+```text
+scenario_id: PS-107
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-regeneration.md; references/projection-verification.md; references/session-orchestration.md
+check/probe: inspect independent branch failure state, session partial-progress reporting, and candidate publication boundaries
+expected_behavior: successful independent branches progress; failed branches remain STALE/BLOCKED; the session cannot claim global completion or propagate a failed candidate
+observed_behavior: branch-local failure and partial completion are explicit; candidate failures publish no revision and independent work is not cancelled by contract
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS107_GREEN_PARTIAL_REGENERATION
+```
+
+### PS-108
+
+```text
+scenario_id: PS-108
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-lifecycle.md; references/projection-impact.md; references/projection-verification.md
+check/probe: compare current generated content with its last verified fingerprint and inspect the manual-drift route
+expected_behavior: content divergence records PROJECTION_CONTENT_DIVERGED, marks STALE, and requires regeneration; manual prose is disposable and never semantic authority
+observed_behavior: fingerprint divergence has an explicit STALE/REGENERATE route; no .bak/.old preservation or authority extraction path is defined
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS108_GREEN_MANUAL_DRIFT_DISPOSABLE
+```
+
+### PS-109
+
+```text
+scenario_id: PS-109
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-verification.md; references/projection-impact.md; references/session-orchestration.md; SKILL.md
+check/probe: inspect missing, stale, conflicting, or unresolved semantic-authority prerequisites at regeneration time
+expected_behavior: regeneration is BLOCKED and routes to SEMANTIC_REVALIDATION/owning gate; Projection Layer neither invents authority nor resolves conflict from prose
+observed_behavior: required authority blockers produce BLOCKED with SEMANTIC_REVALIDATION, while disputed classification/contract routes to CONTRACT_ADJUDICATION
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS109_GREEN_AUTHORITY_BLOCKING
+```
+
+### PS-110
+
+```text
+scenario_id: PS-110
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-verification.md; references/projection-lifecycle.md
+check/probe: inspect candidate, REGENERATED, V1, V2, V3, V4, revision publication, and CURRENT transitions
+expected_behavior: V1 STRUCTURAL, V2 DEPENDENCY / PROVENANCE, V3 CONTRACT COMPLETENESS, and V4 AUTHORITY CONSISTENCY all pass before CURRENT; verifier does not adjudicate authority
+observed_behavior: the four ordered verification gates precede publication; REGENERATED alone cannot become CURRENT, and failed candidates publish no revision
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS110_GREEN_V1_V4_CURRENT_GATE
+```
+
+### PS-111
+
+```text
+scenario_id: PS-111
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-gates-and-packages.md; references/session-orchestration.md; references/projection-impact.md
+check/probe: inspect PERMISSIVE, REQUIRED_SCOPE_CURRENT, and ALL_SCOPED_CURRENT package policies with unrelated stale members
+expected_behavior: only the named required scope and mandatory prerequisites block a scoped gate; unrelated stale/blocked state remains visible and non-blocking
+observed_behavior: finite package membership snapshots and scoped gate results are explicit; no global zero-stale predicate is permitted
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS111_GREEN_GATE_SCOPED_FRESHNESS
+```
+
+### PS-112
+
+```text
+scenario_id: PS-112
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/projection-lifecycle.md; references/projection-verification.md; references/session-orchestration.md; references/report-contract.md
+check/probe: trace legacy artifact registration through owner, PRJ identity, contract, dependency/selector resolution, accepted authority, fingerprint, and V1–V4
+expected_behavior: readable/path/age/history/prior acceptance cannot establish CURRENT; unmapped meaning blocks migration and missing authority routes to semantic revalidation
+observed_behavior: the conservative registration chain and both blocking routes are explicit; no silent promotion of human prose or legacy content is allowed
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS112_GREEN_LEGACY_PROJECTION_REGISTRATION
+```
+
+### PS-113
+
+```text
+scenario_id: PS-113
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/report-contract.md; references/projection-verification.md; references/projection-lifecycle.md; references/session-orchestration.md; SKILL.md
+check/probe: trace RF/SER/target/roadmap/As-Built meaning from Architecture-owned authority and STM into a generated final-report projection
+expected_behavior: mapped accepted authorities survive regeneration unchanged; unmapped report meaning blocks with PROJECTION_MIGRATION_BLOCKED_UNMAPPED_AUTHORITY; working/INDEX.md stays coordinator authority
+observed_behavior: the authority inventory, STM-backed factual boundary, V4 comparison, and unmapped-meaning block are explicit
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS113_GREEN_ARCHITECTURE_PROJECTION_AUTHORITY
+```
+
+### PS-114
+
+```text
+scenario_id: PS-114
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: SKILL.md; references/session-orchestration.md; references/revalidation-and-freshness.md; references/projection-lifecycle.md
+check/probe: inspect presentation-only repair, PROJECTION_REVALIDATION, semantic-drift escalation, and dependency-change routing
+expected_behavior: unchanged accepted semantics use bounded PROJECTION_REPAIR/PROJECTION_REVALIDATION without reopening technical gates; drift requires TECHNICAL_REVALIDATION_REQUIRED and regeneration where applicable
+observed_behavior: the repair boundary preserves meaning, forbids persistent manual sections, and distinguishes presentation repair from source/baseline change
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS114_GREEN_PROJECTION_REPAIR_BOUNDARY
+```
+
+### PS-115
+
+```text
+scenario_id: PS-115
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/technical-documentation.md; capabilities/test-review/references/test-engineering-contract.md; references/projection-gates-and-packages.md
+check/probe: inspect every capability package for package_id, owner, gate, freshness_policy, finite required/optional/conditional member objects, purposes, and mandatory prerequisites
+expected_behavior: package membership is explicit and finite; selectors, paths, titles, and file presence cannot calculate membership
+observed_behavior: Technical Documentation declares ten registered projections with bounded section conditions; Test Review declares nine registered projections with explicit optional and conditional schema; both packages use finite membership
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS115_GREEN_CAPABILITY_PACKAGE_SCHEMA
+```
+
+### PS-116
+
+```text
+scenario_id: PS-116
+run_id: stage-b-static-20260905-01
+candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+validation_type: STATIC_CONTRACT
+execution_context: local read-only contract inspection; coordinator/runtime unavailable
+authoritative_files_inspected: references/technical-documentation.md; capabilities/test-review/references/test-engineering-contract.md; references/projection-dependencies.md
+check/probe: inspect every SEL-TECH-DOC-* and SEL-TEST-REVIEW-* catalog entry for authoritative record type, revision, closed dimensions/operators, finite predicate, and stable ordering
+expected_behavior: selector resolution is deterministic over accepted authoritative records; Test Engineering STM slices remain exact dependencies rather than prose-derived selectors
+observed_behavior: all ten Technical Documentation selectors and eleven Test Review selector rows have bounded schema, definition_revision 1, finite predicates, and semantic_id ASC, revision ASC ordering
+violations: none in static contract
+verdict: STATIC_CONTRACT_PASS — PS116_GREEN_CAPABILITY_SELECTOR_DETERMINISM
+```
+
+## Named Stage A regression groups
+
+These regressions were checked as static contract preservation against the
+candidate head. The ranges below are the exact accepted pressure ranges present
+in this repository at execution time; overlapping ranges are intentional because
+the same boundary is consumed by more than one Stage B path.
+
+| group | exact pressure IDs/ranges | authoritative files inspected | check/probe | observed result | validation_type |
+|---|---|---|---|---|---|
+| Context/freshness | PS-39..43; PS-54..56; PS-65..77; PS-78..80 | `references/session-orchestration.md`; `references/revalidation-and-freshness.md`; `references/discovery-coverage.md`; `tests/pressure-scenario-56-long-run-authority-integrity.md` | preserve bounded Context Envelope, authority reconciliation, intent routing, freshness, and projection-only repair | all named boundaries remain explicit; no global replay or repair-as-regeneration path found | `STATIC_CONTRACT` |
+| Architecture authority/discovery | PS-33..43; PS-45..56 | `SKILL.md`; `references/discovery-coverage.md`; `references/review-method.md`; `references/root-boundary-adjudication.md`; `references/evidence-and-severity.md` | preserve mechanism coverage, ownership, root boundary, severity ordering, and final editorial separation | authority and discovery contracts remain represented; no finding-count or prose shortcut is introduced | `STATIC_CONTRACT` |
+| Capability integration | PS-57..64 | `references/review-modes-and-orchestration.md`; `references/shared-assurance-principles.md`; `capabilities/test-review/SKILL.md` | preserve capability registry, ownership, dependency-sliced dispatch, and asymmetric scope | capability boundaries remain distinct from umbrella authority and projections | `STATIC_CONTRACT` |
+| Orchestration/projection/language | PS-33..43; PS-65..80 | `SKILL.md`; `references/session-orchestration.md`; `references/revalidation-and-freshness.md`; `references/report-contract.md`; `tests/pressure-scenarios-37-38-mermaid-and-prose-quality.md` | preserve native-plan sync, user-facing language, Mermaid/editorial gates, session intents, and bounded repair | Stage B additions retain the existing intent, language, and final-package boundaries | `STATIC_CONTRACT` |
+| Test Engineering | PS-79; PS-81..89 | `capabilities/test-review/SKILL.md`; `capabilities/test-review/references/test-engineering-contract.md`; `tests/test-engineering-capability-validation.md` | preserve BC/CC/MAT/TM/GAP ownership, minimum dependency slices, output selection, and impact-driven revalidation | Test Review semantic records and exact STM dependencies remain authoritative; projection packages do not absorb them | `STATIC_CONTRACT` |
+| Stage A STM foundation | PS-90..99 | `references/shared-technical-model.md`; `references/technical-model-coverage.md`; `tests/shared-technical-model-foundation-validation.md`; `tests/pressure-scenario-99-legacy-and-cross-capability-reuse.md` | preserve persistent STM bootstrap, coverage/depth mapping, fact ownership, evidence separation, incremental reuse, and legacy compatibility | PS-90..99 contract results remain available and Stage B references STM/semantic authority rather than replacing it | `STATIC_CONTRACT` |
+
+Named regression result: `STATIC_CONTRACT_PASS` for every group above. Runtime
+execution remains unavailable for every group.
+
+## Final static integrity checks
+
+The required Task 13 probes were run against the candidate documentation before
+commit and the committed result was rechecked. Their semantic interpretation is
+recorded here; matching tokens were not treated as proof without reading the
+surrounding contracts.
+
+```text
+git diff --check origin/main..HEAD
+result: PASS (no whitespace errors in the committed candidate range)
+
+rg -n "working/INDEX\.md" SKILL.md references capabilities tests
+result: PASS; all suspicious matches were inspected and preserve the explicit
+COORDINATOR_WORKFLOW_AUTHORITY exclusion; no projection record owns INDEX.md
+
+rg -n "PROJECTION_REPAIR" SKILL.md references capabilities tests
+result: PASS; matches consistently route presentation-only repair through
+PROJECTION_REVALIDATION and escalate semantic drift
+
+rg -n "CONSUMER -> PREREQUISITE|PRJ-C -> PRJ-B -> PRJ-A" references tests
+result: PASS; matches define direct consumer-owned dependency metadata and
+topological prerequisite-first execution
+
+rg -n "projection.*authority|source of truth|authoritative" SKILL.md references capabilities tests
+result: PASS; matches preserve the STM/semantic authority boundary, keep
+projections non-authoritative, and exclude generated views from coordinator truth
+```
+
+No suspicious hit contradicted the authority or lifecycle contracts. No
+`contracts/` file or `SKILL.md` was modified by Task 13.
+
+## Runtime limitation and final disposition
+
+```text
+runtime_validation: UNAVAILABLE
+reason: repository is Markdown Skill/reference based with no executable coordinator/runtime
+```
+
+The static candidate record has no unresolved HIGH-impact contract failure and
+does not claim runtime execution. Runtime pressure validation remains open until
+an executable coordinator/runtime and scenario harness exist.
