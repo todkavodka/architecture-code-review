@@ -56,7 +56,7 @@ Current Foundation
        |
        +--> Stage A Shared Technical Model Foundation [DONE]
        |
-       +--> Stage B Audit Projection & Regeneration [NEXT]
+       +--> Stage B Audit Projection & Regeneration [IMPLEMENTATION CANDIDATE]
        |
        +--> Stage C Test Engineering Execution
        |
