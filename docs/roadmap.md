@@ -119,10 +119,11 @@ remains `UNAVAILABLE` and is an environment limitation, not a runtime pass.
 
 ## Stage B — Audit Projection & Regeneration
 
-**Status: `PLANNED`**
+**Status: `IMPLEMENTATION CANDIDATE — REVIEW PENDING`**
 
-Stage B is the next planned stage and will be handled by a separate
-Discovery/design gate.
+В изолированной feature branch подготовлен кандидат реализации Stage B.
+Независимое implementation review и promotion ещё не выполнены; этот статус
+не означает, что Stage B получил `DONE`.
 
 ### Purpose
 
@@ -133,20 +134,28 @@ semantic records, `PROJECTION_REPAIR` и legacy audit reconciliation.
 Это не reindexing: этап не посвящён vector/RAG indexing. Речь идёт об impact-driven
 regeneration проекций из принятого semantic authority.
 
-### Candidate Discovery scope
+### Implemented candidate scope
 
-Discovery может рассмотреть:
+Кандидат реализации фиксирует следующие возможности высокого уровня:
 
-- projection dependency map;
-- обнаружение stale projections;
-- impact-driven regeneration;
-- full regeneration, когда она структурно необходима;
-- revision-bound projections;
-- cross-document consistency verification;
-- idempotent regeneration;
-- legacy audit reconciliation;
-- preservation policy для human-authored content;
-- `PROJECTION_REPAIR 2.0`.
+- explicit projection identity, lifecycle, freshness, revisions, fingerprints,
+  and bounded `PROJECTION_REPAIR`;
+- dependency and selector contracts with persisted impact analysis and
+  deterministic targeted/all-stale regeneration planning;
+- verified generation, revision publication, downstream invalidation, and
+  gate-scoped projection packages;
+- safe projection contracts for Architecture Review, Technical Documentation,
+  and Test Engineering that preserve upstream semantic authority;
+- protection of coordinator `working/INDEX.md`, distinct operational views,
+  conservative legacy registration, and NEW/EXTEND/REVALIDATE orchestration;
+- auditable static/contract validation for the Stage B pressure scenarios.
+
+Runtime validation координатора остаётся `UNAVAILABLE`, поскольку репозиторий
+основан на Markdown Skill/reference и не содержит исполняемого координатора
+Stage B.
+
+Последовательность и статусы Stage C, Stage D и Stage E сохраняются; этот
+кандидат не авторизует реализацию Stage C.
 
 Целевая схема:
 
