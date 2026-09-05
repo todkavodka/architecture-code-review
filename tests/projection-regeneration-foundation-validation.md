@@ -495,11 +495,12 @@ results only.
 ## Task 13 auditable Stage B candidate validation
 
 The following is the final candidate validation record for this worktree. It is
-bound to the committed candidate head before the Task 13 documentation commit:
+bound to the committed implementation head after Tasks 10–12 remediation and
+before the Task 13 documentation commit:
 
 ```text
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local isolated worktree; fresh read-only repository inspection
 runtime_validation: UNAVAILABLE
@@ -519,7 +520,7 @@ and verdict explicitly.
 ```text
 scenario_id: PS-100
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: SKILL.md; references/session-orchestration.md; references/projection-lifecycle.md; references/projection-impact.md
@@ -535,7 +536,7 @@ verdict: STATIC_CONTRACT_PASS — PS100_GREEN_EXPLICIT_PROJECTION_CLASSIFICATION
 ```text
 scenario_id: PS-101
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-impact.md; references/session-orchestration.md; references/revalidation-and-freshness.md
@@ -551,7 +552,7 @@ verdict: STATIC_CONTRACT_PASS — PS101_GREEN_SEMANTIC_CHANGE_STALE_ONLY
 ```text
 scenario_id: PS-102
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-dependencies.md; references/projection-impact.md; references/technical-documentation.md; capabilities/test-review/references/test-engineering-contract.md
@@ -567,7 +568,7 @@ verdict: STATIC_CONTRACT_PASS — PS102_GREEN_SELECTOR_MEMBERSHIP_IMPACT
 ```text
 scenario_id: PS-103
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-dependencies.md; references/projection-regeneration.md; references/projection-impact.md
@@ -583,7 +584,7 @@ verdict: STATIC_CONTRACT_PASS — PS103_GREEN_PROJECTION_EDGE_DIRECTION
 ```text
 scenario_id: PS-104
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-impact.md; references/projection-verification.md; references/projection-lifecycle.md
@@ -599,7 +600,7 @@ verdict: STATIC_CONTRACT_PASS — PS104_GREEN_UPSTREAM_FRESHNESS_RECONCILIATION
 ```text
 scenario_id: PS-105
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-dependencies.md; references/projection-impact.md; references/projection-verification.md
@@ -615,7 +616,7 @@ verdict: STATIC_CONTRACT_PASS — PS105_GREEN_UPSTREAM_REVISION_IMPACT
 ```text
 scenario_id: PS-106
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-dependencies.md; references/projection-regeneration.md; references/session-orchestration.md
@@ -631,7 +632,7 @@ verdict: STATIC_CONTRACT_PASS — PS106_GREEN_REGENERATION_SCOPE
 ```text
 scenario_id: PS-107
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-regeneration.md; references/projection-verification.md; references/session-orchestration.md
@@ -647,7 +648,7 @@ verdict: STATIC_CONTRACT_PASS — PS107_GREEN_PARTIAL_REGENERATION
 ```text
 scenario_id: PS-108
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-lifecycle.md; references/projection-impact.md; references/projection-verification.md
@@ -663,7 +664,7 @@ verdict: STATIC_CONTRACT_PASS — PS108_GREEN_MANUAL_DRIFT_DISPOSABLE
 ```text
 scenario_id: PS-109
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-verification.md; references/projection-impact.md; references/session-orchestration.md; SKILL.md
@@ -679,7 +680,7 @@ verdict: STATIC_CONTRACT_PASS — PS109_GREEN_AUTHORITY_BLOCKING
 ```text
 scenario_id: PS-110
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-verification.md; references/projection-lifecycle.md
@@ -695,7 +696,7 @@ verdict: STATIC_CONTRACT_PASS — PS110_GREEN_V1_V4_CURRENT_GATE
 ```text
 scenario_id: PS-111
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-gates-and-packages.md; references/session-orchestration.md; references/projection-impact.md
@@ -711,7 +712,7 @@ verdict: STATIC_CONTRACT_PASS — PS111_GREEN_GATE_SCOPED_FRESHNESS
 ```text
 scenario_id: PS-112
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/projection-lifecycle.md; references/projection-verification.md; references/session-orchestration.md; references/report-contract.md
@@ -727,7 +728,7 @@ verdict: STATIC_CONTRACT_PASS — PS112_GREEN_LEGACY_PROJECTION_REGISTRATION
 ```text
 scenario_id: PS-113
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/report-contract.md; references/projection-verification.md; references/projection-lifecycle.md; references/session-orchestration.md; SKILL.md
@@ -743,7 +744,7 @@ verdict: STATIC_CONTRACT_PASS — PS113_GREEN_ARCHITECTURE_PROJECTION_AUTHORITY
 ```text
 scenario_id: PS-114
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: SKILL.md; references/session-orchestration.md; references/revalidation-and-freshness.md; references/projection-lifecycle.md
@@ -759,7 +760,7 @@ verdict: STATIC_CONTRACT_PASS — PS114_GREEN_PROJECTION_REPAIR_BOUNDARY
 ```text
 scenario_id: PS-115
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/technical-documentation.md; capabilities/test-review/references/test-engineering-contract.md; references/projection-gates-and-packages.md
@@ -775,7 +776,7 @@ verdict: STATIC_CONTRACT_PASS — PS115_GREEN_CAPABILITY_PACKAGE_SCHEMA
 ```text
 scenario_id: PS-116
 run_id: stage-b-static-20260905-01
-candidate_head: 8372963e810756d7b5c8e8d1862206485d92ea19
+candidate_head: 2d7c41f586eec2f6637d3f6310013514f4e71b77
 validation_type: STATIC_CONTRACT
 execution_context: local read-only contract inspection; coordinator/runtime unavailable
 authoritative_files_inspected: references/technical-documentation.md; capabilities/test-review/references/test-engineering-contract.md; references/projection-dependencies.md
