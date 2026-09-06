@@ -65,16 +65,16 @@ candidate != semantic authority
 ## Modes and implementation boundary
 
 The approved capability design supports `NEW`, `EXTEND`, `REVALIDATE`, and
-`RESUME`. This entrypoint declares the capability’s participation in those
-modes; detailed coordinator wiring, persistent scope/output restoration,
-coverage orchestration, impact-driven revalidation, and CQRA freshness
-execution are implemented in later approved tasks. This file must not be read
-as claiming that those integrations are complete at this boundary.
+`RESUME`. Shared orchestration, persistent scope/output restoration, coverage
+orchestration, impact-driven revalidation, and CQRA freshness execution are
+defined by the repository contracts referenced by this capability. This
+entrypoint summarizes those integrations without duplicating their detailed
+rules.
 
 ## Outputs and projections
 
 Semantic CQ findings remain authority, not a projection or output toggle.
-Code Quality Findings View/Report is the core future projection; Code Quality
+Code Quality Findings View/Report is the core projection; Code Quality
 Summary is derived; Maintainability Hotspots and Roadmap Contribution are
 optional/derived outputs when selected. Generated outputs must use the shared
 Stage B projection lifecycle; no parallel Code Quality projection lifecycle is

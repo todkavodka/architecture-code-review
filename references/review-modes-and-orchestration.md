@@ -422,9 +422,11 @@ owning Code Quality semantic artifacts. It is not CQ semantic authority.
 
 Code Quality participates in the existing `REVALIDATE` intent, but the
 impact-driven CQ freshness and semantic revalidation contract is implemented by
-the later approved Task 5. This task only preserves the routing/dependency
-boundary. Missing or stale shared evidence/STM blocks only the dependent CQ
-slice and does not rewrite shared facts or invalidate unrelated findings.
+the Code Quality revalidation contract in
+`references/revalidation-and-freshness.md`. This section preserves the
+routing/dependency boundary. Missing or stale shared evidence/STM blocks only
+the dependent CQ slice and does not rewrite shared facts or invalidate
+unrelated findings.
 
 ## 5. Статусы
 
