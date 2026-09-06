@@ -1,210 +1,355 @@
 # Справочник процессов
 
-Это каноническое human-facing описание Session Intent. Другие документы
-объясняют последствия для своей аудитории и ссылаются сюда за полными правилами.
+Это каноническое описание для пользователя намерений сеанса (`Session Intent`)
+и правил выбора сценария. Остальные документы описывают отдельные последствия
+для своей аудитории и ссылаются сюда за полным набором правил. Сохранённое состояние не
+следует считать актуальным только потому, что оно сохранено; и принятая область
+не означает полного охвата всей системы.
 
-Каждый Session Intent описан в одинаковой форме: назначение, условия входа, пользовательские решения, автоматические действия, чтение/запись состояния, gates, stop conditions и postconditions.
+Для каждого намерения сеанса ниже указаны назначение, условия входа,
+решения пользователя, автоматические действия, границы чтения и записи,
+проверочные рубежи, условия остановки и результат. Токены `Session Intent` не
+переводятся: это сохраняемые управляющие значения.
+
+## Выбор сценария
+
+| Состояние | Рекомендуемый сценарий |
+|---|---|
+| Нет предыдущей проверки | `NEW` |
+| `IN_PROGRESS` и та же базовая ревизия | `RESUME` |
+| `IN_PROGRESS` и изменившаяся базовая ревизия | `RESUME` с согласованием состояния |
+| `COMPLETE` на той же зафиксированной базовой ревизии; нужно использовать принятый результат | `USE_EXISTING` |
+| `COMPLETE` на той же зафиксированной базовой ревизии; нужно исправить только итоговые представления | `PROJECTION_REPAIR` |
+| `COMPLETE` и изменившаяся зафиксированная базовая ревизия | `REVALIDATE` |
+| Нужны новая область проверки, модуль или конечный результат | `EXTEND` |
+
+`RESUME_WITH_RECONCILIATION` — рекомендация внутри `RESUME`, а не отдельное
+сохраняемое значение. Во всех случаях, допускающих повторное использование,
+явный `NEW` остаётся доступен для начала новой проверки.
 
 ## `NEW`
 
-**Назначение:** создать новый review package на выбранном baseline.
+**Назначение:** создать новый пакет проверки для выбранной базовой ревизии, а
+не продолжить прежде принятое состояние.
 
-**Entry conditions:** нет пригодного accepted/in-progress package для текущей задачи либо пользователь явно запросил новый audit.
+**Условия входа:** нет пригодного принятого или незавершённого пакета для этой
+задачи либо пользователь явно запросил новую проверку.
 
-**User choices:**
+**Выбор пользователя:**
 
-- baseline, если он неоднозначен;
-- capabilities;
-- Architecture depth/endpoint, если Architecture выбрана;
-- user-facing outputs Test Engineering/Code Quality.
+- базовая ревизия, если она неоднозначна;
+- один или несколько независимых модулей `Review Suite`;
+- глубина и конечный результат `Architecture Review`, если выбран этот модуль;
+- пользовательские итоговые документы `Test Engineering` и `Code Quality Review`.
 
-**Automatic:** repository/profile discovery, persistent STM bootstrap, dependency resolution, capability orchestration, impact accounting.
+Выбор модулей независим: `Architecture Review`, `Test Engineering` и `Code
+Quality Review` не являются родительскими или обязательными друг для друга.
+Нужен как минимум один модуль верхнего уровня. Для `Architecture Review`
+независимо выбираются глубина `STANDARD_FULL` или `FORENSIC` и конечный
+результат `REVIEW_ONLY`, `REVIEW_PLUS_TARGET_ARCHITECTURE` или
+`REVIEW_PLUS_TARGET_AND_ROADMAP`; допустимы все шесть сочетаний. Глубина не
+определяет полноту охвата: `FORENSIC` сам по себе не означает проверку всего
+репозитория.
 
-**Reads:** repository, previous audit discovery metadata, applicable contracts.
+`NEW` не наследует без явного выбора конфигурацию несвязанного принятого
+пакета. Не всякое представление, попадающее в итоговый пакет, выбрано
+пользователем: обязательные вспомогательные проекции и зависимости могут
+выводиться контрактом выбранного модуля. В частности, это не превращает
+обязательные зависимости `Test Engineering` в отдельные флажки выбора.
 
-**Writes:** `working/INDEX.md`, evidence, STM, selected capability semantics, projection/package state.
+**Автоматически:** исследование репозитория и профиля, создание постоянной
+начальной STM, разрешение зависимостей, координация выбранных модулей и учёт
+влияния на проекции.
 
-**Gates:** capability-specific technical gates, Projection Impact Analysis, package policy.
+**Читает:** репозиторий, метаданные обнаруженных прежних проверок и применимые
+контракты.
 
-**Stops:** ambiguous baseline/authority, insufficient evidence, blocked dependency, failed required review gate.
+**Записывает:** `working/INDEX.md`, доказательства, STM, семантические записи
+выбранных модулей и состояние проекций и пакета.
 
-**Postcondition:** accepted semantic state for selected scope; projections may still be `STALE` unless package requires current deliverables.
+**Проверочные рубежи:** технические рубежи выбранных модулей, анализ влияния
+на проекции (`Projection Impact Analysis`) и политика пакета.
 
----
+**Остановка:** неоднозначная базовая ревизия или источник истины, недостаток
+доказательств, заблокированная зависимость либо непрохождение обязательного
+рубежа проверки.
+
+**Результат:** принятое семантическое состояние для выбранной области. Его
+проекции могут оставаться `STALE`, если пакет не требует актуальных итоговых
+документов.
 
 ## `RESUME`
 
-**Назначение:** продолжить незавершённый persisted workflow.
+**Назначение:** продолжить незавершённое сохранённое состояние с устойчивой
+границы процесса.
 
-**Entry conditions:** package имеет unfinished durable boundary.
+**Условия входа:** у пакета есть незавершённая устойчивая граница.
 
-**User choices:** подтвердить package/baseline reconciliation при реальной неоднозначности.
+**Выбор пользователя:** подтвердить согласование пакета и базовой ревизии,
+только если существует действительная неоднозначность.
 
-**Automatic:** validate INDEX against owning artifacts, restore Review Suite read-only, find first non-accepted durable boundary.
+**Автоматически:** сопоставить `INDEX.md` с владеющими артефактами, восстановить
+конфигурацию `Review Suite` только для чтения и найти первую непринятую
+устойчивую границу. Конфигурацию нельзя произвольно выбрать заново.
 
-**Reads:** `INDEX.md`, owning artifacts/revisions, handoffs, relevant dependencies.
+**Читает:** `INDEX.md`, владеющие артефакты и их ревизии, записи передачи
+состояния и нужные зависимости.
 
-**Writes:** continued workflow state and newly completed artifacts.
+**Записывает:** продолженное состояние процесса и новые завершённые артефакты.
 
-**Gates:** freshness/authority reconciliation before substantive continuation.
+**Проверочные рубежи:** до содержательного продолжения нужны проверка
+актуальности и согласование источников истины. Краткая сохранённая сводка —
+это проекция, а не источник истины: при расхождении с владеющим артефактом
+побеждает последний и требуется `AUTHORITY_RECONCILIATION_REQUIRED`.
 
-**Stops:** stale/contradictory compact state, missing owning artifact, changed baseline requiring reconciliation.
+**Остановка:** устаревшее или противоречивое краткое состояние, отсутствие
+владеющего артефакта либо изменившаяся базовая ревизия, требующая согласования.
 
-**Postcondition:** workflow продолжается без повторного выполнения уже accepted unrelated work.
+**Результат:** процесс продолжается без повторного выполнения уже принятой,
+не относящейся к делу работы. `RESUME` не становится ни `NEW`, ни
+автоматическим `REVALIDATE`.
 
-**Нельзя:** использовать `RESUME` как новый capability/output configurator. New scope → `EXTEND`.
-
----
+**Нельзя:** использовать `RESUME` как настройку новых модулей или итоговых
+документов. Новая область направляется в `EXTEND`.
 
 ## `REVALIDATE`
 
-**Назначение:** повторно проверить только semantic state, затронутый изменением accepted baseline или dependencies.
+**Назначение:** повторно проверить только принятое семантическое состояние,
+затронутое изменениями между прежней принятой и текущей базовыми ревизиями или
+их зависимостями. Это не повторный аудит целиком и не проверка одних лишь
+непосредственно изменённых файлов.
 
-**Entry conditions:** существует accepted package и новый current baseline/change context.
+**Условия входа:** есть принятый пакет и новая текущая базовая ревизия либо
+контекст изменений.
 
-**User choices:** подтвердить baseline/change context; принять решение при genuinely ambiguous authority; решить, принимать ли `FULL_REAUDIT_RECOMMENDED` при `SYSTEMIC` impact.
+**Выбор пользователя:** подтвердить базовую ревизию и контекст изменений;
+принять решение при действительно неоднозначном источнике истины; при
+системном влиянии решить, принимать ли рекомендацию `FULL_REAUDIT_RECOMMENDED`.
 
-**Read-only context:** previous Review Suite configuration.
+**Восстановленный контекст только для чтения:** прежняя конфигурация `Review
+Suite`, включая состояние модулей и выбранные итоговые документы. Сценарий не
+включает и не выключает модули, не меняет глубину или конечный результат
+`Architecture Review` и не добавляет новые результаты.
 
-**Automatic:**
+**Автоматически:**
 
 ```text
-CHANGE_INVENTORY
-IMPACT_ANALYSIS
-IMPACT_CLASSIFICATION
-MINIMUM_DEPENDENCY_SLICE
-TARGETED_FRESH_EVIDENCE
-REVALIDATION / ADJUDICATION
-DELTA_RECONCILIATION
-Projection Impact Analysis
+BASELINE_BINDING
+→ CHANGE_INVENTORY
+→ IMPACT_ANALYSIS
+→ IMPACT_CLASSIFICATION
+→ MINIMUM_DEPENDENCY_SLICE
+→ TARGETED_FRESH_EVIDENCE
+→ REVALIDATION / ADJUDICATION
+→ DELTA_RECONCILIATION
+→ анализ влияния на проекции (`Projection Impact Analysis`)
 ```
 
-**Reads:** previous accepted authority, dependency metadata/indexes, current changed sources.
+Изменения сопоставляются с принятым прежним состоянием, затем анализ влияния
+определяет минимальную затронутую область и зависимости. Повторно проверяются
+только допустимые затронутые семантические срезы; незатронутое принятое
+состояние сохраняется, когда это подтверждают зависимости и доказательства.
 
-**Writes:** revalidated/superseded semantic records, impact state, projection freshness accounting.
+**Классы влияния:** `LOCAL`, `BOUNDARY`, `SYSTEMIC` — это метки координации, а
+не серьёзность вывода. `LOCAL` означает отсутствие доказанного существенного
+затрагивания границы, контракта или общего факта. `BOUNDARY` означает, что
+затронута существенная граница API, доверия, хранения, владения, жизненного
+цикла, конкурентного выполнения или контракта; проверяются эта граница и её
+существенные зависимости. `SYSTEMIC` означает, что нельзя надёжно ограничить
+проверку меньшим срезом; он выдаёт `FULL_REAUDIT_RECOMMENDED`, но не запускает
+полный повторный аудит автоматически.
 
-**Impact classes:** `LOCAL | BOUNDARY | SYSTEMIC`.
+**Читает:** прежние принятые источники истины, метаданные и индексы зависимостей,
+а также текущие изменённые исходные данные.
 
-**Stops:** unknown linkage requiring targeted investigation; disputed required fact; systemic impact without user decision; technical accounting failure blocks projection-sensitive gate.
+**Записывает:** повторно проверенные или замещённые семантические записи,
+состояние влияния и учёт актуальности проекций.
 
-**Postcondition:** affected state reconciled; unaffected accepted state preserved where dependency evidence supports preservation.
+**Остановка:** неизвестная связь, требующая адресного исследования; спорный
+обязательный факт; системное влияние без решения пользователя; техническая
+неудача учёта влияния блокирует зависящий от проекций рубеж. При необходимости
+новой области, модуля или результата маршрут ведёт в `EXTEND`.
 
-**Нельзя:** добавлять capabilities/outputs как часть ordinary `REVALIDATE`. New work → `EXTEND`.
-
----
+**Результат:** затронутое состояние согласовано, а незатронутое принятое
+состояние сохранено в допустимых границах.
 
 ## `EXTEND`
 
-**Назначение:** добавить capability, output или Architecture endpoint к accepted package без повторного выполнения unrelated accepted work.
+**Назначение:** добавить к принятому пакету модуль, итоговый документ или
+конечный результат `Architecture Review`, не повторяя несвязанную принятую
+работу.
 
-**Entry conditions:** accepted reusable package exists.
+**Условия входа:** существует пригодный для повторного использования принятый
+пакет.
 
-**User choices:** only available additions.
-
-**Presentation:**
+**Выбор пользователя:** только доступные добавления. Уже принятое показывается
+для контекста только для чтения, а пользователь выбирает лишь ещё не выбранные
+допустимые добавления.
 
 ```text
-Existing / preserved [READ-ONLY]
-Available additions [USER SELECTABLE]
+Сохранённое и принятое [ТОЛЬКО ЧТЕНИЕ]
+Доступные добавления [ВЫБИРАЕТ ПОЛЬЗОВАТЕЛЬ]
 ```
 
-**Automatic:** required dependency closure, targeted backfill/revalidation, impact accounting.
+**Автоматически:** закрытие обязательных зависимостей, адресное дополнение или
+повторная проверка и учёт влияния на проекции.
 
-**Reads:** accepted capability registry, owning artifacts, freshness/dependency state.
+**Читает:** реестр принятых модулей, владеющие артефакты, состояние актуальности
+и зависимостей.
 
-**Writes:** union of previous selection + explicit additions + structural prerequisites.
+**Записывает:** объединение прежнего выбора, явно добавленных пунктов и
+структурно обязательных предпосылок. Оно монотонно: принятые выборы нельзя
+молча убрать или перенастроить.
 
-**Architecture rules:**
+**Правила `Architecture Review`:** если модуль отсутствовал, его можно добавить
+и выбрать глубину и конечный результат как в `NEW`. Если он уже принят,
+глубина остаётся только для чтения; менять `FORENSIC` на `STANDARD_FULL` или
+иначе пересматривать глубину нельзя. Расширять можно только конечный результат
+в разрешённом направлении:
 
-- absent capability → may add and select depth/endpoint;
-- existing depth remains read-only;
-- endpoint extension is monotonic:
-  `REVIEW_ONLY -> TARGET -> TARGET+ROADMAP`.
+```text
+REVIEW_ONLY → REVIEW_PLUS_TARGET_ARCHITECTURE
+REVIEW_ONLY → REVIEW_PLUS_TARGET_AND_ROADMAP
+REVIEW_PLUS_TARGET_ARCHITECTURE → REVIEW_PLUS_TARGET_AND_ROADMAP
+```
 
-**Stops:** requested addition requires changing accepted semantics rather than additive work; prerequisite unavailable/blocked.
+Из `REVIEW_PLUS_TARGET_AND_ROADMAP` добавлений конечного результата нет.
 
-**Postcondition:** accepted package extended without deleting prior accepted selections.
+**Остановка:** запрошенное дополнение требует изменить, а не дополнить
+принятую семантику, либо обязательная предпосылка недоступна или `BLOCKED`.
 
----
+**Результат:** пакет расширен без удаления прежних принятых выборов. Это не
+`NEW` и не способ пересмотреть существующую область через `REVALIDATE`.
 
 ## `USE_EXISTING`
 
-**Назначение:** consume existing accepted result без новой technical work.
+**Назначение:** использовать существующий принятый результат без новой
+технической работы.
 
-**Entry conditions:** accepted reusable package exists; baseline/authority/projection requirements suitable for requested consumption.
+**Условия входа:** есть пригодный принятый пакет, а его базовая ревизия,
+источники истины, проекции и требования к их актуальности допускают требуемое
+использование.
 
-**User choices:** package/deliverable if several valid choices exist.
+**Выбор пользователя:** пакет или итоговый документ, если допустимо несколько
+вариантов.
 
-**Automatic:** validate package, authority bindings, projection registration/freshness and gate policy.
+**Автоматически:** проверка пакета, привязок к источникам истины, регистрации
+и актуальности проекций и политики проверочного рубежа.
 
-**Reads:** accepted package and projection lifecycle metadata.
+**Читает:** принятый пакет и метаданные жизненного цикла проекций.
 
-**Writes:** только metadata reconciliation, если contract это допускает; substantive semantic work не создаётся.
+**Записывает:** только согласование метаданных, если это разрешает контракт;
+новая содержательная семантическая работа не создаётся.
 
-**Stops:** requested deliverable stale/blocked under required policy; source change requires `REVALIDATE`; requested new output requires `EXTEND`.
+**Остановка:** запрошенный результат `STALE` или `BLOCKED` при требуемой
+политике, изменение исходного состояния требует `REVALIDATE`, а новый итоговый
+документ требует `EXTEND`.
 
-**Postcondition:** existing accepted deliverable consumed.
-
----
+**Результат:** используется существующий принятый итоговый документ. Это не
+продолжение незавершённого процесса `RESUME`.
 
 ## `PROJECTION_REPAIR`
 
-**Назначение:** исправить представление accepted meaning без изменения semantic authority.
+**Назначение:** исправить зарегистрированную проекцию принятого смысла, не
+изменяя семантический источник истины.
 
-**Entry conditions:** accepted revision-bound package; нет unresolved source change requiring `REVALIDATE`; requested change presentation-only.
+**Условия входа:** есть принятый пакет, привязанный к ревизии; нет
+неразрешённого изменения исходного состояния, требующего `REVALIDATE`; а
+запрошенное исправление относится только к представлению.
 
-**User choices:** eligible registered `PRJ-*` projection, document/section/presentation issue.
+**Выбор пользователя:** допустимая зарегистрированная проекция `PRJ-*`, а
+также документ, раздел или проблема представления. Выбор происходит из
+регистрации выбранного пакета, а не из произвольных Markdown-файлов.
 
-**Automatic:** authority binding, presentation validation, `PROJECTION_REVALIDATION`.
+**Автоматически:** проверка привязки к источнику истины, проверка представления
+и `PROJECTION_REVALIDATION`.
 
-**Reads:** selected projection record, current accepted authority refs.
+**Читает:** запись выбранной проекции и ссылки на текущие принятые источники
+истины.
 
-**Writes:** corrected projection + projection verification/lifecycle state.
+**Записывает:** исправленную проекцию, а также состояние её проверки и
+жизненного цикла.
 
-**Allowed changes:** language, Markdown, Mermaid syntax/layout, links, navigation, tables, terminology, cross-references, representation of accepted meaning.
+**Допустимые изменения:** язык, Markdown, синтаксис или компоновка Mermaid,
+ссылки, навигация, таблицы, терминология, перекрёстные ссылки и точное
+представление уже принятого смысла.
 
-**Stops:** semantic drift.
-
-Return:
+**Остановка и эскалация:** исправление не может менять доказательства,
+идентичность или границу корня, серьёзность, владельца, инвариант жизненного
+цикла или целевого состояния, статус замысла продукта, механизм цели,
+предпосылку, зависимость или рубеж дорожной карты, допущение безопасности либо
+семантику безопасной активации. При семантическом расхождении или недопустимом
+источнике истины остановите этот сценарий и верните его на семантическую
+повторную проверку:
 
 ```text
 SEMANTIC_DRIFT_DETECTED
 TECHNICAL_REVALIDATION_REQUIRED
 ```
 
-**Postcondition:** repaired projection; technical semantics and technical gates unchanged.
+Если отсутствует, устарел, конфликтует или не разрешён необходимый источник
+истины, направьте работу в `SEMANTIC_REVALIDATION`; если неясны контракт или
+классификация проекции — в `CONTRACT_ADJUDICATION`. Ни один из этих маршрутов
+не позволяет считать проекцию `CURRENT`.
 
----
+**Результат:** исправлена только проекция; техническая семантика, технические
+рубежи и базовая ревизия не меняются. Проекция никогда не становится источником
+истины лишь потому, что она сгенерирована или отредактирована.
 
-## `RG-*` regeneration
+## Учёт влияния и пересборка проекций
 
-`RG-*` не является Session Intent.
+После стабилизации семантических изменений в `NEW`, `EXTEND` или `REVALIDATE`
+однократно выполняется анализ влияния на проекции (`Projection Impact
+Analysis`). Он фиксирует прямое
+влияние и распространение по обратному графу, определяет состояние
+`CURRENT`, `STALE` или `BLOCKED` и сохраняет `PROJECTION_IMPACT_ACCOUNTED`.
+Это учёт последствий, а не пересборка документов и не подтверждение, что все
+проекции стали `CURRENT`.
 
-**Назначение:** пересобрать requested stale projection/package from accepted authority.
+Действия по результатам учёта различаются:
 
-**Entry:** explicit fresh-output request.
+| Действие | Операционное следствие |
+|---|---|
+| `NONE` | Влияния на проекцию не обнаружено. |
+| `REGENERATE` | Нужна явная пересборка соответствующей проекции. |
+| `PROJECTION_REPAIR` | Допустимо ограниченное исправление представления при сохранной семантике. |
+| `SEMANTIC_REVALIDATION` | Требуется повторная проверка владеющей семантики. |
+| `CONTRACT_ADJUDICATION` | Требуется решение по контракту или классификации проекции. |
 
-**Automatic:** resolve stale prerequisites, freeze execution scope, generate, verify, fingerprint/revision decision.
+Пересборка — отдельная, явно запрошенная работа `RG-*`; это не намерение сеанса.
+Она запускается только при явном запросе актуального результата или пакета,
+разрешает нужные устаревшие предпосылки, фиксирует область выполнения,
+генерирует результат и проверяет его. `REVALIDATE` и анализ влияния не
+переписывают автоматически все устаревшие проекции.
 
-**Stops:** missing/blocked semantic prerequisite, projection contract failure, failed verification.
+После учёта применяют политику пакета. При `PERMISSIVE` семантическое закрытие
+возможно после успешного учёта, хотя отложенные устаревшие проекции остаются
+видимыми. При `REQUIRED_SCOPE_CURRENT` запрошенная проекция и обязательные
+предпосылки должны быть `CURRENT`. При `ALL_SCOPED_CURRENT` должны быть
+`CURRENT` все разрешённые обязательные члены пакета. Если необходимая область
+неактуальна, закрытие блокируется до явно запрошенной пересборки или иного
+действия владельца; сам рубеж её не запускает.
 
-**Postcondition:** requested projection becomes `CURRENT` only after required verification.
-
----
-
-## Общие routing invariants
+## Общие инварианты маршрутизации
 
 ```text
 RESUME != NEW
 REVALIDATE != NEW
-REVALIDATE != regeneration
-PROJECTION_REPAIR != semantic remediation
-EXTEND preserves accepted selection
-USE_EXISTING creates no new scope
+REVALIDATE != пересборка RG-*
+PROJECTION_REPAIR != семантическое исправление
+EXTEND сохраняет принятый выбор
+USE_EXISTING не создаёт новую область
 ```
+
+Проекции и краткие записи передачи состояния помогают выбрать маршрут, но не
+заменяют владеющий семантический артефакт. При их расхождении нельзя молча
+перезаписывать смысл: требуется согласование, и до него последующая работа по
+устаревшей семантике запрещена. Модули `Test Engineering` и `Code Quality
+Review` также не создают частную реконструкцию фактов: при недостающих фактах
+они используют общий процесс доказательств и STM.
 
 ## См. также
 
-- [Reuse and Change Guide](../guides/reuse-and-change.md)
-- [Lifecycle and Freshness](../concepts/lifecycle-and-freshness.md)
-- [Troubleshooting](../operations/troubleshooting.md)
+- [Руководство по повторному использованию и изменениям](../guides/reuse-and-change.md)
+- [Жизненный цикл и актуальность](../concepts/lifecycle-and-freshness.md)
+- [Устранение неполадок](../operations/troubleshooting.md)
