@@ -1,480 +1,52 @@
 # Architecture Code Review
 
-`architecture-code-review` — evidence-first Skill для глубокого анализа существующих программных систем.
+`architecture-code-review` — evidence-first Skill для глубокого review существующих программных систем.
 
 Он объединяет три независимые capability:
 
-- **Architecture Review** — как система действительно устроена, кто чем владеет, где находятся архитектурные риски и корневые проблемы;
-- **Test Engineering** — какие существенные поведения действительно доказаны тестами, где есть пробелы и какие тестовые артефакты нужны;
-- **Code Quality Review** — какие реализационные механизмы создают существенные последствия для сопровождаемости, надёжности, тестируемости, жизненного цикла, ресурсов, конкурентности, зависимостей и локализации.
+- **Architecture Review** — фактическая архитектура, ownership, lifecycle, boundaries, root causes, reliability/security implications;
+- **Test Engineering** — какие существенные поведения действительно доказаны тестами, где есть gaps и какие test artifacts нужны;
+- **Code Quality Review** — реализационные механизмы с существенными последствиями для maintainability, reliability, testability, lifecycle, resources, concurrency, dependencies и localization.
 
-Capability можно выбирать независимо в рамках одного Review Suite. Результаты опираются на общий evidence layer и Shared Technical Model, но **не смешивают semantic authority** разных областей.
+Capability можно использовать отдельно или вместе в одном Review Suite.
 
-Главный принцип Skill:
+Главный принцип:
 
 > **Ширина утверждения не должна превышать ширину доказательств.**
 
-Если проверен один обработчик, это не доказывает корректность всей модели авторизации.  
-Если обычный сценарий работает, это ещё не подтверждает корректность retries, recovery, concurrency или shutdown.  
-Если доказательств недостаточно, Skill обязан оставить результат ограниченным, частичным или unresolved, а не превращать предположение в факт.
-
 ---
 
-## Что умеет Skill
+## Что делает Skill
 
-### Architecture Review
-
-Architecture Review восстанавливает фактическую архитектуру системы и проверяет:
-
-- компоненты и процессы;
-- владение состоянием и ресурсами;
-- жизненный цикл;
-- конкурентное выполнение;
-- retries, cancellation и recovery;
-- доверительные и security-границы;
-- контракты между компонентами;
-- надёжность и отказоустойчивость;
-- сопровождаемость;
-- тестируемость;
-- архитектурные root causes.
-
-При необходимости Architecture Review может дополнительно сформировать:
-
-- **Target Architecture**;
-- **Remediation Roadmap**.
-
-Архитектурные findings имеют собственную authority (`RF-*`) и не являются взаимозаменяемыми с Test Engineering или Code Quality findings.
-
----
-
-### Test Engineering
-
-Test Engineering отвечает не на вопрос «тесты зелёные или нет», а на более строгий:
-
-> **Какие существенные поведения системы действительно подтверждены исполняемыми тестами, какие подтверждены частично, какие не доказаны и где тесты могут создавать ложное чувство уверенности?**
-
-Пользователь может выбирать результаты независимо:
+Вместо lint-style списка подозрений Skill строит проверяемую цепочку:
 
 ```text
-Test Engineering: OFF
-
-или:
-
-[x] Test Assurance
-[ ] Test Plan
-[ ] Contract Consistency Report
-[ ] Test Environment Design
-[ ] Service Simulator Design
-[ ] Service Simulator Implementation Plan
-[ ] E2E Test Plan
-```
-
-`Test Assurance` — базовое ядро Test Engineering.
-
-Legacy-значения `REVIEW_ONLY` и `REVIEW_PLUS_TEST_PLAN` относятся только к совместимости со старым persisted Test Review state. Они не являются современными пунктами меню `NEW` или `EXTEND`.
-
-Внутренние зависимости подключаются только когда они действительно нужны. Например:
-
-- `Behavior Model` не является пользовательским переключателем;
-- применимый `Contract Verification` выполняется автоматически, если существует существенный формализованный контракт;
-- `Service Simulator Design` не включается автоматически только потому, что выбран E2E;
-- необязательные пользовательские документы не создаются без необходимости или явного выбора.
-
-Entrypoint:
-
-[`capabilities/test-review/SKILL.md`](capabilities/test-review/SKILL.md)
-
----
-
-### Code Quality Review
-
-Code Quality Review — отдельная capability, а не подраздел Architecture Review.
-
-Она ищет не «плохой стиль вообще», а **реализационные механизмы с доказуемым существенным последствием**.
-
-Типичные области:
-
-- дублирование и чрезмерная сложность;
-- неправильные lifecycle/resource patterns;
-- concurrency hazards;
-- fragile error handling;
-- плохие dependency boundaries;
-- локализация и hardcoded user-facing values;
-- framework-specific anti-patterns;
-- testability problems;
-- maintainability hotspots;
-- реализационные дефекты, которые ещё не являются архитектурным root cause.
-
-Code Quality Review владеет:
-
-- `CQ-*` — принятыми Code Quality findings;
-- `CQRA-*` — Code Quality remediation actions;
-- ограниченным состоянием coverage/freshness самой capability.
-
-При этом:
-
-```text
-tool warning != CQ finding
-metric != CQ finding
-smell != CQ finding
-candidate != semantic authority
-CQRA COMPLETED != CQ RESOLVED
-```
-
-Принятый `CQ-*` требует evidence-backed интерпретации и material consequence.
-
-Code Quality Review использует language-neutral core. Языковые и framework-specific addenda могут уточнять анализ, но не становятся отдельной semantic authority.
-
-Entrypoint:
-
-[`capabilities/code-quality-review/SKILL.md`](capabilities/code-quality-review/SKILL.md)
-
----
-
-## Review Suite
-
-Architecture Review, Test Engineering и Code Quality Review могут использоваться:
-
-- отдельно;
-- вместе в одном запуске;
-- добавляться позже через `EXTEND`;
-- продолжаться через `RESUME`;
-- точечно перепроверяться через `REVALIDATE`.
-
-Capability selection и output selection — разные вещи.
-
-При `NEW` пользователь сначала выбирает верхнеуровневые capability:
-
-```text
-Review Suite
-├── [ ] Architecture Review
-├── [ ] Test Engineering
-└── [ ] Code Quality Review
-```
-
-Действует инвариант `AT_LEAST_ONE_TOP_LEVEL_CAPABILITY_SELECTED`: пустой Review Suite недопустим, а все семь непустых комбинаций разрешены. Если Architecture Review не выбран, его `mode/depth` и `endpoint/result` отсутствуют в persisted state по контракту, а общие STM/evidence-зависимости остаются внутренними и не включают Architecture автоматически.
-
-Например:
-
-```text
-Architecture Review: ON
-Test Engineering: ON
-Code Quality Review: ON
-```
-
-не означает, что Skill автоматически создаст все возможные документы каждой capability.
-
-Выбираются только необходимые пользовательские outputs, а внутренние зависимости подключаются минимально необходимым slice.
-
----
-
-## Как начинается работа
-
-Skill не должен автоматически запускать новый полный аудит.
-
-Сначала определяется:
-
-```text
-repository
-+ revision
-+ working-tree state
+source code / contracts / tests
         |
         v
-existing audit discovery
+Shared Evidence
         |
         v
-authority / lineage / freshness
+Shared Technical Model
+        |
+        +--> Architecture Review
+        +--> Test Engineering
+        +--> Code Quality Review
         |
         v
-Project Profile
-        |
-        v
-Session Intent
-        |
-        v
-capability + output selection
-        |
-        v
-minimum necessary work
+human-readable outputs
 ```
 
-### Session Intent
-
-Поддерживаются:
-
-| Intent | Когда используется |
-|---|---|
-| `USE_EXISTING` | использовать уже принятый и актуальный результат |
-| `NEW` | начать новый аудит в заданных границах |
-| `RESUME` | продолжить незавершённый workflow |
-| `REVALIDATE` | перепроверить затронутую изменениями semantic slice |
-| `EXTEND` | добавить новую capability или output без полного повторного аудита |
-| `PROJECTION_REPAIR` | исправить только представление уже принятой семантики |
-
-Типичная маршрутизация:
-
-```text
-предыдущего аудита нет               -> NEW
-IN_PROGRESS                           -> RESUME
-COMPLETE + тот же baseline            -> USE_EXISTING
-COMPLETE + изменившийся baseline      -> REVALIDATE
-нужна новая capability/output         -> EXTEND
-сломаны только Markdown/links/wording -> PROJECTION_REPAIR
-```
-
-`PROJECTION_REPAIR` не заменяет `REVALIDATE`.
-
-Если для исправления пользовательского документа приходится менять semantic authority, evidence, severity, ownership или accepted technical meaning, Skill должен перейти обратно в технический workflow.
-
----
-
-## Shared Evidence и Shared Technical Model
-
-Capability не должны независимо реконструировать одну и ту же систему каждая «для себя».
-
-Общий factual substrate разделён на:
-
-```text
-WS-*   bounded investigation/workset
-EV-*   addressable observation inside a workset
-STM    accepted factual Shared Technical Model
-```
-
-Над этим слоем работают capability-specific interpretations:
-
-```text
-Shared Evidence / STM
-        |
-        +--> Architecture Review   -> RF-*
-        |
-        +--> Test Engineering      -> BC-* / CC-* / MAT-* / TM-* / GAP-* / TASK-*
-        |
-        +--> Code Quality Review   -> CQ-* / CQRA-*
-```
-
-Один и тот же факт может участвовать в нескольких интерпретациях, но ownership semantic records не переносится между capability.
-
-### Ключевые границы authority
-
-| Объект | Владелец |
-|---|---|
-| `WS-*`, `EV-*` | shared evidence layer |
-| STM facts | Shared Technical Model |
-| `RF-*` | Architecture Review |
-| `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, `TASK-*` | Test Engineering |
-| `CQ-*`, `CQRA-*` | Code Quality Review |
-| `working/INDEX.md` | workflow/coordinator state |
-| пользовательские Markdown reports | projection, не semantic authority |
-
-`working/INDEX.md` нужен для `RESUME`, но он не становится владельцем findings, contracts или factual model.
-
----
-
-## Architecture Review: базовый flow
-
-Упрощённо полный Architecture Review выглядит так:
-
-```text
-baseline
-  -> Shared Evidence
-  -> Shared Technical Model
-  -> Technical Model Coverage Review
-  -> Architecture thematic discovery
-  -> Discovery Coverage Matrix
-  -> Independent Coverage Review
-  -> candidate verification
-  -> root-boundary adjudication
-  -> severity
-  -> Authoritative Findings Ledger
-  -> optional Target Architecture
-  -> optional Remediation Roadmap
-  -> projections / final package
-  -> independent editorial verification
-```
-
-### Почему сначала As-Built / STM
-
-Skill не должен искать проблемы только по названиям файлов, grep-совпадениям или общему впечатлению.
-
-Сначала нужно понять:
-
-- какие реальные компоненты существуют;
-- какие процессы исполняются;
-- кто владеет состоянием;
-- где проходят boundary;
-- какие существуют lifecycle transitions;
-- какие execution paths существенны.
-
-Только после этого можно надёжно формулировать findings.
-
----
-
-## Test Engineering: Behavior Contract Model
-
-Расширенный Test Engineering использует единую модель поведения, чтобы Test Plan, Contract Verification, Simulator и E2E не придумывали продуктовую семантику независимо.
-
-```text
-architecture / implementation / contracts / consumers
-                        |
-                        v
-                 Behavior Model
-                      BC-*
-                        |
-        +---------------+---------------+
-        |               |               |
-        v               v               v
- Contract Verification Test Design  Scenario Design
-      CC-*                             /       \
-                                  Simulator    E2E
-```
-
-Основные сущности:
-
-```text
-RF-*    Architecture/root finding
-BC-*    Behavior Contract
-CC-*    Contract Consistency Record
-MAT-*   Material Assurance Target
-TM-*    Test Mapping
-GAP-*   Assurance Gap
-TASK-*  Test Engineering remediation task
-CQ-*    Code Quality finding
-CQRA-*  Code Quality remediation action
-```
-
-Критические границы:
-
-```text
-BC != MAT
-BC != RF
-BC != GAP
-CC != GAP
-CQ != RF
-CQ != GAP
-CQRA != TASK
-```
-
----
-
-## Contract Verification
-
-Если система публикует формализованный контракт, Skill сравнивает несколько представлений:
-
-```text
-DECLARED      OpenAPI / protobuf / AsyncAPI / docs
-IMPLEMENTED   routes / handlers / DTO / auth / errors
-CONSUMED      frontend / SDK / CLI / other services
-TESTED        executable tests
-```
-
-Ни одно представление не получает автоматический приоритет только потому, что оно «официальное» или исполняемое.
-
-При конфликте создаётся отдельное `CC-*`, после чего authority разрешается явно.
-
-Contract drift и отсутствие тестового доказательства — разные проблемы: наличие `CC-*` не означает автоматическое создание `GAP-*`.
-
----
-
-## Targeted `REVALIDATE`
-
-Изменение Git HEAD само по себе не означает полный повтор аудита.
-
-Базовый принцип:
-
-```text
-accepted baseline A
-  -> current baseline B
-  -> changed inputs
-  -> impact analysis
-  -> minimum affected semantic slice
-  -> fresh evidence
-  -> revalidation
-  -> preserve unaffected accepted state
-```
-
-Это относится и к Code Quality:
-
-```text
-changed source/config/dependency/addendum/EV/STM
-        |
-        v
-dependency impact
-        |
-        v
-affected CQ records
-        |
-        v
-targeted REVALIDATE
-```
-
-`REVALIDATE` не равен `RESUME` и не равен projection regeneration. Предыдущая конфигурация Review Suite при `REVALIDATE` восстанавливается и показывается **read-only**: capability и outputs не переоткрываются как новое меню. Изменённый scope и affected slice определяются impact analysis. Если пользователь хочет добавить новую capability или новый output, это маршрутизируется в `EXTEND`, а не меняет конфигурацию `REVALIDATE`.
-
----
-
-## Projections и пользовательские документы
-
-Semantic authority и человекочитаемый документ — разные вещи.
-
-Stage B использует стабильные `PRJ-*` projection identities, dependency tracking, freshness, validation и regeneration.
-
-Основные правила:
-
-```text
-semantic authority != projection
-
-semantic REVALIDATE != projection regeneration
-
-PROJECTION_REPAIR != semantic remediation
-```
-
-Projection может быть `STALE`, пока semantic authority остаётся принятой.
-
-И наоборот, `CURRENT` projection может честно отображать `PARTIAL` coverage — это не противоречие.
-
-### Code Quality projections
-
-Поддерживаются:
-
-- **Code Quality Findings View**;
-- **Code Quality Summary**;
-- **Maintainability Hotspots**;
-- **Code Quality Roadmap Contribution**.
-
-Поддерживаемый output не означает автоматически выбранный output.
-
-Package строится из:
-
-```text
-explicit selected outputs
-+
-dependency closure
-```
-
-и использует общие Stage B policies:
-
-```text
-PERMISSIVE
-REQUIRED_SCOPE_CURRENT
-ALL_SCOPED_CURRENT
-```
-
----
-
-## Stack addenda
-
-Для некоторых технологий существуют дополнительные проверки, например:
-
-- Ansible;
-- Django;
-- Electron;
-- FastAPI;
-- Litestar;
-- React;
-- Tauri.
-
-Они дополняют общий анализ, но не становятся отдельными верхнеуровневыми capability.
-
-Наличие framework/tool signal не создаёт finding автоматически.
+Это позволяет:
+
+- сохранять provenance;
+- переиспользовать уже принятые факты;
+- продолжать незавершённый review;
+- перепроверять только затронутую изменениями область;
+- добавлять новые outputs без полного повторного аудита;
+- отделять technical authority от человекочитаемых Markdown reports.
+
+Подробно модель описана в [Architecture Guide](docs/architecture.md).
 
 ---
 
@@ -488,7 +60,7 @@ git clone \
   ~/.agents/skills/architecture-code-review
 ```
 
-После установки начните новую сессию агента, чтобы Skill был обнаружен заново.
+После установки начните новую session агента, чтобы Skill был обнаружен заново.
 
 ### Обновление
 
@@ -498,7 +70,7 @@ git switch main
 git pull --ff-only
 ```
 
-Проверить установленную ревизию:
+Проверить установленную revision:
 
 ```bash
 git rev-parse HEAD
@@ -506,7 +78,7 @@ git rev-parse HEAD
 
 ---
 
-# Использование
+# Быстрый старт
 
 Самый простой запрос:
 
@@ -514,9 +86,23 @@ git rev-parse HEAD
 Используй architecture-code-review для этого проекта.
 ```
 
-Skill должен сначала показать подходящий Session Intent и доступные capability/output choices, а не молча запускать максимальный аудит.
+Skill сначала определит repository/baseline, найдёт предыдущие audit packages и предложит подходящий Session Intent.
+
+Для нового review показывается Review Suite:
+
+```text
+Review Suite
+
+[ ] Architecture Review
+[ ] Test Engineering
+[ ] Code Quality Review
+```
+
+Нужно выбрать хотя бы одну capability.
 
 ---
+
+# Примеры использования
 
 ## Только Architecture Review
 
@@ -533,15 +119,7 @@ Test Engineering: OFF
 Code Quality Review: OFF
 ```
 
-Для более глубокого расследования:
-
-```text
-Architecture Review:
-- depth: FORENSIC
-- result: REVIEW_ONLY
-```
-
----
+Для более глубокого расследования замените `STANDARD_FULL` на `FORENSIC`.
 
 ## Architecture + Target Architecture + Roadmap
 
@@ -558,9 +136,38 @@ Test Engineering: OFF
 Code Quality Review: OFF
 ```
 
----
+## Только Test Engineering
 
-## Architecture + Test Engineering
+```text
+Используй architecture-code-review.
+
+Session Intent: NEW
+
+Architecture Review: OFF
+
+Test Engineering:
+- Test Assurance
+- Test Plan
+
+Code Quality Review: OFF
+```
+
+## Только Code Quality Review
+
+```text
+Используй architecture-code-review.
+
+Session Intent: NEW
+
+Architecture Review: OFF
+Test Engineering: OFF
+
+Code Quality Review:
+- Findings View/Report
+- Summary
+```
+
+## Полный Review Suite
 
 ```text
 Используй architecture-code-review.
@@ -576,282 +183,130 @@ Test Engineering:
 - Test Plan
 - Contract Consistency Report
 
-Code Quality Review: OFF
-```
-
----
-
-## Только Code Quality Review
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review: OFF
-Test Engineering: OFF
-
 Code Quality Review:
-- Findings View
-- Summary
-```
-
-Например, такой запуск подходит для отдельного review реализации после большой переработки кода, когда архитектурная модель уже известна и задача состоит именно в качестве реализации.
-
----
-
-## Architecture + Test Engineering + Code Quality
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review:
-- depth: STANDARD_FULL
-- result: REVIEW_ONLY
-
-Test Engineering:
-- Test Assurance
-- Test Plan
-
-Code Quality Review:
-- Findings View
+- Findings View/Report
 - Summary
 - Maintainability Hotspots
 ```
 
----
-
-## Добавить capability позже (`EXTEND`)
-
-`EXTEND` показывает уже принятые capability/outputs как **Existing / preserved** и отдельно — только **Available additions**. Принятые настройки не переоткрываются и не удаляются.
-
-Для Architecture Review расширение монотонно:
-
-```text
-Architecture absent
-  -> можно добавить Architecture и выбрать depth/result
-
-REVIEW_ONLY
-  -> можно добавить Target Architecture
-  -> или Target Architecture + Remediation Roadmap
-
-REVIEW_PLUS_TARGET_ARCHITECTURE
-  -> можно добавить Remediation Roadmap
-
-REVIEW_PLUS_TARGET_AND_ROADMAP
-  -> новых Architecture endpoint additions нет
-```
-
-У уже принятого Architecture Review существующий depth остаётся read-only во время обычного `EXTEND`.
-
-```text
-Используй architecture-code-review.
-
-EXTEND существующий принятый audit package.
-
-Добавь Code Quality Review:
-- Findings View
-- Summary
-
-Не перезапускай несвязанные принятые этапы.
-```
-
-Аналогично можно добавить Test Engineering outputs или доступное Architecture extension к уже принятому пакету.
+Skill подключает внутренние dependencies минимально необходимым slice и не должен автоматически включать все возможные outputs.
 
 ---
 
-## Продолжить незавершённый аудит (`RESUME`)
+# Повторное использование audit
 
 ```text
-Используй architecture-code-review.
-
-RESUME существующий незавершённый аудит.
-
-Восстанови состояние из working/INDEX.md и owning artifacts.
-Не используй chat history как semantic authority.
-Продолжи с первого незавершённого валидного gate.
+NEW
 ```
+
+Новый review package.
+
+```text
+RESUME
+```
+
+Продолжить незавершённый workflow из persisted state.
+
+```text
+REVALIDATE
+```
+
+Проверить изменения через impact analysis и переоткрыть только затронутую semantic slice.
+
+```text
+EXTEND
+```
+
+Добавить capability/output к уже принятому package без повторного запуска несвязанных этапов.
+
+```text
+USE_EXISTING
+```
+
+Использовать уже принятый и актуальный результат.
+
+```text
+PROJECTION_REPAIR
+```
+
+Исправить только presentation: Markdown, Mermaid, links, navigation, wording — без изменения accepted technical semantics.
+
+Подробно эти flows описаны в [Workflow Guide](docs/workflows.md).
 
 ---
 
-## Проверить изменения (`REVALIDATE`)
+# Что создаётся
+
+Во время review Skill может создавать:
 
 ```text
-Используй architecture-code-review.
-
-REVALIDATE принятый audit package относительно текущего baseline.
-
-Сначала выполни impact analysis.
-Перепроверь только затронутую semantic slice.
-Не запускай весь аудит заново без evidence необходимости.
+working/INDEX.md
+working/evidence/WS-*.md
+working/technical-model/...
+RF-* Architecture findings
+BC-* / CC-* / MAT-* / TM-* / GAP-* Test Engineering records
+CQ-* / CQRA-* Code Quality records
+PRJ-* derived projections
+RG-* regeneration sessions
 ```
+
+`working/INDEX.md` хранит coordinator state, но не заменяет technical authority.
+
+`WS-*` / `EV-*` — evidence.
+
+Shared Technical Model хранит принятые общие технические факты.
+
+`RF-*`, Test Engineering records и `CQ-*` принадлежат своим capability.
+
+`PRJ-*` — человекочитаемые projections, а не новый источник технической истины.
+
+Полное описание структуры файлов, индексов, IDs и их использования: [Artifacts and State](docs/artifacts-and-state.md).
 
 ---
 
-## Исправить только документы (`PROJECTION_REPAIR`)
+# Какие итоговые документы можно получить
 
-`PROJECTION_REPAIR` выбирает цель из **зарегистрированных projections текущего принятого package**, а не из semantic authority. Пользователь выбирает конкретный `PRJ-*` / документ / раздел; semantic records показываются только как provenance и не редактируются этим режимом.
+В зависимости от выбранных capability и outputs Review Suite может сформировать:
 
-```text
-Используй architecture-code-review.
+- Architecture Review;
+- Authoritative Findings Ledger;
+- Target Architecture;
+- Remediation Roadmap;
+- Test Assurance;
+- Test Plan;
+- Contract Consistency Report;
+- Test Environment Design;
+- Service Simulator Design;
+- Service Simulator Implementation Plan;
+- E2E Test Plan;
+- Code Quality Findings View;
+- Code Quality Summary;
+- Maintainability Hotspots;
+- Code Quality Roadmap Contribution.
 
-PROJECTION_REPAIR принятого audit package.
-
-Покажи eligible registered projections этого package.
-Выбери конкретный документ или раздел.
-Исправь только Markdown, Mermaid, ссылки, навигацию и wording.
-Если требуется изменить technical semantics — остановись с
-SEMANTIC_DRIFT_DETECTED и TECHNICAL_REVALIDATION_REQUIRED.
-```
-
----
-
-## Изменённое рабочее дерево
-
-Для воспроизводимого аудита предпочтителен committed `HEAD`:
-
-```text
-Используй architecture-code-review.
-Проверяй committed HEAD.
-Незакоммиченные изменения не включай в технические выводы.
-```
-
-Если необходимо сознательно анализировать локальные изменения:
-
-```text
-Используй architecture-code-review.
-Включи рабочее дерево как EPHEMERAL snapshot.
-```
-
-Такой baseline должен быть явно помечен как невоспроизводимый обычным Git commit.
+Что означает каждый документ и когда его выбирать: [Output Guide](docs/output-guide.md).
 
 ---
 
-# Итоговые артефакты
+# Документация
 
-По умолчанию audit package хранится под:
+| Документ | О чём |
+|---|---|
+| [Architecture](docs/architecture.md) | Review Suite, Shared Evidence, STM, authority boundaries, semantic state vs projections |
+| [Artifacts and State](docs/artifacts-and-state.md) | files, `INDEX.md`, IDs, indexes, registries, persistence и provenance |
+| [Workflows](docs/workflows.md) | `NEW`, `RESUME`, `REVALIDATE`, `EXTEND`, `USE_EXISTING`, `PROJECTION_REPAIR`, regeneration |
+| [Output Guide](docs/output-guide.md) | какие user-facing documents создаются и зачем |
+| [Roadmap](docs/roadmap.md) | дальнейшее развитие Skill |
 
-```text
-docs/reviews/architecture-review/
-```
-
-Конкретный набор файлов зависит от выбранных capability и outputs.
-
-Пользовательские документы должны отвечать на четыре вопроса:
-
-> **Что происходит → почему это важно → к чему приводит → что менять**
-
-Внутренние IDs нужны для provenance и трассировки, но не должны заменять нормальное техническое объяснение.
-
----
-
-# Структура репозитория
-
-Упрощённо:
-
-```text
-.
-├── README.md
-├── LICENSE
-├── SKILL.md
-│
-├── capabilities/
-│   ├── test-review/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │
-│   └── code-quality-review/
-│       ├── SKILL.md
-│       └── references/
-│           ├── code-quality-contract.md
-│           ├── code-quality-lifecycle.md
-│           └── code-quality-projection.md
-│
-├── references/
-│   ├── session-orchestration.md
-│   ├── review-modes-and-orchestration.md
-│   ├── shared-evidence-model.md
-│   ├── shared-technical-model.md
-│   ├── technical-model-coverage.md
-│   ├── revalidation-and-freshness.md
-│   ├── projection-lifecycle.md
-│   ├── projection-gates-and-packages.md
-│   ├── review-method.md
-│   ├── discovery-coverage.md
-│   ├── independent-verification.md
-│   └── stacks/
-│
-├── tests/
-│   └── pressure-scenario-*.md
-│
-└── docs/
-    ├── roadmap.md
-    └── superpowers/
-        ├── specs/
-        ├── plans/
-        └── reviews/
-```
-
-`SKILL.md` — umbrella orchestrator.
-
-Capability-specific semantics находятся в собственных `capabilities/*` entrypoints и references.
-
-Shared evidence, orchestration, freshness и projection lifecycle находятся в общих `references/`.
-
----
-
-# Проверка изменений Skill
-
-Изменение Markdown-инструкций Skill может менять фактическое поведение агента так же сильно, как изменение production code.
-
-Поэтому существенные изменения проходят evidence-driven цикл:
-
-```text
-design / contract
-  -> implementation plan
-  -> fail-first pressure evidence
-  -> implementation
-  -> deterministic checks
-  -> independent review
-  -> targeted remediation
-  -> targeted re-review
-  -> promotion readiness
-  -> published-ref verification
-  -> merge
-  -> post-promotion verification
-```
-
-Pressure scenario относится к конкретной ревизии и конкретному контракту. Старый `GREEN` не является вечным доказательством корректности будущего `main`.
-
-Validation должна оставаться пропорциональной риску: сначала targeted evidence, а отдельный harness создаётся только когда его долгосрочная ценность оправдывает стоимость поддержки.
+Нормативные agent contracts находятся в `SKILL.md`, `references/` и `capabilities/*/references/`. Документы выше предназначены для человека и объясняют эту модель, не создавая параллельную authority.
 
 ---
 
 # Язык итоговых документов
 
-Язык пользовательских документов следует языку текущего запроса, если пользователь явно не выбрал другой.
+Язык user-facing документов следует языку текущего запроса, если пользователь явно не выбрал другой.
 
-Для русскоязычного пользователя итоговые документы должны быть написаны нормальным связным русским техническим языком.
-
-Не переводятся без необходимости:
-
-- точные идентификаторы и status tokens;
-- имена файлов и пути;
-- API, IPC и protocol names;
-- формальные mode/entity names;
-- символы и объекты исходного кода.
-
-Внутренние ledger/handoff записи могут быть компактными, но финальный документ не должен выглядеть как черновик агента.
-
----
-
-# Roadmap
-
-Текущие направления развития:
-
-[`docs/roadmap.md`](docs/roadmap.md)
+Точные IDs, status tokens, file paths, API/protocol names и code symbols не переводятся без необходимости.
 
 ---
 
