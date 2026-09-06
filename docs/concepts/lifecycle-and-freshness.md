@@ -1,6 +1,6 @@
 # Жизненный цикл и актуальность
 
-Это каноническое human-facing объяснение жизненного цикла, актуальности и
+Это каноническое объяснение для пользователя жизненного цикла, актуальности и
 различия между повторной проверкой технического смысла и пересборкой документов.
 
 В `Review Suite` несколько независимых видов состояния. Они не должны
@@ -11,16 +11,16 @@
 Фраза «документ актуален» может означать разные вещи:
 
 - технический факт всё ещё подтверждён;
-- finding всё ещё применим;
-- projection соответствует accepted authority;
-- workflow завершён;
-- package можно публиковать.
+- вывод всё ещё применим;
+- проекция соответствует принятому источнику истины;
+- процесс завершён;
+- пакет результатов можно публиковать.
 
 Эти состояния проверяются отдельно.
 
-## STM lifecycle
+## Жизненный цикл STM
 
-STM fact проходит semantic lifecycle:
+Факт STM проходит собственный жизненный цикл:
 
 ```text
 CANDIDATE
@@ -29,7 +29,7 @@ CANDIDATE
   -> SUPERSEDED | REJECTED
 ```
 
-Freshness хранится отдельно:
+Актуальность хранится отдельно:
 
 ```text
 VALID
@@ -37,13 +37,13 @@ REVALIDATION_REQUIRED
 UNKNOWN
 ```
 
-Поэтому accepted fact может существовать исторически, но требовать revalidation для нового baseline.
+Поэтому принятый факт может существовать исторически, но требовать повторной проверки для новой базовой ревизии.
 
-## Capability-owned lifecycle
+## Жизненные циклы модулей проверки
 
-Architecture, Test Engineering и Code Quality имеют собственные lifecycle rules.
+`Architecture Review`, `Test Engineering` и `Code Quality Review` имеют собственные правила жизненного цикла.
 
-Например, Code Quality remediation action может быть `COMPLETED`, но finding не становится автоматически `RESOLVED`:
+Например, действие по устранению в `Code Quality Review` может быть `COMPLETED`, но вывод не становится автоматически `RESOLVED`:
 
 ```text
 CQRA COMPLETED
@@ -51,11 +51,11 @@ CQRA COMPLETED
 CQ RESOLVED
 ```
 
-После remediation требуется evidence-backed revalidation finding.
+После устранения требуется повторная проверка вывода на новых доказательствах.
 
-## Projection freshness
+## Актуальность проекций
 
-Projection имеет другой freshness axis:
+У проекции есть отдельное измерение актуальности:
 
 ```text
 CURRENT
@@ -63,33 +63,33 @@ STALE
 BLOCKED
 ```
 
-`STALE` означает: документ больше не подтверждён как актуальное представление своих dependencies.
+`STALE` означает: документ больше не подтверждён как актуальное представление своих зависимостей.
 
 Это не означает:
 
 ```text
-underlying semantic authority is false
+семантический источник истины неверен
 ```
 
-И наоборот, `CURRENT` projection может честно отображать partial/unknown semantic state.
+И наоборот, проекция `CURRENT` может честно отображать частично известное или неизвестное семантическое состояние.
 
-## Semantic freshness != projection freshness
+## Актуальность семантики не равна актуальности проекции
 
 Ключевое различие:
 
 ```text
-semantic REVALIDATE
+семантическая повторная проверка `REVALIDATE`
   !=
-projection regeneration
+пересборка проекции
 ```
 
-После accepted semantic change выполняется Projection Impact Analysis. Она отмечает затронутые projections, но не переписывает их.
+После принятого семантического изменения выполняется `Projection Impact Analysis`. Она отмечает затронутые проекции, но не переписывает их.
 
-Если нужен новый fresh document, создаётся отдельная `RG-*` regeneration session.
+Если нужен новый актуальный документ, создаётся отдельный сеанс пересборки `RG-*`.
 
-## Revalidation после изменения проекта
+## Повторная проверка после изменения проекта
 
-Для accepted package используется bounded flow:
+Для принятого пакета результатов используется ограниченная по области последовательность:
 
 ```text
 previous baseline
@@ -103,7 +103,7 @@ previous baseline
   -> delta reconciliation
 ```
 
-Git diff используется как routing context, а не как доказательство.
+Git diff используется для маршрутизации, а не как доказательство.
 
 ## Impact classes
 
