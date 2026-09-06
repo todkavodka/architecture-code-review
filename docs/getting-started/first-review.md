@@ -1,6 +1,6 @@
 # Первый полный запуск
 
-Этот walkthrough показывает не только конфигурацию, но и жизненный цикл нового audit package.
+Этот пример показывает не только конфигурацию, но и полный жизненный цикл нового пакета аудита.
 
 ## Исходная задача
 
@@ -9,16 +9,16 @@
 - как система реально устроена;
 - где находятся архитектурные риски;
 - насколько текущие тесты подтверждают критические поведения;
-- какие реализационные механизмы создают существенные проблемы сопровождения.
+- какие механизмы реализации создают существенные проблемы сопровождения.
 
-Запрос пользователю к агенту может быть простым:
+Запрос к агенту может быть простым:
 
 ```text
-Используй architecture-code-review для этого repository.
+Используй architecture-code-review для этого репозитория.
 Нужен полный инженерный аудит перед модернизацией.
 ```
 
-## Шаг 1. Startup discovery
+## Шаг 1. Определение исходного состояния
 
 Skill сначала определяет:
 
@@ -31,9 +31,11 @@ Project Profile
 Session Intent
 ```
 
-Если пригодного предыдущего audit нет, будет рекомендован `NEW`.
+Canonical поля выше сохраняются в технических контрактах, но для пользователя это означает: определить проект, найти предыдущие результаты, зафиксировать базовую ревизию, учесть незакоммиченные изменения и выбрать правильный сценарий продолжения работы.
 
-Если working tree содержит незакоммиченные изменения, агент должен явно определить, анализируется только committed HEAD, ephemeral snapshot или работа останавливается. Это важно для воспроизводимости evidence.
+Если пригодного предыдущего аудита нет, будет рекомендован `NEW`.
+
+Если рабочее дерево содержит незакоммиченные изменения, агент должен явно определить, анализируется ли только committed HEAD, отдельный EPHEMERAL snapshot или работа останавливается. Это важно для воспроизводимости доказательств.
 
 ## Шаг 2. Review Suite
 
@@ -55,25 +57,25 @@ Code Quality Review: ON
   Maintainability Hotspots
 ```
 
-Это пример, а не обязательная default-конфигурация. Skill должен помогать ограничивать scope и не включать документы «на всякий случай».
+Это пример, а не обязательная конфигурация. Skill должен помогать ограничивать область проверки и не включать документы «на всякий случай».
 
-## Шаг 3. Persistent baseline
+## Шаг 3. Сохранение базового состояния
 
-До substantive capability work создаются coordinator state и persistent STM baseline. Это не значит, что вся система мгновенно описывается полностью.
+До основной работы создаются состояние координатора и базовая версия Shared Technical Model. Это не значит, что вся система сразу описывается полностью.
 
 Принцип:
 
 ```text
-always create model baseline
+создать устойчивую модель для выбранной ревизии
 !=
-always fully populate model
+сразу полностью описать весь репозиторий
 ```
 
-Полный Architecture Review потребует принятой фактической модели достаточной ширины до тематического анализа. Более узкая capability может работать на bounded accepted slice.
+Полный Architecture Review требует принятой фактической модели достаточной ширины до тематического анализа. Более узкий модуль проверки может работать на ограниченной принятой части модели.
 
-## Шаг 4. Evidence
+## Шаг 4. Доказательства
 
-Исследование разбивается на worksets `WS-*`. Внутри них появляются observations `EV-*`, привязанные к baseline и source location.
+Исследование разбивается на `WS-*` worksets. Внутри них появляются `EV-*` observations, привязанные к базовой ревизии и точному источнику.
 
 Например:
 
@@ -88,11 +90,11 @@ WS-007-order-publication
     observed: database commit happens before event publication
 ```
 
-Observation ещё не является finding. Оно только фиксирует подтверждённое наблюдение.
+`EV-*` ещё не является finding. Оно только фиксирует подтверждённое наблюдение. Термины `workset`, `observation` и `finding` используются как canonical terms и определены в [глоссарии](../reference/glossary.md).
 
 ## Шаг 5. Shared Technical Model
 
-Из достаточных evidence принимаются технические факты STM:
+Из достаточных доказательств принимаются технические факты STM:
 
 ```text
 COMP-API
@@ -101,13 +103,13 @@ DS-POSTGRES
 EVENT-ORDER-COMPLETED
 ```
 
-Они связываются provenance с `WS#EV` и друг с другом. Только Technical Model Gate может принять, пересмотреть, отклонить или supersede STM fact.
+Они связываются с `WS#EV` и друг с другом. Только Technical Model Gate может принять, пересмотреть, отклонить или заменить новой ревизией факт STM.
 
-## Шаг 6. Capability analysis
+## Шаг 6. Анализ выбранными модулями
 
-Дальше каждая capability интерпретирует общие факты в собственной области.
+Дальше каждый модуль интерпретирует общие факты в своей области.
 
-Architecture Review может создать `RF-*` для архитектурного root problem.
+Architecture Review может создать `RF-*` для подтверждённой архитектурной корневой проблемы.
 
 Test Engineering может создать:
 
@@ -118,49 +120,49 @@ TM-*
 GAP-*
 ```
 
-Code Quality может создать `CQ-*`, если конкретный implementation mechanism имеет доказанное material consequence.
+Code Quality Review может создать `CQ-*`, если конкретный механизм реализации имеет доказанное существенное последствие.
 
 Один и тот же факт может участвовать во всех трёх анализах, но записи не превращаются друг в друга.
 
-## Шаг 7. Проверки и gates
+## Шаг 7. Проверки перед принятием
 
-Перед публикацией выводов Skill проверяет достаточность coverage, независимую falsification/verification там, где её требует capability, и консистентность downstream outputs.
+Перед публикацией выводов Skill проверяет достаточность охвата, проводит независимую проверку кандидатов там, где её требует соответствующий модуль, и проверяет согласованность зависимых итоговых документов.
 
-Недостаточная evidence должна ограничить ширину вывода, а не маскироваться уверенным prose.
+Недостаток доказательств должен ограничить ширину вывода, а не маскироваться уверенной формулировкой.
 
 ## Шаг 8. Итоговый пакет
 
-Конкретный layout зависит от repository convention и выбранных outputs. Концептуально пользователь получает:
+Конкретное расположение файлов зависит от соглашений репозитория и выбранных документов. Концептуально пользователь получает:
 
 ```text
-architecture report / findings ledger
-optional target architecture
-optional remediation roadmap
+Architecture Review / Findings Ledger
+optional Target Architecture
+optional Remediation Roadmap
 
-test assurance summary/map
-optional test plan / contract report / environment / simulator / E2E
+Test Assurance summary/map
+optional Test Plan / Contract Report / Environment / Simulator / E2E
 
-code quality findings / summary / hotspots
+Code Quality Findings / Summary / Hotspots
 
 working/
   INDEX.md
   evidence/
   technical-model/
   projections/
-  capability working state
+  capability-specific state
 ```
 
 ## Шаг 9. Как читать результат
 
-Руководителю или архитектору обычно достаточно начать с main report/summary и roadmap.
+Руководителю или архитектору обычно достаточно начать с основного отчёта, summary и roadmap.
 
 Инженер, который проверяет конкретный вывод, идёт глубже:
 
 ```text
-report
-  -> RF/CQ/GAP/other semantic record
+отчёт
+  -> RF/CQ/GAP/другая semantic record
   -> STM fact / WS#EV
-  -> source
+  -> исходный источник
 ```
 
 Так можно доказать происхождение вывода без повторного анализа всей системы.
@@ -169,24 +171,24 @@ report
 
 Допустим, после аудита появилось 20 новых commits.
 
-Не нужно запускать `NEW` только потому, что HEAD изменился. Для принятого audit package используется `REVALIDATE`:
+Не нужно запускать `NEW` только потому, что изменился HEAD. Для принятого пакета используется `REVALIDATE`:
 
 ```text
-old baseline
-  -> new baseline
-  -> change inventory
-  -> impact analysis
-  -> minimum affected dependency slice
-  -> fresh evidence
-  -> revalidation
-  -> projection impact accounting
+предыдущая базовая ревизия
+  -> текущая базовая ревизия
+  -> перечень изменений
+  -> анализ влияния
+  -> минимальная затронутая область зависимостей
+  -> новые доказательства
+  -> повторная проверка
+  -> учёт влияния на итоговые документы
 ```
 
-Незатронутая accepted authority сохраняется.
+Не затронутое изменениями принятое состояние сохраняется.
 
 ## Следующие материалы
 
 - [Review Suite](../concepts/review-suite.md)
-- [Evidence и STM](../concepts/evidence-and-technical-model.md)
-- [Workflow Reference](../reference/workflows.md)
+- [Доказательства и STM](../concepts/evidence-and-technical-model.md)
+- [Справочник процессов](../reference/workflows.md)
 - [Архитектурный пример](../examples/architecture-review.md)
