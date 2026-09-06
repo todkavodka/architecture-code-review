@@ -248,8 +248,10 @@ Review Suite
 
   [ ] Architecture Review
       if selected:
-        depth: STANDARD_FULL | FORENSIC
-        endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
+        Depth:
+          STANDARD_FULL | FORENSIC
+        Endpoint:
+          REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
 
   [ ] Test Engineering
       if selected:
@@ -279,6 +281,13 @@ The three top-level capabilities are independently selectable. No capability is
 the implicit parent of another. Configuration under a capability is shown only
 when that capability is selected. A `NEW` session with no selected capability is
 invalid and must not proceed to substantive work.
+
+Architecture `Depth` and `Endpoint` are independent user selections. The
+Architecture menu therefore exposes the full Cartesian product: each of
+`STANDARD_FULL` and `FORENSIC` may be paired with each of `REVIEW_ONLY`,
+`REVIEW_PLUS_TARGET_ARCHITECTURE`, and `REVIEW_PLUS_TARGET_AND_ROADMAP`.
+The recommendation may identify a default pair, but it does not restrict the
+other five valid pairs or require a custom answer.
 
 When Architecture Review is not selected, do not ask for Architecture depth or
 endpoint and do not create Architecture-only work. Shared evidence, STM, or a
