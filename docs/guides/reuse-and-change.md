@@ -1,177 +1,59 @@
 # Повторное использование, изменения и расширение
 
-`Review Suite` рассчитан на длительную жизнь пакета аудита. Принятое состояние
-не нужно выбрасывать после каждого нового commit или запроса пользователя.
-Полные условия входа, автоматические действия, остановки и результаты каждого
-`Session Intent` определяет [справочник процессов](../reference/workflows.md).
+`Review Suite` рассчитан на длительное использование пакета аудита. Полные
+правила сценариев, условий входа и остановок приведены в
+[справочнике процессов](../reference/workflows.md); это руководство объясняет
+только, какой сценарий выбрать в практической ситуации.
 
-## Выбор Session Intent
+| Ситуация | Сценарий | Последствие |
+|---|---|---|
+| Нет предыдущего аудита | `NEW` | Создаётся новый пакет и область проверки. |
+| Работа не завершена | `RESUME` | Продолжается первая непринятая устойчивая граница. |
+| Проект изменился | `REVALIDATE` | Прежние настройки доступны только для чтения. |
+| Нужен модуль или документ | `EXTEND` | Добавляется только новое; прежний выбор сохраняется. |
+| Нужен уже принятый результат | `USE_EXISTING` | Новая техническая работа не создаётся. |
+| Исправлено только оформление | `PROJECTION_REPAIR` | Технический смысл не меняется. |
 
-| Ситуация | Intent |
-|---|---|
-| Нет предыдущего audit | `NEW` |
-| Workflow не закончен | `RESUME` |
-| Accepted baseline изменился | `REVALIDATE` |
-| Нужен новый capability/output/endpoint | `EXTEND` |
-| Нужен существующий accepted deliverable | `USE_EXISTING` |
-| Нужно исправить только presentation | `PROJECTION_REPAIR` |
+## После изменения проекта
 
-## `RESUME`
+Для принятого пакета используйте `REVALIDATE`. Он определяет затронутую часть
+зависимостей и повторно проверяет только необходимое. Если воздействие
+оказывается `SYSTEMIC`, пользователь отдельно решает, нужен ли полный аудит
+после `FULL_REAUDIT_RECOMMENDED`.
 
-Используйте, когда работа остановилась до полного closeout.
+Подробные правила повторной проверки: [справочник процессов](../reference/workflows.md#revalidate)
+и [жизненный цикл и актуальность](../concepts/lifecycle-and-freshness.md).
 
-```text
-RESUME
-  -> validate INDEX bindings
-  -> restore Review Suite read-only
-  -> reconcile owning artifacts
-  -> continue first non-accepted durable boundary
-```
+## Добавление результата
 
-`RESUME` не является новым конфигуратором. Если пользователь хочет добавить
-итоговый документ, используется `EXTEND`.
+Для нового документа, модуля или дополнительного результата `Architecture
+Review` используйте `EXTEND`. Уже принятые элементы показываются только для
+чтения и не снимаются автоматически. Глубина существующего `Architecture
+Review` не меняется; его результат можно только расширить от `REVIEW_ONLY` к
+`REVIEW_PLUS_TARGET_ARCHITECTURE`, а затем к
+`REVIEW_PLUS_TARGET_AND_ROADMAP`.
 
-## `REVALIDATE`
+Полные правила добавления: [раздел `EXTEND`](../reference/workflows.md#extend).
 
-Используйте после изменения accepted baseline.
+## Использование прежнего результата
 
-Предыдущая конфигурация `Review Suite` показывается только для чтения. Область
-повторной проверки вычисляется автоматически по зависимостям.
+`USE_EXISTING` подходит, если выбранный документ и его источники истины
+пригодны по политике пакета. Изменение исходников направляется в `REVALIDATE`,
+а новый документ — в `EXTEND`.
 
-```text
-previous baseline
-  -> current baseline
-  -> change inventory
-  -> impact analysis
-  -> minimum dependency slice
-  -> fresh evidence
-  -> revalidation
-  -> delta reconciliation
-```
+## Оформление и пересборка
 
-### Что выбирает пользователь
+`PROJECTION_REPAIR` подходит только для языка, Markdown, Mermaid, навигации,
+таблиц и других изменений представления. Если исправление меняет технический
+смысл, процесс возвращает `SEMANTIC_DRIFT_DETECTED` и требует технической
+повторной проверки.
 
-Пользователь подтверждает baseline/change context и принимает решения там, где authority действительно неоднозначна.
+Анализ влияния на проекции не пересобирает документы. Для получения свежего
+документа после принятого изменения нужен отдельный запрос `RG-*`. Подробности:
+[модель жизненного цикла](../concepts/lifecycle-and-freshness.md) и
+[модель проекций и пакетов](../concepts/projections-and-packages.md).
 
-Пользователь не выбирает заново модули и флажки документов для обычного
-`REVALIDATE`.
+## См. также
 
-### `SYSTEMIC` impact
-
-Если targeted completion больше нельзя считать надёжным, Skill возвращает:
-
-```text
-FULL_REAUDIT_RECOMMENDED
-user_decision_required: true
-```
-
-Полный audit не запускается без решения пользователя.
-
-## `EXTEND`
-
-Используйте, когда accepted package нужно расширить.
-
-```text
-Existing / preserved [READ-ONLY]
-Available additions [USER SELECTABLE]
-```
-
-Persisted result:
-
-```text
-previous accepted selection
-UNION explicit additions
-UNION required dependencies
-```
-
-### Добавление capability
-
-Если Architecture Review отсутствовала, её можно добавить и выбрать depth/endpoint.
-
-Если модуль уже существует, принятая конфигурация не открывается как новое меню
-`NEW`.
-
-### Architecture endpoint extension
-
-Для existing Architecture endpoint extension monotonic:
-
-```text
-REVIEW_ONLY
-  -> REVIEW_PLUS_TARGET_ARCHITECTURE
-  -> REVIEW_PLUS_TARGET_AND_ROADMAP
-```
-
-Из `REVIEW_ONLY` можно сразу запросить Target + Roadmap.
-
-Выбранная глубина остаётся доступной только для чтения. Смена
-`STANDARD_FULL` ↔ `FORENSIC` не является обычным добавлением результата.
-
-### Test/Code Quality additions
-
-Показываются только ещё не выбранные документы. Уже выбранные документы
-сохраняются.
-
-## `USE_EXISTING`
-
-Используйте, когда accepted state и required projections подходят без новой technical work.
-
-Skill проверяет:
-
-- package usability;
-- authority/revision bindings;
-- required projection freshness;
-- выбранный deliverable.
-
-Новый scope через `USE_EXISTING` не добавляется.
-
-## `PROJECTION_REPAIR`
-
-Используйте, если нужно исправить presentation уже принятого смысла:
-
-- grammar/language;
-- Markdown;
-- Mermaid syntax/layout;
-- links/navigation;
-- table formatting;
-- terminology;
-- cross-references.
-
-Target выбирается из eligible registered `PRJ-*` projections accepted package.
-
-Если correction меняет technical meaning:
-
-```text
-SEMANTIC_DRIFT_DETECTED
-TECHNICAL_REVALIDATION_REQUIRED
-```
-
-## Projection regeneration
-
-`REVALIDATE` и анализ влияния на проекции не пересобирают документы
-автоматически.
-
-Если после semantic change нужен fresh output:
-
-```text
-explicit freshness request
-  -> RG-* session
-  -> requested projection + stale prerequisites
-  -> verification
-```
-
-## Пример жизненного цикла
-
-```text
-Day 1: NEW Architecture REVIEW_ONLY
-Day 10: EXTEND -> add Target Architecture
-Day 30: code changed -> REVALIDATE affected slice
-Day 31: Summary became STALE -> explicit RG-* if fresh summary needed
-Day 45: broken Mermaid -> PROJECTION_REPAIR
-Day 60: USE_EXISTING accepted current report
-```
-
-## Что читать дальше
-
-- [Workflow Reference](../reference/workflows.md)
-- [Lifecycle and freshness](../concepts/lifecycle-and-freshness.md)
-- [Revalidation example](../examples/revalidation.md)
+- [Справочник процессов](../reference/workflows.md)
+- [Пример повторной проверки](../examples/revalidation.md)
