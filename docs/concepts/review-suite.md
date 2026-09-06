@@ -95,28 +95,28 @@ Endpoint:
 Модули проверки не должны независимо «изобретать» систему каждый для себя.
 
 ```text
-Source
-  -> Shared Evidence
+Исходные источники
+  -> Общие доказательства
   -> Shared Technical Model
        |        |        |
        v        v        v
- Architecture  Test   Code Quality
+ Архитектура  Тестовая инженерия  Качество кода
 ```
 
 Общий слой хранит наблюдения и факты. Слой модулей проверки хранит интерпретации и решения в своих областях.
 
-## Когда capabilities взаимодействуют
+## Когда модули проверки взаимодействуют
 
 Один механизм может иметь несколько независимых последствий.
 
 Например:
 
 ```text
-INT-014 publication after commit
+INT-014 публикация после фиксации
   |
-  +--> RF-007 architecture ownership ambiguity
-  +--> GAP-004 missing retry/concurrency proof
-  +--> CQ-012 duplicated retry mechanism
+  +--> RF-007 неоднозначность владения в архитектуре
+  +--> GAP-004 нет доказательства повторных попыток и конкурентности
+  +--> CQ-012 дублирующий механизм повторных попыток
 ```
 
 Это не дублирование. Каждая запись отвечает на свой вопрос и имеет отдельный жизненный цикл.
@@ -136,7 +136,7 @@ INT-014 publication after commit
 -> минимально необходимая часть доказательств и модели
 -> работа выбранных модулей
 -> стабилизация семантического состояния
--> Projection Impact Analysis
+-> анализ влияния на проекции
 -> определение состава пакета
 -> запрошенные итоговые документы
 ```
@@ -146,5 +146,5 @@ INT-014 publication after commit
 - [Доказательства и STM](evidence-and-technical-model.md)
 - [Источники истины и происхождение выводов](authority-and-provenance.md)
 - [Руководство по Architecture Review](../guides/architecture-review.md)
-- [Test Engineering guide](../guides/test-engineering.md)
+- [Руководство по Test Engineering](../guides/test-engineering.md)
 - [Руководство по Code Quality Review](../guides/code-quality-review.md)

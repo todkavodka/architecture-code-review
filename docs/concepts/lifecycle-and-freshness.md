@@ -83,7 +83,8 @@ BLOCKED
 пересборка проекции
 ```
 
-После принятого семантического изменения выполняется `Projection Impact Analysis`. Она отмечает затронутые проекции, но не переписывает их.
+После принятого семантического изменения выполняется анализ влияния на
+проекции. Он отмечает затронутые проекции, но не пересобирает их.
 
 Если нужен новый актуальный документ, создаётся отдельный сеанс пересборки `RG-*`.
 
@@ -92,22 +93,22 @@ BLOCKED
 Для принятого пакета результатов используется ограниченная по области последовательность:
 
 ```text
-previous baseline
-  -> current baseline
-  -> change inventory
-  -> impact analysis
-  -> impact classification
-  -> minimum dependency slice
-  -> targeted fresh evidence
-  -> revalidation/adjudication
-  -> delta reconciliation
+предыдущая базовая ревизия
+  -> текущая базовая ревизия
+  -> перечень изменений
+  -> анализ влияния
+  -> классификация влияния
+  -> минимальный срез зависимостей
+  -> свежие адресные доказательства
+  -> повторная проверка и принятие решения
+  -> согласование изменений
 ```
 
 Git diff используется для маршрутизации, а не как доказательство.
 
-## Impact classes
+## Классы влияния
 
-Нормативный revalidation contract использует orchestration labels:
+Нормативный контракт повторной проверки использует следующие метки управления:
 
 ```text
 LOCAL
@@ -115,45 +116,56 @@ BOUNDARY
 SYSTEMIC
 ```
 
-Это не severity findings.
+Это не значения серьёзности замечаний.
 
-- `LOCAL` — нет доказанного существенного изменения boundary/contract/ownership; проверка остаётся локальной, пока evidence не расширит scope.
-- `BOUNDARY` — затронута существенная API, auth/trust, persistence, lifecycle, concurrency, IPC или другая accepted boundary.
-- `SYSTEMIC` — изменилось несколько фундаментальных boundaries или модель системы настолько, что targeted completion больше ненадёжна.
+- `LOCAL` — нет доказанного существенного изменения границы, контракта или
+  владения; проверка остаётся локальной, пока доказательства не расширят
+  рассматриваемую область.
+- `BOUNDARY` — затронута существенная API, граница аутентификации или доверия,
+  хранение данных, жизненный цикл, конкурентное выполнение, IPC или другая
+  принятая граница.
+- `SYSTEMIC` — изменилось несколько фундаментальных границ или модель системы
+  настолько, что адресное завершение проверки больше ненадёжно.
 
-Для `SYSTEMIC` Skill рекомендует full reaudit и требует решения пользователя:
+Для `SYSTEMIC` инструмент рекомендует полный повторный аудит и требует решения
+пользователя:
 
 ```text
 FULL_REAUDIT_RECOMMENDED
 user_decision_required: true
 ```
 
-## Preservation unaffected state
+## Сохранение незатронутого состояния
 
-`REVALIDATE` не должен уничтожать unaffected accepted state.
+`REVALIDATE` не должен уничтожать незатронутое принятое состояние.
 
-Если изменилась одна API boundary, нет основания автоматически revalidate unrelated storage subsystem.
+Если изменилась одна граница API, нет основания автоматически повторно
+проверять несвязанную подсистему хранения.
 
-Preservation допустим только когда dependency analysis действительно показывает отсутствие влияния. Unknown linkage нельзя объявлять preserved без targeted investigation.
+Сохранение допустимо, только когда анализ зависимостей действительно показывает
+отсутствие влияния. Неизвестную связь нельзя считать сохранённой без адресного
+исследования.
 
-## Supersession
+## Замещение
 
-Исторические records не переписываются так, чтобы казаться текущими.
+Исторические записи не переписываются так, чтобы казаться текущими.
 
 Если сущность заменена:
 
 ```text
-old record
-  -> superseded_by -> new record
+старая запись
+  -> заменена -> новая запись
 ```
 
-Это позволяет объяснить прошлые decisions и корректно revalidate dependent artifacts.
+Это позволяет объяснить прежние решения и корректно повторно проверять
+зависимые артефакты.
 
-## Compact state
+## Компактное состояние
 
-`INDEX.md` и handoffs должны проверяться против owning authority before downstream substantive use.
+`INDEX.md` и записи передачи состояния должны сверяться с владеющим источником
+истины до содержательного использования далее по процессу.
 
-Если compact state старее owning artifact:
+Если компактное состояние старее владеющего артефакта:
 
 ```text
 AUTHORITY_RECONCILIATION_REQUIRED
@@ -161,11 +173,12 @@ AUTHORITY_RECONCILIATION_REQUIRED
 
 Нельзя считать запись свежей только потому, что она лежит в более новом файле.
 
-## Presentation-only change
+## Изменение только представления
 
-Если меняется только язык, Markdown, таблица, Mermaid или ссылка без semantic change, используется `PROJECTION_REPAIR` и `PROJECTION_REVALIDATION`.
+Если меняется только язык, Markdown, таблица, Mermaid или ссылка без изменения
+смысла, используются `PROJECTION_REPAIR` и `PROJECTION_REVALIDATION`.
 
-Если в процессе обнаружен semantic drift:
+Если в процессе обнаружено смысловое расхождение:
 
 ```text
 SEMANTIC_DRIFT_DETECTED
@@ -176,15 +189,15 @@ TECHNICAL_REVALIDATION_REQUIRED
 
 | Событие | Нужное действие |
 |---|---|
-| Код не менялся, нужен existing accepted report | `USE_EXISTING` |
-| Workflow не закончен | `RESUME` |
-| Project baseline изменился | `REVALIDATE` |
-| Нужен новый capability/output | `EXTEND` |
-| Изменилось только presentation | `PROJECTION_REPAIR` |
-| Projection stale, semantics accepted | explicit `RG-*` regeneration when fresh output is required |
+| Код не менялся, нужен существующий принятый отчёт | `USE_EXISTING` |
+| Процесс не закончен | `RESUME` |
+| Изменилась базовая ревизия проекта | `REVALIDATE` |
+| Нужен новый модуль проверки или итоговый документ | `EXTEND` |
+| Изменилось только представление | `PROJECTION_REPAIR` |
+| Проекция устарела, а семантика принята | Явно запустить пересборку `RG-*`, если нужен актуальный итоговый документ |
 
 ## Что читать дальше
 
-- [Reuse and Change Guide](../guides/reuse-and-change.md)
-- [Workflow Reference](../reference/workflows.md)
-- [Projections and Packages](projections-and-packages.md)
+- [Повторное использование и изменения](../guides/reuse-and-change.md)
+- [Справочник процессов](../reference/workflows.md)
+- [Проекции и пакеты результатов](projections-and-packages.md)

@@ -59,13 +59,13 @@ freshness
 
 Устойчивый идентификатор и жизненный цикл позволяют адресовать документ независимо от пути.
 
-## Projection Impact Analysis
+## Анализ влияния на проекции
 
 После стабилизации семантических изменений выполняется отдельный учёт их влияния:
 
 ```text
 принятое семантическое изменение
-  -> Projection Impact Analysis
+  -> анализ влияния на проекции
   -> прямое влияние
   -> распространение по обратным зависимостям
   -> обновление `CURRENT` / `STALE` / `BLOCKED`
@@ -74,22 +74,22 @@ freshness
 
 `PROJECTION_IMPACT_ACCOUNTED` означает, что влияние учтено. Это не означает, что все проекции пересобраны или имеют состояние `CURRENT`.
 
-## Regeneration
+## Пересборка
 
 Если пользователю нужен актуальный итоговый документ, запускается отдельный сеанс `RG-*`.
 
 ```text
-requested PRJ
-  -> resolve stale prerequisites
-  -> frozen RG plan
-  -> generate
-  -> V1..V4 verification
-  -> fingerprint/revision decision
+запрошенная PRJ-проекция
+  -> определить устаревшие обязательные предпосылки
+  -> зафиксированный план RG-сеанса
+  -> создать документ
+  -> проверки V1..V4
+  -> решить вопрос отпечатка и редакции
 ```
 
 Если созданное содержимое идентично текущей проверенной ревизии, новая ревизия не создаётся только ради факта запуска пересборки.
 
-## Package
+## Пакет результатов
 
 Пакет проекций — именованный набор итоговых документов. Он не является семантической моделью и не превращает своих участников в источник истины.
 
@@ -109,81 +109,92 @@ conditional_members
 
 Перед завершением создаётся снимок состава конкретного экземпляра пакета.
 
-## Freshness policies
+## Политики актуальности
 
 ### `PERMISSIVE`
 
-Stale/blocked projections могут оставаться видимыми, если текущий gate их не потребляет. Semantic closeout не требует repository-wide zero-stale state.
+Проекции в состоянии `STALE` или `BLOCKED` могут оставаться видимыми, если
+текущая проверка их не использует. Семантическое завершение не требует, чтобы
+во всём репозитории не оставалось устаревших проекций.
 
 ### `REQUIRED_SCOPE_CURRENT`
 
-Requested projection и обязательные upstream prerequisites должны быть `CURRENT`.
+Запрошенная проекция и её обязательные исходные предпосылки должны быть
+`CURRENT`.
 
 ### `ALL_SCOPED_CURRENT`
 
-Все resolved required members выбранного package должны быть `CURRENT`.
+Все разрешённые обязательные участники выбранного пакета должны быть `CURRENT`.
 
-## Closeout chain
+## Последовательность завершения
 
-Projection-sensitive closeout следует последовательности:
+Завершение, зависящее от проекций, следует последовательности:
 
 ```text
-semantic gates accepted
+семантические проверки приняты
   -> PROJECTION_IMPACT_ACCOUNTED
-  -> package membership resolved
-  -> required scoped projections CURRENT
-  -> closeout/publication permitted
+  -> состав пакета определён
+  -> требуемые проекции в области имеют состояние CURRENT
+  -> завершение и публикация разрешены
 ```
 
-Если required projection `BLOCKED`, package gate блокируется с указанием owning action. Accepted semantic work при этом не откатывается.
+Если требуемая проекция имеет состояние `BLOCKED`, проверка пакета блокируется
+с указанием действия владельца. Принятая семантическая работа при этом не
+откатывается.
 
-## Unrelated stale projections
+## Несвязанные устаревшие проекции
 
-Допустим, пользователь делает Code Quality extension, а старый Architecture summary stale.
+Допустим, пользователь расширяет Code Quality Review, а прежняя сводка
+Architecture Review устарела.
 
-Если Architecture projection не входит в required scope текущего package, она остаётся видимой, но не обязана блокировать Code Quality closeout.
+Если проекция Architecture Review не входит в обязательную область текущего
+пакета, она остаётся видимой, но не обязана блокировать завершение Code Quality
+Review.
 
-Это позволяет работать bounded scope без искусственного требования «сначала обновить вообще все документы repository».
+Это позволяет работать в ограниченной области без искусственного требования
+«сначала обновить вообще все документы репозитория».
 
 ## `PROJECTION_REPAIR`
 
-Presentation-only correction использует существующие registered projections выбранного accepted package.
+Исправление только представления использует существующие зарегистрированные
+проекции выбранного принятого пакета.
 
-Пользователь выбирает не semantic object, а конкретную projection/document/section.
+Пользователь выбирает не семантический объект, а конкретную проекцию, документ
+или раздел.
 
 Разрешены:
 
 - язык;
-- Markdown structure;
-- Mermaid syntax/layout без изменения mechanism;
-- links/navigation;
-- tables;
-- terminology;
-- representation уже accepted meaning.
+- структуру Markdown;
+- синтаксис и компоновку Mermaid без изменения механизма;
+- ссылки и навигацию;
+- таблицы;
+- терминологию;
+- представление уже принятого смысла.
 
-Semantic change возвращает workflow в technical revalidation.
+Изменение смысла возвращает процесс к технической повторной проверке.
 
-## Как читать package
+## Как читать пакет результатов
 
 Для обычного потребителя:
 
 ```text
-package main report
-  -> supporting projection
-  -> semantic record when needed
+основной отчёт пакета
+  -> вспомогательная проекция
+  -> семантическая запись при необходимости
 ```
 
-Для проверки provenance:
+Для проверки происхождения:
 
 ```text
-PRJ-* document
-  -> owning semantic records
-  -> STM/evidence
-  -> source
+документ PRJ-*
+  -> владеющие семантические записи
+  -> STM и доказательства
+  -> исходный источник
 ```
 
 ## Что читать дальше
 
-- [Output Reference](../reference/outputs.md)
-- [Workflow Reference](../reference/workflows.md)
-- [Artifacts Reference](../reference/artifacts.md)
+- [Справочник итоговых документов](../reference/outputs.md)
+- [Справочник процессов](../reference/workflows.md)
+- [Справочник артефактов](../reference/artifacts.md)
