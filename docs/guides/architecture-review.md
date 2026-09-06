@@ -1,143 +1,174 @@
-# Руководство по Architecture Review
+# Руководство по `Architecture Review`
 
-Architecture Review предназначен для evidence-backed анализа фактической архитектуры существующей системы и архитектурных root problems.
+`Architecture Review` — модуль проверки фактической архитектуры существующей
+системы. Он помогает установить подтверждённые архитектурные проблемы и их
+корневые причины, а при необходимости подготовить `Target Architecture` и
+`Remediation Roadmap`.
 
-## Когда выбирать
+## Когда выбирать модуль
 
-Используйте Architecture Review, если нужно понять:
+Выбирайте `Architecture Review`, когда нужно разобраться:
 
-- runtime/deployment topology;
-- ownership состояния и ресурсов;
-- API/IPC/process/persistence/trust boundaries;
-- ключевые command/read/async/external flows;
-- lifecycle, startup/readiness/shutdown;
-- retries, recovery, idempotency;
-- concurrency и shared-state behavior;
-- failure/partial-failure behavior;
-- configuration/secrets;
-- observability;
-- архитектурные root causes и remediation direction.
+- в топологии выполнения и развёртывания;
+- во владении состоянием и ресурсами;
+- в границах API, IPC, процессов, хранилищ и доверия;
+- в существенных командных, читающих, асинхронных и внешних потоках;
+- в жизненном цикле, запуске, готовности и остановке;
+- в повторах, восстановлении, идемпотентности и конкурентном доступе к общему состоянию;
+- в отказах и частичных отказах;
+- в конфигурации, секретах и наблюдаемости;
+- в подтверждённых архитектурных причинах проблем и направлениях их устранения.
 
-Если задача только в тестовом доказательстве поведения или implementation quality, Architecture Review не обязан быть включён.
+Если требуется только проверить тестовые доказательства поведения или качество
+реализации, этот модуль включать не обязательно. Он выбирается независимо от
+`Test Engineering` и `Code Quality Review`; включение одного из этих модулей не
+включает остальные. В запуске `NEW` должен быть выбран хотя бы один модуль
+верхнего уровня.
 
-## Выбор depth
+## Выберите глубину и вариант результата
 
-### `STANDARD_FULL`
+У `Architecture Review` две независимые настройки: глубина исследования и
+вариант итогового результата. Это не готовые предустановки: допустима любая из
+шести комбинаций.
 
-Стандартный полный аудит. Требует factual STM coverage уровня `FULL/COMPACT` перед full-model thematic discovery.
+| Глубина | Вариант результата |
+| --- | --- |
+| `STANDARD_FULL` | `REVIEW_ONLY` |
+| `STANDARD_FULL` | `REVIEW_PLUS_TARGET_ARCHITECTURE` |
+| `STANDARD_FULL` | `REVIEW_PLUS_TARGET_AND_ROADMAP` |
+| `FORENSIC` | `REVIEW_ONLY` |
+| `FORENSIC` | `REVIEW_PLUS_TARGET_ARCHITECTURE` |
+| `FORENSIC` | `REVIEW_PLUS_TARGET_AND_ROADMAP` |
 
-Подходит для большинства production repositories, когда нужен полный обзор системы без forensic-level evidence density.
+### Глубина исследования
 
-### `FORENSIC`
+`STANDARD_FULL` — полный стандартный архитектурный аудит в заданной области.
+До тематического анализа ему требуется принятая полная STM уровня
+`FULL/COMPACT`.
 
-Углублённое исследование. Требует `FULL/FORENSIC` factual depth.
+`FORENSIC` — более глубокое расследование для сложных, конкурентных,
+чувствительных к безопасности или спорных систем. Оно требует STM уровня
+`FULL/FORENSIC` и сохраняет более подробную причинную и доказательную историю.
 
-Используйте, когда:
+Глубина не равна полноте охвата. Даже углублённое расследование не даёт права
+считать исследованным каждый файл или нераскрытую часть системы; полнота охвата
+подтверждается отдельной проверкой. Подробные правила приведены в
+[справочнике режимов и управления процессом](../../references/review-modes-and-orchestration.md).
 
-- система security-sensitive;
-- существенны races/concurrency;
-- boundaries спорны;
-- есть сложные failure/recovery paths;
-- необходимо более подробное сохранение evidence и correction history.
+### Вариант итогового результата
 
-`FORENSIC` — это depth, а не endpoint. Он поддерживает все три результата.
+`REVIEW_ONLY` даёт завершённый результат: принятый набор архитектурных
+замечаний. Отсутствие целевой архитектуры или плана устранения не делает такой
+аудит неполным.
 
-## Выбор endpoint
+`REVIEW_PLUS_TARGET_ARCHITECTURE` дополнительно запрашивает документ `Target
+Architecture` — описание желаемого состояния системы, основанное на принятых
+архитектурных выводах.
 
-### `REVIEW_ONLY`
+`REVIEW_PLUS_TARGET_AND_ROADMAP` также запрашивает `Remediation Roadmap` —
+производный план движения к целевому состоянию: темы устранения, порядок,
+зависимости, приоритеты и шаги миграции. Этот план не заменяет `Target
+Architecture`: первый описывает желаемое состояние, второй — путь к нему.
 
-Результат: Architecture Review + authoritative findings.
+Вариант результата не меняет владельца технического смысла. `Target
+Architecture` и `Remediation Roadmap` — производные пользовательские документы;
+они не становятся источником фактов STM или владельцем `RF-*`. Создание плана
+не закрывает и не разрешает автоматически архитектурные замечания.
 
-Выбирайте, если нужен диагноз current system без проектирования будущего состояния.
+## Как формируются выводы
 
-### `REVIEW_PLUS_TARGET_ARCHITECTURE`
-
-Добавляет Target Architecture после принятия review.
-
-Target должна отвечать на подтверждённые root problems и не проектироваться из непроверенных candidates.
-
-### `REVIEW_PLUS_TARGET_AND_ROADMAP`
-
-Добавляет Target Architecture и Remediation Roadmap.
-
-Roadmap описывает ordering, prerequisites, gates и evidence, а не просто список пожеланий.
-
-## Как проходит анализ
-
-Высокоуровнево:
-
-```text
-baseline
--> Shared Evidence
--> accepted/fresh STM
--> Technical Model Coverage acceptance
--> thematic discovery
--> discovery coverage
--> independent candidate verification
--> root-boundary adjudication
--> severity
--> RF-* authority
--> optional Target Architecture
--> optional Roadmap
--> projections/package closeout
-```
-
-## Что считается Architecture finding
-
-`RF-*` должен иметь evidence-backed material consequence и root boundary.
-
-Плохой пример:
-
-> В проекте много singleton classes.
-
-Хороший архитектурный finding требует доказать, что конкретный mechanism создаёт architecture-level consequence, например нарушает ownership, isolation, lifecycle или failure semantics.
-
-Implementation smell без architecture root cause может принадлежать Code Quality Review.
-
-## As-Built и STM
-
-As-Built Architecture — human-readable synthesis accepted STM и architecture-specific interpretation. Она полезна для чтения, но factual authority остаётся STM.
-
-Если As-Built и STM расходятся, нельзя «починить факт» редактированием report. Нужно reconcile owning authority.
-
-## Coverage discipline
-
-Полный Architecture Review не должен строить global findings по локально исследованной области.
-
-Coverage review фиксирует:
-
-- covered domains;
-- partial/blocked areas;
-- high-risk domains;
-- limitations;
-- independent acceptance.
-
-Недостаточная coverage должна быть видима в final report.
-
-## Пример выбора
+Проверка использует общий фактический фундамент, а не строит собственную
+параллельную модель системы:
 
 ```text
-Architecture Review: ON
-Depth: FORENSIC
-Endpoint: REVIEW_PLUS_TARGET_AND_ROADMAP
-Test Engineering: OFF
-Code Quality Review: ON
-  Findings View/Report
+исходный код и другие источники
+  -> доказательства `WS-*` / `EV-*`
+  -> Shared Technical Model
+  -> архитектурная интерпретация
+  -> `RF-*`
+  -> пользовательские представления
 ```
 
-Это означает глубокий architecture analysis и отдельный Code Quality analysis. Code Quality не становится частью Architecture authority.
+`WS-*` объединяет ограниченную область исследования, а `EV-*` фиксирует
+наблюдение, привязанное к источнику и базовой ревизии. Принятые факты в Shared
+Technical Model (STM) описывают, что система существенно делает и как устроена.
+`Architecture Review` использует эти факты для интерпретации, но не изменяет их
+напрямую и не восстанавливает фактическое состояние в обход STM. Если обнаружен
+пробел или противоречие в фактах, он передаётся в соответствующий процесс STM.
 
-## После accepted review
+Технический факт не равен архитектурному замечанию. Например, факт «сервис A
+синхронно обращается к базе B» может поддержать вывод о единственной
+блокирующей зависимости на критическом пути, но сам по себе ещё не является
+`RF-*`. Аналогично, подтверждённая проблема не предписывает единственное
+решение: диагноз, риск и рекомендация остаются разными объектами.
 
-- новые commits → `REVALIDATE`;
-- нужен Target после `REVIEW_ONLY` → `EXTEND`;
-- нужен Roadmap после Target → `EXTEND`;
-- broken Markdown/report links → `PROJECTION_REPAIR`;
-- нужно просто прочитать accepted report → `USE_EXISTING`.
+## Что считается архитектурным замечанием
+
+`RF-*` — принятый архитектурный вывод, которым владеет `Architecture Review`.
+Он должен быть подкреплён доказательствами, иметь существенное последствие и
+прослеживаться через STM к `WS-*` / `EV-*`, а при необходимости — к исходному
+коду. Правдоподобное опасение, предпочтение стиля или одиночное наблюдение не
+становится `RF-*` без такой проверки.
+
+На этапе исследования формируются кандидаты, открытые вопросы и сведения о
+полноте охвата. После независимой проверки и решения по корневой границе
+принимаются только обоснованные замечания. Количество замечаний не доказывает
+полноту анализа: незакрытые или ограниченные области и известные ограничения
+должны быть видимы в результате.
+
+Подробные определения доказательств, STM и происхождения выводов см. в
+[разделе о доказательствах и технической модели](../concepts/evidence-and-technical-model.md)
+и [разделе об источниках истины](../concepts/authority-and-provenance.md).
+
+## Целевая архитектура и план устранения
+
+Если выбран соответствующий вариант результата, после принятия архитектурного
+аудита создаются производные документы.
+
+- `Target Architecture` описывает целевое устройство системы и изменения,
+  которые отвечают на подтверждённые архитектурные проблемы.
+- `Remediation Roadmap` описывает последовательность внедрения: зависимости,
+  контрольные точки, приоритеты и шаги перехода.
+
+Ни один из них не переписывает факты STM, смысл `RF-*` или текущее описание
+системы. Они опираются на принятые выводы и решения о целевом состоянии. Если
+выбран `REVIEW_ONLY`, эти документы не требуются; если выбран
+`REVIEW_PLUS_TARGET_ARCHITECTURE`, план устранения также не требуется.
+
+## Как читать результат
+
+Начните с пользовательского отчёта, чтобы понять область, ограничения,
+архитектурные замечания и их последствия. Затем при необходимости переходите
+по идентификаторам `RF-*` к подтверждающим фактам STM, `WS-*` / `EV-*` и
+источникам.
+
+Отчёты и другие человекочитаемые документы — производные представления
+принятого технического смысла. Править созданный Markdown-отчёт не следует,
+если нужно изменить факт или архитектурное замечание: изменение возвращается к
+владельцу смысла, после чего представление пересобирается. Подробнее см.
+[раздел о проекциях и пакетах результатов](../concepts/projections-and-packages.md).
+
+## Что делать после изменения системы
+
+Когда изменяется базовая ревизия или существенная часть системы,
+`REVALIDATE` заново оценивает затронутое принятое состояние на основании
+анализа влияния и свежих доказательств. Это адресная повторная проверка, а не
+автоматический полный аудит; при системном влиянии может потребоваться решение
+о полном повторном аудите. Практические правила приведены в
+[справочнике процессов](../reference/workflows.md) и
+[разделе об актуальности](../concepts/lifecycle-and-freshness.md).
+
+Если нужно добавить запрошенный результат позже, используйте `EXTEND`. Это
+аддитивный сценарий: для уже принятого `Architecture Review` глубина остаётся
+только для чтения, а вариант результата можно расширять лишь монотонно. Он не
+переписывает произвольно принятую область или настройки.
 
 ## Связанные документы
 
 - [Review Suite](../concepts/review-suite.md)
-- [Evidence и STM](../concepts/evidence-and-technical-model.md)
-- [Output Reference](../reference/outputs.md)
-- [Architecture Review example](../examples/architecture-review.md)
+- [Доказательства и STM](../concepts/evidence-and-technical-model.md)
+- [Источники истины и происхождение выводов](../concepts/authority-and-provenance.md)
+- [Жизненный цикл и актуальность](../concepts/lifecycle-and-freshness.md)
+- [Проекции и пакеты результатов](../concepts/projections-and-packages.md)
+- [Справочник процессов](../reference/workflows.md)
+- [Пример `Architecture Review`](../examples/architecture-review.md)
