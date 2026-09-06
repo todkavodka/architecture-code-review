@@ -74,11 +74,13 @@ rules.
 ## Outputs and projections
 
 Semantic CQ findings remain authority, not a projection or output toggle.
-Code Quality Findings View/Report is the core projection; Code Quality
-Summary is derived; Maintainability Hotspots and Roadmap Contribution are
-optional/derived outputs when selected. Generated outputs must use the shared
-Stage B projection lifecycle; no parallel Code Quality projection lifecycle is
-defined here.
+Each listed Code Quality document is a `DERIVED_PROJECTION` of accepted CQ
+authority and is also `USER_SELECTABLE`. Derived describes the document's
+source relationship; it does not mean automatically selected, mandatory, or
+always generated. This applies to Code Quality Findings View/Report, Code
+Quality Summary, Maintainability Hotspots, and Roadmap Contribution. Generated
+outputs must use the shared Stage B projection lifecycle; no parallel Code
+Quality projection lifecycle is defined here.
 
 Projection repair cannot change CQ semantic authority, and semantic
 `REVALIDATE` is not projection regeneration. `working/INDEX.md` remains

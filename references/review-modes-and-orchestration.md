@@ -274,7 +274,17 @@ registry. The following statuses reuse the existing workflow state vocabulary:
 
 ```text
 capabilities:
+  - id: architecture-review
+    selected: false
+    status: NOT_APPLICABLE | PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE
+    mode: STANDARD_FULL | FORENSIC        # present only when selected
+    endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP  # present only when selected
+    owning_artifact: <Architecture authority path>
+    owning_artifact_revision: <revision>
+    dependencies:
+      - <artifact/ref + revision>
   - id: test-review
+    selected: false
     status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
     endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN  # legacy Test Review input/projection
     outputs:
@@ -290,6 +300,7 @@ capabilities:
     dependencies:
       - <artifact/ref + revision>
   - id: code-quality-review
+    selected: false
     status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
     outputs:
       findings_view: false
@@ -383,8 +394,9 @@ The `INDEX` ownership and revision binding are the invariant, not the exact path
 
 For Code Quality Review, the `outputs` fields are independent coordinator
 selection state, not semantic authority and not Stage B projection records.
-`Findings View/Report` is the core useful projection but is not implicitly
-selected merely because the capability is enabled; `Code Quality Summary`,
+Each listed Code Quality output is both `USER_SELECTABLE` and a
+`DERIVED_PROJECTION`: it is derived from accepted CQ authority, but it is not
+implicitly selected, mandatory, or always generated. `Code Quality Summary`,
 `Maintainability Hotspots`, and `Roadmap Contribution` are selected only when
 requested or structurally required by a selected output. Package membership is
 resolved later as explicit selection plus dependency closure under the shared

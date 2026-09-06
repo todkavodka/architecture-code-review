@@ -243,34 +243,49 @@ semantic authority.
 For `NEW`, always show this complete startup shape before substantive work:
 
 ```text
-Architecture Review
-  depth: STANDARD_FULL | FORENSIC
-  endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
+Review Suite
+  at least one top-level capability must be selected
 
-Test Engineering
-  OFF
-  or independent output selection:
-    Test Assurance: required core
-    Test Plan: optional
-    Contract Consistency Report: optional
-    Test Environment Design: optional
-    Service Simulator Design: optional
-    Service Simulator Implementation Plan: optional
-    E2E Test Plan: optional
+  [ ] Architecture Review
+      if selected:
+        depth: STANDARD_FULL | FORENSIC
+        endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
 
-Code Quality Review
-  OFF
-  or independent output selection:
-    Findings View/Report: core projection, optional selection
-    Code Quality Summary: derived projection, optional selection
-    Maintainability Hotspots: optional/derived projection
-    Roadmap Contribution: optional/derived projection
+  [ ] Test Engineering
+      if selected:
+        Test Assurance: required core
+        Test Plan: optional
+        Contract Consistency Report: optional
+        Test Environment Design: optional
+        Service Simulator Design: optional
+        Service Simulator Implementation Plan: optional
+        E2E Test Plan: optional
+
+  [ ] Code Quality Review
+      if selected:
+        Findings View/Report: user-selectable derived projection
+        Code Quality Summary: user-selectable derived projection
+        Maintainability Hotspots: user-selectable derived projection
+        Roadmap Contribution: user-selectable derived projection
+
+  zero selected capabilities: invalid
+  one or more selected capabilities: valid
 
 Stack Addenda
   detected automatically; confirmed before substantive use
 ```
 
-For a full Architecture Review, the selected depth fixes the required Shared
+The three top-level capabilities are independently selectable. No capability is
+the implicit parent of another. Configuration under a capability is shown only
+when that capability is selected. A `NEW` session with no selected capability is
+invalid and must not proceed to substantive work.
+
+When Architecture Review is not selected, do not ask for Architecture depth or
+endpoint and do not create Architecture-only work. Shared evidence, STM, or a
+targeted factual dependency may still be resolved internally for a selected
+capability; that internal dependency does not select Architecture Review.
+
+For a selected full Architecture Review, the selected depth fixes the required Shared
 Technical Model coverage/depth projection: `STANDARD_FULL` requires
 `FULL/COMPACT` and `FORENSIC` requires `FULL/FORENSIC`. Persist the selected
 requirement, but do not represent it as accepted coverage at startup. The
@@ -297,6 +312,11 @@ requested Code Quality slice and reuses accepted/fresh shared evidence or STM
 dependencies; `RESUME` restores the persisted Code Quality selection rather
 than reconstructing it from conversation. Detailed Code Quality semantics live
 in `capabilities/code-quality-review/SKILL.md` and its referenced contracts.
+
+Each listed Code Quality document is a derived projection of accepted Code
+Quality authority. `DERIVED_PROJECTION` describes the document's relationship
+to its source; it does not mean the document is automatically selected or
+always generated. Output selection remains explicit and user-selectable.
 
 When Test Review is selected, its optional Test Engineering outputs are
 persisted as independent booleans, never as a compound mode:

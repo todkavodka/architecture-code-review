@@ -38,7 +38,10 @@ the projection meaning and contract remain unchanged.
 | `PRJ-CQ-02-HOTSPOTS` | `working/projections/code-quality/hotspots.md` | Maintainability Hotspots | selected accepted `CQ-*` records; Code Quality coverage state |
 | `PRJ-CQ-03-ROADMAP-CONTRIBUTION` | `working/projections/code-quality/roadmap-contribution.md` | Code Quality Roadmap Contribution | selected accepted `CQ-*` and linked `CQRA-*` records; Code Quality coverage state |
 
-These are all Stage B `PRJ-*` identities. They use the shared projection
+These are all Stage B `PRJ-*` identities. Each is a `DERIVED_PROJECTION` and
+`USER_SELECTABLE` output: it is derived from the listed accepted semantic
+authority, but selection is explicit and no projection is automatically enabled
+or mandatory merely because Code Quality Review is selected. They use the shared projection
 contract revision, freshness states, dependency snapshots, `V1`–`V4`,
 fingerprint, verified revision, and `RG-*` regeneration workflow. No
 Code-Quality-specific lifecycle or validation ladder exists.
