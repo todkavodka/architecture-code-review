@@ -1,272 +1,45 @@
 # Architecture Code Review
 
-`architecture-code-review` — evidence-first Skill для глубокого review существующих программных систем.
-
-Он объединяет три независимые capability:
-
-- **Architecture Review** — фактическая архитектура, ownership, lifecycle, boundaries, root causes, reliability/security implications;
-- **Test Engineering** — какие существенные поведения действительно доказаны тестами, где есть gaps и какие test artifacts нужны;
-- **Code Quality Review** — реализационные механизмы с существенными последствиями для maintainability, reliability, testability, lifecycle, resources, concurrency, dependencies и localization.
-
-Capability можно использовать отдельно или вместе в одном Review Suite.
+`architecture-code-review` — Skill для глубокого инженерного анализа существующих программных систем. Он помогает не просто собрать список замечаний, а построить проверяемую картину системы, связать выводы с доказательствами и сохранить результаты так, чтобы их можно было продолжать, перепроверять и расширять после изменений проекта.
 
 Главный принцип:
 
 > **Ширина утверждения не должна превышать ширину доказательств.**
 
----
+## Для кого
 
-## Что делает Skill
+Skill рассчитан на:
 
-Вместо lint-style списка подозрений Skill строит проверяемую цепочку:
+- архитекторов и технических лидов;
+- senior/staff engineers;
+- команды сопровождения legacy-систем;
+- Test/QA Engineering;
+- команды, готовящие модернизацию, миграцию или крупный refactoring;
+- независимый технический аудит перед релизом, интеграцией или передачей системы.
 
-```text
-source code / contracts / tests
-        |
-        v
-Shared Evidence
-        |
-        v
-Shared Technical Model
-        |
-        +--> Architecture Review
-        +--> Test Engineering
-        +--> Code Quality Review
-        |
-        v
-human-readable outputs
-```
+## Какие задачи решает
 
-Это позволяет:
+Review Suite объединяет три независимые capability:
 
-- сохранять provenance;
-- переиспользовать уже принятые факты;
-- продолжать незавершённый review;
-- перепроверять только затронутую изменениями область;
-- добавлять новые outputs без полного повторного аудита;
-- отделять technical authority от человекочитаемых Markdown reports.
+### Architecture Review
 
-Подробно модель описана в [Architecture Guide](docs/architecture.md).
+Восстанавливает фактическую архитектуру системы, проверяет ownership состояния и ресурсов, lifecycle, boundaries, concurrency, failure/recovery behavior, trust/security implications и подтверждённые архитектурные root problems.
 
----
+При необходимости дополнительно строит Target Architecture и Remediation Roadmap.
 
-# Установка
+### Test Engineering
 
-## Codex, OpenCode и другие агенты с `~/.agents/skills`
+Проверяет, какие существенные поведения действительно доказаны исполняемыми тестами, где остаются пробелы, согласованы ли contract representations и какие Test Plan, environment, simulator или E2E artifacts нужны.
 
-```bash
-git clone \
-  https://github.com/todkavodka/architecture-code-review.git \
-  ~/.agents/skills/architecture-code-review
-```
+### Code Quality Review
 
-После установки начните новую session агента, чтобы Skill был обнаружен заново.
+Находит не просто stylistic smells, а реализационные механизмы с доказуемым существенным последствием для сопровождаемости, надёжности, тестируемости, lifecycle, concurrency, dependencies, localization и других качеств.
 
-### Обновление
+Capability можно использовать отдельно или вместе. Ни одна из них не является обязательным родителем другой.
 
-```bash
-cd ~/.agents/skills/architecture-code-review
-git switch main
-git pull --ff-only
-```
+## Что вы получаете
 
-Проверить установленную revision:
-
-```bash
-git rev-parse HEAD
-```
-
----
-
-# Быстрый старт
-
-Самый простой запрос:
-
-```text
-Используй architecture-code-review для этого проекта.
-```
-
-Skill сначала определит repository/baseline, найдёт предыдущие audit packages и предложит подходящий Session Intent.
-
-Для нового review показывается Review Suite:
-
-```text
-Review Suite
-
-[ ] Architecture Review
-[ ] Test Engineering
-[ ] Code Quality Review
-```
-
-Нужно выбрать хотя бы одну capability.
-
----
-
-# Примеры использования
-
-## Только Architecture Review
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review:
-- depth: STANDARD_FULL
-- result: REVIEW_ONLY
-
-Test Engineering: OFF
-Code Quality Review: OFF
-```
-
-Для более глубокого расследования замените `STANDARD_FULL` на `FORENSIC`.
-
-## Architecture + Target Architecture + Roadmap
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review:
-- depth: STANDARD_FULL
-- result: REVIEW_PLUS_TARGET_AND_ROADMAP
-
-Test Engineering: OFF
-Code Quality Review: OFF
-```
-
-## Только Test Engineering
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review: OFF
-
-Test Engineering:
-- Test Assurance
-- Test Plan
-
-Code Quality Review: OFF
-```
-
-## Только Code Quality Review
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review: OFF
-Test Engineering: OFF
-
-Code Quality Review:
-- Findings View/Report
-- Summary
-```
-
-## Полный Review Suite
-
-```text
-Используй architecture-code-review.
-
-Session Intent: NEW
-
-Architecture Review:
-- depth: STANDARD_FULL
-- result: REVIEW_ONLY
-
-Test Engineering:
-- Test Assurance
-- Test Plan
-- Contract Consistency Report
-
-Code Quality Review:
-- Findings View/Report
-- Summary
-- Maintainability Hotspots
-```
-
-Skill подключает внутренние dependencies минимально необходимым slice и не должен автоматически включать все возможные outputs.
-
----
-
-# Повторное использование audit
-
-```text
-NEW
-```
-
-Новый review package.
-
-```text
-RESUME
-```
-
-Продолжить незавершённый workflow из persisted state.
-
-```text
-REVALIDATE
-```
-
-Проверить изменения через impact analysis и переоткрыть только затронутую semantic slice.
-
-```text
-EXTEND
-```
-
-Добавить capability/output к уже принятому package без повторного запуска несвязанных этапов.
-
-```text
-USE_EXISTING
-```
-
-Использовать уже принятый и актуальный результат.
-
-```text
-PROJECTION_REPAIR
-```
-
-Исправить только presentation: Markdown, Mermaid, links, navigation, wording — без изменения accepted technical semantics.
-
-Подробно эти flows описаны в [Workflow Guide](docs/workflows.md).
-
----
-
-# Что создаётся
-
-Во время review Skill может создавать:
-
-```text
-working/INDEX.md
-working/evidence/WS-*.md
-working/technical-model/...
-RF-* Architecture findings
-BC-* / CC-* / MAT-* / TM-* / GAP-* Test Engineering records
-CQ-* / CQRA-* Code Quality records
-PRJ-* derived projections
-RG-* regeneration sessions
-```
-
-`working/INDEX.md` хранит coordinator state, но не заменяет technical authority.
-
-`WS-*` / `EV-*` — evidence.
-
-Shared Technical Model хранит принятые общие технические факты.
-
-`RF-*`, Test Engineering records и `CQ-*` принадлежат своим capability.
-
-`PRJ-*` — человекочитаемые projections, а не новый источник технической истины.
-
-Полное описание структуры файлов, индексов, IDs и их использования: [Artifacts and State](docs/artifacts-and-state.md).
-
----
-
-# Какие итоговые документы можно получить
-
-В зависимости от выбранных capability и outputs Review Suite может сформировать:
+В зависимости от выбранной конфигурации Skill может сформировать:
 
 - Architecture Review;
 - Authoritative Findings Ledger;
@@ -284,32 +57,138 @@ Shared Technical Model хранит принятые общие техничес
 - Maintainability Hotspots;
 - Code Quality Roadmap Contribution.
 
-Что означает каждый документ и когда его выбирать: [Output Guide](docs/output-guide.md).
+Skill также сохраняет evidence, фактическую technical model, semantic records и coordinator state, чтобы последующие проверки не зависели от памяти конкретного чата или агента.
 
----
+## Установка
 
-# Документация
+Для Codex, OpenCode и других агентов, использующих `~/.agents/skills`:
 
-| Документ | О чём |
+```bash
+git clone \
+  https://github.com/todkavodka/architecture-code-review.git \
+  ~/.agents/skills/architecture-code-review
+```
+
+После установки начните новую agent session.
+
+Проверить установленную revision:
+
+```bash
+git -C ~/.agents/skills/architecture-code-review rev-parse HEAD
+```
+
+Подробно: [Установка, обновление и проверка](docs/getting-started/installation.md).
+
+## Быстрый старт
+
+Самый простой запрос:
+
+```text
+Используй architecture-code-review для этого проекта.
+```
+
+Skill сначала определит repository, baseline и существующие audit packages, затем предложит подходящий Session Intent.
+
+Для нового аудита показывается Review Suite:
+
+```text
+[ ] Architecture Review
+[ ] Test Engineering
+[ ] Code Quality Review
+```
+
+Нужно выбрать хотя бы одну capability.
+
+Architecture Review отдельно предлагает:
+
+```text
+Depth:
+  STANDARD_FULL
+  FORENSIC
+
+Endpoint:
+  REVIEW_ONLY
+  REVIEW_PLUS_TARGET_ARCHITECTURE
+  REVIEW_PLUS_TARGET_AND_ROADMAP
+```
+
+Depth и endpoint независимы: любой из двух depth поддерживает любой из трёх endpoint.
+
+## Примеры
+
+### Архитектурный аудит
+
+```text
+Используй architecture-code-review.
+Нужен новый Architecture Review: STANDARD_FULL, REVIEW_ONLY.
+Test Engineering и Code Quality не включай.
+```
+
+### Анализ качества тестов
+
+```text
+Используй architecture-code-review.
+Нужен Test Engineering review: Test Assurance + Test Plan.
+Architecture и Code Quality не включай.
+```
+
+### Анализ качества реализации
+
+```text
+Используй architecture-code-review.
+Нужен Code Quality Review: Findings View + Summary.
+Architecture и Test Engineering не включай.
+```
+
+### Повторная проверка после изменений
+
+```text
+Используй существующий audit package и REVALIDATE изменения после прошлого accepted baseline.
+```
+
+Полные end-to-end scenarios: [Examples](docs/index.md#сквозные-примеры).
+
+## Повторное использование результатов
+
+Review Suite рассчитан на длительную жизнь audit package:
+
+| Ситуация | Используйте |
 |---|---|
-| [Architecture](docs/architecture.md) | Review Suite, Shared Evidence, STM, authority boundaries, semantic state vs projections |
-| [Artifacts and State](docs/artifacts-and-state.md) | files, `INDEX.md`, IDs, indexes, registries, persistence и provenance |
-| [Workflows](docs/workflows.md) | `NEW`, `RESUME`, `REVALIDATE`, `EXTEND`, `USE_EXISTING`, `PROJECTION_REPAIR`, regeneration |
-| [Output Guide](docs/output-guide.md) | какие user-facing documents создаются и зачем |
-| [Roadmap](docs/roadmap.md) | дальнейшее развитие Skill |
+| Начать новый аудит | `NEW` |
+| Продолжить незавершённый | `RESUME` |
+| Проверить изменения проекта | `REVALIDATE` |
+| Добавить capability/output/endpoint | `EXTEND` |
+| Использовать уже принятый результат | `USE_EXISTING` |
+| Исправить только Markdown/Mermaid/wording | `PROJECTION_REPAIR` |
 
-Нормативные agent contracts находятся в `SKILL.md`, `references/` и `capabilities/*/references/`. Документы выше предназначены для человека и объясняют эту модель, не создавая параллельную authority.
+Изменившийся Git HEAD сам по себе не означает, что весь аудит нужно выполнять заново. `REVALIDATE` вычисляет затронутую область по dependency impact и сохраняет unaffected accepted state.
 
----
+## Важные свойства
 
-# Язык итоговых документов
+- Evidence и technical facts привязаны к конкретному baseline.
+- Человекочитаемый report не становится источником истины только потому, что он существует.
+- Semantic state и freshness итоговых документов отслеживаются отдельно.
+- Новый output можно добавить через `EXTEND`, не повторяя unrelated accepted work.
+- Presentation-only correction не имеет права менять accepted technical meaning.
+- Legacy packages reconciles консервативно; старые результаты не переписываются молча.
 
-Язык user-facing документов следует языку текущего запроса, если пользователь явно не выбрал другой.
+## Документация
 
-Точные IDs, status tokens, file paths, API/protocol names и code symbols не переводятся без необходимости.
+Начните с [Documentation Hub](docs/index.md).
 
----
+Основные разделы:
 
-# Лицензия
+- [Getting Started](docs/index.md#с-чего-начать)
+- [Concepts](docs/index.md#основные-понятия)
+- [Practical Guides](docs/index.md#практические-руководства)
+- [Reference](docs/index.md#справочник)
+- [Operations](docs/index.md#эксплуатация)
+- [End-to-End Examples](docs/index.md#сквозные-примеры)
+
+Терминология и canonical tokens: [Глоссарий](docs/reference/glossary.md).
+
+Нормативные agent contracts находятся в `SKILL.md`, `references/` и `capabilities/*/references/`. Документация в `docs/` объясняет модель человеку и не создаёт параллельную authority.
+
+## Лицензия
 
 См. [`LICENSE`](LICENSE).
