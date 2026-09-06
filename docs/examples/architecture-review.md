@@ -1,33 +1,33 @@
-# Пример: архитектурный аудит legacy backend
+# Пример: архитектурный аудит устаревшего серверного приложения
 
-Этот пример показывает end-to-end использование Architecture Review на существующем backend перед модернизацией.
+Этот пример показывает ограниченный по области запуск `Architecture Review`
+перед модернизацией сервиса заказов. Это не описание всего репозитория и не
+гарантия типовой структуры исходного кода; приведённые пути и идентификаторы
+иллюстративны, но согласованы между собой.
 
 ## Исходная ситуация
 
-Команда наследует сервис заказов. Документация неполная, часть business logic живёт в background workers, наблюдаются редкие duplicate events после timeout/retry.
+Команда получает сервис заказов с неполной документацией. Часть логики предметной
+области выполняют фоновые обработчики, а после тайм-аута и повторной попытки
+иногда появляются дублирующие события о завершении заказа. Нужны фактическое
+описание архитектурной причины, целевая архитектура и план устранения.
 
-Пользователь просит:
+Пользователь формулирует запрос так:
 
 ```text
 Используй architecture-code-review.
-Нужно понять фактическую архитектуру сервиса заказов, корневые причины duplicate completion events и получить Target Architecture с планом исправлений.
+Нужно понять фактическую архитектуру сервиса заказов, корневую причину
+дублирующих событий о завершении и получить Target Architecture с планом исправлений.
 ```
 
-## Startup
+## Начальная конфигурация
 
-Skill обнаруживает:
+Перед началом Skill обнаруживает отсутствие ранее принятого пакета аудита,
+фиксирует базовую ревизию `a1b2c3d` и подтверждает, что рабочее дерево не
+содержит незакоммиченных отслеживаемых изменений. Рекомендовано намерение
+сеанса `NEW`.
 
-- previous accepted audit отсутствует;
-- committed baseline: `a1b2c3d`;
-- working tree clean.
-
-Recommendation:
-
-```text
-Session Intent: NEW
-```
-
-Review Suite:
+В `Review Suite` пользователь включает только `Architecture Review`:
 
 ```text
 Architecture Review: ON
@@ -38,11 +38,17 @@ Test Engineering: OFF
 Code Quality Review: OFF
 ```
 
-`FORENSIC` выбран из-за concurrency/retry/failure-sensitive behavior. Endpoint независим от depth, поэтому Target + Roadmap допустимы.
+`FORENSIC` выбран из-за конкурентного выполнения, повторных попыток и
+неопределённого результата тайм-аута. Это один из шести допустимых вариантов:
+глубина и вариант итогового результата выбираются независимо. Включение
+`Architecture Review` не запускает `Test Engineering` или `Code Quality Review`.
+Углублённое исследование также не означает, что подтверждён охват всего
+репозитория: полнота охвата устанавливается отдельной проверкой.
 
-## Evidence discovery
+## Доказательства и фактическая модель
 
-Создаются worksets, например:
+Рабочие области исследования ограничивают физическую группировку доказательств,
+а не фиксируют архитектурный вывод:
 
 ```text
 WS-001-runtime-topology
@@ -52,7 +58,7 @@ WS-004-timeout-retry
 WS-005-shutdown-recovery
 ```
 
-В `WS-003`:
+В `WS-003` зарегистрированы адресуемые наблюдения:
 
 ```text
 EV-004
@@ -66,7 +72,7 @@ symbol: publish_completion
 observed: timeout result does not prove whether broker accepted the message
 ```
 
-В `WS-004`:
+В `WS-004` находится ещё одно наблюдение:
 
 ```text
 EV-003
@@ -74,11 +80,12 @@ source: src/workers/retry.py
 observed: retry path calls publish_completion again after ambiguous timeout
 ```
 
-Ни одно observation само по себе не объявляется архитектурным finding.
+`WS-*` — ограниченная рабочая область и физическая группа доказательств;
+`EV-*` — отдельное адресуемое наблюдение внутри неё. Ни то ни другое не является
+архитектурным замечанием, техническим фактом или записью `EVENT-*`.
 
-## Shared Technical Model
-
-Technical Model Gate принимает facts:
+`Shared Technical Model (STM)` принимает факты, подтверждённые этими и другими
+наблюдениями:
 
 ```text
 COMP-API
@@ -90,96 +97,102 @@ INT-PUBLISH-COMPLETION
 FLOW-ORDER-COMPLETION
 ```
 
-Relations показывают, что API и retry worker участвуют в одном material publication flow, а ownership terminal publication не закреплён отдельным механизмом.
+Связи фактов показывают, что API и обработчик повторных попыток участвуют в
+одном существенном потоке публикации, а отдельный механизм не закрепляет
+владение окончательной публикацией. STM хранит этот фактический смысл;
+`Architecture Review` использует его, но не создаёт факты приватно.
 
-## Architecture discovery
+## Архитектурное замечание
 
-После factual coverage accepted Architecture Review анализирует lifecycle и ownership.
+После принятия фактической модели и проверки полноты охвата модуль формирует
+кандидат: несколько путей выполнения могут инициировать окончательную
+публикацию после неоднозначного тайм-аута. Независимая проверка ищет
+идемпотентность на стороне брокера, уникальный ключ публикации, механизм
+транзакционного исходящего буфера, устранение дубликатов у потребителя и
+владение повторными попытками.
 
-Candidate:
-
-> Несколько execution paths могут инициировать terminal publication после ambiguous timeout.
-
-Independent verification пытается опровергнуть candidate:
-
-- ищет broker-side idempotency;
-- ищет unique publication key;
-- проверяет transaction/outbox mechanism;
-- проверяет consumer deduplication contract;
-- проверяет retry generation ownership.
-
-Допустим, ни один mechanism не обеспечивает system-level uniqueness.
-
-## Accepted finding
-
-Появляется `RF-*`, например:
+Допустим, ни один из этих механизмов не обеспечивает уникальность на уровне
+системы. После независимой проверки и решения по корневой границе принимается
+архитектурное замечание `RF-007`:
 
 ```text
 RF-007
-root boundary: terminal event publication ownership
-material consequence: ambiguous timeout can cause repeated publication attempts without a single authoritative publication owner
-severity: HIGH
-supporting refs:
+корневая граница: владение публикацией окончательного события
+существенное последствие: неоднозначный тайм-аут позволяет повторные попытки
+публикации без единственного владельца публикации
+критичность: HIGH
+основание:
   INT-PUBLISH-COMPLETION@rev2
   WS-003#EV-007
   WS-004#EV-003
 ```
 
-Finding не формулируется как «retry code плохой». Root boundary — ownership terminal publication.
-
-## Target Architecture
-
-Target может предложить, например, transactional outbox + single publication ownership, если это следует из accepted constraints и прошло target review.
-
-Traceability:
+`RF-007` — интерпретация, которой владеет `Architecture Review`, а не исходный
+факт. Цепочка происхождения и обоснования остаётся читаемой в обоих
+направлениях:
 
 ```text
-RF-007
-  -> target invariant: one durable publication intent per terminal transition
-  -> target mechanism: transactional outbox owned by order state transition
+src/events/publisher.py@a1b2c3d
+  -> WS-003#EV-007
+  -> INT-PUBLISH-COMPLETION@rev2
+  -> RF-007
 ```
 
-## Remediation Roadmap
+## Производные итоговые документы
 
-Roadmap не начинается с «переписать publisher».
+Выбранный вариант `REVIEW_PLUS_TARGET_AND_ROADMAP` запрашивает после принятия
+аудита два дополнительных документа. Пользователь выбрал вариант результата,
+а не каждый файл пакета отдельной отметкой.
 
-Возможный порядок:
+`Target Architecture` предлагает целевое состояние: один устойчиво сохранённый
+замысел публикации на окончательный переход заказа и один владелец публикации,
+основанный на транзакционном исходящем буфере. Это рекомендация, отвечающая на
+`RF-007`, а не само замечание и не новый факт о текущей системе.
 
-1. зафиксировать publication identity/invariant;
-2. добавить durable outbox state;
-3. перевести producer path на outbox write inside transaction;
-4. внедрить publisher ownership/retry semantics;
-5. добавить observability and migration checks;
-6. только после acceptance удалить старые direct publish paths.
+`Remediation Roadmap` превращает рекомендацию в порядок действий: зафиксировать
+идентичность и инвариант публикации, добавить состояние исходящего буфера,
+перенести запись намерения в транзакцию, определить владение публикацией и
+повторными попытками, затем проверить миграцию и только после принятия убрать
+прежние прямые пути публикации. Наличие пункта в плане не закрывает `RF-007`
+автоматически.
 
-Для каждого этапа определяются prerequisites и evidence gate.
+Оба документа — производные человекочитаемые представления. Они не становятся
+источниками фактов STM, не владеют `RF-007` и не переписывают описание текущей
+системы.
 
-## Итоговый package
+## Итоговый снимок пакета результатов
 
-Пользователь получает:
+Ниже приведён компактный снимок принятого результата для этого примера.
+Идентификаторы `PRJ-ARCH-*` иллюстративны: они показывают устойчивую
+идентичность проекции, а не фиксированный реестр проекций для каждого
+репозитория или имя файла.
 
 ```text
-Architecture Review
-Authoritative Findings Ledger
-Target Architecture
-Remediation Roadmap
-working/INDEX.md
-evidence/WS-*.md
-technical-model/...
+Базовая ревизия: a1b2c3d
+Выбранный модуль: Architecture Review
+Глубина: FORENSIC
+Вариант результата: REVIEW_PLUS_TARGET_AND_ROADMAP
+
+Принятое семантическое состояние
+  STM: COMP-API, COMP-WORKER, DS-ORDERS,
+       EVENT-ORDER-COMPLETED, INT-PUBLISH-COMPLETION@rev2,
+       FLOW-ORDER-COMPLETION
+  Architecture Review: RF-007
+
+Производные документы
+  PRJ-ARCH-00-REVIEW   — Architecture Review
+  PRJ-ARCH-01-FINDINGS — Authoritative Findings Ledger
+  PRJ-ARCH-02-TARGET   — Target Architecture
+  PRJ-ARCH-03-ROADMAP  — Remediation Roadmap
+
+Состав пакета результатов
+  требуемые для выбранного варианта участники: четыре указанные проекции
+  проверенные ревизии и актуальность требуемых участников: CURRENT
+  решение о составе: сохранено для выбранного варианта результата
 ```
 
-### Снимок принятого результата
-
-```text
-baseline: a1b2c3d
-Review Suite: Architecture Review = ON (FORENSIC, REVIEW_PLUS_TARGET_AND_ROADMAP)
-selected documents: Architecture Review, Findings Ledger, Target Architecture, Roadmap
-package members: PRJ-ARCH-00-REVIEW, PRJ-ARCH-01-FINDINGS,
-                 PRJ-ARCH-02-TARGET, PRJ-ARCH-03-ROADMAP
-freshness: CURRENT for required package members
-```
-
-Один проверяемый путь чтения выглядит так:
+Это не означает, что Markdown-файл сам стал семантическим источником истины.
+Например, проверяемый путь от документа к факту выглядит так:
 
 ```text
 PRJ-ARCH-00-REVIEW
@@ -189,24 +202,24 @@ PRJ-ARCH-00-REVIEW
   -> src/events/publisher.py@a1b2c3d
 ```
 
-Такой пакет можно использовать повторно: новый исходный код требует
-`REVALIDATE`, а добавление ещё не выбранного результата — `EXTEND`.
+После завершения сохраняются не только итоговые документы: STM и `RF-007` как
+принятое семантическое состояние, зарегистрированные проекции с их проверенными
+ревизиями и актуальностью, а также `working/INDEX.md` с состоянием процесса,
+выбранной конфигурацией, реестром артефактов и передачей состояния. `INDEX.md`
+помогает возобновить процесс, но не заменяет STM или архитектурное замечание.
 
-## Через месяц
+## Повторное использование позже
 
-После изменений пользователь не запускает новый forensic audit автоматически:
+Сохранённый пакет не становится автоматически актуальным только потому, что он
+существует. Если изменится исходный код или его зависимости, `REVALIDATE`
+определяет затронутую область по влиянию изменений и собирает нужные свежие
+доказательства; он не обязан повторно проверять весь репозиторий.
 
-```text
-Используй существующий audit package и REVALIDATE изменения после текущего HEAD.
-```
+Если потребуется действительно новый результат или новая область, уместен
+`EXTEND`: он добавляет допустимый объём работы, не переписывая прежнюю принятую
+конфигурацию. Если повреждена лишь зарегистрированная проекция, а семантический
+источник истины остаётся действительным, уместен `PROJECTION_REPAIR`.
 
-Impact analysis должен проверить только affected facts/findings/target assumptions и сохранить unaffected accepted state.
-
-## Что показывает этот пример
-
-- evidence отделено от interpretation;
-- factual model переиспользуется;
-- finding требует falsification и root adjudication;
-- Target строится после accepted review;
-- Roadmap связан с findings/target;
-- изменения проекта обрабатываются через bounded `REVALIDATE`.
+Подробные условия этих процессов приведены в [справочнике процессов](../reference/workflows.md),
+[руководстве по `Architecture Review`](../guides/architecture-review.md) и
+[описании проекций и пакетов](../concepts/projections-and-packages.md).
