@@ -11,13 +11,13 @@
 Отвечает на вопросы:
 
 - как система реально устроена;
-- где проходят существенные runtime и trust boundaries;
+- где проходят существенные границы выполнения и доверия;
 - кто владеет состоянием и ресурсами;
-- как устроены lifecycle, concurrency, retries, recovery и failure behavior;
-- какие архитектурные root findings доказаны;
-- какую Target Architecture и Remediation Roadmap следует построить, если они запрошены.
+- как устроены жизненный цикл, конкурентное выполнение, повторы, восстановление и обработка отказов;
+- какие архитектурные корневые выводы подтверждены;
+- какие `Target Architecture` и `Remediation Roadmap` нужны, если они запрошены.
 
-Authority: `RF-*` и другие architecture-owned records.
+Источники технической истины: `RF-*` и другие записи, принадлежащие `Architecture Review`.
 
 ### Test Engineering
 
@@ -25,21 +25,21 @@ Authority: `RF-*` и другие architecture-owned records.
 
 - какие существенные поведения должны быть доказаны;
 - какие из них действительно подтверждаются исполняемыми тестами;
-- где test evidence недостаточно;
-- расходятся ли DECLARED / IMPLEMENTED / CONSUMED / TESTED representations;
-- какие Test Plan, environment, simulator или E2E artifacts нужны.
+- где недостаточно тестовых доказательств;
+- расходятся ли представления `DECLARED` / `IMPLEMENTED` / `CONSUMED` / `TESTED`;
+- какие `Test Plan`, проект тестовой среды, имитатор сервиса или `E2E Test Plan` нужны.
 
-Authority: `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, `TASK-*`.
+Источники технической истины: `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, `TASK-*`.
 
 ### Code Quality Review
 
-Ищет не стилистические предупреждения сами по себе, а implementation mechanisms с доказуемым существенным последствием для сопровождения, надёжности, тестируемости, concurrency, dependencies, resource lifecycle и других качеств.
+Ищет не стилистические предупреждения сами по себе, а механизмы реализации с доказуемым существенным последствием для сопровождения, надёжности, тестируемости, конкурентного выполнения, зависимостей, жизненного цикла ресурсов и других качеств.
 
-Authority: `CQ-*` и `CQRA-*`.
+Источники технической истины: `CQ-*` и `CQRA-*`.
 
 ## Независимый выбор
 
-Для `NEW` пользователь выбирает top-level capabilities независимо:
+Для `NEW` пользователь независимо выбирает основные модули проверки:
 
 ```text
 [ ] Architecture Review
@@ -55,11 +55,11 @@ AT_LEAST_ONE_TOP_LEVEL_CAPABILITY_SELECTED
 
 Допустимы все семь непустых комбинаций.
 
-Architecture Review не является обязательным родителем Test Engineering или Code Quality. Если другой capability нужен accepted STM slice, он разрешается как factual dependency и не включает Architecture Review автоматически.
+`Architecture Review` не является обязательным родителем для `Test Engineering` или `Code Quality Review`. Если другому модулю нужна принятая часть STM, она разрешается как зависимость с фактическими данными и не включает `Architecture Review` автоматически.
 
 ## Настройка модуля и выбор документов — разные вещи
 
-Выбор capability определяет, какая semantic work должна выполняться. Выбор итоговых документов определяет, какие projections нужны пользователю.
+Выбор модуля определяет, какая семантическая работа должна быть выполнена. Выбор итоговых документов определяет, какие представления нужны пользователю.
 
 Например:
 
@@ -71,11 +71,11 @@ Code Quality Review: ON
   Roadmap Contribution: OFF
 ```
 
-означает, что Code Quality analysis выполняется, но пользователь заказал только один человекочитаемый output.
+означает, что выполняется анализ качества реализации, но пользователь заказал только один человекочитаемый итоговый документ.
 
 ## Architecture: две независимые оси
 
-Architecture Review имеет независимые depth и endpoint:
+`Architecture Review` имеет две независимые оси: глубину исследования и конечный результат:
 
 ```text
 Depth:
@@ -88,11 +88,11 @@ Endpoint:
   REVIEW_PLUS_TARGET_AND_ROADMAP
 ```
 
-Любой depth поддерживает любой endpoint. `FORENSIC` не означает `REVIEW_ONLY`.
+Любая глубина поддерживает любой конечный результат. `FORENSIC` не означает `REVIEW_ONLY`.
 
-## Общий factual substrate
+## Общий фактический фундамент
 
-Capabilities не должны независимо «изобретать» систему каждая для себя.
+Модули проверки не должны независимо «изобретать» систему каждый для себя.
 
 ```text
 Source
@@ -103,7 +103,7 @@ Source
  Architecture  Test   Code Quality
 ```
 
-Shared layer хранит наблюдения и факты. Capability layer хранит интерпретации и решения своей области.
+Общий слой хранит наблюдения и факты. Слой модулей проверки хранит интерпретации и решения в своих областях.
 
 ## Когда capabilities взаимодействуют
 
@@ -119,32 +119,32 @@ INT-014 publication after commit
   +--> CQ-012 duplicated retry mechanism
 ```
 
-Это не дублирование. Каждая запись отвечает на свой вопрос и имеет отдельный lifecycle.
+Это не дублирование. Каждая запись отвечает на свой вопрос и имеет отдельный жизненный цикл.
 
 ## Stack Addenda
 
-Языковые/framework-specific addenda — lenses, а не top-level capabilities. Они могут уточнять анализ для Rust, TypeScript, React, Tauri и других стеков, но не создают новую semantic authority и не должны молча включать capability.
+Дополнения для конкретных языков и фреймворков уточняют анализ, но не являются основными модулями проверки. Они не создают новый источник технической истины и не должны молча включать модуль проверки.
 
 ## Что происходит после выбора
 
 Для `NEW` последовательность концептуально такая:
 
 ```text
-baseline
--> Review Suite selection
--> persistent STM bootstrap
--> minimum required evidence/model slice
--> selected capability work
--> semantic stabilization
+базовая ревизия
+-> выбор в Review Suite
+-> создание сохранённой начальной STM
+-> минимально необходимая часть доказательств и модели
+-> работа выбранных модулей
+-> стабилизация семантического состояния
 -> Projection Impact Analysis
--> package resolution
--> requested deliverables
+-> определение состава пакета
+-> запрошенные итоговые документы
 ```
 
 ## Что читать дальше
 
-- [Evidence и STM](evidence-and-technical-model.md)
-- [Authority и provenance](authority-and-provenance.md)
-- [Architecture Review guide](../guides/architecture-review.md)
+- [Доказательства и STM](evidence-and-technical-model.md)
+- [Источники истины и происхождение выводов](authority-and-provenance.md)
+- [Руководство по Architecture Review](../guides/architecture-review.md)
 - [Test Engineering guide](../guides/test-engineering.md)
-- [Code Quality Review guide](../guides/code-quality-review.md)
+- [Руководство по Code Quality Review](../guides/code-quality-review.md)
