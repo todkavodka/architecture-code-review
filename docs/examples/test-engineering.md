@@ -22,7 +22,7 @@ Architecture Review и Code Quality Review не включай.
 
 ## Начальная конфигурация
 
-Skill фиксирует базовую ревизию `a1b2c3d` и начинает новый сеанс `NEW`. В
+Инструмент фиксирует базовую ревизию `a1b2c3d` и начинает новый сеанс `NEW`. В
 `Review Suite` включён один самостоятельный модуль верхнего уровня:
 
 ```text
@@ -51,7 +51,7 @@ observed: order transaction may commit before the response reaches the client
 
 EV-002
 source: tests/test_retry.py
-observed: test_retry_after_500 covers an explicit HTTP 500 response
+observed: test_retry_after_500 проверяет явный ответ HTTP 500
 
 EV-003
 source: api/openapi.yaml

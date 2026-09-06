@@ -1,156 +1,180 @@
-# Пример: повторная проверка после изменений
+# Пример: адресная повторная проверка после изменения
 
-## Исходная ситуация
+Этот пример показывает повторное использование принятого пакета аудита после
+изменения системы. Идентификаторы, пути и ревизии иллюстративны; адресная
+повторная проверка не является ни автоматическим полным аудитом, ни
+автоматической пересборкой документов.
 
-Месяц назад команда завершила Architecture Review + Test Engineering. Package принят на baseline `A`.
+## Принятое сохранённое состояние
 
-С тех пор появились 24 commits. Изменены:
-
-- retry coordinator;
-- completion event publisher;
-- два integration tests;
-- UI не менялся;
-- auth subsystem не менялся.
-
-Пользователь просит:
+Месяц назад команда завершила пакет `PKG-ORDER-REVIEW` на базовой ревизии `A`
+с конфигурацией `Architecture Review + Test Engineering`. В `working/INDEX.md`
+сохранены принятая конфигурация, границы области, ссылки на основные артефакты
+и состав пакета:
 
 ```text
-Используй существующий audit package и проверь изменения после прошлого accepted baseline.
+Базовая ревизия: A
+Состояние процесса: COMPLETE
+Выбранные модули: Architecture Review, Test Engineering
+Семантические записи:
+  STM: INT-PUBLISH-COMPLETION@rev2, EVENT-ORDER-COMPLETED
+  Architecture Review: RF-007
+  Test Engineering: BC-022, MAT-012, TM-044, GAP-009
+Проекции пакета:
+  PRJ-ARCH-00-REVIEW                           CURRENT
+  PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY         CURRENT
+  PRJ-TEST-REVIEW-01-ASSURANCE-MAP             CURRENT
+  PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT CURRENT
+Политика пакета: ALL_SCOPED_CURRENT
 ```
 
-## Intent
+Эта запись — сохранённое принятое состояние, но не доказательство его
+актуальности относительно будущей ревизии. `working/INDEX.md` хранит
+координацию, а не смысл STM, `RF-*`, `BC-*`, `MAT-*`, `TM-*` или `GAP-*`.
 
-Skill рекомендует:
+## Изменение и выбор намерения
+
+После принятия пакета появилась текущая базовая ревизия `B`. Изменены
+координатор повторных попыток, издатель события о завершении и два
+интеграционных теста; интерфейс пользователя и подсистема аутентификации не
+менялись. Пользователь просит проверить изменения после принятой ревизии.
+
+Подходящее намерение сеанса — `REVALIDATE`. Оно восстанавливает принятую
+конфигурацию согласно контракту, а не предлагает незаметно определить её
+заново:
 
 ```text
-REVALIDATE
+Восстановленная конфигурация: Architecture Review + Test Engineering
+Базовая ревизия прежнего состояния: A
+Текущая базовая ревизия для новых доказательств: B
 ```
 
-Предыдущая Review Suite configuration восстанавливается read-only. Пользователь не выбирает заново capabilities и outputs.
+Если пользователь попросил бы исследовать новую законную область, например
+механизм выставления счетов, маршрут был бы `EXTEND`, а не расширение
+`REVALIDATE` без явного решения.
 
-## Change inventory
+## Определение влияния
 
-Git diff и Project Profile delta используются для routing:
+Сам список изменённых путей не доказывает смыслового влияния. Новые
+адресуемые наблюдения на ревизии `B` показывают следующее:
 
 ```text
-src/retry/* changed
-src/events/publisher.py changed
-tests/integration/retry_* changed
+WS-014-retry-publication#EV-061
+source: src/retry/coordinator.py
+observed: повторная попытка теперь передаёт устойчивый ключ публикации
+
+WS-014-retry-publication#EV-062
+source: src/events/publisher.py
+observed: издатель записывает ключ до отправки брокеру
+
+WS-014-retry-publication#EV-063
+source: tests/integration/retry_publication.spec.ts
+observed: тест воспроизводит тайм-аут после принятия сообщения брокером
 ```
 
-Эти paths не являются сами по себе доказательством semantic impact.
-
-## Dependency impact
-
-Accepted records показывают зависимости:
+Техническая модель повторно проверяет затронутое взаимодействие:
 
 ```text
-INT-PUBLISH-COMPLETION
-  -> RF-007
-  -> BC-022
-  -> MAT-012
-  -> CQ-019 (if selected in prior suite)
+INT-PUBLISH-COMPLETION@rev2
+  → кандидат новой редакции
+  → INT-PUBLISH-COMPLETION@rev3 (ACCEPTED, VALID)
 ```
 
-Auth facts и unrelated storage migration records не имеют demonstrated linkage к change.
-
-Impact классифицируется как `BOUNDARY`, потому что затронута material publication/retry boundary.
-
-## Minimum dependency slice
-
-Skill revalidates:
-
-- affected evidence observations;
-- relevant STM interactions/events;
-- `RF-007`;
-- `BC-022` / `MAT-012` / associated `TM/GAP`;
-- dependent projections after semantic stabilization.
-
-Он не обязан заново анализировать auth, unrelated REST endpoints или весь test suite.
-
-## Fresh evidence
-
-Создаются/обновляются observations на current baseline `B`.
-
-Допустим, новый implementation добавил durable publication key и tests подтверждают timeout/retry scenario.
-
-Technical Model Gate принимает revised interaction fact.
-
-Architecture revalidation решает, остаётся ли `RF-007`, изменяется или superseded.
-
-Test Engineering revalidation обновляет `TM-*` и может закрыть соответствующий `GAP-*` после accepted evidence.
-
-## Preservation
-
-Unchanged accepted auth subsystem сохраняется без revalidation, потому что dependency analysis не показывает impact.
-
-Это ключевой смысл targeted workflow:
+По зависимостям от этого факта определён класс влияния `BOUNDARY`: затронута
+граница публикации и повторных попыток. Это не тяжесть замечания и не правило
+«проверять только изменённые файлы». Затронутый семантический срез и его
+происхождение таковы:
 
 ```text
-changed HEAD
-!=
-full audit automatically required
+INT-PUBLISH-COMPLETION@rev3
+  → RF-007
+  → BC-022
+  → MAT-012
+  → TM-044 / GAP-009
+  → WS-014-retry-publication#EV-061..EV-063
+  → исходный код и тесты на B
 ```
 
-## Projection impact
+Поэтому повторно проверяются новые наблюдения, взаимодействие STM, `RF-007`,
+`BC-022`, `MAT-012`, `TM-044` и `GAP-009`. Подсистема аутентификации остаётся
+принятой без повторной проверки, поскольку анализ зависимостей не показал
+влияния. Охват адресного среза и глубина его проверки различаются: достаточный
+охват `BOUNDARY` не означает, что глубина исследования равна полному аудиту.
 
-После semantic stabilization выполняется Projection Impact Analysis.
+## Семантическое решение и влияние на проекции
 
-Допустим:
+Свежие доказательства подтверждают, что один ключ публикации сохраняется до
+отправки, а повторная попытка не создаёт второго наблюдаемого события. После
+принятой повторной проверки `Architecture Review` фиксирует решение по
+`RF-007` в принадлежащем ему семантическом артефакте; `TM-044` обновляется на
+полное доказательство, а `GAP-009` закрывается только этой повторной
+проверкой, а не появлением нового тестового файла.
+
+Только после стабилизации этого семантического состояния выполняется `Projection
+Impact Analysis`:
 
 ```text
-Architecture Report -> STALE
-Test Assurance Summary -> STALE
-Unrelated Contract Report -> CURRENT
+PRJ-ARCH-00-REVIEW                           STALE
+PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY         STALE
+PRJ-TEST-REVIEW-01-ASSURANCE-MAP             STALE
+PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT CURRENT
 ```
 
-Impact accounting не переписывает documents.
+Это учёт влияния, а не пересборка. Если нужен свежий архитектурный отчёт и
+сводка Test Assurance, пользователь явно запускает адресный сеанс `RG-*` для
+этих проекций. До него семантические записи могут быть текущими, а прежние
+отчёты — `STALE`; принятое не равно текущему.
 
-Если пользователь требует fresh Architecture Report и Assurance Summary, запускается explicit targeted `RG-*` session.
+`PROJECTION_REPAIR` применим только к повреждённому представлению при
+неизменном принятом семантическом источнике. Он не может изменить
+`INT-PUBLISH-COMPLETION`, `RF-007`, `BC-022`, `MAT-012`, `TM-044` или `GAP-009`.
+Если при ремонте проекции обнаружено смысловое расхождение, процесс
+останавливается и требует семантической повторной проверки.
 
-## Когда был бы нужен full reaudit
+## Границы классов влияния
 
-Если changes одновременно перестроили persistence ownership, runtime topology, trust boundaries и major lifecycle, impact мог бы стать `SYSTEMIC`.
+В этом сценарии выбран `BOUNDARY`. `LOCAL` применим, когда подтверждённо
+затронута лишь локальная семантическая область, а `SYSTEMIC` — когда влияние
+распространяется через существенные зависимости и границы системы. При
+`SYSTEMIC` контракт может вернуть `FULL_REAUDIT_RECOMMENDED`; это рекомендация,
+требующая решения пользователя, а не автоматический запуск полного аудита.
 
-Тогда Skill возвращает:
+## Итоговый снимок после повторной проверки
 
 ```text
-FULL_REAUDIT_RECOMMENDED
-user_decision_required: true
+Предыдущая базовая ревизия: A
+Текущая базовая ревизия: B
+Намерение: REVALIDATE
+Класс влияния: BOUNDARY
+
+Сохранённое текущее семантическое состояние
+  STM: INT-PUBLISH-COMPLETION@rev3 (ACCEPTED, VALID)
+  Architecture Review: RF-007 (решение повторной проверки сохранено владельцем)
+  Test Engineering: BC-022, MAT-012, TM-044 (полное доказательство),
+                    GAP-009 (разрешён после принятой повторной проверки)
+  новые доказательства: WS-014-retry-publication#EV-061..EV-063
+
+Состояние пакета результатов
+  PRJ-ARCH-00-REVIEW                           STALE
+  PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY         STALE
+  PRJ-TEST-REVIEW-01-ASSURANCE-MAP             STALE
+  PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT CURRENT
+  пакет: не CURRENT по политике ALL_SCOPED_CURRENT до явной пересборки
 ```
 
-И ждёт решения пользователя.
-
-## Итог
-
-`REVALIDATE` даёт три важных свойства:
-
-1. fresh evidence только там, где она нужна;
-2. preservation unaffected accepted state;
-3. явное отделение semantic revalidation от projection regeneration.
-
-## Снимок результата после повторной проверки
+Сохраняются новая базовая ревизия, принятая конфигурация, новые доказательства,
+перепроверенные записи и их зависимости, решение о влиянии, актуальность всех
+затронутых проекций и состав пакета. Маршрут от будущего свежего отчёта к
+основанию остаётся проверяемым:
 
 ```text
-previous baseline: A
-current baseline: B
-restored Review Suite: Architecture Review + Test Engineering [READ-ONLY]
-affected semantic records: INT-PUBLISH-COMPLETION, RF-007, BC-022, MAT-012
-package members: PRJ-ARCH-00-REVIEW, PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
-freshness after impact accounting: affected documents STALE;
-                                 unrelated Contract Report CURRENT
+PRJ-ARCH-00-REVIEW (после RG-*)
+  → RF-007 (решение повторной проверки)
+  → INT-PUBLISH-COMPLETION@rev3
+  → WS-014-retry-publication#EV-061..EV-063
+  → src/retry/coordinator.py, src/events/publisher.py@B
 ```
 
-Путь проверки обновлённого вывода остаётся тем же:
-
-```text
-fresh Architecture Review projection
-  -> revalidated RF-007
-  -> revised STM interaction
-  -> fresh WS#EV
-  -> changed source at baseline B
-```
-
-Пакет остаётся пригодным для повторного использования после закрытия нужных
-проверок. Если требуется свежий отчёт, это отдельный явный запрос `RG-*`, а не
-автоматическое следствие `REVALIDATE`.
+Подробные правила приведены в [справочнике процессов](../reference/workflows.md),
+[описании жизненного цикла и актуальности](../concepts/lifecycle-and-freshness.md)
+и [описании проекций и пакетов](../concepts/projections-and-packages.md).

@@ -1,142 +1,215 @@
-# Пример: Code Quality Review
+# Пример: аудит качества реализации
+
+Этот пример показывает ограниченный аудит качества реализации интерфейса
+оформления заказа. Пути, идентификаторы и сведения о приложении приведены для
+иллюстрации; сценарий не утверждает, что проверяет весь репозиторий или
+автоматически исправляет код.
 
 ## Исходная ситуация
 
-Frontend имеет несколько entrypoints и постепенно оброс локальными workaround для локализации, retries и state synchronization. Команда хочет понять, какие проблемы действительно существенны, а не получить список lint warnings.
+Клиентское приложение имеет три точки входа: основное окно, страницу в браузере
+и предварительный просмотр настроек. В каждой из них независимо развивается
+выбор языка. Команда собирается объединить этот механизм и хочет отличить
+доказанную проблему качества от перечня предупреждений анализатора.
 
-Запрос:
+Пользователь просит:
 
 ```text
 Используй architecture-code-review.
-Нужен только Code Quality Review: Findings View, Summary и Maintainability Hotspots.
+Нужен только Code Quality Review: Code Quality Findings View,
+Code Quality Summary и Maintainability Hotspots.
 Architecture Review и Test Engineering не включай.
 ```
 
-## Review Suite
+## Начальная конфигурация и доказательства
+
+Инструмент фиксирует базовую ревизию `a1b2c3d` и начинает сеанс `NEW`. В `Review
+Suite` выбран самостоятельный модуль:
 
 ```text
 Architecture Review: OFF
 Test Engineering: OFF
 Code Quality Review: ON
-  Findings View/Report
-  Code Quality Summary
-  Maintainability Hotspots
+  Явно выбранные итоговые документы:
+    Code Quality Findings View
+    Code Quality Summary
+    Maintainability Hotspots
 ```
 
-## Signal collection
-
-Инструменты и repository inspection находят:
-
-- duplicated locale fallback functions;
-- 11 hardcoded user-facing labels;
-- большой state coordinator;
-- несколько ignored promise rejections.
-
-На этом этапе findings ещё нет.
+В рабочей области `WS-002-locale-resolution` сохраняются адресуемые
+наблюдения:
 
 ```text
-tool warning != CQ finding
-metric != CQ finding
-smell != CQ finding
+EV-011
+source: src/desktop/locale.ts
+observed: неизвестный язык заменяется на английский
+
+EV-012
+source: src/web/locale.ts
+observed: неизвестный язык заменяется на язык операционной системы
+
+EV-013
+source: src/settings/preview-locale.ts
+observed: предварительный просмотр использует третью таблицу соответствий
+
+EV-014
+source: tests/locale-entrypoints.spec.ts
+observed: один профиль с языком zz-ZZ отображается по-разному в трёх точках входа
 ```
 
-## Проверка material consequence
+`WS-*` группирует доказательства, а `EV-*` обозначает отдельное наблюдение:
+ни одна из этих записей не является замечанием `CQ-*`. Для понимания границ
+интерфейса модуль использует принятый срез `Shared Technical Model (STM)`:
 
-Для duplicated locale fallback исследование показывает:
+```text
+COMP-DESKTOP-CLIENT
+COMP-WEB-CLIENT
+COMP-SETTINGS-PREVIEW
+IF-USER-PREFERENCES
+CFG-LOCALE-FALLBACK
+```
 
-- desktop entrypoint normalizes unknown locale to English;
-- web entrypoint falls back to system locale;
-- settings preview uses a third mapping;
-- один и тот же user profile показывает разные language results в зависимости от entrypoint.
+STM — фактический источник истины о компонентах и конфигурации. `Code Quality
+Review` не заменяет его своим выводом и не создаёт приватную конкурирующую
+модель.
 
-Это уже evidence-backed consequence.
+## От наблюдения к принятому замечанию
 
-Accepted finding может выглядеть так:
+Предупреждение анализатора о трёх похожих функциях — лишь повод исследовать
+механизм. В этом примере цепочка принятия выглядит так:
+
+```text
+предупреждение анализатора
+  → WS-002-locale-resolution#EV-011..EV-014
+  → интерпретация: три независимые реализации выбора языка
+  → существенное последствие: один профиль даёт разный язык интерфейса
+  → принятое замечание CQ-014
+```
+
+После независимой проверки `Code Quality Review` принимает следующую
+семантическую запись:
 
 ```text
 CQ-014
-mechanism: three independent locale fallback implementations
-material consequence: the same profile can render different language depending on entrypoint
+mechanism: три независимые реализации выбора резервного языка
+scope: COMP-DESKTOP-CLIENT, COMP-WEB-CLIENT, COMP-SETTINGS-PREVIEW
+material consequence: один профиль может получить разный язык в зависимости
+                      от точки входа
+applicability: APPLICABLE
+lifecycle: ACTIVE
+disposition: WONT_FIX не установлен
 severity: MEDIUM
+confidence: HIGH
+provenance: WS-002-locale-resolution#EV-011..EV-014, CFG-LOCALE-FALLBACK
 ```
 
-## Что осталось только signal
+`CQ-014` — семантический источник истины о принятом замечании; предупреждение
+анализатора, кандидат и итоговый Markdown этого права не получают. `MEDIUM`
+описывает тяжесть последствия, а `HIGH` — достоверность наблюдений и
+интерпретации; эти оси не взаимозаменяемы. Применимость `APPLICABLE` также не
+является ни жизненным циклом `ACTIVE`, ни решением о дальнейшей судьбе записи.
+Например, `FALSE_POSITIVE`, `ACCEPTED_EXCEPTION` и `WONT_FIX` отличаются от
+`NOT_APPLICABLE` и не означают `RESOLVED`.
 
-Допустим, большой state coordinator действительно имеет 2400 LOC, но targeted review не доказал material defect/maintenance consequence beyond size itself.
+Большой координатор состояния в `src/session/coordinator.ts` имеет 2400 строк,
+но в выбранной области нет доказанного существенного последствия. Он остаётся
+наблюдением или кандидатом; размер файла не превращается в `CQ-*` сам по себе.
 
-Он остаётся observation/candidate и не превращается в `CQ-*` только по metric.
+## Действие по устранению и граница ответственности
 
-## Maintainability Hotspot
-
-Если несколько accepted findings концентрируются в `src/session/`, hotspot может объединить их для planning:
-
-```text
-Hotspot: session/state orchestration
-linked findings:
-  CQ-021
-  CQ-024
-  CQ-031
-reason:
-  repeated lifecycle/error-handling mechanisms create coupled maintenance burden
-```
-
-Hotspot не строится просто по LOC ranking.
-
-## Remediation
-
-Для `CQ-014` создаётся action:
+Для `CQ-014` отдельно создаётся действие:
 
 ```text
 CQRA-006
-centralize locale resolution behind one accepted policy
+relates_to: CQ-014
+action: перенести выбор резервного языка в один принятый механизм
+lifecycle: PLANNED
 ```
 
-После реализации action получает `COMPLETED`.
-
-Но finding остаётся открытым до revalidation:
+`CQRA-006` — источник истины о работе по устранению, но не о самом замечании.
+После внесения кода его жизненный цикл может стать `COMPLETED`; это означает,
+что работа выполнена, но не доказывает исчезновение различий:
 
 ```text
-CQRA COMPLETED != CQ RESOLVED
+CQRA-006 COMPLETED != CQ-014 RESOLVED
 ```
 
-Revalidation должна проверить, что divergent behavior действительно исчезло во всех material entrypoints.
+Для перевода `CQ-014` в `RESOLVED` необходимы свежие адресуемые доказательства
+и повторная проверка всех трёх точек входа. До неё запись остаётся `ACTIVE`,
+даже если задача завершена. Если понадобится архитектурная интерпретация,
+создаётся связь или запрос в `Architecture Review`; `Code Quality Review` не
+переписывает замечание в `RF-*`. Недостаток исполняемого подтверждения
+поведения относится к `GAP-*` в `Test Engineering`, а не к `CQ-*`.
 
-## Связь с другими capabilities
+## Выбранные документы и пакет результатов
 
-Если investigation обнаружит architecture-level ownership issue, Code Quality может создать relation/escalation к Architecture concern, но не должна сама переписать это в `RF-*` без Architecture owning flow.
+Все документы этого модуля выбираются пользователем. Ни один не создаётся как
+обязательный результат только потому, что включён `Code Quality Review`.
 
-Если проблема — отсутствие executable proof, это Test Engineering concern, а не автоматический `CQ-*`.
+| Класс | Документ | Причина |
+|---|---|---|
+| `USER_SELECTABLE` | `Code Quality Findings View` | Выбран для просмотра принятых `CQ-*`. |
+| `USER_SELECTABLE` | `Code Quality Summary` | Выбран для краткой оценки существенных последствий и границ охвата. |
+| `USER_SELECTABLE` | `Maintainability Hotspots` | Выбран для группировки принятых замечаний по областям. |
+| не выбран | `Code Quality Roadmap Contribution` | Не входит в этот пакет и не создаётся молча. |
 
-## Итоговые документы
+`Maintainability Hotspots` может показать область `src/session/`, только если
+несколько принятых замечаний действительно образуют связанную нагрузку
+сопровождения; это не ранжирование по числу строк. Все три документа —
+проекции `CQ-*` и связанных доказательств. `Code Quality Roadmap Contribution`,
+если бы он был выбран, тоже не был бы записью действия `CQRA-*`.
 
-Пользователь получает:
-
-- Findings View — detailed record-level view;
-- Summary — компактную картину material risks;
-- Hotspots — areas of concentrated accepted maintenance burden.
-
-Каждый документ — projection accepted CQ authority, а не отдельная semantic truth.
-
-## Снимок принятого результата
+## Итоговый снимок состояния и пакета
 
 ```text
-baseline: a1b2c3d
-Review Suite: Code Quality Review = ON
-selected documents: Findings View/Report, Code Quality Summary,
-                    Maintainability Hotspots
-package members: PRJ-CQ-00-FINDINGS-VIEW, PRJ-CQ-01-SUMMARY,
-                 PRJ-CQ-02-HOTSPOTS
-freshness: CURRENT for selected members
+Базовая ревизия: a1b2c3d
+Выбранный модуль: Code Quality Review
+
+Сохранённое семантическое состояние
+  STM: COMP-DESKTOP-CLIENT, COMP-WEB-CLIENT,
+       COMP-SETTINGS-PREVIEW, IF-USER-PREFERENCES, CFG-LOCALE-FALLBACK
+  CQ: CQ-014 (ACTIVE, APPLICABLE, MEDIUM, HIGH)
+  CQRA: CQRA-006 (PLANNED)
+  доказательства: WS-002-locale-resolution#EV-011..EV-014
+
+Выбранные члены пакета результатов
+  PRJ-CQ-00-FINDINGS-VIEW   — Code Quality Findings View
+  PRJ-CQ-01-SUMMARY         — Code Quality Summary
+  PRJ-CQ-02-HOTSPOTS        — Maintainability Hotspots
+  актуальность требуемых участников: CURRENT
+  политика пакета: ALL_SCOPED_CURRENT
 ```
 
-Путь проверки вывода:
+Проверяемая цепочка от вывода к его основанию:
 
 ```text
 PRJ-CQ-00-FINDINGS-VIEW
-  -> CQ-014
-  -> WS/EV or source references
-  -> affected locale-resolution entrypoints at a1b2c3d
+  → CQ-014
+  → CFG-LOCALE-FALLBACK
+  → WS-002-locale-resolution#EV-011..EV-014
+  → src/desktop/locale.ts, src/web/locale.ts,
+    src/settings/preview-locale.ts@a1b2c3d
 ```
 
-`PRJ-CQ-*` не получает право менять `CQ-*`; новый код проверяется через
-`REVALIDATE`, а свежий документ создаётся через `RG-*` при необходимости.
+Сохраняются `CQ-014`, `CQRA-006`, их состояния, связи, происхождение и
+зависимости, сведения об актуальности зарегистрированных проекций, состав
+пакета и координационная запись `working/INDEX.md`. Проекции и `INDEX.md` не
+заменяют семантические источники истины.
+
+## Повторное использование позже
+
+Изменение кода, конфигурации или зависимости запускает `REVALIDATE`, который
+определяет затронутые `CQ-*` по зависимостям, а не по одному списку изменённых
+файлов. После стабилизации семантики анализ влияния на проекции определяет их
+актуальность; сам этот анализ не пересобирает документы. Свежий выбранный
+документ создаётся отдельным сеансом `RG-*`.
+
+Новая законная область или новый документ добавляются через `EXTEND`. Если
+повреждена только зарегистрированная проекция при неизменном принятом
+семантическом источнике, допустим `PROJECTION_REPAIR`. Он не может незаметно
+переписать `CQ-*` или `CQRA-*`: обнаружение смыслового расхождения останавливает
+этот путь и требует семантической повторной проверки.
+
+Подробнее правила описаны в [руководстве по Code Quality Review](../guides/code-quality-review.md),
+[справочнике процессов](../reference/workflows.md) и
+[описании проекций и пакетов](../concepts/projections-and-packages.md).
