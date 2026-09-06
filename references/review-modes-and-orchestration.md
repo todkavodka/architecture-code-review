@@ -289,6 +289,17 @@ capabilities:
     owning_artifact_revision: <revision>
     dependencies:
       - <artifact/ref + revision>
+  - id: code-quality-review
+    status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
+    outputs:
+      findings_view: false
+      code_quality_summary: false
+      maintainability_hotspots: false
+      roadmap_contribution: false
+    owning_artifact: <Code Quality semantic/session artifact path>
+    owning_artifact_revision: <revision>
+    dependencies:
+      - <WS/EV/STM or related semantic ref + revision>
 ```
 
 For Test Engineering, `outputs` is the persisted configuration authority; the
@@ -369,6 +380,53 @@ working/capabilities/test-review/...
 ```
 
 The `INDEX` ownership and revision binding are the invariant, not the exact paths.
+
+For Code Quality Review, the `outputs` fields are independent coordinator
+selection state, not semantic authority and not Stage B projection records.
+`Findings View/Report` is the core useful projection but is not implicitly
+selected merely because the capability is enabled; `Code Quality Summary`,
+`Maintainability Hotspots`, and `Roadmap Contribution` are selected only when
+requested or structurally required by a selected output. Package membership is
+resolved later as explicit selection plus dependency closure under the shared
+Stage B package policies; this registry does not register `PRJ-*` records.
+
+Code Quality session state keeps the qualified coverage reference alongside the
+capability entry. The owning Code Quality assessment/session state records
+`COMPLETE`, `PARTIAL`, or `BLOCKED` coverage and its requested, reviewable,
+excluded, unavailable, unsupported, dirty/noncanonical, limitation, and
+affected-claim context. A partial or blocked slice qualifies aggregate claims
+but does not invalidate unrelated accepted CQ findings whose dependencies
+remain sufficient.
+
+For the Code Quality capability, coordinator transitions are:
+
+```text
+NEW
+  → register independent CQ selection and selected outputs
+  → persist scope, semantic references, coverage reference, and blockers
+
+EXTEND
+  → preserve accepted upstream capabilities and shared evidence/STM
+  → add only the requested CQ scope and outputs
+
+RESUME
+  → verify baseline and persisted revisions
+  → restore CQ selection, scope, outputs, blockers, handoff, and coverage reference
+  → continue from the first non-accepted durable boundary
+```
+
+`RESUME` does not restart the full review, become `NEW`, or become automatic
+`REVALIDATE`; it never reconstructs workflow state from chat or prose memory.
+`working/INDEX.md` stores only this coordinator routing state and references the
+owning Code Quality semantic artifacts. It is not CQ semantic authority.
+
+Code Quality participates in the existing `REVALIDATE` intent, but the
+impact-driven CQ freshness and semantic revalidation contract is implemented by
+the Code Quality revalidation contract in
+`references/revalidation-and-freshness.md`. This section preserves the
+routing/dependency boundary. Missing or stale shared evidence/STM blocks only
+the dependent CQ slice and does not rewrite shared facts or invalidate
+unrelated findings.
 
 ## 5. Статусы
 

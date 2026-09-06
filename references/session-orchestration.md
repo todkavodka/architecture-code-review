@@ -258,6 +258,14 @@ Test Engineering
     Service Simulator Implementation Plan: optional
     E2E Test Plan: optional
 
+Code Quality Review
+  OFF
+  or independent output selection:
+    Findings View/Report: core projection, optional selection
+    Code Quality Summary: derived projection, optional selection
+    Maintainability Hotspots: optional/derived projection
+    Roadmap Contribution: optional/derived projection
+
 Stack Addenda
   detected automatically; confirmed before substantive use
 ```
@@ -278,6 +286,17 @@ reconciled persisted configuration by default; `REVALIDATE` shows the previous
 suite as default; `EXTEND` shows only additions. `PROJECTION_REPAIR` reuses the
 accepted suite only to locate and constrain the projections being repaired; it
 does not reopen configuration choices by default.
+
+Code Quality Review is an independent capability selection, separate from
+Architecture Review and Test Engineering. Selecting the capability does not
+implicitly select every Code Quality projection. When enabled, persist its
+selected outputs independently and retain the capability's owning semantic
+records and qualified coverage state by reference. `NEW` may select Code
+Quality without selecting either other capability; `EXTEND` adds only the
+requested Code Quality slice and reuses accepted/fresh shared evidence or STM
+dependencies; `RESUME` restores the persisted Code Quality selection rather
+than reconstructing it from conversation. Detailed Code Quality semantics live
+in `capabilities/code-quality-review/SKILL.md` and its referenced contracts.
 
 When Test Review is selected, its optional Test Engineering outputs are
 persisted as independent booleans, never as a compound mode:

@@ -406,6 +406,70 @@ the entire report by default. `previous_accepted_evidence_preserved` means the
 impact analysis found no dependency requiring fresh verification. It does not
 mean freshly reread, runtime tested, independently reviewed, or newly proven.
 
+### Code Quality semantic revalidation
+
+For a Code Quality `REVALIDATE`, the shared change inventory is refined through
+the direct bindings of accepted `CQ-*`, candidate, and `CQRA-*` records. The
+minimum semantic flow is:
+
+```text
+changed binding
+  → resolve direct CQ dependency edges
+  → identify affected CQ/CQRA identities
+  → load the minimum affected EV/STM/context slice
+  → mark affected accepted findings/actions STALE
+  → revalidate and adjudicate only that slice
+  → preserve unrelated accepted CQ authority
+```
+
+The direct binding categories are:
+
+| Changed input | Affected Code Quality slice |
+|---|---|
+| file, symbol, or implementation mechanism | findings and candidates bound to that source/mechanism, including move, deletion, or regeneration |
+| `EV-*` observation | findings whose evidence binding uses that observation |
+| accepted STM fact | findings whose interpretation requires that fact |
+| dependency, framework, runtime configuration, feature flag, or build mode | findings that declare the changed input as a material dependency |
+| language/framework addendum or applicability revision | interpretations using that addendum or affected applicability decision |
+| Architecture or Test Engineering authority | CQ relations and interpretations that explicitly depend on that authority |
+| `CQRA-*` completion or semantic-basis change | every linked finding for that action, independently |
+
+This is an evidence-backed dependency slice, not a new generic graph. Direct
+owning metadata is authoritative; changed paths, lockfiles, and diffs are
+routing context until the relevant dependency is established. An unknown link
+requires targeted investigation and cannot be classified as preserved merely
+to save work.
+
+The revalidation overlay records at least the changed binding, affected CQ
+identities, preserved CQ identities, dependencies inspected, evidence loaded,
+and each finding's outcome. For each affected finding, the outcome is one of:
+
+```text
+same semantic issue
+  → preserve CQ-* identity; revalidate to CURRENT or BLOCKED
+issue absent
+  → resolve CQ-* only with post-change evidence
+materially different mechanism/meaning
+  → SUPERSEDE old CQ-* and create a distinct replacement identity
+insufficient evidence/context
+  → retain lifecycle; set freshness BLOCKED
+```
+
+An equivalent refactor, rename, or file move may preserve identity when the
+mechanism, consequence, and relevant bindings remain semantically equivalent;
+the path change alone neither resolves nor invalidates the finding. A deleted
+source binding affects only findings depending on it. Dependency/configuration,
+addendum, STM, or related-authority changes affect only records with a material
+edge to that input. Unaffected CQ findings and their evidence are reused, not
+reconstructed.
+
+`CQRA COMPLETED` marks remediation work complete and causes targeted
+revalidation of each linked finding; it never performs a bulk resolution.
+`REVALIDATE` remains separate from `RESUME`, `NEW`, and `EXTEND`, and it ends at
+semantic adjudication. It does not regenerate projections, register `PRJ-*`,
+run `RG-*`, or apply package policy. Any later projection freshness accounting
+uses the shared Stage B handoff after the semantic delta is stabilized.
+
 ### Test Engineering source-view routing
 
 Test Engineering records concrete revision bindings for each accepted BC and
