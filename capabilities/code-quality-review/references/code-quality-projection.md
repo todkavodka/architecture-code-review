@@ -25,15 +25,18 @@ owning semantic or projection gate; the projection does not adjudicate it.
 
 ## Registered projections
 
-The following stable identities are independently regeneratable. Output paths
-are declared by the selected package and do not define identity.
+The following stable identities are independently regeneratable. Registration
+declares each artifact path; package selection selects registered projections
+and does not supply missing registration metadata. Paths remain distinct from
+projection identities, and a path change does not create a new identity when
+the projection meaning and contract remain unchanged.
 
-| Projection | Human-readable output | Direct semantic inputs |
-|---|---|---|
-| `PRJ-CQ-00-FINDINGS-VIEW` | Code Quality Findings View/Report | selected accepted `CQ-*` records; Code Quality coverage state |
-| `PRJ-CQ-01-SUMMARY` | Code Quality Summary | selected accepted `CQ-*` records; linked `CQRA-*` records when remediation status is shown; Code Quality coverage state |
-| `PRJ-CQ-02-HOTSPOTS` | Maintainability Hotspots | selected accepted `CQ-*` records; Code Quality coverage state |
-| `PRJ-CQ-03-ROADMAP-CONTRIBUTION` | Code Quality Roadmap Contribution | selected accepted `CQ-*` and linked `CQRA-*` records; Code Quality coverage state |
+| Projection | Declared artifact path | Human-readable output | Direct semantic inputs |
+|---|---|---|---|
+| `PRJ-CQ-00-FINDINGS-VIEW` | `working/projections/code-quality/findings-view.md` | Code Quality Findings View/Report | selected accepted `CQ-*` records; Code Quality coverage state |
+| `PRJ-CQ-01-SUMMARY` | `working/projections/code-quality/summary.md` | Code Quality Summary | selected accepted `CQ-*` records; linked `CQRA-*` records when remediation status is shown; Code Quality coverage state |
+| `PRJ-CQ-02-HOTSPOTS` | `working/projections/code-quality/hotspots.md` | Maintainability Hotspots | selected accepted `CQ-*` records; Code Quality coverage state |
+| `PRJ-CQ-03-ROADMAP-CONTRIBUTION` | `working/projections/code-quality/roadmap-contribution.md` | Code Quality Roadmap Contribution | selected accepted `CQ-*` and linked `CQRA-*` records; Code Quality coverage state |
 
 These are all Stage B `PRJ-*` identities. They use the shared projection
 contract revision, freshness states, dependency snapshots, `V1`–`V4`,
@@ -47,22 +50,35 @@ scope is a persisted scope binding owned by the Code Quality assessment/session
 state; a filename, directory, report prose, or inferred relevance cannot
 provide membership.
 
-The controlled selectors use only the existing Stage B dimensions:
+The controlled selectors use only the existing Stage B dimensions. CQ-specific
+fields are formal structured properties of the selected authoritative records,
+not additional Stage B selector dimensions:
 
 ```text
 CODE_QUALITY_FINDING_SELECTOR:
   authoritative_record_type: CQ_FINDING
-  allowed dimensions: lifecycle | freshness | applicability | disposition |
-                      severity | category | capability_owner | scope_binding
-  eligibility: accepted semantic authority AND capability_owner = CODE_QUALITY
-               AND scope_binding = <persisted Code Quality scope>
+  allowed dimensions: entity_type | status | freshness |
+                      structured_properties | formal_relations | capability_owner
+  allowed operators: = | IN | HAS_ANY
+  logical_connectors: AND | OR
+  predicate: status = ACCEPTED AND freshness = CURRENT
+             AND capability_owner = CODE_QUALITY
+             AND structured_properties.cq_scope_binding = <persisted Code Quality scope>
+  formal structured properties: cq_scope_binding | lifecycle | applicability |
+                                disposition | severity | category
   stable_order: semantic_id ASC, revision ASC
 
 CODE_QUALITY_REMEDIATION_SELECTOR:
   authoritative_record_type: CQRA_ACTION
-  allowed dimensions: lifecycle | freshness | capability_owner | scope_binding
-  eligibility: Code Quality semantic authority AND capability_owner = CODE_QUALITY
-               AND scope_binding = <persisted Code Quality scope>
+  allowed dimensions: entity_type | status | freshness |
+                      structured_properties | formal_relations | capability_owner
+  allowed operators: = | IN | HAS_ANY
+  logical_connectors: AND | OR
+  predicate: status IN [PROPOSED, PLANNED, COMPLETED]
+             AND freshness = CURRENT
+             AND capability_owner = CODE_QUALITY
+             AND structured_properties.cq_scope_binding = <persisted Code Quality scope>
+  formal structured properties: cq_scope_binding | lifecycle
   stable_order: semantic_id ASC, revision ASC
 
 coverage_dependency:
