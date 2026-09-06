@@ -1,6 +1,6 @@
 # Проекции и пакеты результатов
 
-Это каноническое human-facing объяснение проекций, пакетов результатов и
+Это каноническое объяснение для пользователя проекций, пакетов результатов и
 правил их актуальности.
 
 Человекочитаемые документы `Review Suite` отделены от семантического источника
@@ -9,24 +9,24 @@
 
 ## Проекция
 
-Projection — производное представление accepted authority.
+Проекция — производное представление принятого источника истины.
 
-Она имеет stable `PRJ-*` identity и собственный lifecycle record.
+У неё есть устойчивый идентификатор `PRJ-*` и собственная запись жизненного цикла.
 
 Пример:
 
 ```text
-CQ-* authority
+источник истины `CQ-*`
   -> PRJ-CQ-00 Findings View
   -> PRJ-CQ-01 Summary
   -> PRJ-CQ-02 Hotspots
 ```
 
-Projection может быть Markdown report, summary, navigation view или другой controlled deliverable.
+Проекцией может быть Markdown-отчёт, краткое резюме, навигационное представление или другой управляемый итоговый документ.
 
-## Что хранит projection record
+## Что хранит запись проекции
 
-Conceptually:
+Схематично:
 
 ```text
 projection_id
@@ -43,40 +43,40 @@ freshness
 Эти данные нужны, чтобы ответить:
 
 - от чего зависит документ;
-- какой accepted revision он отображает;
+- какую принятую ревизию он отображает;
 - изменилось ли его содержимое;
-- нужно ли его revalidate/regenerate;
-- является ли новый файл новой revision той же projection.
+- нужна ли ему повторная проверка или пересборка;
+- является ли новый файл новой ревизией той же проекции.
 
-## Почему filename недостаточно
+## Почему имени файла недостаточно
 
 Файл `summary.md` сам по себе не доказывает:
 
-- что это тот же логический document;
-- что dependencies не изменились;
-- что content прошёл verification;
-- что файл current.
+- что это тот же логический документ;
+- что зависимости не изменились;
+- что содержимое прошло проверку;
+- что файл актуален.
 
-Stable identity и lifecycle делают document addressable независимо от path.
+Устойчивый идентификатор и жизненный цикл позволяют адресовать документ независимо от пути.
 
 ## Projection Impact Analysis
 
-После stabilized semantic delta выполняется отдельный accounting pass:
+После стабилизации семантических изменений выполняется отдельный учёт их влияния:
 
 ```text
-accepted semantic delta
+принятое семантическое изменение
   -> Projection Impact Analysis
-  -> direct impact
-  -> reverse dependency propagation
-  -> CURRENT / STALE / BLOCKED updates
+  -> прямое влияние
+  -> распространение по обратным зависимостям
+  -> обновление `CURRENT` / `STALE` / `BLOCKED`
   -> PROJECTION_IMPACT_ACCOUNTED
 ```
 
-`PROJECTION_IMPACT_ACCOUNTED` означает, что влияние учтено. Это не означает, что все projections regenerated или `CURRENT`.
+`PROJECTION_IMPACT_ACCOUNTED` означает, что влияние учтено. Это не означает, что все проекции пересобраны или имеют состояние `CURRENT`.
 
 ## Regeneration
 
-Если пользователь требует fresh deliverable, запускается отдельная `RG-*` session.
+Если пользователю нужен актуальный итоговый документ, запускается отдельный сеанс `RG-*`.
 
 ```text
 requested PRJ
@@ -87,13 +87,13 @@ requested PRJ
   -> fingerprint/revision decision
 ```
 
-Если generated content идентичен current verified revision, новая revision не создаётся только ради факта запуска regeneration.
+Если созданное содержимое идентично текущей проверенной ревизии, новая ревизия не создаётся только ради факта запуска пересборки.
 
 ## Package
 
-Projection package — именованный deliverable scope. Он не является semantic model и не превращает его members в authority.
+Пакет проекций — именованный набор итоговых документов. Он не является семантической моделью и не превращает своих участников в источник истины.
 
-Package declaration содержит finite membership rules:
+Описание пакета содержит конечные правила состава:
 
 ```text
 package_id
@@ -105,9 +105,9 @@ optional_members
 conditional_members
 ```
 
-Membership не вычисляется arbitrary filename globs или prose queries.
+Состав пакета не вычисляется по произвольным шаблонам имён файлов или поисковым запросам в тексте.
 
-Перед closeout создаётся resolved membership snapshot конкретной package instance.
+Перед завершением создаётся снимок состава конкретного экземпляра пакета.
 
 ## Freshness policies
 
