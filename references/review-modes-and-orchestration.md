@@ -228,7 +228,8 @@ visibility and selection remain in Session Orchestration.
 Минимальные разделы:
 
 1. repository path/ref/commit и dirty-state на старте;
-2. mode и endpoint;
+2. selected capability configuration (Architecture `mode`/`endpoint` only when
+   Architecture Review is selected);
 3. current phase;
 4. execution plan;
 5. artifact registry;
@@ -312,6 +313,25 @@ capabilities:
     dependencies:
       - <WS/EV/STM or related semantic ref + revision>
 ```
+
+Architecture-specific persisted configuration is conditional:
+
+```text
+architecture-review.selected == true
+  → mode is REQUIRED: STANDARD_FULL | FORENSIC
+  → endpoint is REQUIRED: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
+
+architecture-review.selected == false
+  → mode is ABSENT_BY_CONTRACT
+  → endpoint is ABSENT_BY_CONTRACT
+  → Architecture work is not enabled
+```
+
+`ARCHITECTURE_NOT_SELECTED` therefore implies
+`ARCHITECTURE_MODE_NOT_REQUIRED` and `ARCHITECTURE_ENDPOINT_NOT_REQUIRED`.
+The absence of Architecture mode/endpoint does not prevent a selected Test
+Engineering or Code Quality capability from resolving its own shared factual
+dependencies.
 
 For Test Engineering, `outputs` is the persisted configuration authority; the
 legacy `endpoint` is retained only for backward-compatible Test Review packages
