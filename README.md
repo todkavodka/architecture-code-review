@@ -71,6 +71,8 @@ Test Engineering: OFF
 
 `Test Assurance` — базовое ядро Test Engineering.
 
+Legacy-значения `REVIEW_ONLY` и `REVIEW_PLUS_TEST_PLAN` относятся только к совместимости со старым persisted Test Review state. Они не являются современными пунктами меню `NEW` или `EXTEND`.
+
 Внутренние зависимости подключаются только когда они действительно нужны. Например:
 
 - `Behavior Model` не является пользовательским переключателем;
@@ -140,6 +142,17 @@ Architecture Review, Test Engineering и Code Quality Review могут испо
 - точечно перепроверяться через `REVALIDATE`.
 
 Capability selection и output selection — разные вещи.
+
+При `NEW` пользователь сначала выбирает верхнеуровневые capability:
+
+```text
+Review Suite
+├── [ ] Architecture Review
+├── [ ] Test Engineering
+└── [ ] Code Quality Review
+```
+
+Действует инвариант `AT_LEAST_ONE_TOP_LEVEL_CAPABILITY_SELECTED`: пустой Review Suite недопустим, а все семь непустых комбинаций разрешены. Если Architecture Review не выбран, его `mode/depth` и `endpoint/result` отсутствуют в persisted state по контракту, а общие STM/evidence-зависимости остаются внутренними и не включают Architecture автоматически.
 
 Например:
 
@@ -394,7 +407,7 @@ affected CQ records
 targeted REVALIDATE
 ```
 
-`REVALIDATE` не равен `RESUME` и не равен projection regeneration.
+`REVALIDATE` не равен `RESUME` и не равен projection regeneration. Предыдущая конфигурация Review Suite при `REVALIDATE` восстанавливается и показывается **read-only**: capability и outputs не переоткрываются как новое меню. Изменённый scope и affected slice определяются impact analysis. Если пользователь хочет добавить новую capability или новый output, это маршрутизируется в `EXTEND`, а не меняет конфигурацию `REVALIDATE`.
 
 ---
 
@@ -612,6 +625,27 @@ Code Quality Review:
 
 ## Добавить capability позже (`EXTEND`)
 
+`EXTEND` показывает уже принятые capability/outputs как **Existing / preserved** и отдельно — только **Available additions**. Принятые настройки не переоткрываются и не удаляются.
+
+Для Architecture Review расширение монотонно:
+
+```text
+Architecture absent
+  -> можно добавить Architecture и выбрать depth/result
+
+REVIEW_ONLY
+  -> можно добавить Target Architecture
+  -> или Target Architecture + Remediation Roadmap
+
+REVIEW_PLUS_TARGET_ARCHITECTURE
+  -> можно добавить Remediation Roadmap
+
+REVIEW_PLUS_TARGET_AND_ROADMAP
+  -> новых Architecture endpoint additions нет
+```
+
+У уже принятого Architecture Review существующий depth остаётся read-only во время обычного `EXTEND`.
+
 ```text
 Используй architecture-code-review.
 
@@ -624,7 +658,7 @@ EXTEND существующий принятый audit package.
 Не перезапускай несвязанные принятые этапы.
 ```
 
-Аналогично можно добавить Test Engineering outputs к уже принятому Architecture Review.
+Аналогично можно добавить Test Engineering outputs или доступное Architecture extension к уже принятому пакету.
 
 ---
 
@@ -658,13 +692,18 @@ REVALIDATE принятый audit package относительно текуще�
 
 ## Исправить только документы (`PROJECTION_REPAIR`)
 
+`PROJECTION_REPAIR` выбирает цель из **зарегистрированных projections текущего принятого package**, а не из semantic authority. Пользователь выбирает конкретный `PRJ-*` / документ / раздел; semantic records показываются только как provenance и не редактируются этим режимом.
+
 ```text
 Используй architecture-code-review.
 
 PROJECTION_REPAIR принятого audit package.
 
+Покажи eligible registered projections этого package.
+Выбери конкретный документ или раздел.
 Исправь только Markdown, Mermaid, ссылки, навигацию и wording.
-Если требуется изменить technical semantics — остановись и запроси REVALIDATE.
+Если требуется изменить technical semantics — остановись с
+SEMANTIC_DRIFT_DETECTED и TECHNICAL_REVALIDATION_REQUIRED.
 ```
 
 ---
