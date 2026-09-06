@@ -116,3 +116,27 @@ Revalidation должна проверить, что divergent behavior дейс
 - Hotspots — areas of concentrated accepted maintenance burden.
 
 Каждый документ — projection accepted CQ authority, а не отдельная semantic truth.
+
+## Снимок принятого результата
+
+```text
+baseline: a1b2c3d
+Review Suite: Code Quality Review = ON
+selected documents: Findings View/Report, Code Quality Summary,
+                    Maintainability Hotspots
+package members: PRJ-CQ-00-FINDINGS-VIEW, PRJ-CQ-01-SUMMARY,
+                 PRJ-CQ-02-HOTSPOTS
+freshness: CURRENT for selected members
+```
+
+Путь проверки вывода:
+
+```text
+PRJ-CQ-00-FINDINGS-VIEW
+  -> CQ-014
+  -> WS/EV or source references
+  -> affected locale-resolution entrypoints at a1b2c3d
+```
+
+`PRJ-CQ-*` не получает право менять `CQ-*`; новый код проверяется через
+`REVALIDATE`, а свежий документ создаётся через `RG-*` при необходимости.

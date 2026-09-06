@@ -1,263 +1,78 @@
 # Справочник итоговых документов
 
-Этот справочник описывает user-facing outputs: назначение, аудиторию, prerequisites, source authority, expected content, freshness и последующее использование.
+Это канонический human-facing справочник выбираемых и обязательных документов.
+
+Итоговые документы — человекочитаемые проекции принятого смысла. Их выбор не
+создаёт и не изменяет семантические записи. После изменения семантики сначала
+учитывается влияние на проекции, а свежий документ создаётся только по явному
+запросу в `RG-*`.
+
+## Как читать карточки
+
+| Поле | Значение |
+|---|---|
+| Режим | `USER_SELECTABLE` — явный выбор; `REQUIRED_WHEN_CAPABILITY_ENABLED` — обязателен вместе с модулем; `INTERNAL_REQUIRED_PROJECTION` — не является флажком, но может требоваться модулю; `CONDITIONAL` — зависит от endpoint или выбранного документа. |
+| Пакет | Указывает условие включения. Выбранный документ становится обязательным членом конкретного пакета; невыбранный не блокирует его. |
+| Актуальность | Проекция использует `CURRENT | STALE | BLOCKED`; политика пакета определяет, какие члены должны быть `CURRENT`. |
+| Обновление | Изменение смысла → владеющая повторная проверка → учёт влияния; свежий Markdown → явный `RG-*`. Изменение только оформления → `PROJECTION_REPAIR`. |
 
 ## Architecture Review
 
-**Audience:** architects, tech leads, senior engineers, engineering managers.
-
-**Purpose:** показать фактическую архитектуру, существенные boundaries/flows/lifecycle properties, ограничения coverage и accepted `RF-*` findings.
-
-**Prerequisites:** selected Architecture capability, accepted factual STM coverage требуемой depth, architecture review gates.
-
-**Source authority:** STM + Architecture-owned semantic records.
-
-**Expected sections:** scope/baseline, as-built synthesis, material boundaries/flows, lifecycle/failure/concurrency/security observations, findings summary, limitations/coverage, links to authoritative ledger.
-
-**Freshness:** projection lifecycle `PRJ-*`; semantic changes могут сделать report `STALE`.
-
-**How to consume:** сначала как system-level diagnosis; для доказательства отдельного claim переходить к `RF-*`/STM/evidence.
-
----
-
-## Authoritative Findings Ledger
-
-**Audience:** architects, remediation owners, reviewers.
-
-**Purpose:** полный traceable registry accepted `RF-*`.
-
-**Source authority:** Architecture Review itself; ledger хранит authoritative finding records, а не executive prose.
-
-**Expected content per finding:** ID, scope/root boundary, evidence/STM refs, material consequence, severity, relationships/supersession, status.
-
-**Use:** remediation planning, Target/Roadmap traceability, future `REVALIDATE`.
-
----
-
-## Target Architecture
-
-**Audience:** architects, implementation leads.
-
-**Select when:** нужен design future state after accepted review.
-
-**Prerequisites:** accepted Architecture findings and endpoint `REVIEW_PLUS_TARGET_ARCHITECTURE` or additive `EXTEND`.
-
-**Source authority:** accepted architecture semantics + target technical review.
-
-**Expected content:** target boundaries/owners, lifecycle/state mechanisms, transition-relevant invariants, mapping findings → target mechanisms, unresolved constraints.
-
-**Do not select when:** нужен только diagnosis current system.
-
-**Update:** findings/constraints change → targeted revalidation/target consistency review, not arbitrary prose edit.
-
----
-
-## Remediation Roadmap
-
-**Audience:** engineering leadership, program/technical leads.
-
-**Prerequisites:** accepted Architecture + Target Architecture.
-
-**Purpose:** безопасная последовательность изменений.
-
-**Expected content:** remediation groups, prerequisites, dependencies, gates, evidence required before next step, rollback/activation considerations where applicable.
-
-**Anti-pattern:** generic backlog без связи с accepted root findings/target mechanisms.
-
----
-
-## Test Assurance Summary
-
-**Audience:** tech leads, QA/test leads, engineering managers.
-
-**Required when:** Test Engineering enabled.
-
-**Source authority:** `BC-*`, `MAT-*`, `TM-*`, `GAP-*`, applicable `CC-*`.
-
-**Purpose:** быстрый ответ на вопрос, насколько material behavior действительно доказано тестами.
-
-**Expected content:** overall assurance posture, strongest proven areas, critical/important gaps, limitations, recommended next actions.
-
----
-
-## Test Assurance Map
-
-**Audience:** engineers/test engineers.
-
-**Purpose:** detailed traceability.
-
-**Expected relation:**
-
-```text
-MAT-* -> BC-* -> TM-* -> verdict / GAP-*
-```
-
-**Use:** понять, какой exact test доказывает какой target и где evidence недостаточно.
-
----
-
-## Test Plan
-
-**Audience:** test/feature implementation teams.
-
-**Prerequisites:** accepted assurance targets/gaps.
-
-**Purpose:** actionable plan доказательства missing/weak behaviors.
-
-**Expected content per item:** target/behavior, minimal test boundary, fixtures/dependencies, scenario variants, assertions, observability, acceptance evidence.
-
-**Do not select when:** нужен только assessment current test suite без remediation plan.
-
----
-
-## Contract Consistency Report
-
-**Audience:** API owners, producer/consumer teams, migration/integration leads.
-
-**Prerequisites:** applicable Contract Verification and accepted `CC-*` records.
-
-**Purpose:** human-readable projection discrepancies/adjudications across:
-
-```text
-DECLARED
-IMPLEMENTED
-CONSUMED
-TESTED
-```
-
-**Important:** report ≠ Contract Verification. Verification is internal semantic gate; report is optional projection.
-
----
-
-## Test Environment Design
-
-**Audience:** test infrastructure/CI engineers.
-
-**Purpose:** определить faithful environment strategy for material tests.
-
-**Expected content:** dependency inventory, selected strategy per dependency, fidelity rationale, lifecycle/reset/isolation, secrets/config, observability, CI constraints.
-
-**Typical strategies:** `REAL_DISPOSABLE`, `SERVICE_EMULATOR`, `CONTROLLABLE_MOCK`, `IN_PROCESS_DOUBLE`, `TEMP_RESOURCE`, `NOT_REQUIRED`.
-
----
-
-## Service Simulator Design
-
-**Audience:** consumer teams, test infrastructure engineers.
-
-**Purpose:** design controllable simulator accepted contract behavior.
-
-**Expected content:** Contract API, State Store, Scenario Engine, Fault Injection, Event Emitter, Control API, health/reset/seed, fidelity boundaries.
-
-**Prerequisite:** accepted behavior/contract semantics sufficient to define simulator.
-
-**Do not select when:** simple mock/stub already faithfully proves required behavior.
-
----
-
-## Service Simulator Implementation Plan
-
-**Audience:** engineers implementing simulator.
-
-**Prerequisite:** accepted/fresh Simulator Design.
-
-**Expected content:** component breakdown, APIs/control plane, state model, scenario/fault implementation, test strategy for simulator, CI integration, delivery gates.
-
-**Scope:** plan, not automatic runtime implementation.
-
----
-
-## E2E Test Plan
-
-**Audience:** test/platform/product engineers.
-
-**Purpose:** prove guarantees requiring multiple real components.
-
-**Expected scenario fields:** source `BC-*`, participants, real/simulated dependencies, initial state, stimulus, assertions, failure observability, cleanup/reset, CI suitability.
-
-**Anti-pattern:** выбирать E2E только потому, что он кажется «самым полным».
-
----
-
-## Code Quality Findings View / Report
-
-**Audience:** engineers, reviewers, maintainers.
-
-**Source authority:** accepted `CQ-*` and related `CQRA-*` state.
-
-**Purpose:** detailed engineering view material implementation-quality findings.
-
-**Expected content:** mechanism, evidence/provenance, consequence, severity/confidence, applicability/disposition, relationships, remediation/revalidation state.
-
-**Selection:** explicit. Derived projection не означает auto-required.
-
----
-
-## Code Quality Summary
-
-**Audience:** tech leads, engineering managers.
-
-**Purpose:** compact picture of dominant material Code Quality risk.
-
-**Expected content:** top findings/themes, concentration by area, key consequences, limitations and priorities.
-
-**Difference from Findings View:** Summary агрегирует и объясняет; Findings View даёт detailed record-level traceability.
-
----
-
-## Maintainability Hotspots
-
-**Audience:** tech leads, refactoring/ownership teams.
-
-**Purpose:** показать области, где концентрируется evidence-backed maintenance burden.
-
-**Source:** accepted CQ semantics, а не LOC/complexity metrics alone.
-
-**Expected content:** hotspot area, linked findings, mechanisms, combined consequence, ownership/context, remediation considerations.
-
----
-
-## Code Quality Roadmap Contribution
-
-**Audience:** technical planning owners.
-
-**Purpose:** Code Quality contribution в broader remediation planning.
-
-**Expected content:** linked `CQRA-*`, remediation groups, dependencies, ordering constraints, revalidation expectations.
-
-**Boundary:** не является Architecture Remediation Roadmap и не переписывает Architecture authority.
-
----
-
-## Freshness and update rules for all outputs
-
-User-facing document может использоваться как fresh deliverable только если его projection lifecycle и package policy это разрешают.
-
-```text
-semantic change
-  -> impact accounting
-  -> projection may become STALE
-  -> explicit RG-* if fresh output required
-```
-
-Presentation-only correction → `PROJECTION_REPAIR`.
-
-Semantic correction → owning technical workflow / `REVALIDATE`.
-
-## Как выбрать минимальный набор
-
-- diagnosis architecture → Architecture Review;
-- diagnosis + future design → + Target Architecture;
-- execution sequence → + Roadmap;
-- confidence in tests → Test Assurance;
-- remediation test backlog → + Test Plan;
-- API drift → + Contract Consistency Report;
-- faithful environment → + Test Environment Design;
-- controllable external service → + Simulator;
-- multi-component guarantees → + E2E Test Plan;
-- detailed implementation quality → CQ Findings View;
-- management/first-read CQ picture → + Summary;
-- refactoring concentration → + Hotspots;
-- CQ planning input → + Roadmap Contribution.
-
-Не выбирайте все outputs автоматически. Review Suite должен сохранять минимально достаточный scope.
+| Документ | Режим, владелец и источник | Пакет, предпосылки и обновление | Для кого, содержание и выбор |
+|---|---|---|---|
+| Architecture Review | `REQUIRED_WHEN_CAPABILITY_ENABLED`; владелец `Architecture Review`; STM и архитектурные записи. | Входит в выбранный архитектурный пакет; нужны модуль, принятая фактическая модель нужной глубины и архитектурные проверки. | Архитекторам и техническим лидам: область, базовая ревизия, фактическая картина, границы, потоки, ограничения и `RF-*`. Выбирайте для диагноза системы; не выбирайте, если нужна только проверка тестов или качества реализации. |
+| Authoritative Findings Ledger | `REQUIRED_WHEN_CAPABILITY_ENABLED`; владелец `Architecture Review`; принятые `RF-*`. | Обязательный архитектурный член пакета; обновляется после повторной проверки изменённых `RF-*`. | Владельцам исправлений: идентификатор, граница, доказательства/STM, последствия, серьёзность и замещения. Не выбирается отдельно от архитектурного модуля. |
+| Target Architecture | `CONDITIONAL`; endpoint `REVIEW_PLUS_TARGET_ARCHITECTURE` или `REVIEW_PLUS_TARGET_AND_ROADMAP`, либо `EXTEND`; владелец архитектурный процесс. | Условный член пакета; нужны принятые `RF-*` и проверка целевой архитектуры. | Архитекторам и руководителям реализации: целевые границы, владельцы, механизмы и связь «вывод → механизм». Не выбирайте, если нужен только диагноз. |
+| Remediation Roadmap | `CONDITIONAL`; endpoint `REVIEW_PLUS_TARGET_AND_ROADMAP` либо `EXTEND`; владелец архитектурный процесс. | Условный член пакета; нужны принятые аудит и целевая архитектура. | Техническим лидам: группы работ, порядок, предпосылки, проверки и доказательства. Не выбирайте без принятой цели. |
+
+Для всех архитектурных документов существенное изменение фактов, выводов или
+ограничений требует адресной повторной проверки; редактирование текста не
+заменяет техническое решение.
+
+## Test Engineering
+
+### Выбор `Test Assurance`
+
+`Test Assurance` — обязательный пункт меню при включённом `Test Engineering`.
+Этот один выбор означает обязательное присутствие **Test Assurance Summary** и
+**Test Assurance Map** в пакете. Они не являются двумя отдельными флажками.
+
+| Документ | Режим, владелец и источник | Пакет, предпосылки и обновление | Для кого, содержание и выбор |
+|---|---|---|---|
+| Test Assurance Summary | `REQUIRED_WHEN_CAPABILITY_ENABLED`; `PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY`; Test Engineering; `MAT-*`, `TM-*`, `GAP-*`, применимые `CC-*`. | Обязательный член Test Engineering package с `ALL_SCOPED_CURRENT`. | Лидам и QA: общая картина подтверждения, сильные доказательства, существенные пробелы, ограничения и действия. |
+| Test Assurance Map | `REQUIRED_WHEN_CAPABILITY_ENABLED`; `PRJ-TEST-REVIEW-01-ASSURANCE-MAP`; Test Engineering; `MAT-* → BC-* → TM-* / GAP-*`. | Обязательный член того же пакета. | Инженерам: подробная трассировка цели, поведения, теста и вердикта. При споре переходите к владеющим записям и доказательствам. |
+| Behavior Contract Model | `INTERNAL_REQUIRED_PROJECTION`; не флажок меню; владелец Behavior Model; принятые `BC-*`. | Входит в пакет при условии модуля. Его присутствие не означает выбор дополнительного результата пользователем. | Человекочитаемая модель поведения. Изменение `BC-*` требует технической повторной проверки. |
+| Test Plan | `USER_SELECTABLE`; `PRJ-TEST-REVIEW-02-TEST-PLAN`; Test Engineering; принятые цели и пробелы. | Условный член при `outputs.test_plan = true`. | Командам тестирования: границы, зависимости, сценарии, проверки и критерии принятия. Выбирайте для плана устранения пробелов, не для одной оценки текущего набора тестов. |
+| Contract Consistency Report | `USER_SELECTABLE`; `PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT`; Contract Verification; `CC-*`. | Условный член при `outputs.contract_consistency_report = true`; нужен применимый формальный контракт. | Владельцам API: расхождения и решения между `DECLARED`, `IMPLEMENTED`, `CONSUMED`, `TESTED`. Не является самой проверкой контракта. |
+| Test Environment Design | `USER_SELECTABLE`; `PRJ-TEST-REVIEW-05-TEST-ENVIRONMENT-DESIGN`; Test Engineering. | Условный член при `outputs.test_environment_design = true`. | Инфраструктуре тестов: стратегия среды, изоляция, сброс, конфигурация и наблюдаемость. Выбирайте, когда качество доказательства зависит от среды. |
+| Service Simulator Design | `USER_SELECTABLE`; `PRJ-TEST-REVIEW-06-SERVICE-SIMULATOR-SPEC`; Test Engineering; принятые поведение и контракт. | Условный член при `outputs.service_simulator_design = true`. | Командам-потребителям: API, состояния, сценарии, отказы, события и сброс имитатора. Не выбирайте, если простой заместитель достоверно доказывает нужное поведение. |
+| Service Simulator Implementation Plan | `USER_SELECTABLE`; `PRJ-TEST-REVIEW-07-SERVICE-SIMULATOR-IMPLEMENTATION-PLAN`; Test Engineering. | Условный член при `outputs.service_simulator_implementation_plan = true`; требует принятый и актуальный проект имитатора. | Реализаторам: компоненты, интерфейсы управления, сценарии, проверки и CI. Это план, не автоматическая реализация. |
+| E2E Test Plan | `USER_SELECTABLE`; `PRJ-TEST-REVIEW-08-E2E-TEST-PLAN`; Test Engineering; `BC-*`, `MAT-*`. | Условный член при `outputs.e2e_test_plan = true`. | Тестировщикам и платформенным командам: многокомпонентные сценарии, стимулы, проверки и очистка. Не выбирайте E2E лишь потому, что он кажется самым полным тестом. |
+
+## Code Quality Review
+
+Все четыре документа имеют режим `USER_SELECTABLE`: они являются производными
+проекциями и не включаются автоматически.
+
+| Документ | Владелец, источник и проекция | Пакет, содержание и выбор |
+|---|---|---|
+| Code Quality Findings View / Report | Code Quality Review; принятые `CQ-*` и состояние охвата; `PRJ-CQ-00-FINDINGS-VIEW`. | Условный член при `outputs.findings_view = true`. Для инженеров: механизм, доказательства, последствия, серьёзность, уверенность и повторная проверка. Выбирайте для работы с отдельными выводами. |
+| Code Quality Summary | Code Quality Review; `CQ-*`, связанные `CQRA-*` при показе статуса; `PRJ-CQ-01-SUMMARY`. | Условный член при `outputs.code_quality_summary = true`. Для лидов: главные темы, концентрации рисков, ограничения и приоритеты. Выбирайте для первого краткого обзора. |
+| Maintainability Hotspots | Code Quality Review; `CQ-*` и состояние охвата; `PRJ-CQ-02-HOTSPOTS`. | Условный член при `outputs.maintainability_hotspots = true`. Для владельцев сопровождения: области концентрации подтверждённой нагрузки, не рейтинг по LOC или одной метрике. |
+| Code Quality Roadmap Contribution | Code Quality Review; `CQ-*`, связанные `CQRA-*`; `PRJ-CQ-03-ROADMAP-CONTRIBUTION`. | Условный член при `outputs.roadmap_contribution = true`. Для технического планирования: группы работ, зависимости, порядок и ожидания повторной проверки. Не заменяет архитектурную дорожную карту. |
+
+Изменение `CQ-*` или `CQRA-*` сначала проходит через владеющий технический
+процесс; затем учитывается влияние и при необходимости запрашивается `RG-*`.
+`CQRA COMPLETED != CQ RESOLVED`.
+
+## Политика пакета и актуальность
+
+`PROJECTION_IMPACT_ACCOUNTED` означает только, что влияние изменений записано;
+оно не означает автоматическую пересборку и не утверждает, что все документы
+`CURRENT`. Политика `PERMISSIVE`, `REQUIRED_SCOPE_CURRENT` или
+`ALL_SCOPED_CURRENT` определяет, какие зарегистрированные члены должны быть
+актуальны для конкретного пакета.
+
+Подробнее: [проекции и пакеты результатов](../concepts/projections-and-packages.md),
+[справочник процессов](workflows.md),
+[руководство по Test Engineering](../guides/test-engineering.md).

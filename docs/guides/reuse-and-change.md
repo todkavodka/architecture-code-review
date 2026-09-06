@@ -1,6 +1,9 @@
 # Повторное использование, изменения и расширение
 
-Review Suite рассчитан на длительную жизнь audit package. Accepted state не нужно выбрасывать после каждого нового commit или нового запроса пользователя.
+`Review Suite` рассчитан на длительную жизнь пакета аудита. Принятое состояние
+не нужно выбрасывать после каждого нового commit или запроса пользователя.
+Полные условия входа, автоматические действия, остановки и результаты каждого
+`Session Intent` определяет [справочник процессов](../reference/workflows.md).
 
 ## Выбор Session Intent
 
@@ -25,13 +28,15 @@ RESUME
   -> continue first non-accepted durable boundary
 ```
 
-`RESUME` не является новым конфигуратором. Если пользователь хочет добавить output, это `EXTEND`.
+`RESUME` не является новым конфигуратором. Если пользователь хочет добавить
+итоговый документ, используется `EXTEND`.
 
 ## `REVALIDATE`
 
 Используйте после изменения accepted baseline.
 
-Предыдущая Review Suite configuration показывается read-only. Scope повторной проверки вычисляется автоматически через impact analysis.
+Предыдущая конфигурация `Review Suite` показывается только для чтения. Область
+повторной проверки вычисляется автоматически по зависимостям.
 
 ```text
 previous baseline
@@ -48,7 +53,8 @@ previous baseline
 
 Пользователь подтверждает baseline/change context и принимает решения там, где authority действительно неоднозначна.
 
-Пользователь не выбирает заново capability/output checkboxes для обычного `REVALIDATE`.
+Пользователь не выбирает заново модули и флажки документов для обычного
+`REVALIDATE`.
 
 ### `SYSTEMIC` impact
 
@@ -82,7 +88,8 @@ UNION required dependencies
 
 Если Architecture Review отсутствовала, её можно добавить и выбрать depth/endpoint.
 
-Если capability уже существует, accepted configuration не открывается как новый `NEW` menu.
+Если модуль уже существует, принятая конфигурация не открывается как новое меню
+`NEW`.
 
 ### Architecture endpoint extension
 
@@ -96,11 +103,13 @@ REVIEW_ONLY
 
 Из `REVIEW_ONLY` можно сразу запросить Target + Roadmap.
 
-Existing depth остаётся read-only. Смена `STANDARD_FULL` ↔ `FORENSIC` не является обычным additive extension.
+Выбранная глубина остаётся доступной только для чтения. Смена
+`STANDARD_FULL` ↔ `FORENSIC` не является обычным добавлением результата.
 
 ### Test/Code Quality additions
 
-Показываются только outputs, которых ещё нет. Existing selected outputs сохраняются.
+Показываются только ещё не выбранные документы. Уже выбранные документы
+сохраняются.
 
 ## `USE_EXISTING`
 
@@ -138,7 +147,8 @@ TECHNICAL_REVALIDATION_REQUIRED
 
 ## Projection regeneration
 
-`REVALIDATE` и Projection Impact Analysis не regenerates documents автоматически.
+`REVALIDATE` и анализ влияния на проекции не пересобирают документы
+автоматически.
 
 Если после semantic change нужен fresh output:
 

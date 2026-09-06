@@ -168,6 +168,30 @@ evidence/WS-*.md
 technical-model/...
 ```
 
+### Снимок принятого результата
+
+```text
+baseline: a1b2c3d
+Review Suite: Architecture Review = ON (FORENSIC, REVIEW_PLUS_TARGET_AND_ROADMAP)
+selected documents: Architecture Review, Findings Ledger, Target Architecture, Roadmap
+package members: PRJ-ARCH-00-REVIEW, PRJ-ARCH-01-FINDINGS,
+                 PRJ-ARCH-02-TARGET, PRJ-ARCH-03-ROADMAP
+freshness: CURRENT for required package members
+```
+
+Один проверяемый путь чтения выглядит так:
+
+```text
+PRJ-ARCH-00-REVIEW
+  -> RF-007
+  -> INT-PUBLISH-COMPLETION@rev2
+  -> WS-003#EV-007
+  -> src/events/publisher.py@a1b2c3d
+```
+
+Такой пакет можно использовать повторно: новый исходный код требует
+`REVALIDATE`, а добавление ещё не выбранного результата — `EXTEND`.
+
 ## Через месяц
 
 После изменений пользователь не запускает новый forensic audit автоматически:

@@ -128,3 +128,29 @@ user_decision_required: true
 1. fresh evidence только там, где она нужна;
 2. preservation unaffected accepted state;
 3. явное отделение semantic revalidation от projection regeneration.
+
+## Снимок результата после повторной проверки
+
+```text
+previous baseline: A
+current baseline: B
+restored Review Suite: Architecture Review + Test Engineering [READ-ONLY]
+affected semantic records: INT-PUBLISH-COMPLETION, RF-007, BC-022, MAT-012
+package members: PRJ-ARCH-00-REVIEW, PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
+freshness after impact accounting: affected documents STALE;
+                                 unrelated Contract Report CURRENT
+```
+
+Путь проверки обновлённого вывода остаётся тем же:
+
+```text
+fresh Architecture Review projection
+  -> revalidated RF-007
+  -> revised STM interaction
+  -> fresh WS#EV
+  -> changed source at baseline B
+```
+
+Пакет остаётся пригодным для повторного использования после закрытия нужных
+проверок. Если требуется свежий отчёт, это отдельный явный запрос `RG-*`, а не
+автоматическое следствие `REVALIDATE`.

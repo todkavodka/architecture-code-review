@@ -1,13 +1,12 @@
-# Architecture Guide — новая структура документации
+# Архитектура и модель аудита
 
-Этот путь сохранён для совместимости со старыми ссылками. Концептуальная документация теперь разделена на несколько тематических глав, чтобы не смешивать обзор, модель данных и эксплуатационные правила в одном большом файле.
+Эта страница сохранена для старых ссылок. Каноническое объяснение модели
+аудита теперь разделено на короткие тематические главы.
 
-Начните с:
+- [Review Suite](concepts/review-suite.md) — выбор независимых модулей.
+- [Доказательства и Shared Technical Model](concepts/evidence-and-technical-model.md) — наблюдения, факты, идентичность и ревизии.
+- [Источники истины и происхождение выводов](concepts/authority-and-provenance.md) — владение смыслом и трассировка выводов.
+- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — повторная проверка, актуальность и замещение.
+- [Проекции и пакеты результатов](concepts/projections-and-packages.md) — `PRJ-*`, `RG-*`, правила пакетов и закрытие работ.
 
-- [Review Suite](concepts/review-suite.md) — независимые модули Architecture Review, Test Engineering и Code Quality Review;
-- [Shared Evidence и Shared Technical Model](concepts/evidence-and-technical-model.md) — доказательства, факты, identity и revision;
-- [Authority и provenance](concepts/authority-and-provenance.md) — источники истины и трассировка выводов;
-- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — revalidation, freshness и supersession;
-- [Проекции и пакеты результатов](concepts/projections-and-packages.md) — `PRJ-*`, `RG-*`, package policies и closeout.
-
-Полная карта: [Documentation Hub](index.md).
+Полная карта: [центр документации](index.md).

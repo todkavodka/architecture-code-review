@@ -1,356 +1,77 @@
 # Справочник артефактов
 
-Этот документ описывает persistent artifacts audit package с точки зрения человека: роль, ownership, создание, обновление, freshness и потребителей.
+Это канонический human-facing справочник сохраняемых артефактов пакета аудита.
 
-> Нормативная schema каждого объекта находится в `references/` и capability contracts. Этот справочник объясняет её назначение и практическое использование.
+Этот справочник объясняет, какие записи сохраняет пакет аудита, кто ими
+владеет и когда ими можно пользоваться. Нормативные схемы остаются в
+`references/` и в контрактах модулей; здесь приведены правила чтения и работы.
 
-## 1. `working/INDEX.md`
+## Общая модель
 
-**Роль:** coordinator workflow authority.
+Для любой записи определите владельца смысла, право записи, привязку к базовой
+ревизии, состояние жизненного цикла и происхождение. Итоговый Markdown не
+заменяет семантическую запись, а компактный индекс не заменяет владеющий
+артефакт.
 
-**Владелец/writer:** coordinator.
+| Свойство | Общее правило |
+|---|---|
+| Идентичность | Один устойчивый идентификатор обозначает одну смысловую сущность. Изменение той же сущности создаёт новую ревизию; новая сущность получает новый идентификатор и связь замещения. |
+| Право записи | Запись меняет только владеющий процесс. Другой модуль может создать кандидата либо запрос на повторную проверку, но не переписывает чужой смысл. |
+| Происхождение | Существенный вывод ведёт к базовой ревизии, `WS-*`/`EV-*`, STM либо к другой принятой записи. |
+| Зависимости | Зависимости сохраняются явно. При изменении входа адресная повторная проверка определяет затронутые записи; не связанные записи не переоткрываются без доказанного влияния. |
+| Актуальность | Семантические записи используют собственные состояния актуальности; `PRJ-*` использует `CURRENT`, `STALE`, `BLOCKED`. Состояния разных слоёв не смешиваются. |
+| Проекции | `PRJ-*` представляет принятый смысл, но не принимает, не меняет и не закрывает его. |
 
-**Потребители:** startup routing, `RESUME`, `REVALIDATE`, `EXTEND`, handoff logic.
+## Семейства и операционные правила
 
-**Создаётся:** при `NEW` или reconciliation legacy package.
+| Семейство | Назначение и владелец | Создание и изменение | Потребители | Ревизии, актуальность и связи |
+|---|---|---|---|---|
+| `working/INDEX.md` | Состояние координации: базовая ревизия, выбранные модули, этапы, блокеры и маршрутизация. Владелец — координатор. | Координатор при `NEW`, продолжении, согласовании или изменении маршрутизации. | Запуск, `RESUME`, `REVALIDATE`, `EXTEND`, передача состояния. | Не является STM, реестром выводов или `PRJ-*`. Перед существенным действием сверяется с владеющими артефактами; расхождение требует `AUTHORITY_RECONCILIATION_REQUIRED`. |
+| `WS-*` | Рабочая область ограниченного исследования. Владелец — слой общих доказательств. | Один активный компонент, имеющий право записи, создаёт её при необходимости свежего исследования. | STM и выбранные модули. | Содержит область, базовую ревизию, источники, ограничения, `EV-*` и передачу состояния. Старую область не переписывают под новую ревизию. |
+| `EV-*` | Адресуемое наблюдение внутри `WS-*`. | Слой общих доказательств при исследовании источника. | STM, кандидаты и проверки модулей. | Привязано к источнику и базовой ревизии. Не является выводом, оценкой серьёзности или исправлением. При необходимости свежего доказательства создают новую запись. |
+| `COMP-*`, `IF-*`, `INT-*`, `DS-*`, `EVENT-*`, `FLOW-*`, `AUTH-*`, `CFG-*`, `ERR-*` | Принятые факты STM: компоненты, интерфейсы, взаимодействия, хранилища, события, потоки, границы доверия, конфигурация и контракты отказов. Владелец — Technical Model Gate. | Только Technical Model Gate принимает, пересматривает, отклоняет или замещает факт; модули создают лишь запросы и кандидаты фактов. | Все модули, итоговые документы, повторная проверка. | `CANDIDATE → UNDER_REVIEW → ACCEPTED → SUPERSEDED | REJECTED`; актуальность `VALID | REVALIDATION_REQUIRED | UNKNOWN`; происхождение `WS#EV` и явные связи обязательны. |
+| `RF-*` | Подтверждённый архитектурный корневой вывод. Владелец — `Architecture Review`. | Архитектурный процесс после достаточной модели, независимой проверки и установления корневой границы. | Реестр выводов, целевая архитектура, дорожная карта, `REVALIDATE`. | Содержит границу, последствия, серьёзность и ссылки на STM/доказательства. Изменение фактов или ограничений вызывает повторную проверку либо замещение. |
+| `BC-*` | Контракт существенного поведения. Владелец — Behavior Model. | Behavior Model принимает, пересматривает, отклоняет и замещает запись. | `MAT-*`, проверка контрактов, проекты симулятора и E2E. | Не является тестом или пробелом. Используется только при достаточной принятой и актуальной области зависимостей. |
+| `CC-*` | Решение о согласованности представлений контракта. Владелец — Contract Verification. | Contract Verification при существенном вопросе между `DECLARED`, `IMPLEMENTED`, `CONSUMED`, `TESTED`. | Contract Consistency Report, Test Assurance, повторная проверка. | Фиксирует решение и источники; не передаёт владение контрактом другому модулю. Создаётся только при применимости формального контракта. |
+| `MAT-*` | Существенная цель подтверждения поведения. Владелец — Test Assurance. | Test Assurance по принятому поведению и области проверки. | `TM-*`, `GAP-*`, Summary, Map, Test Plan. | Не равна `BC-*`: описывает, что необходимо доказать. Меняется при изменении поведения, области либо доказательств. |
+| `TM-*` | Связь цели `MAT-*` с исполнимым доказательством и вердиктом. Владелец — Test Assurance. | Test Assurance после анализа тестов. | Summary, Map, `GAP-*`, `REVALIDATE`. | Содержит ссылки на цель, тест и вердикт. Повторно проверяется при изменении теста, поведения или зависимости. |
+| `GAP-*` | Недостающее, частичное или недостаточное доказательство. Владелец — Test Assurance. | Test Assurance при недостаточном `TM-*` или отсутствии доказательства. | Summary, Map, Test Plan, повторная проверка. | Не равен дефекту реализации и не закрывается появлением файла теста: требуется принятое доказательство. |
+| `TASK-*` | Работа по устранению пробела Test Engineering. Владелец — Test Engineering. | Процесс Test Engineering по принятому пробелу или цели. | Test Plan и исполнители улучшений. | Не меняет `BC-*`, `MAT-*`, `TM-*` или `GAP-*` сам по себе; после выполнения требуется подтверждение результата. |
+| `CQ-*` | Подтверждённый вывод о качестве реализации. Владелец — Code Quality Review. | Code Quality Review после цепочки «механизм → доказательство → существенное последствие → принятие». | Findings View, Summary, Hotspots, Roadmap Contribution, `REVALIDATE`. | Не создаётся из предупреждения инструмента или метрики. Имеет механизм, последствия, серьёзность, уверенность, применимость и происхождение. |
+| `CQRA-*` | Действие по устранению одного или нескольких `CQ-*`. Владелец — Code Quality Review. | Процесс Code Quality Review. | Roadmap Contribution, исполнители улучшений, повторная проверка. | `CQRA COMPLETED != CQ RESOLVED`: завершённое действие не закрывает вывод без нового доказательства. |
+| `PRJ-*` | Устойчивый идентификатор итоговой или операционной проекции. Владелец — публикующий модуль или endpoint. | Проекционный процесс по зарегистрированному контракту. | Пользователь, пакет результатов, навигация и проверка происхождения. | Содержит путь, контракт, зависимости, проверенную ревизию, отпечаток и состояние `CURRENT | STALE | BLOCKED`. Изменение семантики отмечает влияние, но не пересобирает документ автоматически. |
+| `RG-*` | Зафиксированная запись отдельной пересборки проекций. | Процесс пересборки по явному запросу свежего документа или пакета. | Публикация и проверка жизненного цикла проекции. | Не является Session Intent, семантической записью или заменой `INDEX.md`. Содержит замороженную область, зависимости, результат генерации и проверку. |
+| Технические индексы | Представления для поиска, маршрутизации и обхода зависимостей. | Генератор либо процесс, указанный владеющим контрактом. | Координатор и адресный запуск модулей. | Восстанавливаемы и неавторитетны. При неоднозначности или устаревании читают первичный артефакт и выполняют согласование. |
 
-**Обновляется:** при изменении process/routing state, capabilities, gates, handoffs, blockers и package/projection routing.
+## Важные различия в Test Engineering
 
-**Не хранит:** substantive STM facts, findings и другой semantic meaning как единственный source of truth.
-
-Типовые разделы:
-
-```text
-repository/baseline
-session_intent
-review_suite
-current phase
-execution plan
-artifact registry
-capability registry
-coverage summaries
-handoffs
-blockers
-revalidation state
-projection/package routing
-```
-
-Если `INDEX.md` расходится с owning accepted artifact, downstream substantive work требует reconciliation.
-
----
-
-## 2. `WS-*` — workset
-
-**Роль:** physical grouping одного bounded investigation.
-
-**Владелец:** Shared Evidence layer.
-
-**Writer:** один active writer на workset.
-
-**Потребители:** STM и capabilities.
-
-**Создаётся:** когда требуется fresh investigation, которое полезно адресовать/переиспользовать.
-
-**Минимальная информация:**
+`BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*` и `TASK-*` отвечают на разные
+вопросы и потому имеют разные условия создания и правила повторной проверки.
 
 ```text
-id
-name
-scope
-baseline
-baseline_type
-status
-investigated_sources
-limitations
-EV records
-HANDOFF SUMMARY
+BC-*  → что система должна делать
+MAT-* → что необходимо доказать
+TM-*  → каким тестом и с каким вердиктом это доказано
+GAP-* → какого доказательства не хватает
+TASK-* → какая работа должна устранить пробел
+CC-*  → как согласованы конфликтующие представления контракта
 ```
 
-**Update rule:** исторический workset не переписывается под новый baseline так, чтобы старое evidence выглядело current.
-
----
-
-## 3. `EV-*` — observation
-
-**Роль:** адресуемое baseline-bound observation.
-
-**Физическое размещение:** обычно внутри `WS-*`.
-
-**Типичная identity:**
-
-```text
-WS-012-payment-retry#EV-003
-```
-
-**Required content:**
-
-```text
-id
-source_type
-repository path or external locator
-symbol/range when available
-baseline binding
-observed fact/behavior
-optional short excerpt
-```
-
-**Не является:** finding, severity decision, remediation или accepted STM fact.
-
----
-
-## 4. STM facts
-
-**Роль:** persistent shared factual authority.
-
-**Владелец/writer:** Technical Model Gate.
-
-**Потребители:** Architecture Review, Test Engineering, Code Quality Review, projections.
-
-**Families:**
-
-```text
-COMP-*  component/runtime unit
-IF-*    interface
-INT-*   interaction
-DS-*    data store
-EVENT-* event/message
-FLOW-*  material flow
-AUTH-*  auth/trust boundary
-CFG-*   configuration fact
-ERR-*   error/failure contract
-```
-
-**Minimum semantic properties:** stable ID, revision, baseline, status, freshness, provenance refs, relations, relevant dependency metadata.
-
-**Lifecycle:**
-
-```text
-CANDIDATE -> UNDER_REVIEW -> ACCEPTED -> SUPERSEDED | REJECTED
-```
-
-**Freshness:**
-
-```text
-VALID | REVALIDATION_REQUIRED | UNKNOWN
-```
-
-**Revision rule:** та же semantic identity → новая revision; новая semantic identity → новый ID + supersession link.
-
----
-
-## 5. `RF-*` — Architecture finding
-
-**Роль:** принятый architecture/root finding.
-
-**Владелец:** Architecture Review.
-
-**Создаётся:** после evidence/STM-backed discovery, independent verification и root-boundary adjudication.
-
-**Typical fields:** identity, scope, root boundary, supporting refs, material consequence, severity, relationships/supersession.
-
-**Потребители:** architecture report, Target Architecture, Remediation Roadmap, `REVALIDATE`.
-
-**Не является:** raw observation или generic code smell.
-
----
-
-## 6. Test Engineering records
-
-### `BC-*`
-
-**Роль:** одно независимо проверяемое существенное поведение.
-
-**Потребители:** assurance targets, contract verification, simulator/E2E design.
-
-### `CC-*`
-
-**Роль:** inconsistency/adjudication record между DECLARED / IMPLEMENTED / CONSUMED / TESTED.
-
-**Создаётся:** только при material contract question.
-
-### `MAT-*`
-
-**Роль:** material assurance target — что должно быть доказано test evidence.
-
-### `TM-*`
-
-**Роль:** mapping assurance target к executable test evidence и verdict.
-
-### `GAP-*`
-
-**Роль:** отсутствующее/частичное/недостаточное доказательство.
-
-### `TASK-*`
-
-**Роль:** Test Engineering remediation work.
-
-**Ключевой boundary:** эти records не являются вариациями одного finding. Они отвечают на разные вопросы.
-
----
-
-## 7. `CQ-*` — Code Quality finding
-
-**Роль:** accepted material implementation-quality finding.
-
-**Владелец:** Code Quality Review.
-
-**Создаётся:** после evidence-backed chain `observation -> candidate -> interpretation -> material consequence -> accepted finding`.
-
-**Typical data:** mechanism, evidence/provenance, consequence, severity, confidence, applicability/disposition, relationships, freshness.
-
-**Не создаётся автоматически из:** lint warning, metric threshold, smell.
-
----
-
-## 8. `CQRA-*` — Code Quality remediation action
-
-**Роль:** remediation action для одного или нескольких `CQ-*`.
-
-**Lifecycle:** capability-owned.
-
-**Critical rule:**
-
-```text
-CQRA COMPLETED != CQ RESOLVED
-```
-
-Finding требует revalidation evidence.
-
----
-
-## 9. `PRJ-*` — projection record
-
-**Роль:** stable identity derived human-readable/operational projection.
-
-**Владелец:** capability/endpoint, который публикует projection contract.
-
-**Typical fields:**
-
-```text
-projection_id
-owner
-artifact_path
-semantic_dependencies
-projection_dependencies
-contract_revision
-verified_revision
-fingerprint
-freshness
-```
-
-**Freshness:** `CURRENT | STALE | BLOCKED`.
-
-**Update trigger:** semantic/dependency/contract impact или explicit regeneration.
-
-**Authority:** projection не становится semantic authority.
-
----
-
-## 10. `RG-*` — regeneration session
-
-**Роль:** frozen execution record пересборки projections.
-
-**Создаётся:** только по explicit request свежего deliverable/пакета.
-
-**Не является:** Session Intent, capability semantic state или finding.
-
-**Typical content:** requested scope, resolved dependencies, execution plan, generation result, verification/fingerprint outcome.
-
----
-
-## 11. Projection package
-
-**Роль:** named deliverable scope для closeout gate.
-
-**Owner:** capability/endpoint declaration.
-
-**Contract:**
-
-```text
-package_id
-owner
-gate
-freshness_policy
-required_members
-optional_members
-conditional_members
-```
-
-**Resolved snapshot:** фиксируется перед gate и содержит конкретные `PRJ-*` revisions.
-
-**Не является:** global projection registry или semantic authority.
-
----
-
-## 12. Generated indexes
-
-**Роль:** lookup/routing/dependency traversal.
-
-**Writer:** generator/owning projection process согласно contract.
-
-**Потребитель:** coordinator и bounded capability dispatch.
-
-**Authority boundary:** generated index не заменяет owning direct metadata/semantic artifact.
-
-Если index stale/ambiguous, требуется чтение owning authority и reconciliation.
-
----
-
-## 13. Recommended package layout
-
-Физический layout может адаптироваться к repository convention. Концептуально:
-
-```text
-docs/reviews/architecture-review/
-  final reports / selected outputs
-  working/
-    INDEX.md
-    evidence/
-      INDEX.md
-      WS-*.md
-    technical-model/
-      INDEX.md
-      coverage.md
-      components/
-      interfaces/
-      interactions/
-      data-stores/
-      events/
-      flows/
-      auth/
-      errors/
-      configuration/
-    projections/
-      registry.md
-      impact.md
-      sessions/RG-*.md
-    capability-specific working state
-```
-
-Имена директорий менее важны, чем stable identity, ownership, revision binding и provenance.
-
-## 14. Reading rules
-
-Для быстрого понимания состояния:
-
-```text
-working/INDEX.md
-```
-
-Для substantive decision:
-
-```text
-INDEX -> owning semantic artifact -> WS#EV -> raw source
-```
-
-Для user-facing consumption:
-
-```text
-main report/summary -> supporting records as needed
-```
+## Как читать пакет аудита
+
+| Задача | С чего начать |
+|---|---|
+| Понять ход работы | `working/INDEX.md` |
+| Проверить техническое решение | владеющий семантический артефакт → `WS#EV` → исходный источник |
+| Прочитать результат | основной документ пакета → поддерживающие проекции по необходимости |
+| Понять, почему документ устарел | `PRJ-*` → зависимости и причина состояния → владеющее действие |
+
+Физическое расположение файлов определяется соглашением анализируемого
+репозитория. Важнее устойчивые идентификаторы, владелец смысла, ревизии и
+происхождение, чем имя каталога.
 
 ## См. также
 
-- [Identifiers and Statuses](identifiers-and-statuses.md)
-- [Authority and Provenance](../concepts/authority-and-provenance.md)
-- [Outputs](outputs.md)
+- [Идентификаторы и статусы](identifiers-and-statuses.md)
+- [Источники истины и происхождение выводов](../concepts/authority-and-provenance.md)
+- [Справочник итоговых документов](outputs.md)

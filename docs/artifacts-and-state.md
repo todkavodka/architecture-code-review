@@ -1,12 +1,11 @@
-# Artifacts and State — новая структура документации
+# Артефакты и состояние
 
-Этот путь сохранён для совместимости со старыми ссылками.
+Эта страница сохранена для старых ссылок. Используйте канонические справочные
+страницы, чтобы понять владельца записи, её актуальность и происхождение.
 
-Актуальный справочник:
+- [Справочник артефактов](reference/artifacts.md) — `INDEX.md`, `WS-*`, `EV-*`, STM, `RF-*`, записи Test Engineering, `CQ-*`, `CQRA-*`, `PRJ-*` и `RG-*`.
+- [Идентификаторы и статусы](reference/identifiers-and-statuses.md) — точные идентификаторы и значения состояний.
+- [Источники истины и происхождение выводов](concepts/authority-and-provenance.md) — границы владения и трассировка.
+- [Глоссарий](reference/glossary.md) — язык пользовательской документации.
 
-- [Артефакты и состояние](reference/artifacts.md) — `INDEX.md`, `WS-*`, `EV-*`, STM, `RF-*`, Test Engineering records, `CQ-*`, `CQRA-*`, `PRJ-*`, `RG-*` и package state;
-- [Идентификаторы и статусы](reference/identifiers-and-statuses.md) — canonical IDs и status tokens;
-- [Authority и provenance](concepts/authority-and-provenance.md) — ownership и трассировка;
-- [Глоссарий](reference/glossary.md) — терминология human-facing documentation.
-
-Полная карта: [Documentation Hub](index.md).
+Полная карта: [центр документации](index.md).

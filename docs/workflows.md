@@ -1,12 +1,12 @@
-# Workflows — новая структура документации
+# Сценарии работы
 
-Этот путь сохранён для совместимости со старыми ссылками.
+Эта страница сохранена для старых ссылок. Каноническое описание Session Intent,
+условий входа, автоматических действий и остановок находится в справочнике
+процессов.
 
-Актуальные материалы:
+- [Повторное использование, изменения и расширение](guides/reuse-and-change.md) — практический выбор между `RESUME`, `REVALIDATE`, `EXTEND`, `USE_EXISTING` и `PROJECTION_REPAIR`.
+- [Справочник процессов](reference/workflows.md) — полные условия, решения пользователя, чтение и запись состояния, проверки и результаты каждого сценария.
+- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — различие между повторной проверкой семантики и пересборкой документов.
+- [Пример `REVALIDATE`](examples/revalidation.md) — сквозной сценарий после изменения проекта.
 
-- [Повторное использование, изменения и расширение](guides/reuse-and-change.md) — практическое руководство по `RESUME`, `REVALIDATE`, `EXTEND`, `USE_EXISTING` и `PROJECTION_REPAIR`;
-- [Workflow Reference](reference/workflows.md) — preconditions, user choices, automatic actions, reads/writes, gates, stop conditions и postconditions для каждого Session Intent;
-- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — semantic freshness, projection freshness и bounded revalidation;
-- [Пример REVALIDATE](examples/revalidation.md) — end-to-end сценарий после изменения проекта.
-
-Полная карта: [Documentation Hub](index.md).
+Полная карта: [центр документации](index.md).

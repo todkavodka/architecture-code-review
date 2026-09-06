@@ -1,13 +1,13 @@
-# Output Guide — новая структура документации
+# Итоговые документы
 
-Этот путь сохранён для совместимости со старыми ссылками.
+Эта страница сохранена для старых ссылок. Канонический справочник объясняет,
+какой документ выбирается пользователем, какой обязателен для пакета и откуда
+он получает технический смысл.
 
-Актуальные материалы:
+- [Справочник итоговых документов](reference/outputs.md) — назначение, аудитория, условия выбора, источники смысла, актуальность и обновление каждого документа.
+- [Руководство по Architecture Review](guides/architecture-review.md)
+- [Руководство по Test Engineering](guides/test-engineering.md)
+- [Руководство по Code Quality Review](guides/code-quality-review.md)
+- [Сквозные примеры](index.md#сквозные-примеры)
 
-- [Справочник итоговых документов](reference/outputs.md) — назначение, аудитория, prerequisites, source authority, expected content, freshness и правила использования каждого output;
-- [Architecture Review guide](guides/architecture-review.md);
-- [Test Engineering guide](guides/test-engineering.md);
-- [Code Quality Review guide](guides/code-quality-review.md);
-- [Сквозные примеры](index.md#сквозные-примеры).
-
-Полная карта: [Documentation Hub](index.md).
+Полная карта: [центр документации](index.md).

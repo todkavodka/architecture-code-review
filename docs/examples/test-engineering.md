@@ -105,3 +105,28 @@ Assurance Map показывает exact `MAT -> BC -> TM/GAP` traceability.
 Impact может затронуть `TM-*`, `MAT-*` verdicts и `GAP-*`, но не обязан revalidate unrelated behaviors.
 
 Если новый test evidence закрывает `GAP-009`, record закрывается только после accepted revalidation, а не потому, что test file появился в Git diff.
+
+## Снимок принятого результата
+
+```text
+baseline: a1b2c3d
+Review Suite: Test Engineering = ON
+selected menu documents: Test Assurance, Test Plan
+package members: PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY,
+                 PRJ-TEST-REVIEW-01-ASSURANCE-MAP,
+                 PRJ-TEST-REVIEW-02-TEST-PLAN
+freshness: CURRENT for the resolved package
+```
+
+Путь проверки одного утверждения:
+
+```text
+PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
+  -> GAP-009
+  -> MAT-012 -> BC-022
+  -> relevant STM facts / executable-test inventory
+  -> source and test files at a1b2c3d
+```
+
+`Behavior Contract Model` может входить в пакет как требуемая проекция модуля,
+но не становится отдельным выбором пользователя.

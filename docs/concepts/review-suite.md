@@ -1,8 +1,10 @@
 # Review Suite
 
-Review Suite объединяет три независимых функциональных модуля проверки (capability), которые используют общие доказательства и Shared Technical Model, но сохраняют собственную semantic authority.
+`Review Suite` объединяет три независимых модуля проверки. Они используют общие
+доказательства и Shared Technical Model, но сохраняют собственные источники
+технического смысла.
 
-## Три capability
+## Три модуля проверки
 
 ### Architecture Review
 
@@ -55,7 +57,7 @@ AT_LEAST_ONE_TOP_LEVEL_CAPABILITY_SELECTED
 
 Architecture Review не является обязательным родителем Test Engineering или Code Quality. Если другой capability нужен accepted STM slice, он разрешается как factual dependency и не включает Architecture Review автоматически.
 
-## Configuration и output selection — разные вещи
+## Настройка модуля и выбор документов — разные вещи
 
 Выбор capability определяет, какая semantic work должна выполняться. Выбор итоговых документов определяет, какие projections нужны пользователю.
 
