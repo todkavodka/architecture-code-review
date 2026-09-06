@@ -6,44 +6,44 @@
 
 ## Зачем нужна карта источников истины
 
-Без явного ownership легко получить три класса ошибок:
+Без явного разграничения ответственности легко получить три класса ошибок:
 
-1. summary начинает считаться источником истины;
-2. capability переписывает factual model под собственный вывод;
-3. старый compact state продолжает использоваться после изменения owning artifact.
+1. краткое резюме начинают считать источником истины;
+2. модуль проверки переписывает фактическую модель под собственный вывод;
+3. старое компактное состояние продолжают использовать после изменения основного артефакта.
 
-Поэтому для каждого типа данных задаётся owning layer.
+Поэтому для каждого типа данных определён источник истины.
 
-## Authority map
+## Карта источников истины
 
-| Объект | За что отвечает | Является authority? |
+| Объект | За что отвечает | Является источником истины? |
 |---|---|---|
-| `working/INDEX.md` | coordinator workflow state | да, только для routing/process state |
-| `WS-*`, `EV-*` | baseline-bound observations | observation authority, не conclusions |
+| `working/INDEX.md` | состояние координации процесса | да, только для маршрутизации и состояния процесса |
+| `WS-*`, `EV-*` | наблюдения, привязанные к базовой ревизии | источник наблюдений, но не выводов |
 | STM `COMP/IF/INT/...` | принятые технические факты | да |
-| `RF-*` | Architecture findings | да |
-| `BC/CC/MAT/TM/GAP/TASK` | Test Engineering semantics | да |
-| `CQ-*`, `CQRA-*` | Code Quality semantics | да |
-| `PRJ-*` documents | человекочитаемое представление | нет, derived projection |
-| `RG-*` | состояние regeneration session | operational state, не semantic authority |
+| `RF-*` | архитектурные выводы | да |
+| `BC/CC/MAT/TM/GAP/TASK` | семантика Test Engineering | да |
+| `CQ-*`, `CQRA-*` | семантика Code Quality Review | да |
+| документы `PRJ-*` | человекочитаемое представление | нет, производная проекция |
+| `RG-*` | состояние сеанса пересборки | операционное состояние, не семантический источник истины |
 
 ## `working/INDEX.md`
 
-`INDEX.md` — coordinator workflow authority. Он хранит то, что нужно для возобновления работы:
+`INDEX.md` — источник истины для координации процесса. Он хранит то, что нужно для возобновления работы:
 
-- baseline;
+- базовую ревизию;
 - Session Intent;
-- selected capabilities;
-- output configuration;
-- phase/gates;
-- artifact registry;
-- handoffs;
+- выбранные модули проверки;
+- конфигурацию итоговых документов;
+- этапы и проверки;
+- реестр артефактов;
+- передачу состояния;
 - blockers;
 - projection/package routing state.
 
-Но `INDEX.md` не является вторым STM и не владеет findings.
+Но `INDEX.md` не является второй STM и не хранит выводы как источник истины.
 
-Если compact INDEX entry расходится с owning artifact, downstream substantive decision должен остановиться и выполнить reconciliation.
+Если компактная запись INDEX расходится с основным артефактом, последующее существенное решение должно остановиться и выполнить согласование.
 
 Концептуально:
 
@@ -55,9 +55,9 @@ owning artifact says REVALIDATION_REQUIRED
 => AUTHORITY_RECONCILIATION_REQUIRED
 ```
 
-## Provenance chain
+## Цепочка происхождения
 
-Хороший accepted finding должен позволять ответить:
+Принятый вывод должен позволять ответить:
 
 > Почему мы считаем это утверждение верным?
 
@@ -76,22 +76,22 @@ RF-007
 GAP-008
   -> MAT-017
   -> BC-042
-  -> relevant STM facts / evidence
-  -> executable test inventory
+  -> относящиеся к делу факты STM / доказательства
+  -> перечень исполняемых тестов
 ```
 
 Для Code Quality:
 
 ```text
 CQ-014
-  -> implementation mechanism
+  -> механизм реализации
   -> WS/EV or source refs
-  -> material consequence
+  -> существенное последствие
 ```
 
-## Projection не становится authority
+## Проекция не становится источником истины
 
-Даже если итоговый report прошёл editorial review, его prose остаётся representation accepted semantics.
+Даже если итоговый отчёт прошёл редакционную проверку, его текст остаётся представлением принятой семантики.
 
 Например:
 
@@ -101,21 +101,21 @@ CQ-017 accepted finding
   -> PRJ-CQ-01 Summary
 ```
 
-Если Summary устарел, `CQ-017` не исчезает. Если человек вручную переписал Summary, это не изменяет `CQ-017`.
+Если краткое резюме устарело, `CQ-017` не исчезает. Если человек вручную переписал резюме, это не изменяет `CQ-017`.
 
-## Что делать при semantic drift
+## Что делать при семантическом расхождении
 
-Если presentation-only edit требует изменить accepted meaning, такой edit больше не является projection repair.
+Если правка представления требует изменить принятый смысл, она больше не является исправлением проекции.
 
 Например, нельзя через `PROJECTION_REPAIR`:
 
 - поменять severity;
-- заменить owner;
+- заменить владельца;
 - изменить root boundary;
-- убрать accepted finding;
+- убрать принятый вывод;
 - изменить target mechanism;
 - изменить roadmap prerequisite;
-- переписать STM fact.
+- переписать факт STM.
 
 Вместо этого workflow возвращает:
 
