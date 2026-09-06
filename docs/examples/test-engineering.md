@@ -1,132 +1,239 @@
-# Пример: анализ качества тестов
+# Пример: проверка достаточности тестов
+
+Этот пример показывает ограниченную проверку поведения оформления заказа перед
+изменением повторных попыток. Идентификаторы, пути и сведения о сервисе
+иллюстративны; пример не утверждает, что проверяет весь репозиторий или
+автоматически создаёт либо выполняет тесты.
 
 ## Исходная ситуация
 
-Backend имеет 1200 тестов и зелёный CI. Команда готовится менять retry logic и хочет понять, действительно ли тесты доказывают material behavior, а не просто покрывают happy path.
+У серверного приложения есть 1200 успешно выполняющихся тестов. Команда хочет
+изменить повторные попытки после тайм-аута и должна понять, доказывает ли
+имеющийся набор тестов отсутствие повторного создания заказа и повторной
+публикации события о его завершении.
 
-Запрос:
+Пользователь просит:
 
 ```text
 Используй architecture-code-review.
-Нужен только Test Engineering review: Test Assurance и Test Plan.
+Нужен только Test Engineering: Test Assurance, Test Plan и Contract Consistency Report.
 Architecture Review и Code Quality Review не включай.
 ```
 
-## Review Suite
+## Начальная конфигурация
+
+Skill фиксирует базовую ревизию `a1b2c3d` и начинает новый сеанс `NEW`. В
+`Review Suite` включён один самостоятельный модуль верхнего уровня:
 
 ```text
 Architecture Review: OFF
 Test Engineering: ON
-  Test Assurance
-  Test Plan
+  Test Assurance: обязательно при включённом модуле
+  Выбранные дополнительные результаты: Test Plan, Contract Consistency Report
 Code Quality Review: OFF
 ```
 
-Architecture OFF не мешает Test Engineering использовать required accepted STM slice.
+`Test Engineering` не требует `Architecture Review` и не включает его
+автоматически. `Test Assurance` — обязательный результат модуля, а не обычный
+необязательный флажок. В этом примере пользователь дополнительно выбрал только
+`Test Plan` и `Contract Consistency Report`; проект тестовой среды, документы
+об имитаторе сервиса и `E2E Test Plan` не выбраны.
 
-## Behavior discovery
+## Доказательства и фактическая модель
 
-Анализ выявляет material behavior:
+Модуль не создаёт факты о системе самостоятельно. Сначала в общей рабочей
+области исследования `WS-001-order-retry` фиксируются адресуемые наблюдения:
+
+```text
+EV-001
+source: src/orders/handler.py
+observed: order transaction may commit before the response reaches the client
+
+EV-002
+source: tests/test_retry.py
+observed: test_retry_after_500 covers an explicit HTTP 500 response
+
+EV-003
+source: api/openapi.yaml
+observed: repeated client order identifier is declared to return HTTP 409
+```
+
+`WS-*` группирует доказательства в ограниченной области, а `EV-*` обозначает
+отдельное наблюдение. Это не факты STM и не семантические записи `Test
+Engineering`.
+
+После проверки через `Shared Technical Model (STM)` принимается нужный для
+этой области фактический срез:
+
+```text
+IF-ORDER-CREATE
+INT-ORDER-COMMIT
+ERR-CLIENT-RESPONSE-TIMEOUT
+EVENT-ORDER-COMPLETED
+```
+
+Он описывает интерфейс, фиксацию заказа, тайм-аут ответа и событие. Этот срез
+служит фактическим основанием, но не определяет сам по себе контракт поведения,
+пробел в проверке или вывод о тестах.
+
+## Семантическое состояние `Test Engineering`
+
+На основе принятого фактического среза модуль формирует разные, не сводимые
+друг к другу семейства записей:
 
 ```text
 BC-021
-Retry after an ambiguous timeout must not create a second order.
+Повторная попытка после неоднозначного тайм-аута не создаёт второй заказ.
 
 BC-022
-Only one terminal completion event may be observable for one order generation.
-```
+Для одного поколения заказа наблюдаемо не более одного окончательного события.
 
-Далее формируются assurance targets:
+CC-004
+DECLARED: OpenAPI указывает HTTP 409 при повторном идентификаторе заказа.
+IMPLEMENTED / TESTED: обработчик и существующий тест ожидают возврат ранее
+созданного заказа с HTTP 200.
+Статус: CLASSIFIED; требуется решение о владельце смысла контракта.
 
-```text
 MAT-011
-Prove order uniqueness after timeout before response is received.
+Нужно доказать уникальность заказа, если фиксация прошла, а ответ клиенту
+прервался тайм-аутом.
 
 MAT-012
-Prove completion publication uniqueness under retry.
-```
+Нужно доказать уникальность публикации события при повторной попытке.
 
-## Existing tests
-
-Допустим, найдено:
-
-```text
 TM-031
-maps MAT-011 -> test_retry_after_500
-verdict: PARTIAL
-reason: test covers explicit HTTP 500, not ambiguous timeout after server-side commit
-```
+Связь MAT-011 с test_retry_after_500.
+Вердикт: PARTIAL — тест проверяет явный HTTP 500, но не тайм-аут после фиксации.
 
-Для `MAT-012` executable evidence не найдено.
-
-## Assurance gaps
-
-```text
 GAP-008
-MAT-011 lacks evidence for commit-success/response-timeout path.
+Для MAT-011 нет исполняемого доказательства пути «фиксация успешна, ответ
+потерян».
 
 GAP-009
-MAT-012 has no executable proof for repeated publication attempts.
+Для MAT-012 нет исполняемого доказательства повторных попыток публикации.
+
+TASK-003
+Подготовить проверку с управляемым прерыванием ответа после фиксации заказа.
 ```
 
-Зелёный CI не отменяет gaps: tests доказывают только фактически проверяемые scenarios.
+`BC-021` и `BC-022` — принятые контракты поведения, а не тестовые случаи и не
+документы. `CC-004` хранит наблюдаемое расхождение представлений контракта и
+отличается от `BC-*`; `Contract Consistency Report` лишь отображает его.
+`MAT-*` выражают значимость требуемого доказательства, а не приоритет или
+серьёзность дефекта. `TM-*` — семантическая модель связи с исполняемыми
+доказательствами, а не `Test Plan` и не исходный код теста. `GAP-*` фиксируют
+недостаточность подтверждения, а `TASK-*` — работу по её устранению.
+Завершение `TASK-003` не закрывает `GAP-008` без новых доказательств и
+принятой повторной проверки.
 
-## Test Assurance output
-
-Summary должен объяснить человеку:
-
-- broad suite exists and is stable;
-- normal retry cases covered;
-- ambiguous outcome path remains unproven;
-- terminal publication uniqueness is not executable-proven;
-- confidence в retry migration ограничена этими gaps.
-
-Assurance Map показывает exact `MAT -> BC -> TM/GAP` traceability.
-
-## Test Plan
-
-Для `GAP-008` план может потребовать integration test boundary с реальной transaction behavior и controllable response interruption.
-
-Для `GAP-009` — scenario с ambiguous broker acknowledgement или controllable publisher boundary, если это минимальная faithful test boundary.
-
-План не должен просто писать «добавить integration test»; он фиксирует stimulus, failure point, assertions и acceptance evidence.
-
-## Что не произошло
-
-- Architecture Review не был молча включён.
-- Behavior Model не показывался пользователю как optional checkbox.
-- Contract Verification не запускался, если нет material formal contract.
-- E2E не был добавлен только потому, что проблема сложная.
-
-## После исправления тестов
-
-Пользователь запускает `REVALIDATE` existing package.
-
-Impact может затронуть `TM-*`, `MAT-*` verdicts и `GAP-*`, но не обязан revalidate unrelated behaviors.
-
-Если новый test evidence закрывает `GAP-009`, record закрывается только после accepted revalidation, а не потому, что test file появился в Git diff.
-
-## Снимок принятого результата
+Цепочка происхождения для одной цели проверки выглядит так:
 
 ```text
-baseline: a1b2c3d
-Review Suite: Test Engineering = ON
-selected menu documents: Test Assurance, Test Plan
-package members: PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY,
-                 PRJ-TEST-REVIEW-01-ASSURANCE-MAP,
-                 PRJ-TEST-REVIEW-02-TEST-PLAN
-freshness: CURRENT for the resolved package
+src/orders/handler.py@a1b2c3d
+  -> WS-001-order-retry#EV-001
+  -> INT-ORDER-COMMIT
+  -> BC-021
+  -> MAT-011
+  -> TM-031 / GAP-008
 ```
 
-Путь проверки одного утверждения:
+## Выбранные, обязательные и производные документы
+
+Состав результата определяется не только явным выбором пользователя:
+
+| Класс | Документ в этом примере | Причина |
+|---|---|---|
+| `REQUIRED_WHEN_CAPABILITY_ENABLED` | `Test Assurance` | Обязательный пользовательский результат при включённом `Test Engineering`. |
+| обязательные члены `Test Assurance` | `Test Assurance Summary`, `Test Assurance Map` | Две части одного обязательного результата, а не независимые флажки. |
+| `INTERNAL_REQUIRED_PROJECTION` | `Behavior Contract Model` | Условие модуля требует читабельную модель принятых `BC-*`; пользователь не выбирает её отдельно. |
+| `USER_SELECTABLE` | `Test Plan` | Пользователь выбрал план для устранения `GAP-008` и `GAP-009`. |
+| `USER_SELECTABLE` | `Contract Consistency Report` | Пользователь выбрал отчёт, поскольку в области есть `CC-004`. |
+| не выбран | `Test Environment Design`, `Service Simulator Design`, `Service Simulator Implementation Plan`, `E2E Test Plan` | Эти дополнительные документы не входят в данный пакет и не создаются молча. |
+
+`Behavior Contract Model` строится из принятых `BC-*`; правка его Markdown не
+меняет `BC-021` или `BC-022`. `Test Plan` опирается на `BC-*`, `MAT-*`, `TM-*`
+и `GAP-*`, но сам не владеет этими записями. Аналогично, `Contract Consistency
+Report` — представление `CC-004`, а не источник его состояния.
+
+## Итоговый результат `Test Assurance`
+
+`Test Assurance Summary` даёт решение `TEST_ASSURANCE_PARTIAL`: обычные
+повторные попытки покрыты, однако путь с успешной фиксацией и потерянным
+ответом, а также уникальность публикации пока не подтверждены исполняемыми
+тестами. `Test Assurance Map` делает видимой связь
+`MAT-011 → BC-021 → TM-031 / GAP-008` и
+`MAT-012 → BC-022 → GAP-009`.
+
+`Test Plan` описывает планируемые проверки: управляемое прерывание ответа
+после фиксации заказа и минимальную достоверную границу для неоднозначного
+подтверждения публикации. Это план доказательств, а не свидетельство того, что
+такие проверки уже были выполнены.
+
+## Итоговый снимок пакета результатов
+
+Ниже приведён проверяемый снимок этого экземпляра `PKG-TEST-REVIEW-DELIVERY`.
+Идентификаторы `PRJ-TEST-REVIEW-*` определены контрактом как устойчивые
+идентичности проекций, а не как имена файлов или семантические записи.
+
+```text
+Базовая ревизия: a1b2c3d
+Выбранный модуль: Test Engineering
+Явно выбранные дополнительные результаты: Test Plan, Contract Consistency Report
+
+Сохранённое семантическое состояние
+  STM: IF-ORDER-CREATE, INT-ORDER-COMMIT,
+       ERR-CLIENT-RESPONSE-TIMEOUT, EVENT-ORDER-COMPLETED
+  BC: BC-021, BC-022 (принятые контракты поведения)
+  CC: CC-004 (CLASSIFIED, VALID)
+  MAT: MAT-011, MAT-012 (принятые цели проверки)
+  TM: TM-031
+  GAP: GAP-008, GAP-009
+  TASK: TASK-003
+
+Члены пакета результатов
+  обязательно: PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
+               PRJ-TEST-REVIEW-01-ASSURANCE-MAP
+  обязательная вспомогательная проекция:
+               PRJ-TEST-REVIEW-03-BEHAVIOR-CONTRACT-MODEL
+  выбрано пользователем и поэтому требуется в этом экземпляре:
+               PRJ-TEST-REVIEW-02-TEST-PLAN
+               PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT
+  актуальность требуемых участников: CURRENT
+  политика пакета: ALL_SCOPED_CURRENT
+```
+
+Пакет результатов — не каталог и не источник семантического смысла. Например,
+путь от его краткой сводки к основанию выглядит так:
 
 ```text
 PRJ-TEST-REVIEW-00-ASSURANCE-SUMMARY
   -> GAP-009
-  -> MAT-012 -> BC-022
-  -> relevant STM facts / executable-test inventory
-  -> source and test files at a1b2c3d
+  -> MAT-012
+  -> BC-022
+  -> EVENT-ORDER-COMPLETED / WS-001-order-retry#EV-001
+  -> src/orders/handler.py@a1b2c3d
 ```
 
-`Behavior Contract Model` может входить в пакет как требуемая проекция модуля,
-но не становится отдельным выбором пользователя.
+После завершения сохраняются не только итоговые документы: принятые `BC-*` и
+`MAT-*`, а также записи `CC-*`, `TM-*`, `GAP-*` и `TASK-*` в их собственных
+состояниях, связи со срезом STM и общими доказательствами, зарегистрированные
+проекции с проверенными ревизиями и актуальностью, состав пакета, а также
+`working/INDEX.md` с конфигурацией и состоянием процесса. Ни `INDEX.md`, ни
+итоговый Markdown не заменяют семантические записи.
+
+## Повторное использование позже
+
+Сохранённое состояние не становится автоматически актуальным. Если изменится
+поведение исходного кода, контракт или зависимость, `REVALIDATE` определит
+затронутые записи и соберёт нужные свежие доказательства; повторная проверка
+остаётся зависящей от влияния изменений, а не от числа изменённых файлов.
+
+Если потребуется новый результат или новая область проверки, `EXTEND` добавит
+только запрошенный объём, сохраняя принятую конфигурацию. Если повреждено лишь
+содержимое зарегистрированной проекции при действительном семантическом
+источнике, применим `PROJECTION_REPAIR`; он не изменяет `BC-*`, `CC-*`,
+`MAT-*`, `TM-*`, `GAP-*` или `TASK-*`.
+
+Подробные условия приведены в [справочнике процессов](../reference/workflows.md),
+[руководстве по Test Engineering](../guides/test-engineering.md) и
+[описании проекций и пакетов](../concepts/projections-and-packages.md).
