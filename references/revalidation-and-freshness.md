@@ -80,6 +80,33 @@ PROJECTION_REPAIR
 → PROJECTION_REPAIR_COMPLETE | TECHNICAL_REVALIDATION_REQUIRED
 ```
 
+Before asking for a repair target, resolve the selected accepted package's
+existing Stage B registration and show a view over its eligible registered
+projections:
+
+```text
+PROJECTION_REPAIR
+├── Package
+│   └── accepted revision-bound package
+├── Eligible registered projections
+│   ├── PRJ-* identity
+│   ├── human-readable name
+│   ├── declared artifact path
+│   └── current revision/freshness when useful
+└── Repair target
+    ├── entire selected projection
+    └── specific section / presentation issue
+```
+
+The list is derived from the selected package and existing projection
+registration/lifecycle records; it is not a hardcoded universal list or a new
+registry. Only presentation concerns such as language, wording, Markdown,
+Mermaid, links, navigation, cross-references, terminology, formatting, and
+representation of accepted meaning are eligible. `RF-*`, `CQ-*`, `CQRA-*`,
+`BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, STM facts, severity, owners, evidence,
+security assumptions, target mechanisms, and lifecycle semantics may appear as
+provenance but are never editable repair targets.
+
 Разрешённая область включает:
 
 - язык, грамматику и читаемость;
@@ -311,6 +338,37 @@ BASELINE_BINDING
 → REVALIDATION / ADJUDICATION
 → DELTA_RECONCILIATION
 ```
+
+The user-facing `REVALIDATE` presentation is explicitly read-only for the
+restored suite:
+
+```text
+REVALIDATE
+├── Previous Review Suite [RESTORED / READ-ONLY]
+│   ├── Architecture Review state
+│   ├── Test Engineering state and outputs
+│   └── Code Quality Review state and outputs
+├── Previous baseline
+├── Current baseline / changed input
+├── Change inventory
+├── Impact Analysis
+├── Minimum affected dependency slice
+├── Targeted evidence
+├── Revalidation / adjudication
+└── Projection Impact Analysis
+```
+
+The restored suite is context, not a configuration menu. During ordinary
+`REVALIDATE`, do not enable or disable capabilities, change Architecture depth
+or endpoint, or select new Test Engineering or Code Quality outputs. Those
+changes route to `EXTEND`; `REVALIDATE_DOES_NOT_BECOME_NEW`. Changed-input
+classification, dependency impact, affected capabilities/records, evidence
+refresh, and projection impact remain automatic and impact-driven.
+
+The user may confirm baseline/change context and any genuinely ambiguous
+authority decision. If impact is `SYSTEMIC`, choosing whether to accept
+`FULL_REAUDIT_RECOMMENDED` remains an explicit user decision; it does not turn
+the restored suite into a new configuration flow.
 
 Git diff, changed paths, and Project Profile delta are routing context only.
 They select where fresh evidence is needed; they are not substantive proof.

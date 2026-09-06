@@ -315,7 +315,9 @@ capabilities:
 
 For Test Engineering, `outputs` is the persisted configuration authority; the
 legacy `endpoint` is retained only for backward-compatible Test Review packages
-and must not be used as the sole output selection. When normalizing legacy state:
+and must not be used as the sole output selection or exposed as a current
+`NEW`/`EXTEND` menu option. `LEGACY_COMPATIBILITY_STATE` is not a
+`CURRENT_USER_MENU_OPTION`. When normalizing legacy state:
 
 `NEW` writes the user's independent Test Engineering selection directly to
 `outputs`. `RESUME`, `EXTEND`, `USE_EXISTING`, and `REVALIDATE` read that
@@ -381,6 +383,14 @@ selected topology requires it. A Service Simulator Implementation Plan requires
 an accepted and fresh simulator specification, so a missing simulator design is
 the minimum upstream addition for that request. `EXTEND` reuses the accepted
 upstream slice instead of replaying the full review.
+
+The same `EXTEND` presentation rule applies to every capability: existing
+capabilities and outputs are shown read-only for context, while only unselected
+capabilities and outputs are offered as additions. For Architecture Review,
+adding an absent capability opens its normal depth/endpoint configuration;
+extending an accepted capability preserves depth and offers only monotonic
+endpoint additions. No accepted capability or output is silently removed or
+reconfigured.
 
 Capability-owned artifacts may use project-local paths, for example:
 

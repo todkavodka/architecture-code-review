@@ -349,6 +349,31 @@ REVIEW_PLUS_TEST_PLAN → test_assurance=true; test_plan=true; all other optiona
 
 The legacy endpoint never implies an extended Test Engineering output.
 
+The legacy values `REVIEW_ONLY` and `REVIEW_PLUS_TEST_PLAN` are
+`LEGACY_COMPATIBILITY_STATE`, not current user-menu options:
+
+```text
+LEGACY_COMPATIBILITY_STATE != CURRENT_USER_MENU_OPTION
+```
+
+They may be consumed only while loading or reconciling legacy persisted state
+for `RESUME`, `USE_EXISTING`, or migration. Modern `NEW` and `EXTEND` show only
+the independent `OFF`/enabled Test Engineering menu and its output booleans.
+Legacy normalization remains conservative:
+
+```text
+REVIEW_ONLY
+  → Test Engineering enabled
+  → Test Assurance selected
+  → every optional output false
+
+REVIEW_PLUS_TEST_PLAN
+  → Test Engineering enabled
+  → Test Assurance selected
+  → Test Plan selected
+  → every other optional output false
+```
+
 For `EXTEND`, first read the accepted capability registry and its freshness and
 authority bindings. Show already selected outputs separately from available
 additions; do not reopen the full `NEW` configuration. If Test Engineering was
@@ -356,6 +381,43 @@ previously `OFF`, show the complete independent output selection. If it was
 already enabled, preserve its selected outputs and show only outputs that can
 still be added. Persist the result as the previous `outputs` union the user's
 explicit additions.
+
+The general `EXTEND` presentation is:
+
+```text
+EXTEND
+├── Existing / preserved
+│   └── selected capabilities and outputs [read-only; not checkboxes]
+└── Available additions
+    └── only capabilities and outputs not already selected
+```
+
+The persisted result is the previous accepted selection union explicit
+additions union structurally required dependencies. Existing selections cannot
+be silently deselected or reconfigured.
+
+Architecture-specific extension is conditional on the accepted capability
+registry:
+
+```text
+Architecture absent
+└── Available addition: Architecture Review
+    └── if selected: choose Depth and Result using the normal NEW choices
+
+Architecture accepted
+├── Existing / preserved: depth and endpoint [read-only]
+└── Available endpoint additions
+    ├── REVIEW_ONLY → REVIEW_PLUS_TARGET_ARCHITECTURE
+    ├── REVIEW_ONLY → REVIEW_PLUS_TARGET_AND_ROADMAP
+    ├── REVIEW_PLUS_TARGET_ARCHITECTURE → REVIEW_PLUS_TARGET_AND_ROADMAP
+    └── REVIEW_PLUS_TARGET_AND_ROADMAP → no addition
+```
+
+The endpoint additions are monotonic: Target Architecture and Roadmap cannot be
+removed or replaced. `EXTEND` never changes an accepted Architecture depth;
+depth changes or semantic reconsideration use the appropriate technical flow.
+When Architecture is absent, adding it does not modify existing Test
+Engineering or Code Quality selections.
 
 Required upstream dependencies may be added only when structurally necessary
 and must be explained before execution. In particular, requesting
