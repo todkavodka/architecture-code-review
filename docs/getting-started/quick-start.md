@@ -1,8 +1,8 @@
 # Быстрый старт
 
-Этот раздел показывает минимальный путь от запроса к первому полезному результату без необходимости заранее понимать внутренние идентификаторы Skill.
+Этот раздел показывает минимальный путь от запроса к первому полезному результату без необходимости заранее разбираться во внутренних идентификаторах Skill.
 
-## 1. Откройте repository
+## 1. Откройте репозиторий
 
 Запустите агента в корне проекта, который нужно проверить.
 
@@ -14,7 +14,7 @@
 Используй architecture-code-review для этого проекта.
 ```
 
-Skill сначала определит repository, baseline, существующие audit packages и рекомендуемый Session Intent. Он не должен автоматически начинать новый полный аудит, если уже существует пригодное состояние.
+Skill сначала определит репозиторий, базовую ревизию, существующие пакеты аудита и рекомендуемый Session Intent. Новый полный аудит не должен запускаться автоматически, если уже существует пригодное сохранённое состояние.
 
 ## 3. Выберите, что нужно проверить
 
@@ -28,11 +28,11 @@ Review Suite
 [ ] Code Quality Review
 ```
 
-Нужно выбрать хотя бы одну capability.
+Нужно выбрать хотя бы один модуль проверки.
 
 ### Architecture Review
 
-Если нужна архитектурная диагностика, выберите depth и endpoint независимо:
+Если нужна архитектурная диагностика, отдельно выберите глубину и конечный результат:
 
 ```text
 Depth:
@@ -45,25 +45,25 @@ Endpoint:
   REVIEW_PLUS_TARGET_AND_ROADMAP
 ```
 
-`STANDARD_FULL` подходит для большинства полных аудитов. `FORENSIC` нужен, когда особенно важны спорные границы, конкурентность, security-sensitive paths, сложные lifecycle и детальная история доказательств.
+`STANDARD_FULL` подходит для большинства полных аудитов. `FORENSIC` нужен, когда особенно важны спорные границы, конкурентность, чувствительные к безопасности пути выполнения, сложный жизненный цикл и подробная история доказательств.
 
 ### Test Engineering
 
-`Test Assurance` обязателен при включённой Test Engineering. Остальные документы выбираются по задаче:
+`Test Assurance` обязателен при включённом Test Engineering. Остальные документы выбираются по задаче:
 
 ```text
-Test Assurance                    required
-Test Plan                         optional
-Contract Consistency Report       optional
-Test Environment Design           optional
-Service Simulator Design          optional
-Service Simulator Implementation Plan optional
-E2E Test Plan                     optional
+Test Assurance                         required
+Test Plan                              optional
+Contract Consistency Report            optional
+Test Environment Design                optional
+Service Simulator Design               optional
+Service Simulator Implementation Plan  optional
+E2E Test Plan                          optional
 ```
 
 ### Code Quality Review
 
-Выберите только нужные человекочитаемые проекции:
+Выберите только те человекочитаемые документы, которые действительно нужны:
 
 ```text
 Findings View/Report
@@ -72,42 +72,44 @@ Maintainability Hotspots
 Roadmap Contribution
 ```
 
-Их выбор не создаёт findings автоматически. `CQ-*` появляется только после evidence-backed проверки material consequence.
+Выбор документа не создаёт `CQ-*` автоматически. `CQ-*` появляется только после того, как конкретный механизм реализации подтверждён доказательствами и для него установлено существенное последствие.
 
-## 4. Дайте Skill выполнить discovery
+## 4. Дайте Skill провести исследование
 
 Во время анализа Skill создаёт или переиспользует:
 
-- baseline-bound evidence;
+- доказательства, привязанные к базовой ревизии;
 - Shared Technical Model;
-- capability-specific semantic records;
-- workflow state в `working/INDEX.md`;
+- записи выбранных модулей проверки;
+- состояние процесса в `working/INDEX.md`;
 - выбранные итоговые документы.
 
-Не нужно вручную просить создать `WS-*`, `EV-*` или STM. Это внутренние механизмы трассировки и повторного использования.
+Не нужно вручную просить создать `WS-*`, `EV-*` или STM. Это внутренние механизмы трассировки и повторного использования результатов.
 
 ## 5. Читайте результат с верхнего уровня
 
-Для первого чтения используйте основной report/summary выбранной capability. В owning semantic records и evidence переходите только когда нужно проверить происхождение конкретного вывода.
+Для первого чтения используйте основной отчёт или краткое резюме выбранного модуля. К авторитетным semantic records и evidence следует переходить только тогда, когда нужно проверить происхождение конкретного вывода.
 
 Типичный путь проверки:
 
 ```text
-main report / summary
-  -> finding or semantic record
-  -> STM / evidence reference
-  -> source code or external source
+основной отчёт / summary
+  -> finding или другая semantic record
+  -> STM / ссылка на evidence
+  -> исходный код или внешний источник
 ```
+
+Термины `semantic record`, `finding` и `evidence` подробно объяснены в [глоссарии](../reference/glossary.md); в нормативных контрактах эти canonical terms сохраняются без переименования.
 
 ## 6. Не запускайте всё заново после каждого изменения
 
-Если audit уже принят:
+Если аудит уже принят:
 
 - проект изменился → `REVALIDATE`;
-- нужен новый output или capability → `EXTEND`;
+- нужен новый итоговый документ или модуль проверки → `EXTEND`;
 - нужно продолжить незавершённую работу → `RESUME`;
 - нужен уже принятый результат → `USE_EXISTING`;
-- сломан только Markdown/Mermaid/wording → `PROJECTION_REPAIR`.
+- сломано только оформление, Markdown, Mermaid или формулировки → `PROJECTION_REPAIR`.
 
 Подробности: [Повторное использование и изменения](../guides/reuse-and-change.md).
 
@@ -118,25 +120,25 @@ main report / summary
 ```text
 Используй architecture-code-review.
 Нужен новый Architecture Review: STANDARD_FULL, REVIEW_ONLY.
-Test Engineering и Code Quality не включай.
+Test Engineering и Code Quality Review не включай.
 ```
 
 ### Только качество тестов
 
 ```text
 Используй architecture-code-review.
-Нужен новый Test Engineering review: Test Assurance + Test Plan.
-Architecture и Code Quality не включай.
+Нужен Test Engineering: Test Assurance + Test Plan.
+Architecture Review и Code Quality Review не включай.
 ```
 
 ### Только качество реализации
 
 ```text
 Используй architecture-code-review.
-Нужен новый Code Quality Review: Findings View + Summary.
-Architecture и Test Engineering не включай.
+Нужен Code Quality Review: Findings View + Summary.
+Architecture Review и Test Engineering не включай.
 ```
 
 ## Дальше
 
-Если это первый серьёзный запуск, прочитайте [Первый полный запуск](first-review.md). Для выбора итоговых документов используйте [Output Reference](../reference/outputs.md).
+Если это первый серьёзный запуск, прочитайте [Первый полный запуск](first-review.md). Для выбора итоговых документов используйте [справочник итоговых документов](../reference/outputs.md).
