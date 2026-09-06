@@ -210,17 +210,71 @@ boundaries.
 
 ## Applicability and addenda
 
-The core is language-neutral. Optional language/framework addenda may declare
-language, framework, version, scope, applicability, idioms, evidence
-expectations, and known false positives. They do not define authority, identity,
-materiality, severity, lifecycle, or remediation.
+The core is language- and framework-neutral. Optional language/framework
+addenda may declare an identity, language/framework/runtime binding, version or
+configuration constraint, selected-scope binding, guidance/check families,
+evidence expectations, known limitations, known false positives, and associated
+tool guidance. An addendum is non-authoritative guidance: it does not define
+CQ identity, authority, materiality, severity, lifecycle, disposition,
+remediation, or coverage.
 
-Unsupported addenda fall back to core review where possible and do not make the
-whole capability `NOT_APPLICABLE`. Conflicting addenda produce observations for
-adjudication; they do not automatically create a CQ finding. Generated,
-vendored, migration, fixture, boilerplate, compatibility, feature-flagged,
-transitional, and performance-specialized code requires applicability and
-ownership checks. Exclusion is not proof of no quality risk.
+Applicability requires evidence from the selected scope and accepted repository
+context, such as confirmed language, framework, runtime, build/dependency or
+configuration facts. A file extension, directory name, repository name, or tool
+availability alone is not sufficient. An applicable addendum may refine
+candidate generation and interpretation; a non-applicable addendum is ignored.
+An unknown or unsupported environment uses the language-neutral core and
+qualifies any affected limitation. Unsupported addenda therefore do not make
+the whole capability `NOT_APPLICABLE` or `BLOCKED`.
+
+If two applicable addenda provide incompatible guidance, the conflict is
+recorded with the competing addendum identities, applicability evidence, and
+affected interpretation. Registration order, execution order, specificity,
+or a tool's preferred answer is not precedence. Code Quality adjudicates the
+conflict against the core contract and available evidence; unresolved
+ambiguity blocks only the affected interpretation or leaves it as a candidate.
+An addendum rule hit remains subject to the normal evidence and materiality
+chain and cannot bypass identity, lifecycle, applicability, disposition,
+severity, confidence, or coverage rules. Addendum/tool specificity is not
+materiality, and an addendum cannot directly create an accepted `CQ-*`.
+
+Generated, vendored, migration, fixture, boilerplate, compatibility,
+feature-flagged, transitional, and performance-specialized code requires
+applicability and ownership checks. `EXCLUDED` is a scope decision, not proof
+that no quality risk exists.
+
+### Tooling boundary
+
+Tools and agent heuristics are optional evidence producers, not semantic
+adjudicators. Grep, linters, formatters, AST analyzers, language servers,
+static analyzers, dependency/framework scanners, complexity or duplication
+detectors may emit an observation or candidate, but:
+
+```text
+tool output != EV-* observation
+tool output != accepted CQ-* finding
+tool warning severity != CQ severity
+tool success/completion != semantic adjudication
+```
+
+Where tool output materially contributes evidence, the accepted evidence
+records the tool identity, invocation or relevant analysis context, selected
+scope, observation, and material limitation using the existing `EV-*`/`WS-*`
+provenance conventions. No execution database or tool-finding ledger is
+created. A tool result still passes candidate applicability, evidence,
+materiality, and Code Quality adjudication; it may result in
+`FALSE_POSITIVE`, `NOT_APPLICABLE`, or `EXCLUDED`.
+
+Tool selection is bounded by the review question, applicable language or
+framework evidence, scope, expected evidence value, and cost. The default is
+not to run every available analyzer or collect redundant signals. An
+unavailable optional tool leaves other evidence usable and blocks only a
+dependent slice when that tool is materially required for the requested claim.
+Disagreement between tools is recorded as evidence and adjudicated; neither
+tool order nor consensus automatically creates or rejects a finding. Tool
+changes contribute to the existing Task 5 dependency/freshness and minimum-
+slice revalidation rules rather than creating an addenda- or tool-specific
+revalidation mechanism.
 
 ## Invariants
 
