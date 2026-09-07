@@ -134,6 +134,29 @@ Persist the selected outputs as independent fields. Existing `REVIEW_ONLY` and
 the former selects only Test Assurance; the latter selects Test Assurance plus
 Test Plan. Neither legacy value silently enables an extended output.
 
+## Product Test Engineering scope
+
+When Product mode is explicitly selected, Test Engineering reuses the existing
+`TRS-*` Test Review Scope family with `scope_kind: PRODUCT`, a stable Product
+scope allocation, `product_id`, the selected accepted Product revision, and an
+immutable Product baseline. Product records carry the exact Product
+`test_review_scope_id`; local records retain their existing local/session scope
+IDs and are not migrated.
+
+Product `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, and `TASK-*` remain
+Test-Engineering-owned semantic records. A Product record must preserve its
+qualified contributing or provider/consumer Project identities, exact
+source/revision bindings, evidence provenance, lifecycle, freshness, and
+dependencies. Product selectors admit only records explicitly bound to the
+Product `TRS-*` scope; membership or a grouped output cannot infer membership.
+
+Product Test Assurance is a finite projection/package over accepted records
+resolved through that scope. It is not a Behavior Model or other semantic
+authority, and it does not consume every record in member Projects. `TASK-*`
+completion never resolves a `GAP-*`. Test execution, simulators, environments,
+code changes, and publication remain separately selected and explicitly
+authorized; Product membership grants none of those permissions.
+
 ## Stage B projection boundary
 
 The numbered, human-readable Test Review outputs are `PRJ-*` projections of
