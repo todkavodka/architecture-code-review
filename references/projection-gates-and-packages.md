@@ -195,3 +195,30 @@ required, optional, and conditional member contract and its resolved snapshot
 from section 3. In particular, a controlled semantic selector inside a
 `PRJ-*` dependency contract detects factual membership changes; it must never
 be repurposed as an open-ended package-membership query.
+
+## 8. Product package composition
+
+Product packages reuse this package authority and the existing policies:
+`PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, and `ALL_SCOPED_CURRENT`. A Product
+package records the accepted Product identity/revision/baseline, resolved
+membership snapshot, selected outputs, and finite member lists:
+
+```text
+product_package_ref: <package identity/revision>
+product_revision: <accepted revision>
+product_baseline_ref: <immutable baseline vector>
+resolved_membership:
+  required: [PRJ-* or exact Project package reference ...]
+  optional: [PRJ-* or exact Project package reference ...]
+  conditional: [PRJ-* or exact Project package reference ...]
+dependency_closure: [PRJ-* / exact Project package reference ...]
+```
+
+Project subpackages are references to exact accepted package/projection
+revisions, not embedded copies and not replacement authority. Membership is
+explicit selection plus dependency closure; an unavailable, stale, or blocked
+member is recorded in its own dimension and affects only packages whose
+resolved required scope depends on it. `ALL_SCOPED_CURRENT` means every
+resolved required member and prerequisite in this Product package, not every
+artifact in every member Project. Product package state never adjudicates
+semantic findings or facts.

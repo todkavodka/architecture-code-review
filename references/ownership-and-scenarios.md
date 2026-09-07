@@ -153,3 +153,14 @@ Broad structural patterns могут повышать вероятность п�
 - нет локального deterministic regression suite.
 
 Такие наблюдения можно вести как `SER-*`; не присваивай им автоматически severity продуктового дефекта.
+
+## Product Architecture Review boundary
+
+In Product mode, a Product-scoped `RF-*` is an Architecture Review semantic
+record only when it has an independently adjudicated cross-project
+architectural consequence. Its evidence packet names the accepted Product
+revision and immutable baseline, affected Projects, qualified `WS-*`/`EV-*`
+observations, accepted STM facts/relations, lifecycle, severity, provenance,
+and direct dependencies. Product membership or a generated aggregation does
+not promote a Project-local RF. Product report/projection content is
+navigation only and cannot write the RF.

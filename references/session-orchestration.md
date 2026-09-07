@@ -105,6 +105,84 @@ The recommendation matrix is:
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
 
+## Product context selection and pinning
+
+Product mode is explicit and opt-in. A normal session remains Product-free;
+the coordinator does not synthesize a one-member Product from a repository or
+Project. Composition semantics are owned by
+[`product-multi-project-review.md`](product-multi-project-review.md), while
+this contract owns session routing and selection.
+
+When Product mode is selected, the coordinator records this routing tuple:
+
+```text
+product_mode: PRODUCT
+product_id: PROD-*
+selected_product_revision: <accepted Product revision>
+product_baseline_ref: <immutable Product baseline>
+membership_snapshot_ref: <immutable membership snapshot>
+```
+
+`selected_product_revision` must resolve to an accepted historical Product
+revision and is pinned for the session; the Product identity's convenience
+`current_revision` pointer cannot retarget an in-progress or historical
+session. The Product revision and Product baseline are distinct: the revision
+records accepted Product meaning and membership, while the baseline binds the
+exact source vector reviewed by that session. Product scopes, Product
+semantic records, projections, and packages require that accepted revision
+and exact baseline reference.
+
+The coordinator verifies that the referenced membership snapshot and baseline
+remain immutable and addressable before resume or downstream dispatch. A
+baseline is a vector of per-Project and external source bindings, never one
+Git SHA. Its coherency classification is `COHERENT`, `MIXED_EXPLICIT`, or
+`UNKNOWN`; that classification describes temporal/source coordination only,
+not availability, review coverage, semantic availability, projection
+freshness, or package gate state.
+
+Product Context Workflow authorization covers selecting an existing Product,
+creating or changing Product context, and pinning an accepted revision. It is
+separate from authorization to read each additional repository/source and
+from authorization to admit dirty or noncanonical content. Product membership
+grants none of those permissions and grants no semantic-write, test, code,
+worktree, commit, push, PR, or deployment authority.
+
+When Product mode is absent, Product fields are absent or `NONE`, local
+`Session Intent` and repository routing remain unchanged, and all existing
+single-project artifact identities remain valid. Product context selection is
+not a semantic gate and does not replace the owning evidence, STM, capability,
+projection, package, or revalidation contracts.
+
+### Product impact and authorization routing
+
+For a Product session, a changed source first creates a Project-local impact
+root. The coordinator then follows qualified direct dependency metadata and
+accepted cross-project relations to the minimum affected Product semantic
+slice. It records affected and preserved sets, source availability limitations,
+and the independent coverage, semantic, projection, and package dimensions.
+`CONTEXT_EXPANSION_REQUIRED` requests only the missing minimum slice. `LOCAL`,
+`BOUNDARY`, and `SYSTEMIC` retain their existing meanings; `SYSTEMIC` may emit
+`FULL_REAUDIT_RECOMMENDED`, but no full Product review starts without explicit
+user choice.
+
+Product `REVALIDATE` does not reread every member repository and does not
+reopen unrelated accepted state. Product `EXTEND` is additive: adding a
+Project, capability, cross-project investigation, output, or shared resource
+uses the minimum new slice and preserves unaffected accepted state. Removing
+or replacing a member, changing its role, or changing shared-resource meaning
+creates a new Product revision and invokes bounded impact adjudication while
+preserving historical baselines and findings.
+
+Product Context Workflow authorization is separate from every source and
+execution permission. The coordinator must obtain distinct authorization for
+reading an additional repository/source, selecting its revision, admitting
+dirty/noncanonical content, writing Product semantic records, writing
+Project-local semantic records, generating projections, running tests,
+modifying code, creating/removing worktrees or branches, committing, pushing,
+creating a PR, and deploying. Membership or Product selection grants none of
+these permissions. Product state is routing/composition state; existing
+capability contracts remain the semantic writers.
+
 ## Intent lifecycle and projection handoff
 
 The coordinator keeps semantic completion separate from projection freshness.
@@ -678,6 +756,30 @@ a reproducible commit baseline. If the snapshot cannot later be reconstructed,
 resume/revalidation reports that limitation rather than claiming full
 recoverability.
 
+### Product baseline source bindings
+
+For Product mode, the immutable `product_baseline_ref` contains one exact
+binding for every selected Project/source and declared external source. Each
+binding records the source identity, repository/scope selector, exact commit
+or content binding, and the state needed to interpret that source:
+
+| Source state | Required Product baseline binding |
+|---|---|
+| clean committed revision | commit SHA plus repository identity and selected scope |
+| dirty tracked state | base commit, changed paths, raw-content fingerprints, and explicit admission decision |
+| selected untracked content | selected paths, raw-content fingerprints, and explicit inclusion decision |
+| detached HEAD | exact commit SHA plus detached state; no branch is inferred |
+| local-only commit | exact local commit SHA plus local-only marker; it is not called remote-canonical |
+| missing remote | observed revision and missing-remote limitation; remote existence is not inferred |
+| diverged source/worktree | exact selected binding plus divergence marker and relevant compared refs |
+
+The existing dirty-working-tree contract supplies the deterministic snapshot
+algorithm. Product acceptance composes that evidence and does not make dirty
+state automatically invalid or automatically accepted. A Product baseline may
+contain dirty or noncanonical members only when the baseline acceptance owner
+records the required binding and limitations. Product baseline acceptance,
+source-read authorization, and semantic acceptance remain separate decisions.
+
 ## INDEX coordinator-state reconciliation
 
 Persist this compact workflow state, without treating it as substantive technical authority:
@@ -695,6 +797,13 @@ working_tree_snapshot
 working_tree_snapshot_algorithm
 review_suite
 stack_addenda
+product_context:
+  product_mode: NONE | PRODUCT
+  product_id
+  selected_product_revision
+  product_baseline_ref
+  membership_snapshot_ref
+  baseline_coherency: COHERENT | MIXED_EXPLICIT | UNKNOWN
 project_profile:
   schema_version
   collector_version

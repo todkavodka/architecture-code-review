@@ -102,3 +102,12 @@ final action: ACCEPT_ROOT | SPLIT_REQUIRED | MERGE_WITH | DEMOTE_TO_SER | OPEN_Q
 - «архитектура событий хрупкая».
 
 Они могут быть полезными SER/theme, но root finding требует mechanism + reachable effect.
+
+## Product RF root boundary
+
+A Product-scoped `RF-*` root must identify the accepted Product
+revision/baseline, affected Projects, qualified evidence and STM relations,
+and one material cross-project correction boundary. A local RF remains a local
+root unless independent Product consequence is adjudicated. Product
+aggregation, report text, projection, or index entries are mapped projections
+and cannot become the root authority.

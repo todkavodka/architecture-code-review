@@ -142,6 +142,65 @@ working/
 
 `INDEX.md` — постоянный источник состояния процесса. Он должен оставаться компактным.
 
+### Product mode coordinator state
+
+Product mode is selected explicitly; it is not inferred from repository
+membership or a multi-repository path. When selected, `INDEX.md` records only
+the compact routing tuple below and references the owning Product records:
+
+```text
+product_context:
+  product_mode: NONE | PRODUCT
+  product_id: PROD-*
+  selected_product_revision: <accepted Product revision>
+  product_baseline_ref: <immutable Product baseline>
+  membership_snapshot_ref: <immutable membership snapshot>
+  baseline_coherency: COHERENT | MIXED_EXPLICIT | UNKNOWN
+```
+
+The coordinator pins the exact accepted Product revision and baseline for the
+session. Historical revisions, membership snapshots, and baselines remain
+addressable even when the Product identity's `current_revision` advances.
+Product revision is Product meaning/membership; Product baseline is the exact
+per-Project and external source vector reviewed by the session, not one Git
+SHA. The coherency value is independent of source availability, review
+coverage, semantic availability, projection freshness/availability, and
+package gate result.
+
+For `product_mode: NONE`, the existing local session shape and artifact
+references remain valid and no synthetic one-member Product is created.
+`INDEX.md` remains coordinator routing authority only: Product semantic
+records, evidence, STM, findings, capability records, projections, and package
+gates remain owned by their existing contracts. Product Context Workflow
+authorization is separate from source-read authorization and dirty-admission
+authorization; membership grants no repository, semantic-write, test, code,
+worktree, commit, push, PR, or deployment permission.
+
+### Product `REVALIDATE` and `EXTEND` routing
+
+In Product mode, `REVALIDATE` starts from the pinned Product baseline and
+routes only the changed Project/source binding, its Project-local impact root,
+qualified direct dependencies, affected cross-project relations and
+capability records, and their Product outputs. It preserves accepted
+unaffected state and records `CONTEXT_EXPANSION_REQUIRED` when a material
+dependency is missing. `LOCAL`, `BOUNDARY`, and `SYSTEMIC` remain impact
+classifications; `SYSTEMIC` may recommend `FULL_REAUDIT_RECOMMENDED`, but it
+does not automatically execute a full Product review.
+
+`EXTEND` adds only the requested Project, capability, cross-project
+investigation, output, or shared-resource context and the minimum dependency
+slice required for it. Removing/replacing a member, changing its role, or
+changing shared-resource meaning creates a new Product revision and receives
+explicit bounded impact adjudication. Historical Product revisions,
+baselines, and findings remain addressable; unrelated accepted Projects are
+not reopened.
+
+These routes do not grant operations authority. Product Context Workflow,
+source-read, revision-selection, dirty-admission, semantic-write, projection,
+test, code, worktree, branch, commit, push, PR, and deployment authorization
+are separate decisions. No Product-wide status is inferred from a missing
+member, and no projection is regenerated implicitly.
+
 ### Session Orchestration coordinator state
 
 Startup selection is owned by `references/session-orchestration.md`. Persist its
@@ -161,6 +220,13 @@ working_tree_snapshot
 working_tree_snapshot_algorithm
 review_suite
 stack_addenda
+product_context:
+  product_mode: NONE | PRODUCT
+  product_id
+  selected_product_revision
+  product_baseline_ref
+  membership_snapshot_ref
+  baseline_coherency: COHERENT | MIXED_EXPLICIT | UNKNOWN
 project_profile:
   schema_version
   collector_version

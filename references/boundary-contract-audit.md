@@ -177,3 +177,13 @@ concrete impact
 ```
 
 Не создавай findings для каждого непокрытого измерения; dimensions — lens, а не quota.
+
+## Product-spanning Architecture boundaries
+
+For Product scope, record every participating Project, repository/scope
+binding, accepted Product baseline, qualified evidence, and STM relation when
+an architectural claim crosses a Project boundary. A cross-project relation
+or shared resource is factual context, not by itself an Architecture finding;
+the Architecture Review owner must adjudicate the material Product
+consequence. A Project-local boundary claim remains local unless that
+independent consequence is established.

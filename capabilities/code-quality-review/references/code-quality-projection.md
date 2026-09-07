@@ -95,6 +95,33 @@ in membership or member revision is Stage B selector impact. The selectors do
 not perform materiality adjudication, reinterpret prose, or promote a
 projection to authority.
 
+### Product Code Quality selectors and summary
+
+When Product mode is selected, a Code Quality selector may resolve Product
+records only from the exact persisted Product scope binding. Product selector
+resolution records the selected `PROD-*` identity, accepted Product revision,
+immutable Product baseline, qualified affected Projects, and the ordered
+`CQ-*`/`CQRA-*` identities and revisions consumed. Local
+`REPOSITORY:<repository>` selectors remain valid and are not rewritten or
+implicitly widened by Product membership.
+
+Product Code Quality projections reuse the existing `PRJ-*` identities,
+`RG-*` regeneration sessions, Stage B dependency kinds, V1–V4 gates, and
+package policies. Their Product dependencies include the selected Product
+semantic CQ/CQRA records, required Code Quality coverage state, and any
+declared qualified evidence/STM or baseline dependency. A Product Summary is a
+derived projection/navigation output: it may aggregate explicit local and
+Product dependencies but cannot create, revise, resolve, or supersede CQ or
+CQRA authority. Product scope does not make unselected member-project records
+package members.
+
+Product CQ/CQRA freshness follows semantic impact accounting separately from
+projection freshness. A changed Product baseline or required cross-project
+binding can make a dependent projection `STALE` or `BLOCKED`; it does not
+automatically regenerate the projection or invalidate unrelated local CQ
+authority. `ALL_SCOPED_CURRENT` applies only to the resolved named package
+scope and its mandatory dependencies.
+
 The direct projection dependencies are:
 
 | Projection | Dependency declarations |

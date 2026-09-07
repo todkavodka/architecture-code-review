@@ -115,6 +115,40 @@ regeneration, retirement, and `RG-*` execution. A generated document or index
 does not become a substitute for the accepted `BC-*`, `CC-*`, `MAT-*`, `TM-*`,
 or `GAP-*` records it renders.
 
+## Product Test Review scope
+
+Product mode is opt-in. It uses the existing `TRS-*` Test Review Scope family
+with `scope_kind: PRODUCT` and a stable Product-keyed scope allocation. The
+persisted Product scope binding is:
+
+```text
+test_review_scope_id: TRS-<stable Product scope allocation>
+scope_kind: PRODUCT
+product_id: PROD-*
+product_revision: accepted Product revision
+product_baseline: immutable Product baseline reference
+qualified_projects: [<Project identity + exact source/revision binding> ...]
+```
+
+Product `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, and `TASK-*` retain their
+existing Test Engineering semantic ownership. A Product record must use the
+exact Product `test_review_scope_id` and preserve qualified provider,
+consumer, contributor, or other boundary-role Project identities as
+applicable, exact source/revision bindings, evidence provenance, lifecycle,
+freshness, and dependencies. Local records continue to use their existing
+Project/session scope IDs; local and Product selector membership is disjoint,
+although a Product scope may reference a local record through an explicit
+qualified dependency.
+
+The Product Test Assurance Summary/Map and other selected Product Test Review
+outputs are finite projections/packages over accepted records resolved through
+the Product `TRS-*` scope. They do not become Behavior Model, Contract
+Verification, assurance-gap, or task authority, and they do not select every
+record in a member Project. `TASK-*` completion remains independent of `GAP-*`
+resolution and evidence state. Test execution, simulator/environment
+provisioning, code modification, commit, and publication require their
+separate authorization; Product membership grants none of them.
+
 ## Stage B Test Review projection contracts
 
 The numbered files in the Output Package are registered as the following

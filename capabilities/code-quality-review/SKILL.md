@@ -40,6 +40,27 @@ Code Quality does not create a private factual model, rewrite `STM`, or treat
 `working/INDEX.md` as semantic authority. Missing or stale prerequisites block
 only the dependent interpretation through the existing shared workflow.
 
+## Product scope
+
+When Product mode is explicitly selected, Code Quality may independently
+adjudicate a Product-scoped existing `CQ-*` or coordinated `CQRA-*` only when
+the concern or action genuinely spans Projects. Product records use
+`scope_kind: PRODUCT` and a stable, disjoint allocation namespace keyed by
+`PRODUCT:<PROD-*>`; they retain the existing `CQ-*`/`CQRA-*` families. A
+Product record must bind the selected Product revision and immutable baseline,
+affected Projects, qualified `WS-*`/`EV-*` evidence, relevant accepted STM
+facts, material cross-project consequence, Code Quality adjudication,
+lifecycle, freshness, dependencies, and provenance.
+
+The local `REPOSITORY:<repository>` allocation namespace, local IDs, selectors,
+and lifecycle remain unchanged. Similar local findings are not promoted by
+membership or aggregation. The Code Quality Summary is a projection over
+explicit selected dependencies and cannot create, revise, resolve, or
+supersede CQ authority. A Product `CQRA-*` coordinates remediation only;
+completion remains independent of CQ resolution and does not close local
+actions. Product scope never transfers interpretation to Architecture Review
+or Test Engineering.
+
 ## Ownership boundaries
 
 `CQ-*` is not an Architecture `RF-*` finding and is not Test Engineering

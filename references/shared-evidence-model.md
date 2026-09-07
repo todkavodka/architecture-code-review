@@ -103,3 +103,41 @@ semantic authority. Reuse the same addressable evidence across STM and
 capabilities instead of creating architecture or test evidence silos for the
 same observation. The cross-capability invariant is also recorded in
 [Shared assurance principles](shared-assurance-principles.md).
+
+## 6. Product-scoped multi-source evidence
+
+When Product mode is selected, a `WS-*` may investigate more than one Project
+or an explicitly declared external source. The existing `WS-*`/`EV-*`
+identities and evidence ownership are reused; Product scope does not create a
+second evidence family. A Product-scoped workset and each observation record
+must additionally retain:
+
+```text
+product_id: PROD-*
+product_revision: <accepted revision>
+product_baseline_ref: <immutable baseline vector>
+project_bindings:
+  - project_id
+    repository_binding
+    scope_selector
+    exact_revision_or_content_binding
+external_source_bindings: <exact locator/revision or limitation>
+observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
+conflict: <independent observations and unresolved disagreement, if any>
+limitations: <availability, coverage, freshness, or source limitations>
+```
+
+Every source binding is qualified by stable Project identity and exact Product
+baseline context; equal local IDs in different Projects therefore remain
+distinct. External participation records the external source and provenance,
+not Product ownership. The evidence writer records observations and conflicts;
+the owning STM or capability gate adjudicates their meaning. A report,
+summary, `INDEX.md`, or generated reverse index may route to this evidence but
+cannot accept, revise, or replace it.
+
+The Product baseline may be `COHERENT`, `MIXED_EXPLICIT`, or `UNKNOWN` as
+defined by the Product context contract. That value is provenance metadata and
+does not override an unavailable source, stale observation, insufficient
+coverage, or a package gate. Conflicting observations remain independently
+preserved until the appropriate owner emits a bounded conflict or
+revalidation request; evidence does not auto-resolve by precedence.

@@ -245,3 +245,21 @@ revision cannot accept, revise, resolve, or supersede an STM fact or coverage
 record. Missing, stale, partial, or conflicting authority blocks or limits the
 projection through its owning STM/coverage gate rather than being repaired in
 documentation prose.
+
+## Product Technical Documentation scope
+
+Product Technical Documentation reuses `PRJ-TECH-DOC-*`,
+`TECH-DOC-SCOPE-*`, and `PKG-TECHNICAL-DOCUMENTATION`. A Product-qualified
+selector snapshot records the accepted Product identity/revision/baseline,
+selector contract revision, finite qualified STM IDs and revisions, and the
+Project/external source bindings used for each selected section. It records
+limitations and coverage requirements without making documentation the STM or
+coverage authority.
+
+Product section membership is explicit and finite. `ALL_SCOPED_CURRENT` is
+evaluated only over the resolved required Technical Documentation members and
+their dependency closure. A stale or unavailable member limits or blocks the
+affected package scope according to the existing gate policy, while unrelated
+Project packages remain independent. Product member changes are handled by
+Projection Impact Analysis before an explicit `RG-*` regeneration; no
+regeneration is implicit.
