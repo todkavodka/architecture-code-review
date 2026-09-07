@@ -192,3 +192,19 @@ stale projections and dependency/revision state at planning time. Projections
 that become stale after that snapshot are recorded for a later plan rather
 than silently expanding the running plan. This is a scope rule over the DAG,
 not a change to the canonical edge direction.
+
+## 6. Product-qualified selector snapshots
+
+Product selectors reuse the controlled selector and resolution model. A
+Product-qualified resolution records the selector contract revision, accepted
+Product identity/revision/baseline, and a finite list of qualified Project or
+external source IDs with their exact revisions/content bindings. The resolved
+snapshot is the dependency input for Product projections and packages; it is
+not an open-ended query and it is not semantic authority.
+
+Product qualification does not rewrite a Project-local selector or its
+existing `PRJ-*` identity. Direct dependency metadata remains owned by the
+consuming projection; generated indexes only locate candidate edges. A Product
+selector can make its consumer stale when a member is added, removed, or
+changes revision, but only the selected Product scope and dependency closure
+are affected. The canonical edge remains `CONSUMER -> PREREQUISITE`.

@@ -238,3 +238,33 @@ reason is added without replacing unrelated active causes. Status is derived
 from the complete active reason set, with `BLOCKED` taking precedence over
 `STALE`, and no reason is cleared merely because an attempted regeneration
 failed.
+
+## 8. Product member impact accounting
+
+Product impact records extend the existing direct-impact model with the exact
+Product selector snapshot and qualified member binding that caused the
+analysis:
+
+```text
+product_id: PROD-*
+product_revision: <accepted revision>
+product_baseline_ref: <immutable baseline vector>
+selector_contract_revision: <revision>
+resolved_members:
+  - project_id + exact revision/content binding
+affected_product_scope: [PRJ-* ...]
+```
+
+A Product member revision, membership change, or selector-resolution change is
+classified through the existing dependency reasons and propagated only to
+consumer-owned Product projections whose direct dependency closure includes
+that member. The reverse graph remains derived navigation. Source
+availability, semantic availability, review coverage, projection freshness,
+and package gate result remain independent dimensions; one unavailable member
+does not create a universal Product status.
+
+Unchanged Product inputs produce `NO_CHANGE` for the affected projection when
+the verified fingerprint and all required revisions still match. Impact
+accounting never writes projection content or starts `RG-*`; an explicit
+regeneration request is required after accounting, and unrelated stale
+projections do not block an unrelated resolved package scope.

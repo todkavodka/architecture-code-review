@@ -266,3 +266,20 @@ the running plan. A verified candidate may be accepted only against its exact
 frozen external inputs and the verified in-scope prerequisite results assigned
 by the frozen DAG; accepting it against observed external drift would
 misrepresent its dependency snapshot.
+
+## 8. Product regeneration inputs and scope
+
+An explicit Product output request freezes the accepted Product identity,
+Product revision, Product baseline, selector contract revisions, resolved
+qualified Project/external member revisions, and the exact `PRJ-*` target set
+in the `RG-*` plan. Product membership or selector changes discovered after
+the freeze are `REGENERATION_INPUT_DRIFT` and require a later plan after normal
+impact accounting.
+
+Product target resolution uses the existing `TARGETED` or `ALL_STALE` modes and
+the existing consumer-to-prerequisite DAG. It may include stale or blocked
+Project projection prerequisites required by the selected Product target, but
+does not include unrelated members merely because they belong to the Product.
+Generation remains explicit; impact analysis never starts it automatically.
+The Product context and selector snapshot are provenance inputs, not a new
+regeneration identity or semantic authority.

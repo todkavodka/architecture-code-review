@@ -294,3 +294,20 @@ TECHNICAL_REVALIDATION_REQUIRED
 Dependency or source/baseline change is not repaired by relabeling it as
 `PROJECTION_REPAIR`; it follows the applicable semantic revalidation and
 regeneration route.
+
+## 8. Product projection scope
+
+Product projections reuse the same stable `PRJ-*` identity, revision, content
+fingerprint, freshness states, and `V1`–`V4` verification gates. Product
+qualification is recorded in the projection's owning selector/dependency
+snapshot; it does not create a Product-specific projection identity family.
+The snapshot binds the accepted Product identity/revision/baseline and the
+resolved qualified Project and external inputs used by the projection.
+
+A Product semantic change, member revision change, or selector-resolution
+change makes only projections whose consumer-owned dependencies include that
+binding stale or blocked. Product impact accounting precedes any explicit
+regeneration request. A projection remains a derived view: it cannot accept,
+revise, or adjudicate Product, Project, STM, Architecture, Code Quality, or
+Test Engineering authority. Product-free Project projections retain their
+existing identity and lifecycle unchanged.

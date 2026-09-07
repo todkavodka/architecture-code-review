@@ -125,6 +125,21 @@ answers whether Architecture Review investigated the material
 architecture/security/reliability mechanism classes required by its own
 contract. Neither gate accepts, replaces, or contains the other.
 
+## 8. Product coverage binding
+
+When Product scope is requested, the existing Technical Model Coverage gate
+binds its matrix and decision to the accepted Product revision and immutable
+Product baseline vector in addition to the qualified Project and external
+source slices it evaluates. Product scope does not create a second coverage
+authority or change the meaning of `ACCEPTED`, `PARTIAL`, `BLOCKED`, or
+`UNKNOWN`.
+
+An unavailable or stale member is recorded as a limitation in the applicable
+coverage rows; it is not silently converted into a failed semantic conclusion.
+The Product Technical Documentation projection may consume the accepted
+coverage decision, but cannot adjudicate or replace it. Product-free coverage
+continues to use the existing Project/local baseline and identity semantics.
+
 For the full Architecture Review sequence:
 
 ```text
