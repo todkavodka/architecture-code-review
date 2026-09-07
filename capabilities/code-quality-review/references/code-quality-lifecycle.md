@@ -134,6 +134,35 @@ separate evidence-backed CQ revalidation. If the semantic basis changes, the
 action becomes `STALE` or requires re-evaluation. CQRA never creates or mutates
 `TASK-*`, `RF-*`, STM, TE authority, or projections.
 
+### Product CQ/CQRA lifecycle binding
+
+Product-scoped existing `CQ-*` and coordinated `CQRA-*` records use the same
+candidate, lifecycle, disposition, freshness, and revalidation axes as local
+records. Their required scope binding is:
+
+```text
+scope_kind: PRODUCT
+product_id: PROD-*
+product_revision: accepted revision
+product_baseline: immutable baseline reference
+affected_projects: qualified Project identities
+allocation_namespace: PRODUCT:<PROD-*>
+```
+
+The Code Quality Review owner allocates and adjudicates these records. A
+Product CQ remains `ACTIVE` only with sufficient Product evidence, accepted
+relevant STM context, a material cross-project consequence, and valid
+provenance. A change to a Product baseline, qualified evidence, STM dependency,
+or affected Project binding marks only the dependent Product record or action
+`STALE`/`BLOCKED` through the existing impact-driven revalidation rules; it
+does not rewrite local CQ/CQRA history or make a stale record current.
+
+Product CQRA completion records implementation evidence for the coordinated
+action but never resolves, supersedes, or changes the lifecycle of a linked
+CQ. Local CQRA actions remain local unless independently adjudicated as one
+Product-spanning action. Product membership and a Product summary cannot write
+upstream CQ/CQRA authority.
+
 ## Source bindings and freshness triggers
 
 An accepted CQ finding binds to the selected repository or dirty baseline,

@@ -21,6 +21,39 @@ The following are not Code Quality semantic authority:
 - generated reports, summaries, hotspots, package manifests, or
   `working/INDEX.md`.
 
+### Product-scoped CQ and CQRA
+
+Product mode is opt-in. A Product-scoped finding uses the existing `CQ-*`
+family with `scope_kind: PRODUCT` and a stable allocation in the disjoint
+`PRODUCT:<PROD-*>` namespace. A Product-scoped remediation action uses the
+existing `CQRA-*` family and the same Product namespace rule. The Product
+allocation is keyed by stable Product identity, not by a transient revision,
+and cannot collide with the local `REPOSITORY:<repository>` namespace. Local
+IDs and their selectors remain unchanged.
+
+Product `CQ-*` acceptance requires all of the following as one semantic tuple:
+
+- selected Product identity and revision;
+- immutable Product baseline;
+- affected Project identities and qualified source bindings;
+- contributing `WS-*`/`EV-*` evidence and relevant accepted STM facts;
+- a material consequence that spans Projects rather than repeated local text;
+- Code Quality ownership and independent adjudication;
+- lifecycle, freshness, dependencies, and provenance.
+
+Product participation, membership, correlation, or a grouped summary is not
+materiality and cannot create a Product finding. Project-local CQ findings
+remain Project-scoped. A Product `CQRA-*` is permitted only for one genuinely
+coordinated action spanning named Projects; it records its owner, scope,
+dependencies, evidence, and lifecycle, and completion does not resolve or
+supersede a linked CQ or local CQRA.
+
+Product Code Quality interpretation remains Code Quality-owned even when
+evidence crosses Project boundaries. It does not create `RF-*` or Test
+Engineering authority. A Product finding is `STALE` or `BLOCKED` when its
+Product baseline or required evidence is no longer valid, using the lifecycle
+rules below; this does not silently invalidate independent local findings.
+
 `CQ-<repository-scoped stable allocation>` is stable, persistent, and carries
 no category, severity, location, or confidence. A candidate receives a CQ
 identity only when accepted as semantic authority. Revalidation retains the
