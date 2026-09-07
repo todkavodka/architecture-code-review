@@ -276,7 +276,7 @@ post-Stage-C and is not part of this completion evidence.
 
 ## Stage D — Code Quality Review
 
-**Status: `PLANNED`**
+**Status: `DONE`**
 
 ### Purpose
 
@@ -284,9 +284,9 @@ post-Stage-C and is not part of this completion evidence.
 которые важны для сопровождаемости и надёжности, но не обязательно являются
 архитектурными findings.
 
-### Candidate Discovery scope
+### Completed scope
 
-Discovery может проверить:
+Stage D delivered:
 
 - duplication и hardcoded values;
 - configuration и localization practices;
@@ -300,7 +300,7 @@ Discovery может проверить:
 - security-adjacent code smells;
 - dependency usage, inconsistent patterns и testability.
 
-Отдельно должны быть определены finding identity, severity, evidence
+The implementation defines finding identity, severity, evidence
 requirements, false-positive controls, language/framework addenda, отношение к
 `RF-*` и включение в remediation roadmap.
 
@@ -309,13 +309,19 @@ Code Quality finding
     != automatically Architecture finding
 ```
 
-На уровне Review Suite будущий aggregate может включать Architecture Review,
+На уровне Review Suite aggregate может включать Architecture Review,
 Code Quality Review и Test Engineering, но semantic ownership каждой capability
 должен остаться явным.
 
+### Completion evidence
+
+Stage D was implemented, independently reviewed, remediated, and promoted.
+Pressure scenarios `PS-117..PS-131` passed, with no remaining material review
+findings. Promotion merge: `71ef6885a9607fa53d008837c0b57bb9a6aad7f5`.
+
 ## Stage E — Product / Multi-Project Review
 
-**Status: `PLANNED`**
+**Status: `DONE`**
 
 ### Purpose
 
@@ -333,9 +339,9 @@ Product
 `Project != Product`. Наличие product-level режима не должно требовать Product
 parent для каждого обычного аудита.
 
-### Candidate Discovery scope
+### Completed scope
 
-Возможные направления:
+Stage E delivered bounded Product / Multi-Project Review support, including:
 
 - product inventory и project discovery;
 - project identity и membership;
@@ -355,11 +361,18 @@ parent для каждого обычного аудита.
 cross-project evidence и product-level inference. Product-level finding нельзя
 получать простым concatenation project reports.
 
-Discovery должен определить Product identity, membership, shared resources,
+The implementation defines Product identity, membership, shared resources,
 baseline/freshness/lineage across repositories, partial project availability,
 large-context budgeting, multi-repository dirty state, cross-project evidence и
-aggregate projections. Это крупнейший будущий этап, поэтому он опирается на
-зрелые single-project Architecture Review и orchestration/revalidation.
+aggregate projections while preserving mature single-project Architecture Review
+and orchestration/revalidation boundaries.
+
+Product mode remains optional, and single-project operation remains first-class.
+The implementation preserves qualified cross-project evidence and STM,
+bounded `REVALIDATE` / additive `EXTEND`, Stage B projection/package reuse, and
+existing capability authority boundaries. Pressure scenarios `PS-132..PS-149`,
+integrated contract validation, and backward-compatibility validation passed.
+Promotion merge: `c0cb853e9c7656f0e045816773c9e79d650186fb`.
 
 ## Cross-Stage Architectural Principles
 
