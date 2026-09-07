@@ -49,7 +49,6 @@ historical artifact.
 | PS-137–PS-140 | Cross-project compatibility, shared-resource ownership, genuine Product RF, and local-finding isolation retain their owning authorities. |
 | PS-141–PS-144 | EXTEND, targeted REVALIDATE, projection freshness, and older-compatible revision remain bounded and explicit. |
 | PS-145–PS-149 | Conflicting evidence, blocked package scope, multi-Product membership, requiredness change, and one-member transition remain isolated and additive. |
-| PS-150–PS-153 | Product RF remains independently adjudicated, local RF is not promoted, conflicts remain explicit, and RF revalidation is targeted. |
 
 ## Forbidden integrated outcomes
 
@@ -68,9 +67,23 @@ historical artifact.
 
 ## Verification record
 
-The implementation gate records the command/check results separately. This
-artifact is accepted only when all contract assertions and PS-132–PS-153 are
-green, the final tracked scope matches the approved plan, and no semantic
+This artifact is accepted only when all contract assertions and PS-132–PS-149
+are green, the final tracked scope matches the approved plan, and no semantic
 divergence or migration is present.
 
-`STAGE_E_PRODUCT_CONTRACT_VALIDATION_PASS`
+### Bounded verification record
+
+The following deterministic checks are the execution record for this artifact.
+They are intentionally bounded shell assertions over the approved contract
+files and selected pressure scenarios; they are not a reusable validation
+harness.
+
+| Check | Exact command/check | Observed result |
+|---|---|---|
+| Product semantic tuple | `rg -l 'Product identity|Product revision|Product baseline|Product mode|Product is not a mandatory parent' references/product-multi-project-review.md` plus joint inspection of the Product identity, baseline, optionality, and non-authority sections | PASS: all four Product distinctions and optional mode are present in one owning contract. |
+| Authority ownership | `rg -l 'WS-\*|EV-\*|STM|RF-\*|CQ-\*|CQRA-\*|BC-\*|CC-\*|MAT-\*|TM-\*|GAP-\*|TASK-\*|PRJ-\*|RG-\*' references/product-multi-project-review.md references/shared-evidence-model.md references/shared-technical-model.md references/review-method.md capabilities/code-quality-review/references/code-quality-contract.md capabilities/test-review/references/test-engineering-contract.md` | PASS: the required authority families are owned by their existing contracts; Product output is described as derived. |
+| Lifecycle and authorization negatives | `rg -n 'not.*automatically|does not grant|no automatic|FULL_REAUDIT_RECOMMENDED|relation.*dependency|consumer.*prerequisite' references/product-multi-project-review.md references/revalidation-and-freshness.md references/projection-lifecycle.md references/projection-gates-and-packages.md references/session-orchestration.md` | PASS: bounded impact, explicit authorization, dependency direction, and no automatic full audit/regeneration are all asserted. |
+| Scenario contract shape | `for f in tests/pressure-scenario-{132..149}-*.md; do test -f "$f" && rg -q '^## Input state$' "$f" && rg -q '^## Expected semantic behavior$' "$f" && rg -q '^## Forbidden behavior$' "$f" && rg -q '^## Affected authority$' "$f" && rg -q '^## Expected impact scope$' "$f" && rg -q '^## Package/projection outcome$' "$f"; done` | PASS: all 18 approved scenarios satisfy the six-field contract. |
+| Approved scope | `test "$(git diff --name-status 2a0fa60e3871b5274c71e7176abe93825552417b..HEAD | awk '$1==\"A\"{n++} END{print n+0}')" = 21` and `test "$(git diff --name-status 2a0fa60e3871b5274c71e7176abe93825552417b..HEAD | awk '$1==\"M\"{n++} END{print n+0}')" = 27` | PASS: the implementation range contains exactly the approved 21 additions and 27 modifications. |
+
+Observed final marker: `STAGE_E_PRODUCT_CONTRACT_VALIDATION_PASS`.
