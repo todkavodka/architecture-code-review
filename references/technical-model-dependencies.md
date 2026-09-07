@@ -213,3 +213,34 @@ projection set without impact evidence.
 
 The detailed source-delta workflow and preserved-set rules remain in
 [Revalidation and compact-state freshness](revalidation-and-freshness.md).
+
+## 8. Product qualification and cross-project edges
+
+Product dependency metadata uses the same direct edge vocabulary and impact
+strengths. The dependent artifact remains the writer and owner of each direct
+dependency; Product context supplies the qualification needed to resolve a
+cross-project target:
+
+```text
+dependency:
+  type: DEPENDS_ON
+  dependent: PROJECT-A::IF-001@<revision>
+  prerequisite: PROJECT-B::IF-001@<revision>
+  product_revision: <accepted Product revision>
+  product_baseline_ref: <immutable baseline vector>
+  impact: HARD | CONDITIONAL | INFORMATIONAL
+```
+
+The displayed qualified form is conceptual; its required semantics are stable
+Project identity, artifact family and identity, and the applicable
+revision/baseline binding. A one-Project dependency may retain the existing
+bare local identity and is not rewritten merely because that Project is also a
+Product member. The direction remains `CONSUMER -> PREREQUISITE`, and the
+existing three impact strengths retain their current routing meaning.
+
+Cross-project relations, compatibility associations, and shared-resource
+links are not dependencies unless the dependent artifact records an explicit
+`DEPENDS_ON` edge. Generated reverse-dependency indexes may locate candidate
+dependents across Project boundaries, but current direct metadata and current
+authority/freshness bindings govern impact traversal. Reports, projections,
+and indexes cannot create or revise a dependency edge.

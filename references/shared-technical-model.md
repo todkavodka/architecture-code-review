@@ -220,3 +220,28 @@ contradiction emits `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` or
 facts. Projection repair may fix presentation from unchanged accepted authority,
 but semantic drift follows technical revalidation and never promotes a
 projection into STM authority.
+
+## 9. Product-scoped factual relations
+
+Product mode reuses the existing STM fact families and Technical Model Gate.
+Project-local facts remain Project-local. A cross-project factual relation is
+accepted only when it references qualified accepted STM records, the accepted
+Product revision, the immutable Product baseline, and the supporting
+Product-scoped `WS-*`/`EV-*` evidence. It is not a second generic Product fact
+model and does not make Product an owner of the referenced technical facts.
+
+Use semantic qualification rather than a new local-ID namespace: a reference
+contains stable Project identity, STM family, local artifact identity, and the
+relevant revision/baseline binding. Thus `IF-001` in Project A and `IF-001` in
+Project B cannot collide in one Product relation. Shared resources such as a
+broker, database, SDK, or auth service retain their technical owner or explicit
+external status; Product context records the relationship without becoming the
+technical writer.
+
+The Technical Model Gate remains the sole writer of accepted cross-project STM
+relations. A relation records a factual association such as provider/consumer,
+publisher/subscriber, or shared-state participation. It is not automatically a
+semantic dependency. Direct dependency metadata remains owned and typed by the
+dependent artifact under `technical-model-dependencies.md`; reverse indexes
+remain derived navigation. A disputed or insufficiently evidenced relation
+stays unresolved/limited and cannot be consumed as accepted downstream truth.
