@@ -437,6 +437,55 @@ affected_decision_or_domain: <decision/domain>
 Then inspect only that required dependency slice. Do not silently broaden the
 context or refuse a material cross-boundary read merely to protect a budget.
 
+## 8. Product impact routing and bounded revalidation
+
+When the selected context is Product mode, the generic `REVALIDATE` flow is
+applied to the pinned Product baseline vector without turning Product review
+into a full repository reread. The coordinator records this bounded chain:
+
+```text
+changed Project/source binding
+→ Project-local impact root
+→ qualified direct dependency traversal
+→ affected cross-project relation/capability records
+→ affected Product projections
+→ resolved Product package evaluation
+```
+
+The changed binding and local impact root are routing inputs. Direct dependency
+metadata owned by the dependent artifact is verified before propagation;
+generated reverse indexes only locate candidates. Cross-project propagation
+occurs only across qualified evidence, STM relations, and explicit dependency
+edges bound to the selected Product revision and baseline. Unaffected accepted
+Project and Product state is recorded in `preserved_domains` only when its
+freshness and dependency mapping support that claim.
+
+Product impact uses the existing `LOCAL`, `BOUNDARY`, and `SYSTEMIC`
+classification. A membership or shared-resource change is at least a Product
+boundary decision when it affects Product meaning; a source change remains
+local until evidence shows a cross-project edge. Missing or unavailable
+linkage prevents a preserved conclusion and records:
+
+```text
+CONTEXT_EXPANSION_REQUIRED
+requested_expansion: <minimum qualified dependency/evidence slice>
+```
+
+`SYSTEMIC` emits `FULL_REAUDIT_RECOMMENDED` with an explicit user decision;
+it never starts a full Product review automatically. Product `REVALIDATE`
+preserves the prior accepted set, revalidates only the affected semantic
+slice, and separately accounts for projection freshness. It does not silently
+reopen unrelated Projects or regenerate projections.
+
+Product `EXTEND` is additive. Adding a Project, capability, cross-project
+investigation, output, or shared-resource context preserves unaffected accepted
+state and resolves only the minimum new dependency/evidence slice. Removing or
+replacing a Project, changing its role, or changing a shared-resource
+declaration creates a new Product revision and requires explicit membership
+impact adjudication; it does not erase historical baselines or findings. A
+bounded downstream revalidation is required only for records that depend on
+the changed Product meaning.
+
 ### Delta reconciliation
 
 The revalidation overlay/artifact contains at minimum:

@@ -153,6 +153,36 @@ single-project artifact identities remain valid. Product context selection is
 not a semantic gate and does not replace the owning evidence, STM, capability,
 projection, package, or revalidation contracts.
 
+### Product impact and authorization routing
+
+For a Product session, a changed source first creates a Project-local impact
+root. The coordinator then follows qualified direct dependency metadata and
+accepted cross-project relations to the minimum affected Product semantic
+slice. It records affected and preserved sets, source availability limitations,
+and the independent coverage, semantic, projection, and package dimensions.
+`CONTEXT_EXPANSION_REQUIRED` requests only the missing minimum slice. `LOCAL`,
+`BOUNDARY`, and `SYSTEMIC` retain their existing meanings; `SYSTEMIC` may emit
+`FULL_REAUDIT_RECOMMENDED`, but no full Product review starts without explicit
+user choice.
+
+Product `REVALIDATE` does not reread every member repository and does not
+reopen unrelated accepted state. Product `EXTEND` is additive: adding a
+Project, capability, cross-project investigation, output, or shared resource
+uses the minimum new slice and preserves unaffected accepted state. Removing
+or replacing a member, changing its role, or changing shared-resource meaning
+creates a new Product revision and invokes bounded impact adjudication while
+preserving historical baselines and findings.
+
+Product Context Workflow authorization is separate from every source and
+execution permission. The coordinator must obtain distinct authorization for
+reading an additional repository/source, selecting its revision, admitting
+dirty/noncanonical content, writing Product semantic records, writing
+Project-local semantic records, generating projections, running tests,
+modifying code, creating/removing worktrees or branches, committing, pushing,
+creating a PR, and deploying. Membership or Product selection grants none of
+these permissions. Product state is routing/composition state; existing
+capability contracts remain the semantic writers.
+
 ## Intent lifecycle and projection handoff
 
 The coordinator keeps semantic completion separate from projection freshness.

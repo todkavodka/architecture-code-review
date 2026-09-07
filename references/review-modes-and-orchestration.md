@@ -176,6 +176,31 @@ authorization is separate from source-read authorization and dirty-admission
 authorization; membership grants no repository, semantic-write, test, code,
 worktree, commit, push, PR, or deployment permission.
 
+### Product `REVALIDATE` and `EXTEND` routing
+
+In Product mode, `REVALIDATE` starts from the pinned Product baseline and
+routes only the changed Project/source binding, its Project-local impact root,
+qualified direct dependencies, affected cross-project relations and
+capability records, and their Product outputs. It preserves accepted
+unaffected state and records `CONTEXT_EXPANSION_REQUIRED` when a material
+dependency is missing. `LOCAL`, `BOUNDARY`, and `SYSTEMIC` remain impact
+classifications; `SYSTEMIC` may recommend `FULL_REAUDIT_RECOMMENDED`, but it
+does not automatically execute a full Product review.
+
+`EXTEND` adds only the requested Project, capability, cross-project
+investigation, output, or shared-resource context and the minimum dependency
+slice required for it. Removing/replacing a member, changing its role, or
+changing shared-resource meaning creates a new Product revision and receives
+explicit bounded impact adjudication. Historical Product revisions,
+baselines, and findings remain addressable; unrelated accepted Projects are
+not reopened.
+
+These routes do not grant operations authority. Product Context Workflow,
+source-read, revision-selection, dirty-admission, semantic-write, projection,
+test, code, worktree, branch, commit, push, PR, and deployment authorization
+are separate decisions. No Product-wide status is inferred from a missing
+member, and no projection is regenerated implicitly.
+
 ### Session Orchestration coordinator state
 
 Startup selection is owned by `references/session-orchestration.md`. Persist its

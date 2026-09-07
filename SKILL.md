@@ -27,6 +27,17 @@ cross-references по принятой authority. Каждый changed projectio
 `PROJECTION_REVALIDATION`; semantic drift требует
 `SEMANTIC_DRIFT_DETECTED` + `TECHNICAL_REVALIDATION_REQUIRED`.
 
+Product / multi-project mode is an explicit opt-in route governed by
+`references/product-multi-project-review.md`. The coordinator may select and
+pin an accepted Product revision and exact baseline only after separate
+Product Context Workflow authorization. Source-read, dirty-admission,
+semantic-write, test, code, worktree, commit, push, PR, and deployment actions
+remain independently authorized; Product membership grants none of them.
+Product `REVALIDATE` is impact-driven and bounded, and Product `EXTEND` is
+additive. Neither implies a full Product reread or automatic projection
+regeneration. Product-free single-project sessions retain the existing route
+and do not require Product state.
+
 Stage B session intents converge on the same explicit projection handoff:
 `NEW` and `EXTEND` finish the requested semantic work first, while
 `REVALIDATE` finishes its impact-driven semantic delta. Once that semantic state
