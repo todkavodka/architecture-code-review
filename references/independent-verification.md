@@ -89,6 +89,24 @@ Verification отвечает на вопрос **«это реально так
 - переписывать As-Built напрямую;
 - считать absence evidence доказательством дефекта.
 
+## Product RF verification
+
+For a Product-scoped Architecture candidate, independent verification must
+confirm the joint scope tuple before Architecture adjudication:
+
+```text
+Product identity/revision + immutable Product baseline
+→ affected Projects
+→ qualified WS-*/EV-* evidence
+→ accepted STM facts/relations
+→ material Product architectural consequence
+```
+
+Verification must also confirm that the candidate uses the existing `RF-*`
+family, remains Architecture-owned, and is not merely a Project-local RF,
+aggregate report, projection, or generated index. A missing or conflicting
+tuple is `UNVERIFIED`/bounded evidence, not a Product RF acceptance.
+
 ## 7. Handoff
 
 Рабочий verification artifact заканчивается persisted `HANDOFF SUMMARY` по contract из `review-modes-and-orchestration.md`, включая outcome каждого `CAND-*`, новые `AC-*`/`OQ-*` и supersessions.

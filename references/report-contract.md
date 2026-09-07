@@ -51,6 +51,17 @@ are generated later.
 - `01-architecture-review.md`: user-facing delivery projection. Its factual As-Built chapter is derived from STM, and it is never the sole persistence location for Architecture meaning.
 - `02-authoritative-findings-ledger.md`: Architecture-owned semantic authority for final RF wording, evidence status, severity, projections, `SER-*`/open questions, supersessions, and the accepted architecture properties/invariants registry.
 - `03-target-architecture.md`: авторитетный источник target mechanisms/invariants/feasibility, когда endpoint это включает.
+
+### Product Architecture Review report boundary
+
+When Product mode is selected, the Architecture Review ledger may contain
+Product-scoped existing `RF-*` records only after independent Product
+adjudication. Each record links the accepted Product revision and immutable
+baseline, affected Projects, qualified `WS-*`/`EV-*` evidence, accepted STM
+facts/relations, consequence, severity, lifecycle, dependencies, and
+provenance. A Project-local RF is not promoted by aggregation. The final
+report and any Product summary are projections/navigation assembled from the
+ledger; they cannot create, revise, resolve, or supersede RF semantics.
 - `04-remediation-roadmap.md`: авторитетный источник implementation sequence/tasks/gates, когда endpoint это включает.
 
 Если accepted STM revision, required factual coverage или projection selector меняется,

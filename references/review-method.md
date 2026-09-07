@@ -241,6 +241,23 @@ It then makes dependent report projections stale. A final-report writer or
 Stage B regeneration cannot apply the correction directly to
 `01-architecture-review.md`, nor use its prose to decide the semantic result.
 
+## Product Architecture Review scope
+
+Product Architecture Review may write a Product-scoped existing `RF-*` only
+after independent adjudication of a genuine cross-project architectural
+consequence. The Product RF record binds the accepted Product identity and
+revision, immutable Product baseline, affected Projects, qualified `WS-*`/
+`EV-*` evidence, accepted STM references, consequence, severity, lifecycle,
+dependencies, and provenance. Architecture Review remains the sole writer of
+that interpretation; STM and Shared Evidence remain factual authorities.
+
+A Project-local RF is never promoted by membership, aggregation, correlation,
+or report rendering. A Product report, summary, or projection is navigation or
+derived presentation only and cannot create, revise, resolve, or supersede an
+RF. Product-scoped RFs use the existing local `RF-*` family and local RF
+identity/lifecycle rules; no Product finding family is introduced. Product RF
+scope is independent of Code Quality and Test Engineering ownership.
+
 ## 8. Positive controls и non-findings
 
 Поддерживай registry механизмов, которые следует сохранить. Также сохраняй considered-but-not-promoted conclusions, когда они предотвращают повторное появление false positives и служат coverage evidence.

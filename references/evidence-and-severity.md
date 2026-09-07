@@ -282,3 +282,15 @@ Runtime reproduction successful ≠ severity automatically higher.
 ## 10. Stable identity
 
 До adjudication используй `CAND-*`. После root-boundary — stable `RF-*` для roots, `SER-*` для supporting engineering risks, `OQ-*` для open questions. Не создавай разные root IDs для одного механизма только потому, что он виден в разных файлах/layers.
+
+## Product RF evidence and severity binding
+
+For a Product-scoped Architecture finding, severity adjudication consumes the
+independently verified Product revision and immutable baseline, affected
+Projects, qualified `WS-*`/`EV-*` observations, accepted STM facts/relations,
+and the material Product consequence. Product membership or a report
+aggregation is not sufficient evidence. The existing Architecture Review
+`RF-*` lifecycle and severity vocabulary remain authoritative; no Product
+severity family is introduced. Conflicting or unavailable evidence remains an
+explicit limitation and cannot be silently promoted to an accepted Product
+finding.
