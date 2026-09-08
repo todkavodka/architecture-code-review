@@ -284,7 +284,7 @@ IF-*:
   auth_refs: optional AUTH-* references
   error_refs: optional ERR-* references
   protocol_properties: optional controlled kind-specific properties
-  precision: EXACT | RESOURCE_BOUNDED | STORE_ONLY | UNRESOLVED
+  precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
   observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
   project_binding: optional Project/repository/revision qualification
   evidence_refs: WS-* / EV-* references
