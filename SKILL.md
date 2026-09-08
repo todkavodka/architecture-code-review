@@ -38,6 +38,49 @@ additive. Neither implies a full Product reread or automatic projection
 regeneration. Product-free single-project sessions retain the existing route
 and do not require Product state.
 
+## Stage F Interface, API, and Data Integration Routing
+
+When a review includes interface, API, integration, event, persistence, or
+data-access scope, acquire and qualify bounded observations through
+[`shared-evidence-model.md`](references/shared-evidence-model.md). Preserve
+`DIRECT_DECLARATION`, `STRONG_INFERENCE`, and `WEAK_HINT` as evidence metadata;
+they do not accept facts. Route candidates and limitations to the Technical
+Model Gate, which remains the sole authority for accepted `IF-*`, `INT-*`,
+`DS-*`, `EVENT-*`, and `FLOW-*` facts. Use the Stage F extensions in
+[`shared-technical-model.md`](references/shared-technical-model.md), including
+the distinction between interactions and relations, precise access authority
+in `INT-*`, and `MIGRATION` versus `MIGRATION_AUTHORITY`.
+
+For a materially relevant declared external contract, invoke the existing
+automatic Contract Verification route in
+[`test-engineering-contract.md`](capabilities/test-review/references/test-engineering-contract.md).
+`CC-*` remains the Test Engineering authority for compatibility; the umbrella
+workflow does not match interfaces or adjudicate `COMPATIBLE` or
+`INCOMPATIBLE`.
+
+After required accepted and fresh semantic inputs are available, route Stage F
+outputs through the Technical Documentation projections in
+[`technical-documentation.md`](references/technical-documentation.md). They
+remain derived projections, with no projection-prose feedback into STM and no
+automatic regeneration. When Product mode is explicitly selected, reuse the
+existing Stage E qualification in
+[`product-multi-project-review.md`](references/product-multi-project-review.md);
+Product is optional, single-project review remains first-class, and Product
+does not become a factual authority or permission boundary.
+
+Before user-facing projection output, apply the owning evidence and rendering
+safety contracts: omit `SECRET`, redact or safely alias `SENSITIVE_INTERNAL`,
+and render `SAFE_TECHNICAL_IDENTIFIER` only when permitted. Dynamic operations,
+unresolved targets or comparison inputs, partial or unavailable sources, stale
+projections, and unresolved CC state remain explicit limitations; orchestration
+must not turn them into exact, compatible, clean, empty, or not-applicable
+results without the owning authority.
+
+Stage F routing does not introduce an automatic API compatibility engine,
+runtime database scanner, SQL parser, distributed tracing system, external
+discovery crawler, or projection-regeneration system. Any such capability
+requires a separate approved architecture and implementation decision.
+
 Stage B session intents converge on the same explicit projection handoff:
 `NEW` and `EXTEND` finish the requested semantic work first, while
 `REVALIDATE` finishes its impact-driven semantic delta. Once that semantic state
