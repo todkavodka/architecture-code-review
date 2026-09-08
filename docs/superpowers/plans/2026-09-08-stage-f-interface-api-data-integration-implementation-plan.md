@@ -110,13 +110,16 @@ The approved implementation should be bounded to these existing contract surface
    - `MIGRATION_AUTHORITY`;
    - new-vs-legacy `READS_FROM` / `WRITES_TO` authority and derivation rules;
    - DB callable DS/IF/INT boundary;
+   - external identity qualification on existing `COMP-*`, `IF-*`, `INT-*`, and `DS-*` records: logical name, bounded external kind, exact source binding or limitation, provider/owner when evidenced, and safe identifier;
+   - secret/sensitive classification is referenced from the shared evidence contract; raw secret values are never STM fields;
    - identity/revision/backward-compatibility rules.
 
 2. `references/shared-evidence-model.md`
    - safe evidence-excerpt rule for Stage F technical identifiers;
    - interaction evidence-source classification binding without replacing global confidence/severity semantics;
    - unresolved/dynamic evidence limitation recording;
-   - secret/sensitive value non-copy rules at shared evidence boundary.
+   - exact `SECRET`, `SENSITIVE_INTERNAL`, and `SAFE_TECHNICAL_IDENTIFIER` classification and non-copy rules at the shared evidence boundary;
+   - safe evidence pointers and safe-address derivation for external identifiers and credential-bearing URLs/DSNs.
 
 3. `references/technical-documentation.md`
    - Stage F selector dimensions/predicates;
@@ -126,8 +129,8 @@ The approved implementation should be bounded to these existing contract surface
    - data entity access, ownership, migration authority;
    - unknown/unresolved sections;
    - safe redaction behavior;
-   - Product Interface Catalog / Integration Map / Data Access Map / External Integrations Catalog projection registration or explicit reuse mapping;
-   - package membership/conditions without a second lifecycle.
+   - exact Product output-to-existing-`PRJ-TECH-DOC-*` mapping, selector revisions, Product-qualified resolution snapshots, V1–V4/fingerprint/freshness requirements, and package membership/conditions without a second lifecycle;
+   - projection rendering consumes only classified safe STM fields/aliases: `SECRET` is omitted, `SENSITIVE_INTERNAL` is redacted or replaced by a safe logical alias, and `SAFE_TECHNICAL_IDENTIFIER` may be shown.
 
 4. `references/product-multi-project-review.md`
    - qualified cross-project IF/INT/DS Stage F semantics;
@@ -339,6 +342,13 @@ Add/clarify:
 
 12. Identity/revision/history rules from Design.
 
+13. External integration identity on existing STM families only:
+    - `external_identity.logical_name` and bounded `kind` such as `THIRD_PARTY_SAAS`, `IDENTITY_PROVIDER`, `PAYMENT_PROVIDER`, `CLOUD_API`, `EXTERNAL_DATABASE`, `OBJECT_STORE`, or `OTHER`;
+    - exact `source_binding` revision/locator or explicit limitation;
+    - evidenced provider/owner and a safe non-secret `safe_identifier`;
+    - external qualification may be attached to existing `COMP-*`, `IF-*`, `INT-*`, or `DS-*` records as applicable;
+    - no credential, token, password, private key, or raw secret-bearing locator is accepted as an STM field.
+
 ### Fail-first checks
 
 Before finalizing Task 1, prove current contract fails to guarantee at least:
@@ -349,6 +359,7 @@ Before finalizing Task 1, prove current contract fails to guarantee at least:
 - STORE_ONLY family restriction;
 - procedure/function DS/IF boundary;
 - MIGRATION_AUTHORITY relation.
+- external identity qualification and safe non-secret identifier fields.
 
 ### Verification
 
@@ -356,6 +367,8 @@ Before finalizing Task 1, prove current contract fails to guarantee at least:
 - inspect only Task 1 diff
 - verify no new family token (`API-*`, `SQL-*`, `DB-*`, `DATA-*`) is introduced as authority
 - verify old family list remains unchanged except controlled relation/property extensions
+- verify external identity remains a qualification on existing families and never becomes a new factual family
+- verify source bindings are exact or explicitly limited and no secret-bearing value is copied into STM
 
 ### Commit
 
@@ -398,7 +411,11 @@ Modify only:
    - evidence may retain file/symbol/range/variable name;
    - secret values are never copied;
    - secret-bearing URLs/DSNs are represented by safe logical facts only;
-   - sensitive internal identifiers use safe alias/redaction policy where required.
+   - classify every technical identifier as exactly `SECRET`, `SENSITIVE_INTERNAL`, or `SAFE_TECHNICAL_IDENTIFIER`;
+   - `SECRET` values are omitted from EV excerpts and stored fields;
+   - `SENSITIVE_INTERNAL` values may be referenced by source pointer but are represented downstream only by a safe alias/redaction;
+   - `SAFE_TECHNICAL_IDENTIFIER` may be retained when the source policy permits it;
+   - the classification is evidence metadata consumed by STM/projection owners, not a new lifecycle or confidence level.
 7. Preserve exact baseline/revision/Product bindings.
 
 ### Cross-check
@@ -415,6 +432,9 @@ Ensure Stage F terms do not redefine existing confidence/severity semantics.
 - no new evidence lifecycle statuses
 - no new severity/confidence levels
 - no secret-bearing examples
+- exact three-class sensitivity vocabulary is present
+- credential-bearing URL/DSN examples contain only redacted/safe logical values
+- evidence pointers remain useful without copying the observed secret
 
 ### Commit
 
@@ -480,12 +500,26 @@ Modify only:
 6. Use conditional membership and existing status/freshness behavior; do not require meaningless empty documents.
 7. Ensure a reader never needs to inspect STM internals to answer the standard Stage F user questions.
 
+8. Register the Product views as qualified uses of existing Technical Documentation projections; named Product views are package/rendering views, not new factual families or a parallel projection lifecycle:
+   - Product Interface Catalog -> `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` and `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` using `SEL-TECH-DOC-02` and `SEL-TECH-DOC-03`;
+   - Product Integration Map -> `PRJ-TECH-DOC-04-INTEGRATIONS` using `SEL-TECH-DOC-04` for qualified `INT-*`/`EVENT-*` facts;
+   - Product Data Access Map -> `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` using `SEL-TECH-DOC-05` for qualified `DS-*` and data relations;
+   - External Integrations Catalog -> the external subsection of `PRJ-TECH-DOC-04-INTEGRATIONS`, with `PRJ-TECH-DOC-07-AUTH-AND-TRUST` referenced when auth facts are selected;
+   - optional Provider/Consumer Matrix -> a qualified view in the existing interface/integration projections, never a new `PRJ-*` identity.
+9. For each selected Product view, retain the existing selector identity with an explicit contract revision, and persist a Product-qualified resolution snapshot containing Product identity/revision, immutable baseline, finite qualified Project/external inputs, exact local IDs/revisions, source bindings, and limitations. Use `SEMANTIC_SELECTOR` for dynamic memberships, `SEMANTIC_EXACT` for named IF/INT/DS/CC/coverage inputs, and `PROJECTION_EXACT` only if an existing upstream projection is consumed.
+10. Apply the existing lifecycle to every mapped `PRJ-*`: owner, contract revision, dependency snapshot, V1 STRUCTURAL, V2 DEPENDENCY/PROVENANCE, V3 CONTRACT COMPLETENESS, V4 AUTHORITY CONSISTENCY, canonical fingerprint, verified revision, and `CURRENT`/`STALE`/`BLOCKED` freshness. Resolve Product package membership through the existing finite `PKG-TECHNICAL-DOCUMENTATION` conditions: sections 02/03 for the Interface Catalog, 04 for Integration/External views and optional Matrix, and 05 for Data Access; no new package or lifecycle is created.
+11. Render only classified safe fields from STM/evidence: omit `SECRET`, redact or replace `SENSITIVE_INTERNAL` with a safe alias, and show only permitted `SAFE_TECHNICAL_IDENTIFIER` values. Projection rendering cannot decide that an unclassified secret-bearing value is safe.
+
 ### Verification
 
 - `git diff --check`
 - selectors use only formal fields/relations, no prose/filename inference
 - no new package lifecycle
 - no duplicate PRJ identity for existing Service sections
+- every Product view maps to the exact existing PRJ/selector/package entries above
+- Product-qualified snapshots contain exact baseline and finite qualified inputs
+- each mapped projection has dependency snapshot, V1–V4, fingerprint, verified revision, and freshness handling
+- redaction tests prove `SECRET` omission and `SENSITIVE_INTERNAL` alias/redaction
 
 ### Commit
 
@@ -504,7 +538,10 @@ Extend Stage E Product semantics so multiple Projects can be aggregated safely i
 Modify:
 
 - `references/product-multi-project-review.md`
-- `references/technical-documentation.md` only if Task 3 did not already complete the Product projection registration cleanly
+
+`references/technical-documentation.md` is owned entirely by Task 3. Task 4
+must not add a conditional second edit or introduce Product-specific PRJ
+identities; it validates and cross-references the exact Task 3 mapping.
 
 ### Required changes
 
@@ -536,12 +573,25 @@ Explicitly prevent:
 - Product projection from becoming factual authority;
 - Product membership from granting read/write/test/Git permission.
 
+The Product contract must bind each selected view to the Task 3 mapping and
+preserve the Product-qualified selector snapshot. Product identity/revision,
+immutable baseline vector, qualified Project/external source bindings, exact
+local STM revisions, availability/coverage/freshness, and package membership
+remain separate fields. The Product contract owns qualification and
+availability semantics; Technical Documentation owns PRJ/selector/package
+registration; Shared Evidence owns observation classification; STM owns safe
+accepted external identity fields. No owner may duplicate another contract's
+redaction or lifecycle authority.
+
 ### Verification
 
 - single-project contract remains unchanged/first-class
 - Product remains optional
 - no Product factual family
 - Stage E baseline/coherency/availability semantics unchanged
+- each named Product view resolves through the exact existing PRJ/selector/package mapping from Task 3
+- Product-qualified snapshots and bounded provider-impact dependencies are explicit
+- no Product output creates a new PRJ family or parallel lifecycle
 - `git diff --check`
 
 ### Commit
@@ -851,6 +901,7 @@ Task 10 is verification only. Do not "fix while verifying". A failure creates a 
    - 26/26 pressure scenarios GREEN;
    - integrated validation PASS;
    - backward compatibility PASS;
+   - PF-01..PF-18: 18 PLAN_PREVENTS, 0 PLAN_AMBIGUOUS, 0 PLAN_ALLOWS_FAILURE;
    - `git diff --check` across implementation range.
 
 ### Commit
@@ -962,6 +1013,37 @@ harness: DO_NOT_BUILD_HARNESS
 verdict: STAGE_F_IMPLEMENTATION_PLAN_APPROVED
 ```
 
+### 10.1 Plan-level fail-first coverage
+
+The independent Plan Review must classify all PF-01..PF-18 against explicit
+Plan text. The expected result is 18 `PLAN_PREVENTS`, 0 `PLAN_AMBIGUOUS`, and 0
+`PLAN_ALLOWS_FAILURE`:
+
+| PF range | Explicit prevention in this Plan |
+|---|---|
+| PF-01 | Task 1 closed `contract_role × observed_view` matrix and invalid-combination handling |
+| PF-02 | Task 1 INT authority and derived `READS_FROM`/`WRITES_TO` rules |
+| PF-03 | Task 1 DS procedure/function identity, optional IF contract, INT EXECUTE |
+| PF-04 | Task 1 family-bounded precision; PS-F13 validation |
+| PF-05 | Task 5 resolved CC mapping; PS-F26 validation |
+| PF-06 | Task 4 qualified Project identity and Product baseline |
+| PF-07 | Task 4 separate Product availability/coverage/freshness/package dimensions |
+| PF-08 | Section 5 absent fields remain absent/unknown/inapplicable |
+| PF-09 | Task 1 separates `OWNS_STATE` and `MIGRATION_AUTHORITY` |
+| PF-10 | Task 1 separates runtime `MIGRATION` and authority relation |
+| PF-11 | Tasks 2–3 exact sensitivity classes and deterministic redaction |
+| PF-12 | Task 2 rejects config-only and unused-client hints |
+| PF-13 | Task 1 preserves historical IF role omission without inference |
+| PF-14 | Task 1 preserves relation-only history without inferred INT access |
+| PF-15 | Task 3 exact PRJ/selector/package mapping and lifecycle fields; Task 4 cross-checks it |
+| PF-16 | Tasks 3–4 and Task 9 preserve Product-free single-project behavior |
+| PF-17 | Task 3 Product-qualified dependency snapshots plus Task 4 bounded impact validation |
+| PF-18 | Section 9 isolated workspace gate before implementation |
+
+The exact expected totals are part of Task 10 final verification and the
+integrated validation artifact. PF-15 and PF-17 are therefore
+`PLAN_PREVENTS`, not reviewer-inferred behavior.
+
 ---
 
 # 11. Scope controls
@@ -1056,6 +1138,49 @@ Expected implementation file count:
 
 This count is a plan assertion to be independently reviewed. If the plan review establishes that a required existing contract must also change, update the plan through remediation before approval rather than silently expanding implementation scope.
 
+### 13.1 Canonical path/task/purpose/validation inventory
+
+Every expected implementation path has one owning task and one bounded
+verification responsibility. The inventory is authoritative for scope and must
+remain exactly 34 paths.
+
+| Path | Task | Purpose / Design requirement | Required validation |
+|---|---:|---|---|
+| `SKILL.md` | 6 | Reference-driven Stage F routing only; no semantic duplication | orchestration remains bounded; no new authority or Product requirement |
+| `references/shared-technical-model.md` | 1 | IF/INT/DS/EVENT relations, external identity qualification, precision, access, migration, history | Task 1 fail-first checks; no new family; `git diff --check` |
+| `references/shared-evidence-model.md` | 2 | source-support classes, exact sensitivity classes, safe pointers, secret non-copy | no new lifecycle/confidence; redacted examples; all three classes |
+| `references/technical-documentation.md` | 3 | Service selectors/content plus exact Product PRJ/selector/snapshot/package mapping | formal selectors; lifecycle fields; V1–V4/fingerprint/freshness; redaction |
+| `references/product-multi-project-review.md` | 4 | Product qualification, availability, external limitations, and cross-reference to Task 3 views | single-project/Product invariants; qualified snapshots; no parallel lifecycle |
+| `capabilities/test-review/references/test-engineering-contract.md` | 5 | CC-owned compatibility mapping | exact CC status/classification/adjudication mapping |
+| `tests/pressure-scenario-154..166-*.md` | 7 | PS-F01..PS-F13 | established six-field scenario contract; GREEN criteria |
+| `tests/pressure-scenario-167..179-*.md` | 8 | PS-F14..PS-F26 | established six-field scenario contract; GREEN criteria |
+| `tests/stage-f-interface-api-data-integration-contract-validation.md` | 9 | integrated Stage F authority/projection/CC contract | deterministic joint assertions and 26-scenario result |
+| `tests/stage-f-interface-api-data-integration-backward-compatibility.md` | 9 | Stage A–E and historical compatibility | no rewrite/default/Product conversion; single-project and permission checks |
+
+The two range rows expand to exactly 26 distinct files. There are no other
+implementation paths. Task 3 owns all Technical Documentation edits; Task 4
+owns only Product contract changes and the cross-check of the Task 3 mapping.
+
+### 13.2 Remediated Design-to-Plan traceability
+
+The following affected Design decisions now map to an exact file, task, and
+validation. No row leaves an authority or lifecycle choice to implementation:
+
+| Design decision | Exact task/file | Validation |
+|---|---|---|
+| External integration identity uses existing COMP/IF/INT/DS qualification | Task 1 / `references/shared-technical-model.md` | external identity shape, exact source binding/limitation, no new family, PS-F05/06/14/17/18 |
+| Secret/sensitive identifier classes and evidence pointers | Task 2 / `references/shared-evidence-model.md` | exact three classes, no secret copy, redacted URL/DSN, PS-F17/18 |
+| User-facing redaction | Task 3 / `references/technical-documentation.md` | only classified safe fields render; `SECRET` omitted; sensitive alias/redaction |
+| Product-qualified external and interface/data views | Task 4 / `references/product-multi-project-review.md` | exact Product revision/baseline/source bindings; PS-F22/23/24 |
+| Product Interface Catalog | Task 3 / existing PRJ-TECH-DOC-02/03 and SEL-TECH-DOC-02/03 | Product-qualified selector snapshots, V1–V4, fingerprint, package membership |
+| Product Integration/External views and optional Matrix | Task 3 / existing PRJ-TECH-DOC-04 (and PRJ-TECH-DOC-07 when auth is selected) | qualified INT/EVENT/IF/CC inputs, finite section 04 membership, lifecycle checks |
+| Product Data Access Map | Task 3 / existing PRJ-TECH-DOC-05 and SEL-TECH-DOC-05 | qualified DS/INT/relation inputs, finite section 05 membership, lifecycle checks |
+| Projection/package lifecycle reuse | Task 3 / `references/technical-documentation.md` | exact selector revision, dependency snapshot, V1–V4, fingerprint, verified revision, freshness |
+| Bounded Product impact | Task 4 plus Task 3 dependency snapshots | qualified dependency membership and PS-F24 bounded impact validation |
+
+All other approved Design decisions remain mapped by Tasks 1–10 as listed in
+the task definitions and are unchanged by this remediation.
+
 ---
 
 # 14. Final implementation acceptance criteria
@@ -1077,9 +1202,13 @@ contract_role_observed_view_matrix: implemented
 legacy_read_write_relation_rule: implemented
 db_callable_boundary: implemented
 evidence_source_support: implemented
+external_identity_qualification: implemented
+safe_identifier_classes: SECRET | SENSITIVE_INTERNAL | SAFE_TECHNICAL_IDENTIFIER
 secret_redaction: implemented
 service_catalog_projections: implemented
 product_catalog_projections: implemented
+product_projection_mapping: existing PRJ-TECH-DOC-02/03/04/05 with qualified selector snapshots
+product_package_membership: existing PKG-TECHNICAL-DOCUMENTATION finite conditions
 CC_compatibility_mapping: implemented
 single_project_compatibility: PASS
 stage_e_product_compatibility: PASS
@@ -1092,6 +1221,7 @@ backward_compatibility_validation: PASS
 migration: COMPATIBLE_EXTENSION
 authority_conflicts: 0
 secret_leakage_paths: 0
+plan_fail_first: 18/18 PLAN_PREVENTS
 tracked_state: CLEAN
 ```
 
@@ -1117,6 +1247,10 @@ modified_existing_files_expected: 6
 new_pressure_scenarios: 26
 new_integrated_validation_files: 2
 expected_changed_paths: 34
+PF_total: 18
+PF_prevents: 18
+PF_ambiguous: 0
+PF_allows_failure: 0
 migration: COMPATIBLE_EXTENSION
 new_identity_family: NO
 harness: DO_NOT_BUILD_HARNESS
