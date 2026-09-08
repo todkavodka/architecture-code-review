@@ -103,20 +103,22 @@ resolved_members: [<STM-ID>@<revision> ...] in stable_order
 [`shared-technical-model.md`](shared-technical-model.md). A fact without an
 applicable authority axis is evaluated only on `status = ACCEPTED` and
 `freshness = VALID`; it is not excluded or promoted by prose interpretation.
-Every selector definition is revisioned as `definition_revision: 1`.
+Each selector definition has its own `definition_revision`. A changed
+selector definition is a dependency-contract change; the stored revision is
+part of every selector dependency snapshot and Product-qualified resolution.
 
-| Selector | Consumer projection | Authoritative record type | Additional bounded predicate |
-|---|---|---|---|
-| `SEL-TECH-DOC-00-SYSTEM-OVERVIEW` | `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `STM_FACT` | `entity_type IN [COMP, IF, INT, DS, EVENT, FLOW, AUTH, CFG, ERR]` |
-| `SEL-TECH-DOC-01-COMPONENTS` | `PRJ-TECH-DOC-01-COMPONENTS` | `STM_FACT` | `entity_type = COMP OR formal_relations HAS_ANY [DEPENDS_ON, DEPLOYS_AS]` |
-| `SEL-TECH-DOC-02-PROVIDED-INTERFACES` | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = PROVIDED` plus optional `interface_kind`, `contract_role`, `precision`, `status`, `freshness`, and Project predicates |
-| `SEL-TECH-DOC-03-CONSUMED-INTERFACES` | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = CONSUMED` plus optional `interface_kind`, `contract_role`, `precision`, `status`, `freshness`, and Project predicates |
-| `SEL-TECH-DOC-04-INTEGRATIONS` | `PRJ-TECH-DOC-04-INTEGRATIONS` | `STM_FACT` | `entity_type IN [INT, EVENT]` plus optional `interaction_kind`, `access_mode`, `precision`, `formal_relations`, `status`, `freshness`, and Project predicates |
-| `SEL-TECH-DOC-05-DATA-AND-PERSISTENCE` | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `STM_FACT` | `entity_type = DS OR (entity_type = INT AND structured_properties.interaction_kind = DATA_ACCESS) OR formal_relations HAS_ANY [READS_FROM, WRITES_TO, OWNS_STATE, MIGRATION_AUTHORITY]` plus optional `resource_kind`, `interaction_kind`, `access_mode`, `precision`, `status`, `freshness`, and Project predicates |
-| `SEL-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `STM_FACT` | `entity_type IN [COMP, CFG] OR formal_relations HAS_ANY [DEPLOYS_AS, DEPENDS_ON, CONFIGURED_BY]` |
-| `SEL-TECH-DOC-07-AUTH-AND-TRUST` | `PRJ-TECH-DOC-07-AUTH-AND-TRUST` | `STM_FACT` | `entity_type IN [AUTH, IF, CFG] OR formal_relations HAS_ANY [PROTECTED_BY, CONFIGURED_BY]` |
-| `SEL-TECH-DOC-08-MATERIAL-FLOWS` | `PRJ-TECH-DOC-08-MATERIAL-FLOWS` | `STM_FACT` | `entity_type IN [FLOW, INT, EVENT] OR formal_relations HAS_ANY [CALLS, PUBLISHES, SUBSCRIBES, PARTICIPATES_IN]` |
-| `SEL-TECH-DOC-09-FAILURE-BEHAVIOR` | `PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` | `STM_FACT` | `entity_type IN [ERR, IF, INT, EVENT] OR formal_relations HAS_ANY [EMITS_ERROR]` |
+| Selector | Definition revision | Consumer projection | Authoritative record type | Additional bounded predicate |
+|---|---:|---|---|---|
+| `SEL-TECH-DOC-00-SYSTEM-OVERVIEW` | 1 | `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `STM_FACT` | `entity_type IN [COMP, IF, INT, DS, EVENT, FLOW, AUTH, CFG, ERR]` |
+| `SEL-TECH-DOC-01-COMPONENTS` | 1 | `PRJ-TECH-DOC-01-COMPONENTS` | `STM_FACT` | `entity_type = COMP OR formal_relations HAS_ANY [DEPENDS_ON, DEPLOYS_AS]` |
+| `SEL-TECH-DOC-02-PROVIDED-INTERFACES` | 2 | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = PROVIDED` plus optional `interface_kind`, `contract_role`, `precision`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-03-CONSUMED-INTERFACES` | 2 | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = CONSUMED` plus optional `interface_kind`, `contract_role`, `precision`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-04-INTEGRATIONS` | 2 | `PRJ-TECH-DOC-04-INTEGRATIONS` | `STM_FACT` | `entity_type IN [INT, EVENT]` plus optional `interaction_kind`, `access_mode`, `precision`, `formal_relations`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-05-DATA-AND-PERSISTENCE` | 3 | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `STM_FACT` | `entity_type = DS OR (entity_type = INT AND structured_properties.interaction_kind = DATA_ACCESS) OR formal_relations HAS_ANY [READS_FROM, WRITES_TO, OWNS_STATE, MIGRATION_AUTHORITY]` plus optional `resource_kind`, `interaction_kind`, `access_mode`, `precision`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | 1 | `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `STM_FACT` | `entity_type IN [COMP, CFG] OR formal_relations HAS_ANY [DEPLOYS_AS, DEPENDS_ON, CONFIGURED_BY]` |
+| `SEL-TECH-DOC-07-AUTH-AND-TRUST` | 1 | `PRJ-TECH-DOC-07-AUTH-AND-TRUST` | `STM_FACT` | `entity_type IN [AUTH, IF, CFG] OR formal_relations HAS_ANY [PROTECTED_BY, CONFIGURED_BY]` |
+| `SEL-TECH-DOC-08-MATERIAL-FLOWS` | 1 | `PRJ-TECH-DOC-08-MATERIAL-FLOWS` | `STM_FACT` | `entity_type IN [FLOW, INT, EVENT] OR formal_relations HAS_ANY [CALLS, PUBLISHES, SUBSCRIBES, PARTICIPATES_IN]` |
+| `SEL-TECH-DOC-09-FAILURE-BEHAVIOR` | 1 | `PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` | `STM_FACT` | `entity_type IN [ERR, IF, INT, EVENT] OR formal_relations HAS_ANY [EMITS_ERROR]` |
 
 ### Stage F selector extension
 
