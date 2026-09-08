@@ -84,7 +84,11 @@ formal fields:
 authoritative_record_type: STM_FACT
 allowed_dimensions:
   entity_type | status | freshness | authority | structured_properties |
-  formal_relations
+  formal_relations | project_binding
+structured_properties:
+  direction | interface_kind | contract_role | operation_identity |
+  resource_kind | interaction_kind | access_mode | precision |
+  external_identity.kind
 allowed_operators: = | IN | HAS_ANY
 logical_connectors: AND | OR
 base_predicate:
@@ -105,14 +109,141 @@ Every selector definition is revisioned as `definition_revision: 1`.
 |---|---|---|---|
 | `SEL-TECH-DOC-00-SYSTEM-OVERVIEW` | `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `STM_FACT` | `entity_type IN [COMP, IF, INT, DS, EVENT, FLOW, AUTH, CFG, ERR]` |
 | `SEL-TECH-DOC-01-COMPONENTS` | `PRJ-TECH-DOC-01-COMPONENTS` | `STM_FACT` | `entity_type = COMP OR formal_relations HAS_ANY [DEPENDS_ON, DEPLOYS_AS]` |
-| `SEL-TECH-DOC-02-PROVIDED-INTERFACES` | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = PROVIDED` |
-| `SEL-TECH-DOC-03-CONSUMED-INTERFACES` | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = CONSUMED` |
-| `SEL-TECH-DOC-04-INTEGRATIONS` | `PRJ-TECH-DOC-04-INTEGRATIONS` | `STM_FACT` | `entity_type IN [INT, EVENT]` |
-| `SEL-TECH-DOC-05-DATA-AND-PERSISTENCE` | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `STM_FACT` | `entity_type = DS OR formal_relations HAS_ANY [READS_FROM, WRITES_TO, OWNS_STATE]` |
+| `SEL-TECH-DOC-02-PROVIDED-INTERFACES` | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = PROVIDED` plus optional `interface_kind`, `contract_role`, `precision`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-03-CONSUMED-INTERFACES` | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `STM_FACT` | `entity_type = IF AND structured_properties.direction = CONSUMED` plus optional `interface_kind`, `contract_role`, `precision`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-04-INTEGRATIONS` | `PRJ-TECH-DOC-04-INTEGRATIONS` | `STM_FACT` | `entity_type IN [INT, EVENT]` plus optional `interaction_kind`, `access_mode`, `precision`, `formal_relations`, `status`, `freshness`, and Project predicates |
+| `SEL-TECH-DOC-05-DATA-AND-PERSISTENCE` | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `STM_FACT` | `entity_type = DS OR formal_relations HAS_ANY [READS_FROM, WRITES_TO, OWNS_STATE, MIGRATION_AUTHORITY]` plus optional `resource_kind`, `interaction_kind`, `access_mode`, `precision`, `status`, `freshness`, and Project predicates |
 | `SEL-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `STM_FACT` | `entity_type IN [COMP, CFG] OR formal_relations HAS_ANY [DEPLOYS_AS, DEPENDS_ON, CONFIGURED_BY]` |
 | `SEL-TECH-DOC-07-AUTH-AND-TRUST` | `PRJ-TECH-DOC-07-AUTH-AND-TRUST` | `STM_FACT` | `entity_type IN [AUTH, IF, CFG] OR formal_relations HAS_ANY [PROTECTED_BY, CONFIGURED_BY]` |
 | `SEL-TECH-DOC-08-MATERIAL-FLOWS` | `PRJ-TECH-DOC-08-MATERIAL-FLOWS` | `STM_FACT` | `entity_type IN [FLOW, INT, EVENT] OR formal_relations HAS_ANY [CALLS, PUBLISHES, SUBSCRIBES, PARTICIPATES_IN]` |
 | `SEL-TECH-DOC-09-FAILURE-BEHAVIOR` | `PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` | `STM_FACT` | `entity_type IN [ERR, IF, INT, EVENT] OR formal_relations HAS_ANY [EMITS_ERROR]` |
+
+### Stage F selector extension
+
+Stage F selectors remain instances of the existing selector grammar. They may
+constrain only formal STM fields that the Technical Model Gate has accepted;
+they do not inspect prose, filenames, source text, or evidence hints. The
+bounded Stage F dimensions are:
+
+```text
+IF:  direction, interface_kind, contract_role, operation_identity, precision
+INT: interaction_kind, access_mode, precision
+DS:  resource_kind, precision
+all: status, freshness, authority, formal_relations, Project qualification
+```
+
+`formal_relations` may select `READS_FROM`, `WRITES_TO`, `OWNS_STATE`, and
+`MIGRATION_AUTHORITY` only as accepted relations. A precise `INT-*` access
+remains the authority for new access; a selector may show a derived
+`READS_FROM`/`WRITES_TO` relation but never infer an `access_mode` from a
+containment relation or from `parent_resource_ref`. `STORE_ONLY` is selectable
+for DS store facts and applicable DATA_ACCESS INT facts only; it is not a
+valid IF, EVENT, FLOW, or non-data INT precision.
+
+When Product mode is active, Project and external qualification are explicit
+selector inputs and remain separate from semantic availability, projection
+freshness, and package status. An absent historical Stage F field is absent or
+unknown; it is never treated as a false exact match. Selector resolution
+persists the exact member IDs and revisions in stable order, and a changed
+membership or selector definition makes the affected projection stale rather
+than silently regenerating it.
+
+## Stage F rendered content
+
+The following content is rendered from accepted, fresh STM facts and their
+recorded evidence/provenance links. Rendering is explanatory and traceable;
+it cannot accept, revise, match, resolve, or enrich a technical fact.
+
+### Provided and consumed interfaces
+
+`PRJ-TECH-DOC-02-PROVIDED-INTERFACES` renders each selected `IF-*` with its
+Project/repository/revision qualification, direction, `contract_role`,
+`interface_kind`, provider reference, operation identity, safe address,
+contract/version reference, protocol properties, observed view, precision,
+status/freshness, and evidence links when those fields are applicable and
+classified safe. Provider declaration and provider implementation remain
+distinct views of the same or separately revised accepted interface; the
+projection does not choose between them.
+
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` renders accepted consumer expectations
+and observed uses separately, including the consumer IF identity/revision,
+operation and protocol details, known provider or explicit unmatched-provider
+limitation, Project qualification, precision, evidence, and freshness. A
+consumer expectation does not require a provider match and is never rewritten
+to a provider IF. Candidate matching is displayed only as the existing
+non-authoritative candidate/not-established state; compatibility is displayed
+only from an existing resolved `CC-*` result and is never inferred by this
+projection.
+
+Unknown operation, `UNRESOLVED` or `RESOURCE_BOUNDED` precision, bounded
+resource, unresolved provider, partial source, and stale or unavailable input
+are rendered as explicit limitations. They are not replaced with an empty
+section, `EXACT`, `COMPATIBLE`, or a clean result.
+
+### Integrations and events
+
+`PRJ-TECH-DOC-04-INTEGRATIONS` renders concrete `INT-*` edges with source,
+target, interaction kind, protocol/transport, access mode where applicable,
+precision, Project/revision qualification, and evidence/provenance. It keeps
+the identities distinct:
+
+```text
+IF-*    surface or contract
+INT-*   concrete interaction or access edge
+EVENT-* semantic event or message
+```
+
+An `EVENT-*` may be rendered without an IF. A webhook may render an EVENT, an
+IF, and an INT together when all three accepted facts exist, without aliasing
+their identities. External integrations render only qualified external
+logical identity, safe source binding or explicit limitation, provider/owner
+when evidenced, and safe identifier fields. A configured URL, SDK, or
+infrastructure declaration alone remains a weak hint and is not rendered as a
+called external system.
+
+### Data, persistence, and migration
+
+`PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` renders accepted DS store/resource
+identity, `resource_kind`, `parent_resource_ref` containment, safe address,
+precision, Project qualification, and evidence. Containment is shown as
+containment only; it does not imply access, ownership, migration authority, or
+dependency.
+
+The section renders accepted data access through precise `INT-*` facts and
+the controlled modes `READ`, `WRITE`, `READ_WRITE`, `EXECUTE`, `DDL`, and
+`MIGRATION`. `READ`/`WRITE`/`READ_WRITE` may display their explicitly derived
+navigation relations. `EXECUTE`, `DDL`, and `MIGRATION` are not displayed as
+READ or WRITE without separate accepted evidence. Relation-only historical
+`READS_FROM`/`WRITES_TO` remains visibly broad and does not gain a fabricated
+access mode or precision.
+
+Ownership and evolution are separate rendered facts:
+
+```text
+OWNS_STATE             state ownership
+MIGRATION_AUTHORITY    schema/data-evolution responsibility
+INT access_mode=MIGRATION runtime migration operation
+```
+
+The projection may show all three, but it never derives one from another.
+Procedure/function DS identity remains distinct from an optional callable IF;
+an EXECUTE INT targets the DS object and may reference the callable IF.
+
+### Evidence and limitations
+
+Every selected Stage F section exposes safe evidence/provenance links and a
+bounded limitation when the source is dynamic, partial, stale, unavailable,
+weak, or unresolved. Evidence source-support classes
+`DIRECT_DECLARATION`, `STRONG_INFERENCE`, and `WEAK_HINT` are displayed as
+evidence metadata only; they do not replace global confidence/severity,
+create STM facts, or promote a weak hint. The projection never infers an API
+call from a config URL, service use from an SDK dependency, table access from
+a DB connection, runtime access from a migration declaration, or client use
+from an unused generated client.
+
+The Technical Documentation projection is not a factual authority. It can
+repair presentation of unchanged accepted facts, but semantic disagreement
+routes to the owning STM, evidence, coverage, or revalidation gate.
 
 A later matching fact, a removed member, or a member revision change is
 selector impact even when no individually named exact dependency changed. The
@@ -201,6 +332,114 @@ listed `PRJ-*` identities before the gate runs. They do not use a filename
 glob, an open-ended subject query, or a selector to calculate package
 membership. A project may therefore omit unselected recommended sections
 without treating them as stale required output.
+
+## Stage F redaction and safety
+
+Projection rendering consumes the shared evidence sensitivity classification;
+it does not create a second classification authority. Every technical
+identifier selected for display is exactly one of:
+
+```text
+SECRET
+SENSITIVE_INTERNAL
+SAFE_TECHNICAL_IDENTIFIER
+```
+
+`SECRET` values are omitted. This includes passwords, API keys, tokens,
+private keys, raw environment values, secret query parameters, and
+credential-bearing URL or DSN material. A projection may retain a safe source
+pointer and the fact that secret material was present, but never the value.
+
+`SENSITIVE_INTERNAL` values are rendered only as an approved safe logical
+alias or redacted form. Private hostnames, usernames, sensitive filesystem
+paths, and internal locators are not silently treated as safe. A
+`SAFE_TECHNICAL_IDENTIFIER` may render when the source policy permits it,
+including a logical service/store name, ordinary public path template,
+schema/table name, event name, or non-secret operation name.
+
+For credential-bearing URLs and DSNs, the generated section may show the
+technology, logical store, database/schema, and safe endpoint class, but not
+the raw value or secret query string. An unclassified value is not safe merely
+because a user-facing section would be useful. The same rule applies to
+Service sections, Product-qualified views, dependency metadata, fingerprints,
+and package summaries.
+
+## Stage F Product-qualified views and lifecycle
+
+Task 3 registers Product views as qualified uses of the existing Service
+projections. These names are rendering views, not new factual families or
+projection identities:
+
+| Product view | Existing projection and selector | Existing package section |
+|---|---|---|
+| Product Interface Catalog | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` / `SEL-TECH-DOC-02` and `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` / `SEL-TECH-DOC-03` | 02 and 03 |
+| Product Integration Map | `PRJ-TECH-DOC-04-INTEGRATIONS` / `SEL-TECH-DOC-04` | 04 |
+| External Integrations Catalog | external subsection of `PRJ-TECH-DOC-04-INTEGRATIONS` / `SEL-TECH-DOC-04`; `PRJ-TECH-DOC-07-AUTH-AND-TRUST` when auth is selected | 04, and 07 when selected |
+| Product Data Access Map | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` / `SEL-TECH-DOC-05` | 05 |
+| optional Provider/Consumer Matrix | qualified view in the existing interface/integration projections | 04 when selected |
+
+Each selected Product view retains the existing selector identity and records
+an explicit selector `definition_revision`. Its Product-qualified resolution
+snapshot contains, as separate fields:
+
+```text
+product_identity/revision
+immutable_product_baseline
+finite_qualified_project_and_external_inputs
+exact_local_stm_ids_and_revisions
+source_bindings_and_limitations
+semantic_availability / coverage / projection_freshness / package_status
+```
+
+Dynamic membership uses `SEMANTIC_SELECTOR`; named IF/INT/DS/CC/coverage
+inputs use `SEMANTIC_EXACT`; `PROJECTION_EXACT` is used only when an existing
+upstream projection is explicitly consumed. A Product snapshot cannot alias
+same-named records across Projects, turn unavailable inputs into clean or
+failed global Product results, or grant repository, read/write, test, or Git
+permission.
+
+Every mapped `PRJ-*` retains the existing lifecycle fields: stable identity,
+owning capability, projection contract revision, semantic dependencies,
+resolved dependency/selector snapshot, `V1 STRUCTURAL`, `V2 DEPENDENCY /
+PROVENANCE`, `V3 CONTRACT COMPLETENESS`, `V4 AUTHORITY CONSISTENCY`, canonical
+fingerprint, verified revision, and `CURRENT`/`STALE`/`BLOCKED` freshness. A
+dependency, selector, Product qualification, or contract change marks only
+the affected projection stale or blocked. Regeneration remains an explicit
+`RG-*` action; Technical Documentation never regenerates automatically and
+never becomes semantic input.
+
+## Historical compatibility and authority invariants
+
+This projection extension is a compatible additive migration. An old broad
+HTTP IF remains valid when operation properties are absent; an old store-level
+DS remains valid without child resources; an old INT remains valid without an
+access mode; and an old EVENT remains valid without protocol-specific
+transport details. Relation-only `READS_FROM`/`WRITES_TO` remains a broad
+historical fact and is not backfilled into a precise INT. Existing Project-
+local facts require no Product conversion, and no old ID or evidence meaning
+is rewritten.
+
+Selectors treat absent Stage F qualifiers as absent, unknown, or
+inapplicable. They do not treat absence as false exactness, compatibility,
+clean output, or permission. New qualifiers require accepted STM/evidence
+authority and create a new revision or child fact under the STM rules; the
+projection does not bulk-regenerate or silently enrich history.
+
+The projection consumes these authorities without duplicating them:
+
+```text
+WS-* / EV-*        evidence and provenance
+STM                accepted technical facts and precision
+CC-*               compatibility status and adjudication
+PRJ-*              rendered documentation projection
+Architecture Review interpretation and findings
+```
+
+No projection text, selector, package, fingerprint, or freshness state can
+create an accepted IF/INT/DS/EVENT fact, infer access or migration authority,
+resolve compatibility, promote a weak hint, or become a second redaction or
+projection-lifecycle authority. Product remains optional and single-project
+operation remains first-class.
 
 ## Human synthesis contract
 
