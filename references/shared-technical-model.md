@@ -52,6 +52,7 @@ SUBSCRIBES
 READS_FROM
 WRITES_TO
 OWNS_STATE
+MIGRATION_AUTHORITY
 PROTECTED_BY
 CONFIGURED_BY
 EMITS_ERROR
@@ -245,3 +246,299 @@ semantic dependency. Direct dependency metadata remains owned and typed by the
 dependent artifact under `technical-model-dependencies.md`; reverse indexes
 remain derived navigation. A disputed or insufficiently evidenced relation
 stays unresolved/limited and cannot be consumed as accepted downstream truth.
+
+## 10. Stage F interface and interaction extensions
+
+Stage F extends the existing STM families. It does not create a parallel
+technical model or a new factual identity family. The Technical Model Gate
+remains the sole writer of accepted facts; evidence and projections remain
+separate authorities.
+
+### 10.1 IF-* interface and contract shape
+
+`IF-*` remains the identity of one material interaction surface or contract. It
+is not a call edge, data-access edge, event identity, dependency, or
+compatibility result. A Stage F interface record may carry this common shape
+when the corresponding property is applicable and evidence-supported:
+
+```text
+IF-*:
+  semantic_id
+  revision
+  status
+  freshness
+  authority
+  direction: PROVIDED | CONSUMED
+  interface_kind: HTTP_REST | GRPC_RPC | GRAPHQL | WEBSOCKET |
+                   WEBHOOK | CLI | LIBRARY | FILE_PROTOCOL | IPC | OTHER
+  contract_role: PROVIDER_DECLARATION |
+                 PROVIDER_IMPLEMENTATION |
+                 CONSUMER_EXPECTATION |
+                 CONSUMER_OBSERVED_USE
+  operation_identity: optional structured protocol operation
+  address: optional safe protocol/resource address
+  contract_version: optional evidenced external/API version
+  contract_ref: optional bounded source/schema/artifact reference
+  contract_fingerprint: optional stable source-derived fingerprint
+  provider_ref: optional qualified COMP-* or external provider
+  auth_refs: optional AUTH-* references
+  error_refs: optional ERR-* references
+  protocol_properties: optional controlled kind-specific properties
+  precision: EXACT | RESOURCE_BOUNDED | STORE_ONLY | UNRESOLVED
+  observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
+  project_binding: optional Project/repository/revision qualification
+  evidence_refs: WS-* / EV-* references
+```
+
+The shape does not require nullable properties to be fabricated. Direction,
+interface kind, identity/revision, evidence, and an applicable precision are
+the core fields; operation, address, version, contract, provider, auth, error,
+and protocol properties are required only when applicable or evidenced.
+
+`contract_role` is a perspective qualifier, not a lifecycle. `observed_view`
+remains the existing observation vocabulary. The Technical Model Gate applies
+this closed role/view matrix:
+
+| `contract_role` | Valid primary views | Meaning of `TESTED` |
+|---|---|---|
+| `PROVIDER_DECLARATION` | `DECLARED`, `TESTED` | A test exercises the declared provider contract; it does not prove implementation equivalence. |
+| `PROVIDER_IMPLEMENTATION` | `IMPLEMENTED`, `TESTED` | A test exercises implemented provider behavior; it does not turn implementation into a declaration. |
+| `CONSUMER_EXPECTATION` | `DECLARED`, `TESTED` | A test asserts the consumer expectation; it does not prove a provider satisfies it. |
+| `CONSUMER_OBSERVED_USE` | `CONSUMED`, `TESTED` | A test exercises consumer use; it does not make the consumer a provider. |
+
+`DECLARED`, `IMPLEMENTED`, and `CONSUMED` are invalid as primary views for
+roles without that perspective. For example, `CONSUMER_EXPECTATION` with
+`IMPLEMENTED` and `PROVIDER_IMPLEMENTATION` with `CONSUMED` are rejected by the
+Technical Model Gate or retained only as unresolved evidence; they are never
+accepted silently. `TESTED` is orthogonal evidence and does not replace the
+role's primary view. Historical IF records without `contract_role` remain
+valid with their existing observed view; the matrix never infers a role or
+default precision for them.
+
+Protocol-specific properties remain under one controlled object selected by
+`interface_kind`:
+
+| Kind | Properties when evidenced |
+|---|---|
+| `HTTP_REST` | method, path/template, safe host/provider reference, media/content contract reference |
+| `GRPC_RPC` | package/service, method, protobuf contract reference/fingerprint |
+| `GRAPHQL` | operation type/name, field or schema address, schema reference/fingerprint |
+| `WEBSOCKET` | endpoint/channel, message direction, material message/topic identity |
+| `WEBHOOK` | callback address, callback event/type, sender/receiver direction |
+| `CLI` | command/subcommand, option contract reference, exit/error contract reference |
+| `LIBRARY` | public symbol/module/package and call contract reference |
+| `FILE_PROTOCOL` | path/pattern, format/schema reference, transfer direction |
+| `IPC` | mechanism, endpoint/channel, message or call contract reference |
+| `OTHER` | bounded documented properties only when material and evidenced |
+
+Unsupported or unobserved properties are absent rather than null claims.
+
+### 10.2 INT-* concrete interaction and access shape
+
+`INT-*` is the primary accepted fact for one concrete source-to-target
+interaction edge. It is not direct dependency metadata and does not own the
+identity of an interface, event, or data resource:
+
+```text
+INT-*:
+  semantic_id
+  revision
+  status
+  freshness
+  authority
+  source_ref: COMP-* or qualified source
+  target_ref: COMP-* | DS-* | qualified external identity | unresolved
+  consumed_interface_ref: optional IF-*@revision
+  provided_interface_ref: optional IF-*@revision
+  event_ref: optional EVENT-*
+  protocol_or_transport: optional evidenced property
+  interaction_kind: CALL | EVENT_PUBLISH | EVENT_SUBSCRIBE |
+                     DATA_ACCESS | FILE_ACCESS | OTHER
+  access_mode: required for DATA_ACCESS
+  sync_or_async: optional existing property
+  timeout: optional existing property
+  retry: optional existing property
+  correlation: optional existing property
+  precision: required
+  project_binding: required Project/revision/baseline qualification
+  evidence_refs: required WS-* / EV-* references
+```
+
+For a data-access interaction, `target_ref` is a `DS-*` resource and
+`access_mode` is one of the controlled values in section 10.4. An external API
+uses a qualified external identity or safe source binding, never a
+secret-bearing URL. An event interaction may reference both its semantic
+`EVENT-*` and its transport target. `CALL`, `DATA_ACCESS`, and event
+interactions do not automatically create `DEPENDS_ON`; dependency metadata
+remains separately typed and authoritative under
+`technical-model-dependencies.md`.
+
+`EVENT-*` remains the identity of a semantic event or message, while
+`EVENT_PUBLISH` and `EVENT_SUBSCRIBE` on `INT-*` record concrete interaction
+edges. `FLOW-*` remains the identity of a material end-to-end, system,
+business, or control flow. Neither event nor flow identity is replaced by an
+interface or interaction record.
+
+### 10.3 DS-* store and addressable-resource shape
+
+One `DS-*` identity family represents both a store-level resource and an
+addressable resource inside that store. Child resources share the STM identity
+and lifecycle model; they do not create `TABLE-*`, `BUCKET-*`, `COLLECTION-*`,
+`SQL-*`, or other new identity families:
+
+```text
+DS-*:
+  semantic_id
+  revision
+  status
+  freshness
+  authority
+  resource_kind
+  parent_resource_ref: optional DS-*
+  technology: optional store technology
+  safe_address: optional evidence-backed logical address
+  precision: EXACT | RESOURCE_BOUNDED | STORE_ONLY | UNRESOLVED
+  project_binding: Project/repository/revision qualification
+  evidence_refs: WS-* / EV-* references
+```
+
+The controlled resource kinds include:
+
+```text
+STORE | DATABASE | SCHEMA | TABLE | VIEW | MATERIALIZED_VIEW |
+PROCEDURE | FUNCTION | NAMESPACE | KEY_PATTERN | COLLECTION |
+SEARCH_INDEX | BUCKET | PREFIX | VECTOR_COLLECTION | VECTOR_INDEX |
+FILE | PATH_PATTERN
+```
+
+`TRIGGER`, `INDEX`, and `SEQUENCE` may be used as additional bounded resource
+kinds when their identity is material to an accepted interaction; they do not
+become new families. `parent_resource_ref` records containment or address
+context only. It does not imply ownership, access, migration authority, or
+dependency. A database connection does not imply access to every table, and a
+store owner does not automatically own every descendant. Any inherited
+ownership must be separately evidenced with its scope and override rule.
+
+### 10.4 Data-access authority and derived relations
+
+Concrete new precise data access is authored in `INT-*`:
+
+```text
+READ
+WRITE
+READ_WRITE
+EXECUTE
+DDL
+MIGRATION
+```
+
+`access_mode` is an interaction property, not a resource identity or a
+dependency. The derivation rule is:
+
+```text
+INT DATA_ACCESS + READ       -> derived READS_FROM
+INT DATA_ACCESS + WRITE      -> derived WRITES_TO
+INT DATA_ACCESS + READ_WRITE -> derived READS_FROM and WRITES_TO
+INT + EXECUTE / DDL / MIGRATION -> no read/write derivation without separate evidence
+```
+
+A materialized `READS_FROM` or `WRITES_TO` relation for the same qualified
+source, target, Project/revision, and baseline is derived/navigation state with
+an explicit link to the authoritative `INT-*` fact. A projection may compute
+the relation without materializing it, but uses the same rule. Direct
+dependency metadata never owns access mode.
+
+Relation-only `READS_FROM` and `WRITES_TO` records without `INT-*` remain valid
+accepted broad historical facts. They carry no inferred `access_mode`, are not
+silently rewritten into INT, and do not receive fabricated precision. If a
+new precise INT contradicts a legacy relation, the INT is authoritative for the
+precise current edge; the historical relation is preserved with a stale or
+`REVALIDATION_REQUIRED` limitation as applicable, and the conflict routes to
+bounded revalidation rather than an overwrite.
+
+### 10.5 Database callable boundary
+
+`PROCEDURE` and `FUNCTION` are DS identities because they are database-owned
+schema objects. They are not callable-interface identities by themselves. An
+independently evidenced callable contract may additionally be represented by
+an `IF-*` with its own stable identity and revision when operation,
+request/response, auth, error, or compatibility semantics are material.
+
+An invocation is an `INT-*` with `interaction_kind=DATA_ACCESS` and
+`access_mode=EXECUTE`, targeting the DS procedure/function and optionally
+referencing the callable IF. DS and IF never alias or replace each other.
+DS-only is valid when execution is evidenced without an independent callable
+contract. An external or abstract callable IF may exist without a known DS.
+
+### 10.6 Precision and family applicability
+
+Precision is independent of evidence strength/confidence, coverage, freshness,
+authority, observed view, and lifecycle:
+
+```text
+EXACT
+RESOURCE_BOUNDED
+STORE_ONLY
+UNRESOLVED
+```
+
+`EXACT`, `RESOURCE_BOUNDED`, and `UNRESOLVED` are applicable to IF, EVENT,
+FLOW, and applicable INT facts. `STORE_ONLY` is valid only for a DS store-level
+fact or a DATA_ACCESS INT whose parent store is known but entity-level target
+is not. It is invalid for IF, EVENT, FLOW, and non-data INT facts. An interface
+with an unresolved operation uses `UNRESOLVED` or `RESOURCE_BOUNDED`, never
+`STORE_ONLY`. Precision never silently upgrades; a stronger observation creates
+a new revision or enrichment while preserving the prior limitation.
+
+### 10.7 Migration authority
+
+`MIGRATION_AUTHORITY` is a controlled STM factual relation meaning
+responsibility for schema/data-resource evolution. It is not runtime migration
+execution, DDL execution, state ownership, or a dependency edge:
+
+```text
+MIGRATION_AUTHORITY:
+  owner_ref: COMP-* or qualified Project owner
+  resource_ref: DS-*
+  source_refs: WS-* / EV-* and migration source locator
+  project_binding: Project/revision/baseline qualification
+  scope: exact resource or bounded resource set
+  status: accepted or unresolved under STM lifecycle
+```
+
+`INT access_mode=MIGRATION` records execution of a migration operation.
+`MIGRATION_AUTHORITY` records responsibility for evolution. Neither implies
+the other, and `MIGRATION_AUTHORITY` never implies `OWNS_STATE`. Multiple or
+conflicting authorities remain independently qualified facts or unresolved
+conflict; the STM does not automatically create an Architecture finding.
+
+### 10.8 External identity qualification and history
+
+No external-service identity family is introduced. Existing `COMP-*`, `IF-*`,
+`INT-*`, and `DS-*` records may carry an external qualification:
+
+```text
+external_identity:
+  logical_name
+  kind: THIRD_PARTY_SAAS | IDENTITY_PROVIDER | PAYMENT_PROVIDER |
+        CLOUD_API | EXTERNAL_DATABASE | OBJECT_STORE | OTHER
+  source_binding: external locator/revision or explicit limitation
+  owner/provider: known logical owner where evidenced
+  safe_identifier: safe non-secret technical identity
+```
+
+The source binding is exact when the source supports it or explicitly limited
+when it does not. A configured URL, SDK, or infrastructure declaration alone is
+not an accepted concrete interaction. Credentials, tokens, passwords, private
+keys, secret query strings, and complete secret-bearing DSNs are never STM
+identifiers or fields. Safe identifier classification and evidence-pointer
+handling remain subject to the Shared Evidence contract; this STM contract
+accepts only the safe, non-secret representation.
+
+Every new Stage F property remains optional when evidence does not support it.
+Existing COMP, IF, INT, DS, EVENT, FLOW, and controlled-relation records retain
+their identity, revision, baseline, authority, and prior precision. Historical
+absence of `contract_role`, Stage F precision, access mode, child resource, or
+external qualification is not interpreted as false, exact, or a fabricated
+default. No ID rewrite, bulk enrichment, Product conversion, or destructive
+migration is permitted.
