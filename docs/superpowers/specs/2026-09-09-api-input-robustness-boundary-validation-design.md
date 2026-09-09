@@ -172,9 +172,12 @@ record a state for the proposition being evaluated:
   unknown-field policy;
 - `IMPLEMENTED` — code or an evidenced framework/server configuration shows
   that the relevant request path enforces the declaration at the stated point;
-- `TESTED` — an existing executable test or accepted Test Engineering case
-  proves the boundary. In v1, execution may remain unavailable, so a generated
-  case is not `TESTED` merely because it was created.
+- `TESTED` — an accepted evidence record of actual execution/observation from
+  an approved runtime or test-execution mechanism. The record must link the
+  case to the executed test, result, environment and baseline identity,
+  timestamp, result status, and provenance as required by the existing Test
+  Engineering contract. An accepted Test Engineering case is not execution
+  evidence and is not `TESTED` by itself.
 
 The useful result is the combination, not a precedence rule. An OpenAPI
 declaration is not implementation evidence. A frontend `maxlength` is a
@@ -189,6 +192,21 @@ Evidence should identify the exact interface, input location, Project/source
 revision, configuration/code path, and provenance. For multi-hop systems,
 record the relevant limits at each reachable boundary; the effective early
 limit is not silently substituted for missing downstream evidence.
+
+The state separation is mandatory:
+
+```text
+accepted_test_case != executed_test != tested_result
+```
+
+`DEFINED`/`ACCEPTED` (or the corresponding existing case-planning and
+governance states) describe what Test Engineering says must be proven. They do
+not imply `EXECUTED`, `TESTED`, `PASSED`, `FAILED`, `OBSERVED`, or
+`VERIFIED_AT_RUNTIME`. A generated case with an expected result remains
+`NOT_EXECUTED`/planned when no execution evidence exists. V1 does not invent a
+runtime result state or ingest runtime evidence; if approved external evidence
+already exists, the existing Test Engineering execution/result semantics
+determine whether `TESTED` may be derived.
 
 ## Finding semantics
 
@@ -207,6 +225,11 @@ impact: <concrete resource, correctness, or assurance consequence>
 recommendation: <bounded corrective direction>
 severity: <LOW | MEDIUM | HIGH with rationale>
 ```
+
+In this shape, `TESTED` is allowed only when the linked accepted execution
+evidence satisfies the preceding rule. A planned or accepted case may describe
+an expected result, but it cannot populate the Stage F `TESTED` view or claim
+that the endpoint passed or failed.
 
 The finding may classify the observed condition as `UNBOUNDED`,
 `DECLARED_ONLY`, `DECLARED_BUT_NOT_ENFORCED`, `ENFORCEMENT_UNKNOWN`, or
@@ -260,6 +283,16 @@ must retain an unresolved assumption and must not invent a threshold.
 Generated cases do not grant authorization to send requests, execute tests,
 modify code, or access runtime environments. Any execution remains separately
 authorized and is unavailable in this v1 design.
+
+For example, when `maxLength = 255`, a generated case with length `256` may
+record “expected 4xx schema validation rejection”. With no execution evidence,
+the case is `DEFINED` or `ACCEPTED` as applicable, the expected result is only
+an expectation, and there is no `TESTED`, `PASSED`, or `FAILED` claim. The same
+rule applies to a body above an evidenced 1 MiB transport limit: “rejected
+before application materialization” is the expected stage, not an observed
+runtime result. If an accepted external CI result exists, it must also carry
+the existing execution, environment, baseline, result, and provenance evidence
+before it can support `TESTED`; this design does not define runtime ingestion.
 
 ## Boundary-value generation
 
@@ -343,6 +376,13 @@ have different limits, the result preserves each member's evidence and reports
 the cross-project limitation or weakest evidenced boundary rather than
 silently treating one Project's limit as universal.
 
+The same qualification applies to test evidence. One Project's generated case
+does not make a Product or interface `TESTED`. One Project's executed result
+does not make other Projects or all Product baselines `TESTED`; Product views
+must retain the exact Project, baseline, environment, and execution-result
+bindings for each tested member. A Product-wide claim requires separately
+qualified accepted execution evidence for the claimed scope.
+
 Unavailable Project/source/configuration evidence remains unavailable. It is
 not evidence that a limit is absent and does not become a clean or safe result.
 
@@ -405,6 +445,12 @@ identify the applicable owner, evidence state, boundary layer, and limitation.
 | 26 | Validation occurs after expensive deserialization | CQ reports `VALIDATION_AFTER_MATERIALIZATION` or parser risk according to the evidenced order. |
 | 27 | Consumer sends data larger than provider contract | Existing Contract Verification/CC handles contract comparison; CQ boundary findings remain separately owned. |
 | 28 | Streaming upload uses different limits from buffered JSON | Each input path has its own qualified boundary record and generated cases. |
+| 29 | Generated boundary case has no execution evidence | Case is `DEFINED`/`ACCEPTED` as applicable; expected result is recorded; `TESTED` is not claimed. |
+| 30 | Accepted Test Engineering case has no execution evidence | Acceptance governs the case only; it remains not tested. |
+| 31 | Expected 413 or schema rejection is documented without execution | Expected outcome does not imply `PASSED`, `FAILED`, or `TESTED`. |
+| 32 | Accepted external execution evidence exists | Existing Test Engineering semantics may derive `TESTED` only from qualified execution/result evidence. |
+| 33 | One Product Project has an executed boundary result | The result remains Project/baseline-qualified and does not imply other Product Projects are tested. |
+| 34 | Generated API boundary case is rendered in an Interface Catalog view | The case informs what must be proven but cannot populate Stage F `TESTED` factual view. |
 
 ## Pressure scenarios and resolutions
 
@@ -429,6 +475,12 @@ constraint on interpretation, not a new runtime mechanism.
 | 14 | Numeric values trigger allocation/resource blow-up | Treat numeric range and resource-sensitive use separately; no arbitrary numeric policy is invented. |
 | 15 | `Content-Length` is absent or transfer is chunked | Require an aggregate streaming/container boundary or report it unknown; header presence is not the limit. |
 | 16 | Validation follows expensive deserialization | Use evidence of ordering to report late validation and expected parser/materialization impact. |
+| 17 | Reviewer marks a generated case accepted | Case governance state remains distinct from execution and cannot become `TESTED`. |
+| 18 | Test Plan includes an expected 413 response | Expected result remains a requirement; it is not an observed response. |
+| 19 | Generated case has exact payload and expected status | Precision of the case does not create runtime evidence or a pass/fail result. |
+| 20 | CI result exists but environment or baseline is unknown | Do not derive a qualified `TESTED` claim without the required execution binding. |
+| 21 | Historical `TESTED` evidence exists for an old revision | It remains bound to the old revision and does not prove a new revision. |
+| 22 | Product has mixed tested and untested Projects | Product output preserves per-Project qualification and does not infer universal `TESTED`. |
 
 These resolutions close the main ambiguity classes: evidence is qualified by
 path and revision, transport and schema are not conflated, and absence or
