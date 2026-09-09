@@ -79,6 +79,27 @@ compatibility identity, result ledger, engine, or Product semantic family.
 `CC-*` remains the sole owner of comparison status, classification,
 adjudication, lifecycle, and historical meaning.
 
+### Direct compatibility routing and Matrix separation
+
+The direct route is:
+
+```text
+qualified provider/consumer inputs
+  → applicable Contract Verification
+  → existing CC-* semantic authority
+```
+
+Generic compatibility is independent of Provider / Consumer Matrix and Product
+qualification. Valid single-project inputs remain applicable under the existing
+Contract Verification rules. Product may qualify inputs or consume a result,
+but does not become compatibility authority.
+
+`MATCH_CANDIDATE`, `NO_MATCH_ESTABLISHED`, and `MATCHING_INDETERMINATE` remain
+non-authoritative matching states. Matrix is a render-only qualified view and
+cannot create or adjudicate a compatibility verdict. A combined Matrix plus
+compatibility request therefore uses two separately owned routes; Matrix
+availability never blocks a valid CC route.
+
 ### Exact comparison inputs
 
 When the existing Contract Verification applicability rule is met, the exact

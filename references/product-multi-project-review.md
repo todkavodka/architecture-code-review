@@ -579,6 +579,28 @@ the resolved required Product members and their mandatory dependencies; an
 unrelated Project package cannot block the Product package. No second package
 authority is introduced.
 
+### Requested output confirmation and qualified Matrix routing
+
+Product context confirmation and requested output confirmation are separate.
+Confirm Product identity, accepted revision, immutable baseline, membership,
+availability, coverage, freshness, and limitations first; then confirm the
+requested canonical output scope. Product context alone is not requested work
+and grants no permission.
+
+Product output labels reuse the canonical output identity with `scope=PRODUCT`;
+they do not create duplicate Product menu identities. Broad Product Technical
+Documentation is `AMBIGUOUS_BROAD` / `UMBRELLA_OUTPUT_REQUEST` and requires
+bounded subsection selection before substantive work. Exact outputs remain
+bounded.
+
+Provider / Consumer Matrix is a Product-qualified `QUALIFIED_VIEW_REQUEST`
+over existing Technical Documentation interface/integration projections. It
+has no new `PRJ-*` identity, lifecycle, factual family, or compatibility
+authority. Product qualifies the view and inputs; Test Engineering Contract
+Verification and `CC-*` remain compatibility authority. Generic compatibility
+does not require Product or Matrix, and single-project compatibility remains
+available when Contract Verification applies.
+
 ## 11. Storage and layout
 
 Product context is stored in the coordinator review workspace under a

@@ -487,6 +487,33 @@ record. Missing, stale, partial, or conflicting authority blocks or limits the
 projection through its owning STM/coverage gate rather than being repaired in
 documentation prose.
 
+## Requested-work routing entry point
+
+Technical Documentation accepts direct requested-work routing without becoming
+a fourth semantic capability. The canonical routing classes and outputs are:
+
+| Output | Routing class | Owner/route | Confirmation and scope |
+|---|---|---|---|
+| Technical Documentation | `UMBRELLA_OUTPUT_REQUEST` | Technical Documentation package | Bounded subsection confirmation; Project/Product valid. |
+| Provided Interfaces | `CANONICAL_PROJECTION_REQUEST` | Existing section 02 / `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | Exact and bounded; Project/Product valid. |
+| Consumed Interfaces | `CANONICAL_PROJECTION_REQUEST` | Existing section 03 / `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | Exact and bounded; Project/Product valid. |
+| Interface Catalog | `CANONICAL_PROJECTION_REQUEST` | Existing sections 02 and 03 | Exact; no new projection identity. |
+| Integration Map | `CANONICAL_PROJECTION_REQUEST` | Existing section 04 / `PRJ-TECH-DOC-04-INTEGRATIONS` | Exact and bounded; Project/Product valid. |
+| Events / Messages | `CANONICAL_PROJECTION_REQUEST` | Existing section 04 event content | Exact and bounded; Project/Product valid. |
+| Data Access Map | `CANONICAL_PROJECTION_REQUEST` | Existing section 05 / `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | Exact and bounded; Project/Product valid. |
+| Persistence / Data Resources | `CANONICAL_PROJECTION_REQUEST` | Existing section 05 | Exact and bounded; Project/Product valid. |
+| Migration Responsibility | `CANONICAL_PROJECTION_REQUEST` | Existing section 05 and accepted `MIGRATION_AUTHORITY` | Exact; never implies runtime migration. |
+| External Integrations Catalog | `CANONICAL_PROJECTION_REQUEST` | Existing external section 04, section 07 when auth is selected | Exact and bounded; Project/Product valid. |
+| Provider / Consumer Matrix | `QUALIFIED_VIEW_REQUEST` | Product-qualified view over existing interface/integration projections | Product-only; no standalone Project Matrix route. |
+
+Exact output selects only its existing section/projection. An umbrella or broad
+request resolves candidates and requires bounded subsection confirmation before
+substantive work; it never silently selects the complete package.
+`BOUNDED_BUT_MULTI_OUTPUT` confirms only listed outputs. Matrix has
+`new_PRJ_identity=NO`, `new_lifecycle=NO`, `new_semantic_authority=NO`, and
+`compatibility_verdict=NOT_IMPLIED`. Partial, unavailable, stale, unresolved,
+or inapplicable input remains an explicit limitation.
+
 ## Product Technical Documentation scope
 
 Product Technical Documentation reuses `PRJ-TECH-DOC-*`,

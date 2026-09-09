@@ -246,3 +246,21 @@ Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endp
 Если material coverage остаётся `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` запрещён.
 
 Otherwise return `REVIEW_PARTIALLY_COMPLETE` with the exact blocked/missing gates from `working/INDEX.md`.
+
+## Requested-work output routing
+
+For startup, load requested-work state from `references/session-orchestration.md`
+and persisted intent/dependency state from `references/review-modes-and-orchestration.md`.
+Route standalone documentation to `references/technical-documentation.md`,
+Product qualification to `references/product-multi-project-review.md`, and
+compatibility to Test Engineering Contract Verification and `CC-*`. Shared
+Evidence, STM, and Stage B contracts remain factual and lifecycle authority.
+
+The resolved-plan confirmation shows `Session Intent`, `Scope Context`,
+`Review Capabilities`, `Requested Outputs`, `Required Internal Work`, and
+`Authorization / Execution Boundaries`. `Requested Outputs != Required Internal
+Work`; Product Context != Requested Outputs. Routing classes are orchestration
+labels only and do not create capabilities, factual families, projection
+identities, lifecycle states, or authority. Selection grants no source-read,
+semantic-write, test, code, Git, worktree, commit, push, PR, deployment, E2E,
+simulator, environment, database-scan, SQL, tracing, or crawling permission.
