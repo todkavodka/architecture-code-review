@@ -230,35 +230,64 @@ Direct natural-language requests for these items may normalize into the owning
 capability configuration. They never create a second output identity or a
 second semantic owner.
 
-### 7.2 Standalone projection/documentation outputs
+### 7.2 Projection, package, and view taxonomy
 
-The following are canonical requested-output identities. They are user-facing
-projection/documentation requests, not semantic capabilities:
+Menu work items, projection identities, projection packages, and qualified
+views are distinct:
 
-| Canonical output | Existing projection/section family | Scope |
-|---|---|---|
-| Technical Documentation | `PRJ-TECH-DOC-*` package | Project or Product |
-| Provided Interfaces | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | Project or Product-qualified |
-| Consumed Interfaces | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | Project or Product-qualified |
-| Interface Catalog | Provided + Consumed Interface projections | Project or Product-qualified |
-| Integration Map | `PRJ-TECH-DOC-04-INTEGRATIONS` | Project or Product-qualified |
-| Events / Messages | Event content in `PRJ-TECH-DOC-04-INTEGRATIONS` | Project or Product-qualified |
-| Data Access Map | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | Project or Product-qualified |
-| Persistence / Data Resources | DS and persistence content in section 05 | Project or Product-qualified |
-| Migration Responsibility | `MIGRATION_AUTHORITY` content in section 05 | Project or Product-qualified |
-| External Integrations Catalog | External subsection of section 04, with section 07 when selected | Project or Product-qualified |
-| Provider / Consumer Matrix | Qualified interface/integration view | Project or Product-qualified |
+```text
+menu work item       = user-facing requested-work identity
+projection identity  = existing stable PRJ-* identity, when defined
+projection package   = finite publication membership and gate
+qualified view       = bounded rendering of an existing projection contract
+```
+
+A menu work item may map to one projection, a bounded set of projections, a
+qualified view, or an explicit package after confirmation. A menu label never
+creates or redefines semantic authority, a `PRJ-*` identity, a package
+lifecycle, or a compatibility result.
+
+The following taxonomy is canonical for routing. It is not a new semantic
+authority or identity family.
+
+| User-facing output | Routing class | Owning contract / semantic owner | Projection identity behavior | Needs subselection? | Product-valid? | Single-project-valid? | Compatibility implication |
+|---|---|---|---|---:|---:|---:|---|
+| Technical Documentation | `UMBRELLA_OUTPUT_REQUEST` | Technical Documentation / STM and Evidence | Existing `PRJ-TECH-DOC-*` package members only | Yes, unless an explicit complete package scope is confirmed | Yes | Yes | None |
+| Provided Interfaces | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `IF-*` STM facts | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | No | Yes | Yes | None |
+| Consumed Interfaces | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `IF-*` STM facts | `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | No | Yes | Yes | None |
+| Interface Catalog | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted IF views | Existing sections 02 and 03; no new PRJ identity | No, unless the user asks for further interface filtering | Yes | Yes | None |
+| Integration Map | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `INT-*` and `EVENT-*` STM facts | `PRJ-TECH-DOC-04-INTEGRATIONS` | No | Yes | Yes | None |
+| Events / Messages | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `EVENT-*` and applicable facts | Event content in existing section 04 | No | Yes | Yes | None |
+| Data Access Map | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `DS-*` and data-access `INT-*` facts | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | No | Yes | Yes | None |
+| Persistence / Data Resources | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `DS-*` facts and relations | Existing section 05 | No | Yes | Yes | None |
+| Migration Responsibility | `CANONICAL_PROJECTION_REQUEST` | STM / accepted `MIGRATION_AUTHORITY`, rendered by Technical Documentation | Existing section 05 | No | Yes | Yes | None; does not imply runtime migration |
+| External Integrations Catalog | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / qualified external COMP/IF/INT/DS/AUTH facts | External subsection of section 04; section 07 when applicable | No | Yes | Yes | None |
+| Provider / Consumer Matrix | `QUALIFIED_VIEW_REQUEST` | Technical Documentation Product-qualified view over existing interface/integration projections; `CC-*` for compatibility only | Existing owning PRJ identities/selectors; no matrix PRJ identity | No for the qualified view; scope must be Product under current contract | Yes | No standalone Project matrix is defined by current contract | No verdict implied |
 
 These names are menu work-item identities, not new `PRJ-*` identities. Existing
 projection identity, selector, contract, package, and lifecycle records remain
-the authority for generated artifacts.
+the authority for generated artifacts. In particular:
 
-`Technical Documentation` may be requested as a package-level output. A
-focused output such as `Interface Catalog` selects the minimum relevant
-documentation sections rather than silently selecting every Technical
-Documentation section. A complete documentation request may select the
-existing overview plus the user-confirmed section scope under the existing
-`TECH-DOC-SCOPE-*` contract.
+```text
+menu request: Provider / Consumer Matrix
+  → Product-qualified rendering/view of existing interface/integration PRJ-* projections
+  → new_PRJ_identity: NO
+  → new_lifecycle: NO
+  → new_semantic_authority: NO
+  → compatibility verdict: NOT implied
+```
+
+The matrix is currently a Product-qualified view because that is the scope
+defined by the Stage F and Product contracts. A future single-project matrix
+would require an owning contract decision; this design does not invent one.
+
+`Technical Documentation` may be requested as an umbrella output. A focused
+output such as `Interface Catalog` selects the minimum relevant documentation
+sections rather than silently selecting every Technical Documentation section.
+A complete Technical Documentation package is a separate explicit package
+choice, if offered, and includes the existing overview plus its confirmed
+section scope under the existing `TECH-DOC-SCOPE-*` contract. Natural-language
+“Technical Documentation” alone never silently means every projection.
 
 ## 8. Architecture ownership preservation
 
@@ -514,6 +543,64 @@ If a phrase plausibly means materially different outputs, the coordinator
 returns `REQUESTED_OUTPUT_AMBIGUOUS` and presents the alternatives. It does not
 guess between Interface Catalog and Integration Map, or between a matrix and a
 compatibility verdict.
+
+### 15.1 Exact, bounded, and broad requests
+
+Natural-language scope and requested output scope are separate decisions:
+
+```text
+scope context confirmation != requested output confirmation
+Product context != request for every Product projection
+```
+
+Requests are classified before substantive work:
+
+| Request class | Example | Routing behavior |
+|---|---|---|
+| `EXACT` | “Покажи все внешние интеграции продукта.” | Normalize directly to `External Integrations Catalog` with `scope=PRODUCT`; no umbrella confirmation unless that output has material subchoices |
+| `BOUNDED_BUT_MULTI_OUTPUT` | “Покажи API и обращения к БД продукта.” | Candidate outputs are `Interface Catalog` and `Data Access Map`; show both for confirmation |
+| `AMBIGUOUS_BROAD` | “Сделай документацию продукта.” | Normalize to the `Technical Documentation` umbrella request, resolve available subsections, and require output/subsection confirmation |
+
+For an umbrella or broad Product request, the confirmation is mandatory before
+substantive work:
+
+```text
+Scope Context:
+  PRODUCT
+  <selected Product identity, accepted revision, exact baseline>
+
+Requested Output:
+  Technical Documentation
+
+Available subsections / views:
+  [ ] Provided Interfaces
+  [ ] Consumed Interfaces
+  [ ] Integrations
+  [ ] Events / Messages
+  [ ] Data / Persistence
+  [ ] External Integrations
+  [ ] other currently supported Technical Documentation sections
+
+Recommended selection:
+  <only what is justified by the explicit request>
+
+Confirm output scope before substantive work: YES
+```
+
+The coordinator must not silently select every projection. It must not require
+the user to understand internal `PRJ-*` identifiers. Product context
+confirmation establishes Product identity, accepted revision, exact baseline,
+membership, and availability limitations; it does not establish requested
+deliverables. The two confirmations are persisted and evaluated separately:
+
+```text
+product_context_confirmation != output_scope_confirmation
+```
+
+An exact bounded output remains bounded. It must not be silently expanded into
+the Technical Documentation umbrella or a complete Product documentation
+package. A bounded multi-output request confirms only the listed candidate
+outputs; it does not imply all other Product outputs.
 
 ## 16. Product behavior
 
@@ -827,7 +914,7 @@ new model.
 | M12 | Show external integrations | Standalone `External Integrations Catalog` | PASS |
 | M13 | Product API map | `Integration Map` or `Interface Catalog`, scope `PRODUCT`, after confirmation | PASS |
 | M14 | Product data access and migration ownership | `Data Access Map` + `Migration Responsibility`, scope `PRODUCT` | PASS |
-| M15 | Product with unavailable repository | Product-qualified output with explicit availability limitations | PASS |
+| M15 | Product with unavailable repository: “Покажи всё, что можно проверить.” | Treat as `AMBIGUOUS_BROAD`; confirm the bounded output set first, then render explicit unavailable-member limitations | PASS |
 | M16 | “Run E2E tests.” | Unsupported execution; optionally confirm E2E Test Plan | PASS |
 | M17 | “Raise simulator and test consumer.” | Unsupported runtime; optionally confirm simulator design/plan | PASS |
 | M18 | Compare provider/consumer compatibility | Matrix plus applicable `CC-*` Contract Verification | PASS |
@@ -843,8 +930,8 @@ new model.
 | MR03 | Standalone Integration Map | Section 04, no capability selected | PASS |
 | MR04 | Standalone Data Access Map | Section 05, no capability selected | PASS |
 | MR05 | Standalone External Integrations Catalog | Section 04 external subsection, section 07 when selected | PASS |
-| MR06 | Matrix without compatibility verdict | Render qualified provider/consumer matrix only | PASS |
-| MR07 | Matrix plus compatibility question | Matrix plus applicable exact `CC-*` route | PASS |
+| MR06 | Product-qualified Provider/Consumer Matrix without compatibility verdict | Resolve to the existing Product-qualified interface/integration view; no new PRJ identity and no CC verdict | PASS |
+| MR07 | Product-qualified Matrix plus compatibility question | Reuse the same view; compatibility separately invokes applicable exact `CC-*` route | PASS |
 | MR08 | Product Interface Catalog | Canonical `Interface Catalog`, `scope=PRODUCT`; no duplicate identity | PASS |
 | MR09 | No capability and no output | `NO_REVIEW_SCOPE_SELECTED` | PASS |
 | MR10 | Product context only | Invalid; Product is not requested work | PASS |
@@ -858,8 +945,12 @@ new model.
 | MR18 | USE_EXISTING missing requested output | Route to `EXTEND`, do not fabricate output | PASS |
 | MR19 | Stage F formatting repair | `PROJECTION_REPAIR` | PASS |
 | MR20 | Stage F semantic correction | `SEMANTIC_DRIFT_DETECTED` + `TECHNICAL_REVALIDATION_REQUIRED` | PASS |
+| MR21 | Product context + “Сделай техническую документацию продукта.” | Recognize umbrella request, resolve available subsections, require deterministic output confirmation before substantive work | PASS |
+| MR22 | Product context + “Покажи внешние интеграции.” | Normalize directly to `External Integrations Catalog` Product-qualified view; do not select unrelated documentation | PASS |
+| MR23 | Product context + “Покажи API и обращения к БД.” | Candidate outputs `Interface Catalog` + `Data Access Map`; confirm both; do not imply complete package | PASS |
+| MR24 | Product context selected with no capabilities or outputs | Reject as `NO_REVIEW_SCOPE_SELECTED`; Product context alone is not requested work | PASS |
 
-Acceptance scenarios: `40` total, `40 PASS` by design.
+Acceptance scenarios: `44` total, `44 PASS` by design.
 
 ## 29. Design-level pressure set
 
@@ -885,6 +976,12 @@ Acceptance scenarios: `40` total, `40 PASS` by design.
 | MD-P18 | Alias becomes a new output identity | Natural-language aliases normalize only to canonical identities |
 | MD-P19 | Conflicting endpoint/output request silently resolved | `REQUESTED_WORK_CONFLICT` requires reconciliation; explicit confirmed choice is preserved |
 | MD-P20 | Unclassified secret appears in catalog | Existing Stage F sensitivity classification and redaction rules remain mandatory |
+| MD-P21 | Menu view accidentally becomes a new PRJ identity | Routing class distinguishes `QUALIFIED_VIEW_REQUEST`; it reuses existing owning PRJ identities |
+| MD-P22 | Provider/Consumer Matrix creates a duplicate projection lifecycle | Matrix route explicitly has `new_PRJ_identity=NO` and `new_lifecycle=NO` |
+| MD-P23 | Broad Technical Documentation request silently selects every projection | `AMBIGUOUS_BROAD` requires subsection/output confirmation before substantive work |
+| MD-P24 | Product context implies all Product outputs | Product context and output-scope confirmations are separate; Product alone is not work |
+| MD-P25 | Product revision selection substitutes for output confirmation | Exact Product revision/baseline confirmation does not confirm deliverables |
+| MD-P26 | Exact output request expands to an umbrella package | Exact and bounded requests remain bounded and cannot silently expand |
 
 ## 30. Finding closure mapping
 
@@ -894,8 +991,15 @@ requires a later implementation and a fresh menu acceptance review.
 | Finding | Root cause | Design mechanism | Expected closure | Later verification |
 |---|---|---|---|---|
 | `MENU-HIGH-001` | Review Suite validity only counted the three capabilities; standalone Stage F outputs had no requested-work representation | `requested_work.standalone_outputs` plus capability-or-output validity | Interface/API/data catalog can be selected with zero semantic capabilities while retaining existing authority | Fresh M10/M20 acceptance and standalone output routing review |
-| `MENU-MEDIUM-001` | Technical Documentation and Product views had semantic selection contracts but no startup/EXTEND entry point | Canonical Requested Outputs menu, scope-aware canonical identities, resolved-plan confirmation | Users can request Project or Product documentation outputs through an explicit route | Fresh M10–M15 and MR01–MR08 acceptance |
+| `MENU-MEDIUM-001` | Technical Documentation and Product views had semantic selection contracts but no startup/EXTEND entry point | Canonical Requested Outputs menu, routing classes, explicit existing-PRJ reuse for qualified views, and resolved-plan confirmation | Users can request supported Project/Product projections and Product-qualified views without inventing a matrix PRJ identity | `DESIGN_REMEDIATED_PENDING_REREVIEW`; fresh M10–M15 and MR01–MR08 acceptance |
 | `MENU-LOW-001` | Startup stages were semantically defined but several user-facing labels were not canonical | Stable labels: Session Intent, Scope Context, Review Capabilities, Requested Outputs, Resolved Plan / Required Internal Work, Authorization / Execution Boundaries | Menu reconstruction has stable conceptual labels without UI implementation assumptions | Menu contract review and language/label acceptance |
+
+### Targeted design-remediation findings
+
+| Finding | Root cause | Design remediation | Status |
+|---|---|---|---|
+| `DRM-MEDIUM-001` | Menu work-item taxonomy conflated a user-facing view request with independently addressable projection scope | `QUALIFIED_VIEW_REQUEST` is now distinct from canonical projection requests; Provider/Consumer Matrix is Product-qualified only under the current contract and reuses existing PRJ identities/selectors/lifecycle with no compatibility verdict implied | `DESIGN_REMEDIATED_PENDING_REREVIEW` |
+| `DRM-MEDIUM-002` | Product/Technical Documentation umbrella request lacked mandatory material output confirmation | Exact, bounded, and broad normalization is defined; Product context and output confirmation are separate; umbrella/broad requests require deterministic subsection/output confirmation before substantive work | `DESIGN_REMEDIATED_PENDING_REREVIEW` |
 
 ## 31. Design invariants
 
@@ -923,6 +1027,12 @@ requires a later implementation and a fresh menu acceptance review.
 | INV-M20 | Explicit confirmed choices cannot be silently contradicted by normalization. |
 | INV-M21 | Product-qualified outputs retain exact Product revision, baseline, Project qualification, availability, coverage, and freshness. |
 | INV-M22 | `USE_EXISTING` cannot fabricate a projection that was never generated and accepted. |
+| INV-M23 | Menu work-item identity does not create or redefine projection identity. |
+| INV-M24 | A qualified view reuses the owning projection lifecycle and never creates a new `PRJ-*` identity unless a separately approved projection contract explicitly does so. |
+| INV-M25 | Technical Documentation is an umbrella request when exact bounded output scope is not specified. |
+| INV-M26 | Broad Product documentation requests require deterministic output/subsection confirmation before substantive work. |
+| INV-M27 | Product context selection never implies selection of every Product projection. |
+| INV-M28 | Exact bounded output requests must not be silently expanded into broader documentation packages. |
 
 ## 32. Scope ownership matrix
 
@@ -979,6 +1089,10 @@ specified.
 - Test Plan and other test documents remain Test Engineering outputs.
 - Product is scope, not requested work.
 - Matrix-only and compatibility requests have separate routes.
+- Provider/Consumer Matrix is a qualified Product view under the current
+  contract, not a newly invented Project projection.
+- Technical Documentation is an umbrella request only until material section
+  scope is confirmed; broad Product requests cannot silently select all views.
 - `USE_EXISTING`, `EXTEND`, `REVALIDATE`, and `PROJECTION_REPAIR` retain their
   existing boundaries.
 - Requested work is distinct from resolved dependencies.
@@ -1001,6 +1115,8 @@ plan, code/UI implementation, tests, or roadmap work.
 
 ### Pressure and finding coverage
 
-All material failure pressures have an explicit prevention, and all three menu
-findings have a design-address mapping. Findings remain open pending
-implementation and fresh acceptance.
+All 26 pressure scenarios have an explicit prevention, all 44 acceptance
+scenarios have deterministic routes, and all three original menu findings plus
+the two targeted design findings have an explicit design-address mapping. The
+targeted findings remain pending independent re-review and implementation
+acceptance; they are not marked closed by this design edit.
