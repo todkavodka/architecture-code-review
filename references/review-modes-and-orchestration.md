@@ -1,5 +1,46 @@
 # Режимы и управление процессом аудита
 
+## Requested and resolved work state
+
+The coordinator persists confirmed user selections separately from dependency
+closure:
+
+```text
+requested_work:
+  capabilities: [<explicit or confirmed capability ids>]
+  standalone_outputs: [<explicit or confirmed output ids>]
+  scope: PROJECT | PRODUCT
+  confirmation_status: CANDIDATE | CONFIRMED
+
+resolved_work:
+  dependency_slice: [<minimum accepted/fresh or required refs>]
+  required_gates: [<owning gate states>]
+  projection_members: [<selected existing projection/package members>]
+  limitations: [<availability, coverage, freshness, authority limits>]
+  authorization_requirements: [<separate approvals still required>]
+```
+
+`requested_work != resolved_work`. Internal STM, Evidence, Behavior Model,
+Contract Verification, Product qualification, and projection dependencies are
+never backfilled into selected capabilities. Multiple requested items use a
+deduplicated minimum dependency union and never escalate automatically to the
+complete Review Suite.
+
+`NEW` accepts capability-only, output-only, and mixed valid work. `USE_EXISTING`
+consumes only an accepted/current registered output; a missing or new output
+routes to `EXTEND`. `RESUME` restores persisted requested and resolved scope
+without silently adding work. `REVALIDATE` preserves requested work and
+revalidates only impacted slices. `EXTEND` is additive and reuses accepted/
+fresh dependencies. `PROJECTION_REPAIR` is presentation-only and escalates
+semantic drift to `SEMANTIC_DRIFT_DETECTED` plus
+`TECHNICAL_REVALIDATION_REQUIRED`.
+
+Legacy records without standalone-output state read as an empty standalone
+output list. Existing capability selections, Architecture Endpoint state, Test
+Engineering output booleans, Product sessions, accepted `COMPLETE` packages,
+and old `RESUME` state remain readable. No historical package or `PRJ-*`
+identity is rewritten or silently enriched.
+
 Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса. Семантика Shared Technical Model (STM), её factual authority и Technical Model Gate определены в `shared-technical-model.md`.
 
 Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.

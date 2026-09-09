@@ -157,6 +157,22 @@ completion never resolves a `GAP-*`. Test execution, simulators, environments,
 code changes, and publication remain separately selected and explicitly
 authorized; Product membership grants none of those permissions.
 
+## Direct output and compatibility routing
+
+Direct requests for Test Assurance, Test Plan, Contract Consistency Report,
+Test Environment Design, Service Simulator Design, Service Simulator
+Implementation Plan, or E2E Test Plan normalize into this existing Test
+Engineering capability and its existing output selections. Test Assurance
+remains required core; Behavior Model and applicable Contract Verification are
+internal dependencies. These are planning/design outputs only; no test,
+simulator, or environment runtime is executed.
+
+Generic compatibility routes directly from qualified provider/consumer inputs
+to applicable Contract Verification and existing `CC-*`. It does not require
+Provider / Consumer Matrix or Product mode, and remains applicable in a valid
+single-project scope. Candidate matching is not adjudication; Matrix can only
+render an already accepted CC result.
+
 ## Stage B projection boundary
 
 The numbered, human-readable Test Review outputs are `PRJ-*` projections of
