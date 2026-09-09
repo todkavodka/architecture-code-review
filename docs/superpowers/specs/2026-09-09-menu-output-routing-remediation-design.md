@@ -262,7 +262,8 @@ authority or identity family.
 | Persistence / Data Resources | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / accepted `DS-*` facts and relations | Existing section 05 | No | Yes | Yes | None |
 | Migration Responsibility | `CANONICAL_PROJECTION_REQUEST` | STM / accepted `MIGRATION_AUTHORITY`, rendered by Technical Documentation | Existing section 05 | No | Yes | Yes | None; does not imply runtime migration |
 | External Integrations Catalog | `CANONICAL_PROJECTION_REQUEST` | Technical Documentation / qualified external COMP/IF/INT/DS/AUTH facts | External subsection of section 04; section 07 when applicable | No | Yes | Yes | None |
-| Provider / Consumer Matrix | `QUALIFIED_VIEW_REQUEST` | Technical Documentation Product-qualified view over existing interface/integration projections; `CC-*` for compatibility only | Existing owning PRJ identities/selectors; no matrix PRJ identity | No for the qualified view; scope must be Product under current contract | Yes | No standalone Project matrix is defined by current contract | No verdict implied |
+| Provider / Consumer Matrix | `QUALIFIED_VIEW_REQUEST` | Technical Documentation Product-qualified view over existing interface/integration projections; `CC-*` for compatibility only | Existing owning PRJ identities/selectors; no matrix PRJ identity | No for the qualified view; scope must be Product under current contract | Yes | No standalone Project matrix is defined by current contract | `EXPLICIT_COMPATIBILITY_REQUEST_REQUIRED` |
+| Compatibility adjudication | `CAPABILITY_OWNED` / automatic applicable Test Engineering work | Test Engineering Contract Verification; accepted `CC-*` remains semantic authority | Existing `CC-*` records and owning Test Engineering outputs; no standalone Stage F compatibility identity | Exact provider/consumer inputs may be confirmed; no Matrix selection required | Yes when the owning contract is applicable | Yes when the owning contract is applicable | Explicit compatibility request invokes the applicable CC route; relationship views do not create a verdict |
 
 These names are menu work-item identities, not new `PRJ-*` identities. Existing
 projection identity, selector, contract, package, and lifecycle records remain
@@ -406,21 +407,93 @@ Provider / Consumer Matrix != compatibility verdict
 
 A matrix-only request renders exact provider/consumer views, candidate matching
 context, and bounded “not established” or “indeterminate” states. It does not
-automatically require or create a compatibility adjudication.
+automatically require or create a compatibility adjudication. Under the current
+contract, the Matrix is a Product-qualified view; that scope is not broadened
+to make compatibility available.
 
-A compatibility request routes to existing Test Engineering Contract
-Verification when the material-applicability rule is met. The accepted
-`CC-*` record remains the sole owner of status, classification, adjudication,
-lifecycle, and historical meaning.
+Three user intents are independent:
+
+### 12.1 Interface relationship view
+
+`INTERFACE_RELATIONSHIP_VIEW` includes requests such as “show provider and
+consumer”, “show provider/consumer relationships”, or “show Provider / Consumer
+Matrix”. It requests a qualified rendering of relationships supported by the
+existing owning Technical Documentation interface/integration projections. A
+Matrix request is therefore a Product-qualified `QUALIFIED_VIEW_REQUEST` under
+the current contract, with no new `PRJ-*` identity, lifecycle, factual family,
+or compatibility authority.
+
+The view may show candidate matching, `NO_MATCH_ESTABLISHED`,
+`MATCHING_INDETERMINATE`, or accepted CC-owned results that are already
+available. It does not create any compatibility result.
+
+### 12.2 Compatibility adjudication
+
+`COMPATIBILITY_ADJUDICATION` includes requests such as “are these APIs
+compatible?”, “are provider and consumer compatible?”, or “verify the contract
+between service A and service B”. It is capability-owned Test Engineering
+Contract Verification work, not a new standalone Stage F projection:
+
+```text
+bounded provider/consumer contract inputs
+  → applicable Contract Verification
+  → existing CC-* semantic authority
+  → existing normalized compatibility result
+```
+
+This route does not require Provider / Consumer Matrix and does not require
+Product mode. It is valid in ordinary single-project scope whenever the
+existing Test Engineering Contract Verification applicability and exact-input
+requirements are satisfied. If the owning workflow requires a selected Test
+Engineering capability, the request normalizes into that existing capability's
+minimum Contract Verification slice; it does not select unrelated Test
+Engineering outputs. Missing, stale, unresolved, or inapplicable inputs remain
+explicit according to the existing contract. The design never manufactures
+`COMPATIBLE` from interface similarity.
+
+The accepted `CC-*` record remains the sole owner of status, classification,
+adjudication, lifecycle, and historical meaning. Existing normalized outcomes,
+including `COMPATIBLE`, `INCOMPATIBLE`, `INDETERMINATE`, and `NOT_COMPARABLE`,
+are not redefined here.
+
+### 12.3 Combined view and compatibility
+
+`COMBINED_VIEW_AND_COMPATIBILITY` requests both a relationship rendering and a
+compatibility adjudication, for example “show the Provider / Consumer Matrix and
+mark which pairs are compatible”. The routing is two separate owned routes:
+
+```text
+qualified Matrix/view route, when its Product scope is applicable
+  + separate Contract Verification / CC route for each applicable comparison
+```
+
+The view may render accepted CC results, but it cannot create them. Matrix
+availability or scope never blocks a valid CC route, and a CC route never
+requires a Matrix rendering.
+
+The compatibility scope and Matrix scope are independent:
+
+```text
+matrix_scope != compatibility_scope
+COMPATIBILITY_ADJUDICATION → Contract Verification / CC
+COMPATIBILITY_ADJUDICATION ↛ Provider / Consumer Matrix → CC
+```
+
+Stage F candidate matching remains non-authoritative. `MATCH_CANDIDATE`,
+`NO_MATCH_ESTABLISHED`, and `MATCHING_INDETERMINATE` are not compatibility
+results; a comparison becomes a compatibility result only through the existing
+CC authority. Product-qualified views consume qualified CC-owned results only.
 
 | Request | Required behavior |
 |---|---|
-| Matrix only | Render provider/consumer records and matching context; no automatic compatibility verdict |
-| “Are they compatible?” | Require exact provider/consumer inputs and applicable fresh accepted `CC-*`; return the existing normalized result or `INDETERMINATE` |
-| Missing or unresolved pair | Do not infer compatibility; preserve candidate/indeterminate limitation |
+| Relationship view / Matrix only | Render provider/consumer records and matching context; no automatic compatibility verdict |
+| Generic “Are they compatible?” | Resolve exact inputs in Project or Product scope as applicable; invoke applicable Contract Verification/`CC-*`; Matrix is not required |
+| Matrix plus compatibility question | Resolve the qualified view, when applicable, and separately invoke applicable Contract Verification/`CC-*` |
+| Missing or unresolved pair | Do not infer compatibility; preserve candidate/indeterminate limitation and the CC-owned unresolved result |
 
 Stage F does not match interfaces or adjudicate `COMPATIBLE` or
-`INCOMPATIBLE`. Product views consume qualified CC-owned results only.
+`INCOMPATIBLE`. Product context qualifies inputs and rendering; it does not
+become compatibility authority.
 
 ## 13. Dependency resolution
 
@@ -533,8 +606,10 @@ output identities.
 | “Какие ресурсы хранения есть” | `Persistence / Data Resources` |
 | “Кто отвечает за миграции” | `Migration Responsibility` |
 | “Внешние интеграции” | `External Integrations Catalog` |
-| “Сравни provider и consumer API” | `Provider / Consumer Matrix` |
-| “Скажи, совместимы ли provider и consumer” | Matrix plus compatibility request routed to applicable `CC-*` authority |
+| “Покажи provider и consumer”, “покажи связи provider/consumer” | `INTERFACE_RELATIONSHIP_VIEW` / `Provider / Consumer Matrix` only when the contract-supported Product-qualified view is applicable; no compatibility request |
+| “Скажи, совместимы ли provider и consumer”, “Совместимы ли API сервиса A и сервиса B?” | `COMPATIBILITY_ADJUDICATION` routed directly to applicable Test Engineering Contract Verification / `CC-*`; Matrix is not required |
+| “Покажи матрицу provider/consumer и совместимость” | `COMBINED_VIEW_AND_COMPATIBILITY`: qualified relationship view plus separate applicable `CC-*` route |
+| “Покажи, кто кого вызывает” | Appropriate Integration/relationship view; no CC route solely from this wording |
 | “Дай Test Plan” | Test Engineering + `test_plan=true` |
 | “Покажи Maintainability Hotspots” | Code Quality Review + `maintainability_hotspots=true` |
 | “Сделай Target Architecture” | Architecture Review with `REVIEW_PLUS_TARGET_ARCHITECTURE` |
@@ -917,7 +992,7 @@ new model.
 | M15 | Product with unavailable repository: “Покажи всё, что можно проверить.” | Treat as `AMBIGUOUS_BROAD`; confirm the bounded output set first, then render explicit unavailable-member limitations | PASS |
 | M16 | “Run E2E tests.” | Unsupported execution; optionally confirm E2E Test Plan | PASS |
 | M17 | “Raise simulator and test consumer.” | Unsupported runtime; optionally confirm simulator design/plan | PASS |
-| M18 | Compare provider/consumer compatibility | Matrix plus applicable `CC-*` Contract Verification | PASS |
+| M18 | “Сравни provider и consumer API и скажи, совместимы ли они.” | Generic `COMPATIBILITY_ADJUDICATION`; resolve applicable exact inputs directly through Test Engineering Contract Verification / `CC-*`; Matrix is not a prerequisite, and single-project scope remains valid | PASS |
 | M19 | Formatting-only report repair | `PROJECTION_REPAIR` | PASS |
 | M20 | Interface Catalog without Architecture Review | Zero capabilities + valid standalone output | PASS |
 
@@ -949,8 +1024,12 @@ new model.
 | MR22 | Product context + “Покажи внешние интеграции.” | Normalize directly to `External Integrations Catalog` Product-qualified view; do not select unrelated documentation | PASS |
 | MR23 | Product context + “Покажи API и обращения к БД.” | Candidate outputs `Interface Catalog` + `Data Access Map`; confirm both; do not imply complete package | PASS |
 | MR24 | Product context selected with no capabilities or outputs | Reject as `NO_REVIEW_SCOPE_SELECTED`; Product context alone is not requested work | PASS |
+| MR25 | Single-project generic compatibility: “Совместимы ли provider и consumer API?” | Resolve exact Project-qualified inputs and invoke applicable Contract Verification / `CC-*`; Matrix is not required | PASS |
+| MR26 | Product generic compatibility without Matrix request | Resolve Product-qualified comparison inputs and invoke the CC-owned compatibility route; do not implicitly select Matrix | PASS |
+| MR27 | Matrix unavailable or inapplicable but compatibility inputs valid | Proceed with applicable CC adjudication; Matrix absence does not block compatibility | PASS |
+| MR28 | Matrix available but compatibility inputs unresolved | Render the relationship view if requested; preserve the CC-owned unresolved/`INDETERMINATE` result and do not fabricate a verdict | PASS |
 
-Acceptance scenarios: `44` total, `44 PASS` by design.
+Acceptance scenarios: `48` total, `48 PASS` by design.
 
 ## 29. Design-level pressure set
 
@@ -982,6 +1061,14 @@ Acceptance scenarios: `44` total, `44 PASS` by design.
 | MD-P24 | Product context implies all Product outputs | Product context and output-scope confirmations are separate; Product alone is not work |
 | MD-P25 | Product revision selection substitutes for output confirmation | Exact Product revision/baseline confirmation does not confirm deliverables |
 | MD-P26 | Exact output request expands to an umbrella package | Exact and bounded requests remain bounded and cannot silently expand |
+| MD-P27 | Generic compatibility accidentally requires Product mode | `COMPATIBILITY_ADJUDICATION` is valid in ordinary Project scope whenever the existing Contract Verification applicability and exact-input rules are satisfied |
+| MD-P28 | Generic compatibility accidentally requires Provider / Consumer Matrix | The compatibility route resolves exact inputs directly through Contract Verification / `CC-*`; Matrix is optional presentation context |
+| MD-P29 | Matrix applicability is broadened merely to make compatibility work | Matrix remains Product-qualified under the current contract; compatibility scope is independent |
+| MD-P30 | Matrix rendering manufactures a compatibility verdict | A relationship view may render accepted CC results but can never create or adjudicate them |
+| MD-P31 | Candidate matching is treated as `COMPATIBLE` | `MATCH_CANDIDATE`, `NO_MATCH_ESTABLISHED`, and `MATCHING_INDETERMINATE` remain non-authoritative and route to CC when adjudication is requested |
+| MD-P32 | Product context becomes compatibility authority | Product only qualifies inputs and views; existing Test Engineering `CC-*` remains the sole compatibility authority |
+
+Pressure scenarios: `32` total, `32 PREVENTED` by design.
 
 ## 30. Finding closure mapping
 
@@ -998,8 +1085,9 @@ requires a later implementation and a fresh menu acceptance review.
 
 | Finding | Root cause | Design remediation | Status |
 |---|---|---|---|
-| `DRM-MEDIUM-001` | Menu work-item taxonomy conflated a user-facing view request with independently addressable projection scope | `QUALIFIED_VIEW_REQUEST` is now distinct from canonical projection requests; Provider/Consumer Matrix is Product-qualified only under the current contract and reuses existing PRJ identities/selectors/lifecycle with no compatibility verdict implied | `DESIGN_REMEDIATED_PENDING_REREVIEW` |
+| `DRM-MEDIUM-001` | Menu work-item taxonomy conflated a user-facing view request with independently addressable projection scope | `QUALIFIED_VIEW_REQUEST` is now distinct from canonical projection requests; Provider/Consumer Matrix is Product-qualified only under the current contract and reuses existing PRJ identities/selectors/lifecycle with no compatibility verdict implied. Generic compatibility is separately routed through applicable Contract Verification / `CC-*` and does not depend on the Matrix | `DESIGN_REMEDIATED_PENDING_REREVIEW` |
 | `DRM-MEDIUM-002` | Product/Technical Documentation umbrella request lacked mandatory material output confirmation | Exact, bounded, and broad normalization is defined; Product context and output confirmation are separate; umbrella/broad requests require deterministic subsection/output confirmation before substantive work | `DESIGN_REMEDIATED_PENDING_REREVIEW` |
+| `DRM-RR-MEDIUM-001` | Generic compatibility remained coupled to Provider/Consumer Matrix after Matrix scope was correctly narrowed to its existing qualified-view contract | Relationship view, compatibility adjudication, and combined requests are explicitly separated; generic compatibility routes directly through applicable Contract Verification / `CC-*` in Project or Product scope, while Matrix scope remains independently contract-backed | `DESIGN_REMEDIATED_PENDING_REREVIEW` |
 
 ## 31. Design invariants
 
@@ -1033,6 +1121,12 @@ requires a later implementation and a fresh menu acceptance review.
 | INV-M26 | Broad Product documentation requests require deterministic output/subsection confirmation before substantive work. |
 | INV-M27 | Product context selection never implies selection of every Product projection. |
 | INV-M28 | Exact bounded output requests must not be silently expanded into broader documentation packages. |
+| INV-M29 | Generic compatibility adjudication does not require Provider / Consumer Matrix. |
+| INV-M30 | Matrix scope and compatibility scope are independent. |
+| INV-M31 | Compatibility semantic authority remains existing Test Engineering `CC-*`. |
+| INV-M32 | Provider / Consumer Matrix may render accepted compatibility outcomes but may not create or adjudicate them. |
+| INV-M33 | Candidate matching does not establish compatibility. |
+| INV-M34 | Single-project compatibility remains available wherever existing Contract Verification inputs and applicability permit it. |
 
 ## 32. Scope ownership matrix
 
@@ -1088,14 +1182,28 @@ specified.
 - Target Architecture and Roadmap remain Architecture endpoint outputs.
 - Test Plan and other test documents remain Test Engineering outputs.
 - Product is scope, not requested work.
-- Matrix-only and compatibility requests have separate routes.
+- Relationship views, compatibility adjudication, and combined requests have separate routes; generic compatibility never depends on Matrix or Product scope.
 - Provider/Consumer Matrix is a qualified Product view under the current
   contract, not a newly invented Project projection.
+- Candidate matching remains non-authoritative, and only existing `CC-*` records
+  can supply compatibility outcomes.
 - Technical Documentation is an umbrella request only until material section
   scope is confirmed; broad Product requests cannot silently select all views.
 - `USE_EXISTING`, `EXTEND`, `REVALIDATE`, and `PROJECTION_REPAIR` retain their
   existing boundaries.
 - Requested work is distinct from resolved dependencies.
+
+### Compatibility routing check
+
+- Single-project generic compatibility is routed directly to applicable Test
+  Engineering Contract Verification / `CC-*` without selecting Matrix.
+- Product compatibility may use Product-qualified inputs and may optionally
+  render a requested Matrix view, but Product is not compatibility authority.
+- Matrix unavailability does not block a valid CC route, and an unresolved CC
+  input cannot be hidden by a relationship view.
+- The design contains `48` deterministic acceptance scenarios and `32`
+  explicitly prevented pressure scenarios; no new compatibility ambiguity is
+  left unresolved.
 
 ### Authority check
 
@@ -1115,8 +1223,8 @@ plan, code/UI implementation, tests, or roadmap work.
 
 ### Pressure and finding coverage
 
-All 26 pressure scenarios have an explicit prevention, all 44 acceptance
+All 32 pressure scenarios have an explicit prevention, all 48 acceptance
 scenarios have deterministic routes, and all three original menu findings plus
-the two targeted design findings have an explicit design-address mapping. The
+the three targeted design findings have an explicit design-address mapping. The
 targeted findings remain pending independent re-review and implementation
 acceptance; they are not marked closed by this design edit.
