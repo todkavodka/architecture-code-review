@@ -81,7 +81,7 @@ migration: COMPATIBLE_EXTENSION
 | M17 | Simulator runtime unsupported; design/plan confirmable | `rg -n "Service Simulator|no test.*runtime|planning/design" capabilities/test-review/SKILL.md` | PASS |
 | M18 | Generic compatibility routes directly to CC | `rg -n "qualified provider/consumer inputs|Contract Verification|Matrix.*Product" capabilities/test-review/references/test-engineering-contract.md` | PASS |
 | M19 | Formatting repair is projection-only | `rg -n "PROJECTION_REPAIR|presentation-only" references/review-modes-and-orchestration.md` | PASS |
-| M20 | Interface Catalog works with zero capabilities | `rg -n "valid standalone output|zero outputs|Interface Catalog" references/session-orchestration.md` | PASS |
+| M20 | Interface Catalog works with zero capabilities | Inspect the complete `Review Suite Configuration` block and run `rg -n "at least one confirmed requested work item|standalone-output-only: valid|zero capabilities \+ zero outputs: invalid|at least one top-level capability must be selected|zero selected capabilities: invalid" references/session-orchestration.md`; assert the new three validity rows exist and both legacy mandatory-capability phrases are absent. | PASS |
 | MR01 | Technical Documentation confirms section scope | `rg -n "UMBRELLA_OUTPUT_REQUEST|subsection confirmation" references/technical-documentation.md` | PASS |
 | MR02 | Interface Catalog selects only sections 02/03 | `rg -n "Interface Catalog.*sections 02 and 03" references/technical-documentation.md` | PASS |
 | MR03 | Integration Map selects section 04 | `rg -n "Integration Map.*section 04" references/technical-documentation.md` | PASS |
@@ -160,6 +160,17 @@ pressure_total: 32
 pressure_prevented: 32
 pressure_ambiguous: 0
 pressure_allows_failure: 0
+
+## Contradiction and CQ normalization regression checks
+
+| Control | Exact check | Expected result |
+|---|---|---|
+| Cross-contract validity consistency | `rg -n "at least one confirmed requested work item|standalone-output-only: valid|zero capabilities \\+ zero outputs: invalid|at least one top-level capability must be selected|zero selected capabilities: invalid|one or more selected capabilities: valid|no selected capability is invalid" SKILL.md references/session-orchestration.md references/review-modes-and-orchestration.md`; assert positive rules occur and every legacy mandatory-capability match is absent from normative text. | PASS; one coherent capability-or-output validity rule. |
+| Output-only positive control | Inspect `requested_work.capabilities=[]`, `standalone_outputs=[Interface Catalog]`, `confirmation_status=CONFIRMED` against the validity rows and `Interface Catalog` route. | VALID. |
+| Empty requested-work negative control | Inspect `capabilities=[]`, `standalone_outputs=[]` against `zero capabilities + zero outputs: invalid`. | `NO_REVIEW_SCOPE_SELECTED`. |
+| Product-only negative control | Inspect Product `scope=PRODUCT` with empty capabilities/outputs against the Product-context exclusion. | INVALID; not conflict. |
+| Internal dependency negative control | Inspect empty requested work with resolved STM/Technical Documentation dependencies against `requested_work != resolved_work`. | INVALID requested work; dependencies do not count as selection. |
+| CQ direct output control | `rg -n "Code Quality Findings|Code Quality Summary|Maintainability Hotspots|Code Quality Roadmap Contribution|Code Quality Review|capability-owned normalization|REQUESTED_WORK_CONFLICT" references/session-orchestration.md` and inspect the four-row normalization table. | PASS; each direct CQ output maps to Code Quality Review and its existing output selection. |
 
 ## Plan-pressure matrix — 26/26 PLAN_PREVENTS
 

@@ -385,7 +385,7 @@ For `NEW`, always show this complete startup shape before substantive work:
 
 ```text
 Review Suite
-  at least one top-level capability must be selected
+  at least one confirmed requested work item must be selected
 
   [ ] Architecture Review
       if selected:
@@ -411,8 +411,11 @@ Review Suite
         Maintainability Hotspots: user-selectable derived projection
         Roadmap Contribution: user-selectable derived projection
 
-  zero selected capabilities: invalid
-  one or more selected capabilities: valid
+  requested work item = selected capability OR valid standalone output/view
+  zero capabilities + zero outputs: invalid (`NO_REVIEW_SCOPE_SELECTED`)
+  standalone-output-only: valid
+  capability-only: valid
+  mixed capability + output: valid
 
 Stack Addenda
   detected automatically; confirmed before substantive use
@@ -421,7 +424,8 @@ Stack Addenda
 The three top-level capabilities are independently selectable. No capability is
 the implicit parent of another. Configuration under a capability is shown only
 when that capability is selected. A `NEW` session with no selected capability is
-invalid and must not proceed to substantive work.
+valid when it has a confirmed valid standalone output; it is invalid only when
+no confirmed requested work item exists.
 
 Architecture `Depth` and `Endpoint` are independent user selections. The
 Architecture menu therefore exposes the full Cartesian product: each of
@@ -467,6 +471,21 @@ Each listed Code Quality document is a derived projection of accepted Code
 Quality authority. `DERIVED_PROJECTION` describes the document's relationship
 to its source; it does not mean the document is automatically selected or
 always generated. Output selection remains explicit and user-selectable.
+
+Direct natural-language requests normalize through the existing capability
+owner before confirmation:
+
+| Direct request | Canonical capability | Existing output selection |
+|---|---|---|
+| Code Quality Findings / Findings View or Report | Code Quality Review | findings view/report |
+| Code Quality Summary | Code Quality Review | code quality summary |
+| Maintainability Hotspots | Code Quality Review | maintainability hotspots |
+| Code Quality Roadmap Contribution | Code Quality Review | roadmap contribution |
+
+This is capability-owned normalization, not standalone output routing and not a
+new authority. Explicit confirmed selections remain subject to
+`REQUESTED_WORK_CONFLICT` when later inferred wording materially contradicts
+them.
 
 When Test Review is selected, its optional Test Engineering outputs are
 persisted as independent booleans, never as a compound mode:
