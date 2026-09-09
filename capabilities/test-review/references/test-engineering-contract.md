@@ -71,6 +71,128 @@ classification:
 Resolving a `CC-*` triggers impact analysis of related behavior; it never
 silently rewrites an accepted `BC-*`.
 
+## Stage F compatibility boundary
+
+Stage F compatibility is a normalized catalog-facing view over the existing
+Contract Verification and `CC-*` authority. It does not create a new
+compatibility identity, result ledger, engine, or Product semantic family.
+`CC-*` remains the sole owner of comparison status, classification,
+adjudication, lifecycle, and historical meaning.
+
+### Exact comparison inputs
+
+When the existing Contract Verification applicability rule is met, the exact
+comparison pair and its qualified inputs are recorded or referenced without
+fabrication:
+
+```text
+provider_if_ref: IF-*@accepted_revision
+consumer_if_ref: IF-*@accepted_revision
+provider_project/repository/revision/baseline
+consumer_project/repository/revision/baseline
+protocol/interface_kind
+operation_identity
+safe_address/path/endpoint identity when material
+contract/API version
+schema/contract reference or fingerprint when applicable
+auth references when material
+error references when material
+supporting WS-*/EV-* evidence/provenance references
+bounded missing/unresolved limitations
+```
+
+The provider and consumer IFs remain independently addressable accepted STM
+identities. A `CC-*` comparison references both exact IF revisions and their
+qualified Project/source bindings; it never aliases, rewrites, or merges the
+two IFs. Product identity, membership, or baseline does not replace either
+Project/revision qualification.
+
+Similarity of path, method, service name, Product membership, or external
+provider name is not sufficient to fabricate a comparison input. Candidate
+matching remains a non-authoritative discovery relation with the bounded
+states:
+
+```text
+MATCH_CANDIDATE
+NO_MATCH_ESTABLISHED
+MATCHING_INDETERMINATE
+```
+
+None of these states is a compatibility result. In particular,
+`MATCH_CANDIDATE` does not mean `COMPATIBLE`, `NO_MATCH_ESTABLISHED` does not
+mean `INCOMPATIBLE`, and `MATCHING_INDETERMINATE` does not mean
+`NOT_COMPARABLE`.
+
+### Normalized catalog-facing result
+
+The normalized Stage F result is derived only from the exact qualified pair
+and existing `CC-*` state. It is not stored as a new semantic authority:
+
+```text
+normalized_result:
+  COMPATIBLE | INCOMPATIBLE | INDETERMINATE | NOT_COMPARABLE
+  source_cc_ref: optional CC-*@accepted_revision
+  provider_if_ref: exact qualified IF revision
+  consumer_if_ref: exact qualified IF revision
+```
+
+The mapping is:
+
+| Stage F result | Required existing authority state |
+|---|---|
+| `COMPATIBLE` | Exact provider/consumer inputs are present; `CC.status = RESOLVED` and `CC.freshness = VALID`; the accepted adjudication explicitly accepts the compared behavior as compatible, including `INTENTIONAL_COMPATIBILITY_BEHAVIOR` where applicable. |
+| `INCOMPATIBLE` | Exact provider/consumer inputs are present; `CC.status = RESOLVED` and `CC.freshness = VALID`; the accepted adjudication explicitly accepts a material mismatch using the existing classifications such as `DECLARATION_STALE`, `IMPLEMENTATION_DEFECT`, `CONSUMER_DEPENDS_ON_UNDECLARED_BEHAVIOR`, or `TEST_ENCODES_STALE_CONTRACT`. |
+| `INDETERMINATE` | A required input or exact revision is absent/unresolved, comparison evidence is insufficient, or `CC` is non-final (`OPEN`, `CLASSIFIED`, or `WONT_RESOLVE`), stale, revalidation-required, authority-unresolved, or contract-unresolved. |
+| `NOT_COMPARABLE` | The accepted records do not form a valid comparison pair under the existing applicability/contract semantics and no `CC-*` comparison exists for that pair. It is not a missing-data or unresolved-CC substitute. |
+
+Missing data never means `COMPATIBLE`. A resolved result for an old provider
+or consumer revision does not prove compatibility for a changed current
+revision. A current comparison remains `INDETERMINATE` until its exact inputs
+and accepted `CC-*` adjudication are established.
+
+When a materially relevant declared external contract exists, the existing
+automatic rule remains unchanged:
+
+```text
+materially relevant declared external contract
+    -> Contract Verification automatic gate
+```
+
+The absence of a catalog output does not narrow this gate. If the rule is not
+applicable, Test Engineering does not create a `CC-*` result merely for
+catalog completeness. A catalog may show only non-authoritative `candidate`,
+`not evaluated`, or `not applicable comparison context` information tied to
+the exact available inputs. It must not manufacture `COMPATIBLE`,
+`INCOMPATIBLE`, or a competing compatibility truth.
+
+### Product and report consumption
+
+Product mode may consume the normalized result only as a derived view over an
+exact qualified comparison. The consumed record preserves:
+
+```text
+Product ID/revision/baseline
+provider Project/revision
+consumer Project/revision
+provider IF/revision
+consumer IF/revision
+CC identity/revision/status/classification/adjudication
+normalized derived result
+```
+
+Product membership and baseline qualification do not grant compatibility,
+rewrite Project-local facts, or create a Product compatibility authority. The
+Contract Consistency Report remains the existing
+`PRJ-TEST-REVIEW-04-CONTRACT-CONSISTENCY-REPORT` projection over current,
+non-superseded `CC-*` records and referenced `BC-*` revisions. A catalog or
+report may format the same accepted state, but neither may adjudicate it.
+
+Historical `CC-*` identity, revision, status, classification, adjudication,
+and meaning remain unchanged. Missing Stage F qualifiers remain absent or
+unknown until bounded revalidation creates new accepted state; no old `CC-*`
+record is bulk-enriched, retroactively Product-qualified, automatically
+re-run, or used to reinterpret a newer IF revision.
+
 ## Identifier Relationships
 
 `BC != MAT`, `BC != RF`, `BC != GAP`, and `BC != TM`. A behavior may support

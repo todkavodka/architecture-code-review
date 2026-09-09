@@ -141,3 +141,190 @@ does not override an unavailable source, stale observation, insufficient
 coverage, or a package gate. Conflicting observations remain independently
 preserved until the appropriate owner emits a bounded conflict or
 revalidation request; evidence does not auto-resolve by precedence.
+
+## 7. Stage F source-support qualification
+
+Stage F adds a bounded source-support classification for technical interaction
+extraction. It describes what an observation supports; it does not create a
+second evidence lifecycle or semantic authority:
+
+```text
+DIRECT_DECLARATION
+STRONG_INFERENCE
+WEAK_HINT
+```
+
+`DIRECT_DECLARATION` is an explicit declaration of a surface, contract,
+binding, schema, migration, resource, provider, or consumer expectation.
+`STRONG_INFERENCE` is an implementation path whose concrete call, binding,
+resource use, or access operation is materially clear even without a formal
+declaration. `WEAK_HINT` is contextual evidence such as a dependency
+declaration, generic connection, configuration URL, unused generated client,
+or provisioned infrastructure resource.
+
+These classes are evidence metadata only. They do not replace the existing
+`HIGH`/`MEDIUM`/`LOW` confidence semantics, candidate lifecycle, severity,
+authority, precision, coverage, freshness, or observed-view vocabulary owned by
+the relevant contracts. A class may be recorded alongside those dimensions;
+none is inferred from another.
+
+### 7.1 Acceptance boundary
+
+The evidence writer records what the source shows and its limitations. Only the
+Technical Model Gate accepts a technical fact. A `WEAK_HINT` may route further
+investigation, support a bounded unresolved observation, or explain why a
+candidate was considered, but it cannot alone create an accepted concrete
+`IF-*`, `INT-*`, `DS-*` child-resource access, or `EVENT-*` producer/consumer
+fact.
+
+The following distinctions are mandatory:
+
+```text
+configured base URL       != confirmed consumed API
+SDK installed              != confirmed runtime integration
+generated client exists    != confirmed client method use
+ORM model exists           != confirmed table access
+connection string exists   != confirmed resource-level access
+database connection exists != confirmed table access
+migration declaration      != confirmed runtime access
+broker configuration       != confirmed semantic event producer/consumer
+```
+
+`DIRECT_DECLARATION` and `STRONG_INFERENCE` still require baseline binding,
+contextual applicability, and sufficient subject-level provenance before an
+STM gate can accept a fact. Evidence strength never silently promotes a
+candidate, fills an absent locator, or upgrades precision.
+
+### 7.2 Fine-grained observation shape
+
+An `EV-*` may qualify the semantic subject at the smallest useful granularity
+without requiring a separate physical file for every observation:
+
+```text
+EV-*:
+  id: WS-###-name#EV-###
+  source_type
+  repository/path or external locator
+  symbol/range/variable: optional exact locator
+  baseline_binding: exact revision/content/product baseline
+  project_binding: exact Project when applicable
+  product_binding: exact Product revision/baseline when applicable
+  observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
+  stage_f_source_support: DIRECT_DECLARATION |
+                          STRONG_INFERENCE | WEAK_HINT
+  subject_kind: interface | provider | consumer | interaction |
+                data_store | data_resource | access_operation |
+                event | migration | migration_authority | other
+  subject_ref: optional IF/INT/DS/EVENT/COMP or qualified external subject
+  provider_or_consumer_side: PROVIDER | CONSUMER | BOTH | NOT_APPLICABLE
+  observed_fact
+  limitation: optional bounded/dynamic/partial limitation
+  safe_excerpt: optional short non-secret excerpt
+  sensitivity: SECRET | SENSITIVE_INTERNAL | SAFE_TECHNICAL_IDENTIFIER
+```
+
+The exact locator may be a file, symbol, line/range, configuration key, schema
+object, operation, or external source revision. If the source cannot support
+that precision, record the available locator and an explicit limitation rather
+than inventing one. Operation-level, entity-level, access-level, event-level,
+migration, and migration-authority observations retain their own binding and
+are not widened to the whole file or store by default.
+
+Provider-side evidence and consumer-side evidence are independently addressable
+through `provider_or_consumer_side`, exact subject references, and their own
+baseline/revision bindings. A provider declaration may support one IF revision;
+a consumer expectation may support another; runtime use may support an INT;
+and a test may support a TESTED view. Evidence does not automatically alias
+provider and consumer semantics, match their identities, or decide
+compatibility. Candidate matching and Contract Verification remain later
+semantic/verification concerns.
+
+### 7.3 Dynamic and partial evidence
+
+Dynamic targets, generated operations, unresolved resource names, unavailable
+external sources, and partial repository coverage remain explicit limitations.
+The evidence record may state that a service, store, event, or migration path
+is known while its exact operation, child resource, provider, consumer, or
+authority cannot be resolved. Such an observation remains bounded or
+unresolved and cannot be presented as exact solely because a related weak hint
+exists.
+
+## 8. Safe evidence excerpts and technical identifiers
+
+Evidence may preserve a file path, symbol, line/range, variable or configuration
+key name, baseline, and a short excerpt when those details are useful for
+reopening the source. It must not copy secret material merely because it is
+present in source. The safe evidence representation is provenance, a bounded
+logical fact, and a limitation—not a credential cache.
+
+Every technical identifier used by Stage F evidence is classified as exactly
+one of:
+
+```text
+SECRET
+SENSITIVE_INTERNAL
+SAFE_TECHNICAL_IDENTIFIER
+```
+
+`SECRET` includes passwords, API keys, access/refresh tokens, client secrets,
+private keys, raw environment secret values, credentials in URLs or connection
+strings, and secret query parameters. `SECRET` values are omitted from EV
+excerpts and stored fields. The evidence may retain a safe source pointer and a
+statement that secret material was present. Secret-bearing URLs and DSNs are
+represented only by safe logical facts and redacted examples.
+
+`SENSITIVE_INTERNAL` includes private hostnames, usernames, sensitive filesystem
+paths, private aliases, and internal locators that are useful for provenance
+but not approved for general display. Evidence may retain a source pointer and
+a safe logical alias or redacted representation; it must not silently upgrade
+the identifier to `SAFE_TECHNICAL_IDENTIFIER`.
+
+`SAFE_TECHNICAL_IDENTIFIER` may be retained when the source policy permits it,
+including a logical provider/store name, ordinary public path template, schema
+or table name, event name/topic, or non-secret operation name. It remains
+subject to baseline and scope binding.
+
+Credential-bearing examples must be represented only in safe form, for example:
+
+```text
+https://<redacted>@logical-provider.example/<redacted-path>
+postgresql://<redacted>@logical-database/<redacted-database>
+DSN: technology=postgresql; host=<redacted>; credential=<omitted>
+```
+
+These are safe logical examples, not copied observed values. An evidence
+pointer may identify the source file, symbol, range, variable/config key, and
+baseline without reproducing the value. The classification is evidence
+metadata consumed by STM and projection owners; it is not a new lifecycle,
+confidence level, or presentation authority.
+
+Evidence safety and projection rendering remain separate responsibilities:
+
+```text
+evidence layer       -> safe observation, provenance, classification, limitation
+STM                  -> accepted non-secret technical facts
+projection layer     -> later safe rendering/redaction contract
+```
+
+Task 2 does not implement Technical Documentation formatting or decide that an
+unclassified value is safe to render. A later projection may omit, alias, or
+redact according to its own contract, but it cannot recover or copy a secret
+that the evidence layer did not persist.
+
+## 9. Historical and Product compatibility
+
+The new source-support and sensitivity fields are additive. Existing `WS-*`
+and `EV-*` records remain valid without fabricated `stage_f_source_support`,
+subject-level provenance, locator precision, or sensitivity classifications.
+Old evidence is not rewritten, enriched by assumption, or invalidated merely
+because Stage F adds optional fields. A later observation may create a new
+revision or observation with stronger qualification while preserving the
+historical binding and limitation.
+
+Product-scoped evidence continues to use the existing `WS-*`/`EV-*` families.
+Product remains optional; Project evidence remains Project-qualified; equal
+local IDs in different Projects remain distinct; external evidence remains
+external; and Product membership does not grant evidence acceptance. Exact
+Product revision/baseline and source availability limitations remain separate
+from evidence strength, precision, freshness, and coverage. The migration
+classification remains `COMPATIBLE_EXTENSION`.

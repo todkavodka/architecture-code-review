@@ -360,6 +360,210 @@ membership where applicable, and Product/Project scope.
 | Product Code Quality Summary | `CONDITIONAL_OUTPUT` | Code Quality projection over declared local/Product `CQ-*` dependencies. |
 | Product Technical Documentation | `OPTIONAL_STAGE_E_OUTPUT` | Technical Documentation projection over selected Product STM/evidence inputs and finite package scope. |
 
+### Stage F Product-qualified Technical Documentation views
+
+Stage F Product views are qualified uses of the existing Technical
+Documentation projections. They are not Product facts, Product-specific
+`PRJ-*` identities, or a second projection lifecycle:
+
+| Product view | Existing Service projection and selector | Existing package section |
+|---|---|---|
+| Product Interface Catalog | `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` / `SEL-TECH-DOC-02` and `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` / `SEL-TECH-DOC-03` | 02 and 03 |
+| Product Integration Map | `PRJ-TECH-DOC-04-INTEGRATIONS` / `SEL-TECH-DOC-04` | 04 |
+| External Integrations Catalog | external subsection of `PRJ-TECH-DOC-04-INTEGRATIONS` / `SEL-TECH-DOC-04`, with `PRJ-TECH-DOC-07-AUTH-AND-TRUST` when auth is selected | 04, and 07 when selected |
+| Product Data Access Map | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` / `SEL-TECH-DOC-05` | 05 |
+| optional Provider/Consumer Matrix | qualified view in the existing interface/integration projections; no new `PRJ-*` identity | 04 when selected |
+
+The named view is a Product rendering choice. The existing Service projection,
+selector, contract revision, lifecycle, package condition, and owning
+capability remain authoritative for Technical Documentation registration. The
+Product contract owns only qualification, availability, and bounded
+cross-project composition.
+
+Each selected view persists one immutable Product-qualified resolution
+snapshot. It records separate fields rather than flattening Product and
+Project state:
+
+```text
+product_projection_snapshot:
+  product_id: PROD-*
+  product_revision: PROD-*@revN
+  baseline_key: Product-scoped accepted baseline
+  immutable_baseline_vector: exact Project/source bindings
+  view_name: selected named Product view
+  service_projection_id: existing PRJ-TECH-DOC-02/03/04/05/07
+  selector_id: existing SEL-TECH-DOC-02/03/04/05
+  selector_definition_revision: existing selector contract revision
+  qualified_inputs:
+    - project_key
+      source_binding: exact revision/content binding or limitation
+      family: IF | INT | DS | EVENT | COMP | AUTH
+      local_semantic_id
+      accepted_semantic_revision
+      evidence_and_source_bindings
+      provider_consumer_qualification: when applicable
+    - external_source_binding: exact revision/locator or limitation
+  availability:
+    source_availability
+    review_coverage
+    semantic_availability
+    projection_freshness
+    package_gate_result
+  limitations
+  package_membership: existing finite PKG-TECHNICAL-DOCUMENTATION condition
+```
+
+Dynamic membership uses `SEMANTIC_SELECTOR`; named IF/INT/DS/CC/coverage
+inputs use `SEMANTIC_EXACT`; `PROJECTION_EXACT` is used only when an existing
+upstream projection is explicitly consumed. Resolution retains stable Project
+identity, local family/semantic ID, accepted local revision, exact source
+binding, and the accepted Product baseline. Equal local IDs from different
+Projects therefore remain distinct; Product rendering never invents a global
+technical ID to make them appear unique.
+
+#### Product Interface Catalog
+
+The Product Interface Catalog qualifies accepted Project-local IF facts and
+renders provided and consumed interfaces as separate views. Each selected IF
+retains, when applicable, direction, `contract_role`, interface kind,
+operation identity, safe address, contract/API version, observed view,
+precision, evidence/provenance, Project/source revision, and Product baseline.
+Provider declaration, provider implementation, consumer expectation, and
+consumer observed use remain distinct accepted facts or views. A consumer
+expectation does not require a provider. An unmatched provider remains an
+explicit limitation, and a candidate match is never rendered as compatibility;
+compatibility may appear only when an existing `CC-*` authority supplies a
+normalized result.
+
+The same local `IF-001` in two Projects is rendered as two qualified records:
+
+```text
+(Product baseline, Project-A, source revision, IF-001, IF revision)
+(Product baseline, Project-B, source revision, IF-001, IF revision)
+```
+
+No Project membership, Product aggregation, or path/name similarity aliases
+those records.
+
+#### Product Integration Map and External Integrations Catalog
+
+The Product Integration Map composes qualified `INT-*`, `IF-*`, `EVENT-*`,
+`COMP-*`, and applicable external identity inputs while preserving their
+distinct owners:
+
+```text
+IF-*    surface or contract
+INT-*   concrete interaction edge
+EVENT-* semantic event or message
+COMP-*  component or runtime unit
+```
+
+Every cross-Project edge retains qualified source and target Project identity,
+local family/ID/revision, exact source binding, and Product baseline. An
+`EVENT-*` may exist without an IF. A webhook may render EVENT + IF + INT when
+all three accepted facts exist without aliasing them. External providers and
+stores retain their external logical identity, bounded kind, exact source
+binding or limitation, owner/provider when evidenced, and safe identifier;
+external membership does not convert them into Product Projects.
+
+The External Integrations Catalog is the external subsection of the same
+integration projection. It shows only accepted qualified `COMP-*`, `IF-*`,
+`INT-*`, `DS-*`, and `AUTH-*` inputs. A configured URL, SDK dependency,
+generic connection, or unused generated client remains a weak hint and cannot
+create a Product interaction or external provider fact.
+
+#### Product Data Access Map
+
+The Product Data Access Map composes qualified DS resources, precise INT access
+facts, derived/legacy relations, state ownership, and migration authority. A
+selected data record retains:
+
+```text
+source_project_key and source_binding
+consuming_project_key and source_binding
+target_ds_local_id and accepted_revision
+resource_kind and parent_resource_ref
+access_mode: READ | WRITE | READ_WRITE | EXECUTE | DDL | MIGRATION
+precision and evidence/provenance
+product_id / product_revision / baseline_key
+```
+
+`INT-*` remains authoritative for new precise access. `READS_FROM` and
+`WRITES_TO` are displayed as explicitly derived navigation or as broad legacy
+relation-only facts; they do not supply a fabricated access mode. A store
+connection does not imply table access, a parent DS does not imply child
+access, resource presence does not imply access, and ownership does not imply
+write access. `EXECUTE`, `DDL`, and `MIGRATION` are not rendered as READ or
+WRITE without separate accepted evidence.
+
+Product data views preserve these distinct facts:
+
+```text
+OWNS_STATE
+MIGRATION_AUTHORITY
+INT access_mode=MIGRATION
+```
+
+None is inferred from another, and Product rendering does not manufacture an
+Architecture finding from multiple writers, cross-owned access, migration
+conflict, or shared-store coupling.
+
+#### Availability, revalidation, and lifecycle
+
+Product view resolution preserves the independent Stage E dimensions of
+source availability, review coverage, semantic availability, projection
+freshness/availability, and package gate result. An unavailable or partial
+Project is rendered with its exact limitation; it is not converted to no
+interfaces, no integrations, no data access, compatible, not applicable,
+verified clean, or globally failed. A stale or blocked Project-local
+projection limits only the Product views whose qualified scope depends on it.
+
+Product impact is bounded and dependent-to-prerequisite:
+
+```text
+changed Project/source binding or accepted fact
+  → qualified Project-local dependency slice
+  → affected IF/INT/DS/EVENT relation or capability
+  → affected Product view and package scope
+```
+
+A changed provider operation may affect the provider IF, bounded consumer
+match candidates/CC inputs, and dependent Product Interface/Integration
+views. A changed data access may affect only the qualified INT, DS resource,
+and dependent Product Data Access view. Unknown linkage routes to bounded
+revalidation; it does not trigger a full Product re-audit or automatic
+regeneration. Product membership or baseline changes create the applicable
+Product revision/baseline and targeted revalidation rather than rewriting an
+historical projection.
+
+Every selected view reuses the existing Service `PRJ-*`, `SEL-*`, `RG-*`,
+`CURRENT`/`STALE`/`BLOCKED`, V1–V4, fingerprint, dependency snapshot, and
+explicit-regeneration semantics. Product qualification is recorded in the
+owning selector/dependency snapshot. It never creates a Product projection
+lifecycle, reverses dependency direction, turns a reverse index into
+dependency authority, or causes automatic regeneration.
+
+#### Safety, authority, and compatibility boundary
+
+Product views consume Task 3's deterministic redaction behavior and the
+Shared Evidence Model's exact classes: `SECRET` is omitted,
+`SENSITIVE_INTERNAL` is redacted or replaced by an approved safe logical
+alias, and `SAFE_TECHNICAL_IDENTIFIER` may render when permitted. Unclassified
+values are not silently promoted to safe. No secret-bearing URL, DSN, query
+string, credential, token, password, or key may enter Product projection
+metadata, fingerprints, summaries, or package output.
+
+Product views are derived projections only. They cannot create Product IF,
+INT, DS, EVENT, compatibility, ownership, or migration-authority facts; they
+cannot rewrite Project-local STM/evidence; and they cannot duplicate the
+Shared Evidence, STM, CC, redaction, or projection-lifecycle authorities.
+Provider/consumer matching remains distinct from compatibility, and Product
+views do not decide `COMPATIBLE` or `INCOMPATIBLE` from path/name similarity.
+
+Product remains optional. A Project outside any Product continues to support
+the existing single-project Service Technical Documentation, STM, Evidence,
+interface, integration, and data-access flows without Product state.
+
 Product packages reuse the Stage B package contract. The package owner is the
 selected capability or endpoint, not the Product aggregate. A Product package
 uses an existing `PKG-*` declaration shape and records a resolved immutable
