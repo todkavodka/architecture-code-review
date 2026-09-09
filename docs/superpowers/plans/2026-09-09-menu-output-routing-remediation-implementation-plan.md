@@ -5,486 +5,447 @@
 > superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement the approved requested-work/output routing model so
-standalone Stage F and Technical Documentation outputs are cleanly requestable
-without artificial semantic capability selection, while preserving all
-existing authority, Product, compatibility, projection, session,
-authorization, and runtime boundaries.
+**Goal:** Implement the approved requested-work/output routing model while
+preserving the three semantic capabilities, all existing ownership and
+authority boundaries, and compatible legacy interpretation.
 
-**Architecture:** The orchestration layer distinguishes confirmed requested
-work from internally resolved dependency work. Capability-owned outputs
-normalize through their existing owners, while standalone, qualified-view, and
-umbrella documentation requests route through existing Evidence, STM,
-Technical Documentation, Product, and Test Engineering contracts without
-creating new semantic or projection authority.
+**Architecture:** Session Orchestration records confirmed `requested_work`;
+the coordinator separately resolves the minimum dependency/gate/projection
+slice as `resolved_work`. Existing Technical Documentation, Product,
+Test Engineering, Stage B, STM, Evidence, CC, authorization, and runtime
+contracts remain the owning authorities.
 
-**Tech Stack:** Markdown Skill/reference contracts, deterministic static
-contract/pressure validation, Git.
+**Tech Stack:** Markdown Skill/reference contracts, deterministic bounded
+static inspection, Git.
 
 **Spec:**
-docs/superpowers/specs/2026-09-09-menu-output-routing-remediation-design.md
+`docs/superpowers/specs/2026-09-09-menu-output-routing-remediation-design.md`
 
-## Global Constraints
+## Global constraints
 
-- Baseline for implementation is the approved plan commit produced by this task; implementation must not start from the design checkpoint alone.
 - Exactly three semantic top-level capabilities remain selectable: `Architecture Review`, `Test Engineering`, and `Code Quality Review`.
-- `requested_work` records confirmed user selections; `resolved_work` records only the minimum dependency/gate/projection slice; `requested_work != resolved_work`.
-- An internal STM, Evidence, Behavior Model, Contract Verification, Product qualification, or projection dependency never becomes a selected capability.
-- Validity is `at least one selected capability OR at least one valid standalone output`; Product context alone is invalid.
-- Capability-owned outputs remain owned by their existing capability: Architecture Endpoint owns Target Architecture and Remediation Roadmap; Test Engineering owns Test Plan and all listed Test Engineering outputs; Code Quality owns all listed CQ outputs.
-- `CANONICAL_PROJECTION_REQUEST`, `QUALIFIED_VIEW_REQUEST`, and `UMBRELLA_OUTPUT_REQUEST` are orchestration routing classes only; they are not semantic identities, factual families, `PRJ-*` identities, lifecycle states, or authority types.
-- Technical Documentation is an umbrella request for broad scope and requires bounded output/subsection confirmation; exact requests remain bounded and never silently select every projection.
-- Provider / Consumer Matrix is a Product-qualified `QUALIFIED_VIEW_REQUEST` over existing Technical Documentation projections: no new `PRJ-*`, lifecycle, factual family, or compatibility authority, and no single-project Matrix route is invented.
-- Generic compatibility routes directly to applicable Test Engineering Contract Verification and existing `CC-*`; it does not require Matrix or Product. Candidate matching is non-authoritative, and Matrix may render accepted CC results but never create them.
-- Product is explicit opt-in context, not requested work, output confirmation, authority, or permission. Canonical output labels are reused with `scope=PRODUCT`; no duplicate Product menu identities are added.
+- Validity is at least one selected capability OR at least one valid standalone output; Product context alone is invalid.
+- `requested_work != resolved_work`; internal STM, Evidence, Behavior Model, Contract Verification, Product qualification, and projection dependencies never become selected capabilities.
+- Capability-owned outputs retain their existing owners: Architecture Endpoint, Test Engineering, and Code Quality Review.
+- `CANONICAL_PROJECTION_REQUEST`, `QUALIFIED_VIEW_REQUEST`, and `UMBRELLA_OUTPUT_REQUEST` are routing classes only, not capabilities, factual authorities, identities, or lifecycles.
+- Technical Documentation is an umbrella that requires bounded output/subsection confirmation; exact outputs remain bounded.
+- Provider / Consumer Matrix is Product-qualified over existing Technical Documentation projections, with no new `PRJ-*`, lifecycle, factual family, or compatibility authority.
+- Generic compatibility routes directly through applicable Test Engineering Contract Verification and existing `CC-*`, independent of Matrix and Product; single-project applicability remains.
+- Product context and output confirmation are separate; canonical output labels use `scope=PRODUCT` rather than duplicate Product identities.
 - All six intents remain exact: `USE_EXISTING`, `NEW`, `RESUME`, `REVALIDATE`, `EXTEND`, `PROJECTION_REPAIR`.
-- Existing Stage B projection identity/lifecycle/freshness/regeneration contracts, shared Evidence semantics, STM factual authority, redaction rules, and authorization contracts remain authoritative and are not duplicated.
-- Selecting requested work grants no source-read, dirty-admission, semantic-write, test, code, worktree, commit, push, PR, deployment, runtime E2E, simulator, database-scan, SQL, tracing, or crawling permission.
-- Migration is `COMPATIBLE_EXTENSION`: old capability-only sessions, Product sessions, Architecture Endpoint state, Test Engineering output state, old `COMPLETE`/`RESUME` packages, and existing identities remain readable without historical rewrite.
-- Validation is static/manual plus deterministic pressure inspection; `DO_NOT_BUILD_HARNESS`. Stop on `STOP_HARNESS_EXPANSION` or `VALIDATION_BUDGET_EXCEEDED`.
-- Before any task, the executor must read this plan. If a later prompt conflicts, stop with `IMPLEMENTATION_PROMPT_PLAN_MISMATCH`; this canonical plan wins.
-
-## Plan authority and execution gate
-
-Before implementing any Task N, executor MUST read this canonical plan and
-extract: task title, exact files, exact required changes, exact verification,
-exact commit subject, and checkpoint behavior. If any later prompt conflicts
-with this plan:
-
-```text
-STOP:
-IMPLEMENTATION_PROMPT_PLAN_MISMATCH
-THE CANONICAL PLAN WINS.
-```
-
-Implementation must begin from the future approved implementation-plan
-checkpoint, use the future worktree described below, and stop for independent
-plan review when a checkpoint requires it. This planning task itself creates no
-implementation branch or worktree.
-
-### Candidate contract classification
-
-| Candidate file | Classification | Concrete reason |
-|---|---|---|
-| `SKILL.md` | MODIFY_REQUIRED | The umbrella Skill must expose the requested-work/resolved-plan handoff and route to owners; it currently has no canonical standalone-output startup integration. |
-| `references/session-orchestration.md` | MODIFY_REQUIRED | The current `NEW` contract rejects zero-capability sessions and lacks the requested-output menu, normalization classes, and output-aware validity predicate. |
-| `references/review-modes-and-orchestration.md` | MODIFY_REQUIRED | Persisted coordinator state and capability registry need additive requested/resolved work and six-intent output routing. |
-| `references/revalidation-and-freshness.md` | NO_CHANGE_REQUIRED | Existing `EXTEND`, impact-driven `REVALIDATE`, `PROJECTION_REPAIR`, freshness, and semantic-drift rules already express the approved boundary; implementation only references them. |
-| `references/technical-documentation.md` | MODIFY_REQUIRED | The existing projection contract needs the direct routing entry point, umbrella confirmation, and qualified-view classification while retaining its projection authority. |
-| `references/product-multi-project-review.md` | MODIFY_REQUIRED | Product output selection needs explicit separation from Product context and canonical output identity reuse for Product-qualified views. |
-| `capabilities/test-review/SKILL.md` | MODIFY_REQUIRED | Direct Test Engineering output normalization and the minimum dependency slice must be made explicit at the capability entry point. |
-| `capabilities/test-review/references/test-engineering-contract.md` | MODIFY_REQUIRED | Generic compatibility must be explicitly decoupled from Matrix/Product while retaining `CC-*` authority and existing applicability. |
-
-The shared Evidence and Shared Technical Model references are additional
-read-only boundary checks, not candidate modifications: their observation,
-redaction, factual, and gate semantics already satisfy the approved design.
+- Stage B projection lifecycle/freshness/regeneration, STM factual authority, Shared Evidence/redaction, CC authority, authorization separation, runtime unsupported boundary, single-project behavior, and Stage F factual boundaries remain unchanged.
+- Migration is `COMPATIBLE_EXTENSION`; old sessions remain readable without historical package or `PRJ-*` rewrite.
+- Validation is bounded static/manual inspection. `harness: DO_NOT_BUILD_HARNESS`; no pressure files, parser, DSL, runner, simulator, or framework.
+- Before executing Block A/B/C, the executor MUST read this canonical plan and extract the block title, exact files, required semantic changes, verification, commit subject, and final review gate. If a later prompt conflicts: `STOP: IMPLEMENTATION_PROMPT_PLAN_MISMATCH`; THE CANONICAL PLAN WINS.
 
 ## Exact implementation file inventory
 
-| Path | Action | Semantic owner | Reason | Task |
+| Path | Action | Owner | Reason | Block |
 |---|---|---|---|---|
-| `SKILL.md` | MODIFY | Umbrella orchestration | Expose the canonical requested-work layers, standalone routing entry point, resolved-plan confirmation, and explicit boundaries without duplicating owning semantics. | Task 6 |
-| `references/session-orchestration.md` | MODIFY | Session Orchestration | Replace capability-only startup validity with requested-work validity; add canonical output menu, normalization, confirmation, persisted fields, six-intent routing, and legacy defaults. | Task 1 |
-| `references/review-modes-and-orchestration.md` | MODIFY | Review Modes / workflow state | Persist `requested_work` separately from `resolved_work`, integrate output-aware capability registry and session-intent transitions, and preserve existing endpoint/output state. | Task 2 |
-| `references/technical-documentation.md` | MODIFY | Technical Documentation projection contract | Add routing entry points, canonical Stage F output labels/classes, umbrella confirmation, qualified-view reuse, and projection/limitation references without changing factual or lifecycle authority. | Task 3 |
-| `references/product-multi-project-review.md` | MODIFY | Product qualification/composition | Reuse canonical output IDs with `scope=PRODUCT`, separate Product context from output confirmation, and define Product-qualified Matrix behavior without duplicate identity. | Task 4 |
-| `capabilities/test-review/SKILL.md` | MODIFY | Test Engineering capability | Make direct Test Engineering output requests normalize into existing capability output booleans and preserve Test Assurance/Behavior Model/automatic CC dependency boundaries. | Task 5 |
-| `capabilities/test-review/references/test-engineering-contract.md` | MODIFY | Test Engineering compatibility authority | State generic compatibility’s direct CC route, Matrix independence, Project applicability, candidate non-authority, and combined-view separation. | Task 5 |
-| `references/revalidation-and-freshness.md` | READ_ONLY | Stage B freshness/revalidation | Verify `EXTEND`, impact-driven `REVALIDATE`, and `PROJECTION_REPAIR` semantics; no routing authority change is required. | Task 2 |
-| `references/shared-evidence-model.md` | READ_ONLY | Shared Evidence | Verify observation/provenance/redaction authority used by standalone outputs; do not alter Evidence semantics. | Task 3 |
-| `references/shared-technical-model.md` | READ_ONLY | Shared Technical Model | Verify IF/INT/DS/EVENT/MIGRATION authority and targeted dependency slices; do not add menu or factual identities. | Task 3 |
-| `tests/menu-output-routing-remediation-contract-validation.md` | CREATE | Validation projection | Deterministically inspect requested-work, routing, ownership, Product, Matrix, compatibility, intent, authorization, runtime, and 48 acceptance mappings. | Task 7 |
-| `tests/menu-output-routing-remediation-backward-compatibility.md` | CREATE | Validation projection | Inspect legacy session/default interpretation and migration `COMPATIBLE_EXTENSION`, plus fail-first evidence and legacy-focused acceptance cases. | Task 7 |
+| `SKILL.md` | MODIFY | Umbrella orchestration | Add pointer-level requested/resolved-plan routing and preserve boundaries without duplicating owning semantics. | B |
+| `references/session-orchestration.md` | MODIFY | Session Orchestration | Add requested-work validity, canonical menu/output routing, normalization, confirmation, and exact conflict handling. | A |
+| `references/review-modes-and-orchestration.md` | MODIFY | Review Modes / workflow state | Persist requested/resolved work and preserve six-intent and legacy behavior. | A |
+| `references/technical-documentation.md` | MODIFY | Technical Documentation | Add direct Stage F/documentation routing, umbrella confirmation, qualified-view reuse, and limitation/redaction references. | B |
+| `references/product-multi-project-review.md` | MODIFY | Product qualification/composition | Separate Product context from deliverable confirmation and define Product-qualified Matrix routing. | B |
+| `capabilities/test-review/SKILL.md` | MODIFY | Test Engineering | Normalize direct Test Engineering outputs into existing owner/output state and preserve unsupported execution. | B |
+| `capabilities/test-review/references/test-engineering-contract.md` | MODIFY | Test Engineering / CC | Decouple generic compatibility from Matrix/Product while retaining `CC-*` authority and Project applicability. | B |
+| `tests/menu-output-routing-remediation-contract-validation.md` | CREATE | Integrated validation | Compact static projection for fail-first post-checks, routing, ownership, boundaries, and 48 acceptance rows; created in Block A, completed in Block C. | A/C |
+| `tests/menu-output-routing-remediation-backward-compatibility.md` | CREATE | Integrated validation | Compact static projection for legacy interpretation, migration, and final compatibility evidence; created/completed in Block C. | C |
 
 Totals:
 
 ```text
-existing_files_modified: 7
-new_files_created: 2
-validation_files_created: 2
-pressure_files_created: 0
+existing_files_modified_planned: 7
+new_files_created_planned: 2
+validation_files_planned: 2
+pressure_files_planned: 0
+harness: DO_NOT_BUILD_HARNESS
 ```
 
-The two new files are validation files, so `new_files_created` and
-`validation_files_created` both equal 2. No individual
-`tests/pressure-scenario-*` files are planned: existing repository convention
-accepts compact integrated pressure inventories for Markdown contracts, and the
-approved design’s 32 pressures are mapped below and in Task 7.
+The two new files are integrated validation projections, not a harness. No
+individual pressure files are planned.
 
-## Derived ownership boundaries
+## Authority and ownership boundaries
 
-The implementation must preserve this authority map:
+The implementation is additive and must preserve this map: Shared Evidence
+owns observation/provenance/redaction; Shared Technical Model and Technical
+Model Gate own accepted technical facts; Architecture Review owns
+interpretation and Architecture Endpoint; Test Engineering owns test semantics,
+Contract Verification, and `CC-*`; Code Quality Review owns `CQ-*`/`CQRA-*`;
+Technical Documentation owns derived documentation and existing `PRJ-*`;
+Product owns qualification/composition; Stage B owns projection lifecycle;
+Session Orchestration and Review Modes own requested selection and routing.
 
-| Concern | Authority | Routing task |
+No selection grants source-read, dirty-admission, semantic-write, test, code,
+worktree, branch, commit, push, PR, deployment, runtime E2E, simulator,
+environment, database-scan, SQL, tracing, or crawling permission.
+
+## Block A — Requested Work & Session Orchestration
+
+**Owns:** pre-change `FF-MENU-01` through `FF-MENU-07` evidence;
+`requested_work` versus `resolved_work`; validity; capability-only,
+output-only, and mixed requests; capability-owned normalization entry points;
+`REQUESTED_WORK_CONFLICT`; all six intents; canonical labels; resolved-plan
+confirmation; and legacy session interpretation where orchestration owns it.
+
+**Files:** modify `references/session-orchestration.md` and
+`references/review-modes-and-orchestration.md`; create
+`tests/menu-output-routing-remediation-contract-validation.md` as the first
+pre-change evidence container; read the approved design and the shared
+authority/freshness references. No other file is modified in this block.
+
+**Fail-first ordering is mandatory:**
+
+1. Before any normative contract edit, create the validation projection with a
+   section named `PRE-CHANGE BASELINE — IMMUTABLE`.
+2. Capture exact current-contract citations and bounded static checks for
+   `FF-MENU-01`..`FF-MENU-07`. The evidence must show the current
+   capability-only validity contradiction, missing umbrella/subselection,
+   Product/output ambiguity, missing requested/resolved separation, Matrix
+   classification gap, compatibility coupling risk, and missing canonical
+   requested-work layers.
+3. Record the seven results as `FAIL_FIRST_VALID` with the current file path,
+   section/table heading, exact command or inspected text, and expected gap.
+   This section is immutable historical evidence: later steps may append
+   post-change evidence but may not rewrite the baseline.
+4. Only after steps 1–3, edit the normative contracts.
+
+**Required normative changes:**
+
+- Replace capability-only startup validity with “at least one selected
+  capability OR at least one valid standalone output”; retain the exact three
+  capabilities and all Architecture depth/endpoint combinations.
+- Add the six canonical labels: `Session Intent`, `Scope Context`, `Review
+  Capabilities`, `Requested Outputs`, `Resolved Plan / Required Internal Work`,
+  and `Authorization / Execution Boundaries`.
+- Persist `requested_work.capabilities`,
+  `requested_work.standalone_outputs`, `requested_work.scope`, and
+  `requested_work.confirmation_status`; keep dependencies under
+  `resolved_work` only.
+- Define `EXACT`, `BOUNDED_BUT_MULTI_OUTPUT`, and `AMBIGUOUS_BROAD`; exact
+  outputs stay bounded and broad Technical Documentation requires explicit
+  subsection confirmation.
+- Define all six intent routes, including additive `EXTEND`, impact-driven
+  `REVALIDATE`, persisted-scope `RESUME`, accepted/current-only
+  `USE_EXISTING`, and presentation-only `PROJECTION_REPAIR` with semantic-drift
+  escalation.
+- Define exact `REQUESTED_WORK_CONFLICT` semantics: an explicit confirmed user
+  selection has precedence over inferred natural-language normalization, but a
+  material contradiction is never silently overwritten. When inferred work
+  conflicts with an explicit confirmed selection, identify both choices, emit
+  or request reconciliation as `REQUESTED_WORK_CONFLICT`, show the conflict,
+  require confirmation of the resulting `requested_work`, persist neither a
+  conflicting state nor a substantive work start until resolved, and do not
+  change the explicit selection implicitly.
+
+Required conflict examples:
+
+| Explicit confirmed selection | Later inferred/requested wording | Required result |
 |---|---|---|
-| Observation/evidence and redaction | Shared Evidence | Task 3 read-only boundary |
-| Accepted technical facts | Shared Technical Model / Technical Model Gate | Task 3 read-only boundary |
-| Architectural interpretation/findings | Architecture Review | Tasks 1 and 6 normalize only |
-| Test semantics and CC | Test Engineering | Task 5 |
-| CQ semantics | Code Quality Review | Tasks 1 and 6 normalize only |
-| Derived documentation | Technical Documentation | Task 3 |
-| Product qualification/composition | Product | Task 4 |
-| Projection identity/lifecycle/freshness/regeneration | Stage B contracts | Tasks 2–4 read/cross-reference only |
-| Requested selection and routing | Session Orchestration / Review Modes | Tasks 1–2 |
+| Architecture Endpoint = `REVIEW_ONLY` | “also build Target Architecture” | `REQUESTED_WORK_CONFLICT`; show explicit endpoint and inferred endpoint; reconcile and confirm; do not silently change Endpoint. |
+| `REVIEW_PLUS_TARGET_ARCHITECTURE` | “do not generate Target Architecture” | `REQUESTED_WORK_CONFLICT`; show both; require confirmed resulting `requested_work`. |
+| External Integrations Catalog only | “make all technical documentation” | Do not expand confirmed `requested_work`; reconcile/confirm any broader scope. |
+| Product context selected, no requested work | no output/capability | Not `REQUESTED_WORK_CONFLICT`; invalid `NO_REVIEW_SCOPE_SELECTED`. |
+| User-selected capabilities | Internal dependency closure differs | Not `REQUESTED_WORK_CONFLICT`; preserve `requested_work != resolved_work`. |
+| Nothing confirmed; two materially ambiguous interpretations | ambiguous natural language | `REQUESTED_OUTPUT_AMBIGUOUS`, not conflict; present alternatives before work. |
 
-No task may transfer authority between these rows.
+**Concrete Block A checks:** use exact `rg` checks for the six labels, three
+capabilities, validity table, `requested_work != resolved_work`, all six intent
+tokens, and `REQUESTED_WORK_CONFLICT`; inspect the two endpoint examples and
+the Product-context-only row in the named sections. Record these checks in the
+validation projection. Run `git diff --check`.
 
-## Task 1: Requested-work startup model and canonical menu
+**Block A execution checklist:**
 
-**Files:**
-- Modify: `references/session-orchestration.md`
-- Read-only boundary: `references/shared-evidence-model.md`, `references/shared-technical-model.md`, `references/revalidation-and-freshness.md`
-- Test/Validate: `tests/menu-output-routing-remediation-contract-validation.md` (Task 7 owner; Task 1 contributes the startup evidence section)
+- [ ] Read the approved design sections governing requested work, validity, normalization, session intents, confirmation, migration, and authority boundaries.
+- [ ] Create the validation projection and capture immutable `FF-MENU-01`..`FF-MENU-07` evidence before the first normative edit.
+- [ ] Modify both Block A contract files and append focused post-change checks; do not alter the baseline section.
+- [ ] Confirm output-only, capability-only, mixed, Product-context-only, unsupported, ambiguous, and conflict routes.
+- [ ] Run the exact checks above and `git diff --check`, then create Commit 1.
 
-**Interfaces:**
-- Consumes: existing Review Suite startup, Product context selection, three capability configuration blocks, six session intents, and existing authorization boundary.
-- Produces: canonical `requested_work.capabilities`, `requested_work.standalone_outputs`, `requested_work.scope`, `requested_work.confirmation_status`; requested-work validity; canonical startup layers `Session Intent`, `Scope Context`, `Review Capabilities`, `Requested Outputs`, `Required Internal Work`, and `Authorization / Execution Boundaries`.
-
-- [ ] Step 1: read/extract the approved design sections 5–8, 14–18, 22, 24–27, and invariants `INV-M01`–`INV-M05`, `INV-M07`–`INV-M08`, `INV-M14`–`INV-M20`, `INV-M22`–`INV-M28`, and `INV-M34` from the design file.
-- [ ] Step 2: record fail-first evidence `FF-MENU-01`, `FF-MENU-02`, and `FF-MENU-07` by citing the current startup text that requires a top-level capability, lacks standalone Technical Documentation umbrella semantics, and lacks canonical requested-work layers.
-- [ ] Step 3: execute the fail-first inspection and confirm the expected gap: `Interface Catalog` cannot be represented with zero capabilities under the current rule, broad Technical Documentation has no mandatory subselection contract, and startup does not separately expose requested outputs versus required internal work.
-- [ ] Step 4: replace only the current `NEW` startup/configuration section with a six-layer menu: retain exactly the three capability blocks and all Architecture depth/endpoint combinations; add canonical requested output identities; define `requested_work` as capabilities plus standalone outputs; define validity for 0/0, capability-only, output-only, mixed, unsupported, ambiguous, and Product-context-only cases; and state that Product context and output confirmation are separate confirmations.
-- [ ] Step 5: add exact normalization classes `EXACT`, `BOUNDED_BUT_MULTI_OUTPUT`, and `AMBIGUOUS_BROAD`, with the approved Russian examples and routes: external integrations → exact catalog, API plus DB access → candidate `Interface Catalog` + `Data Access Map`, documentation → `Technical Documentation` umbrella with subselection, compatibility → CC route, Matrix → relationship view, and Matrix plus compatibility → two routes.
-- [ ] Step 6: define the bounded confirmation payload with `Session Intent`, `Scope Context`, `Review Capabilities`, `Requested Outputs`, `Required Internal Work`, `Excluded Work`, and `Authorization / Execution Boundaries`; explicitly state that confirmation persists requested work and that internal STM/Technical Documentation dependencies do not populate capabilities.
-- [ ] Step 7: run focused static verification by checking all required labels, validity rows, normalization examples, Product/context separation, and no fourth capability; record results in the Task 7 validation artifact draft without editing any other contract.
-- [ ] Step 8: inspect the exact diff for `references/session-orchestration.md`; verify no authority or runtime semantics were duplicated and no current Architecture Endpoint/Test Engineering selection semantics were removed.
-- [ ] Step 9: run `git diff --check`.
-- [ ] Step 10: commit exact file with subject `docs: add requested-work startup routing contract`.
-- [ ] Step 11: record checkpoint `CP1` as pending independent review; do not publish remotely.
-
-## Task 2: Persisted requested/resolved work and six-intent routing
-
-**Files:**
-- Modify: `references/review-modes-and-orchestration.md`
-- Read-only boundary: `references/revalidation-and-freshness.md`, `references/session-orchestration.md`
-- Test/Validate: `tests/menu-output-routing-remediation-backward-compatibility.md` (Task 7 owner; Task 2 contributes persistence/legacy evidence)
-
-**Interfaces:**
-- Consumes: Task 1’s confirmed `requested_work`, canonical output IDs, requested-work validity, and six-layer resolved-plan confirmation.
-- Produces: persisted `resolved_work` routing state with dependency slice, required gates, projection members, limitations, and authorization requirements; six-intent behavior and additive legacy interpretation.
-
-- [ ] Step 1: read/extract approved design sections 5, 13–14, 18–20, 24, 27 and invariants `INV-M03`, `INV-M11`–`INV-M15`, `INV-M22`–`INV-M24`, `INV-M30` from the design file.
-- [ ] Step 2: record fail-first evidence `FF-MENU-04` and `FF-MENU-07` by identifying the current coordinator state where capability configuration and internal dependency closure are not explicitly separate and the startup menu lacks requested-output layers.
-- [ ] Step 3: execute the fail-first inspection and confirm that the current `INDEX.md`/capability registry shape cannot persist a standalone output-only request independently from its resolved dependency slice, while legacy capability state is still the existing compatibility authority.
-- [ ] Step 4: add the exact additive coordinator records `requested_work` and `resolved_work`; keep `INDEX.md` routing-only; define `resolved_work.dependency_slice`, `required_gates`, `projection_members`, `limitations`, and `authorization_requirements`; define deduplication and minimum-slice union without full Review Suite escalation.
-- [ ] Step 5: encode all six intents exactly: `NEW` accepts capability-only/output-only/mixed; `USE_EXISTING` consumes only accepted/current registered output and sends missing/new output to `EXTEND`; `RESUME` restores requested and resolved state without scope addition; `REVALIDATE` preserves requested work and impacts only affected slices; `EXTEND` is additive and reuses accepted/fresh dependencies; `PROJECTION_REPAIR` is presentation-only and escalates semantic drift to `SEMANTIC_DRIFT_DETECTED` + `TECHNICAL_REVALIDATION_REQUIRED`.
-- [ ] Step 6: add conservative legacy interpretation: absent standalone-output state defaults to empty, existing capability-only sessions remain valid, old Architecture Endpoint and Test Engineering output booleans remain authoritative, Product sessions remain interpretable, old `COMPLETE` remains `USE_EXISTING` when accepted/current, old `RESUME` state is readable, and no historical package or `PRJ-*` rewrite occurs.
-- [ ] Step 7: run focused static verification against the six intent table, legacy examples, requested/resolved field distinction, minimum-slice rules, and projection-lifecycle references; record exact pass/fail evidence in Task 7’s backward-compatibility artifact.
-- [ ] Step 8: inspect the exact diff and verify no Stage B identity/lifecycle, semantic authority, or authorization contract was redefined.
-- [ ] Step 9: run `git diff --check`.
-- [ ] Step 10: commit exact file with subject `docs: persist requested and resolved work routing`.
-- [ ] Step 11: record `CP1` cumulative state after Tasks 1–2; stop if requested/resolved work or legacy interpretation is ambiguous.
-
-## Task 3: Technical Documentation and standalone Stage F routing
-
-**Files:**
-- Modify: `references/technical-documentation.md`
-- Read-only boundary: `references/shared-evidence-model.md`, `references/shared-technical-model.md`
-- Test/Validate: `tests/menu-output-routing-remediation-contract-validation.md` (Task 7 owner; Task 3 contributes routing-table and redaction evidence)
-
-**Interfaces:**
-- Consumes: Task 1 canonical output IDs/classes and Task 2 requested/resolved routing state; accepted Evidence/STM facts and existing Technical Documentation selectors/projections.
-- Produces: exact output routing table and dependency route for Technical Documentation, Provided Interfaces, Consumed Interfaces, Interface Catalog, Integration Map, Events / Messages, Data Access Map, Persistence / Data Resources, Migration Responsibility, External Integrations Catalog, and Matrix view.
-
-- [ ] Step 1: read/extract approved design sections 7, 11, 13, 15, 19–21, 23, 25–26, and invariants `INV-M06`, `INV-M11`–`INV-M13`, `INV-M16`–`INV-M20`, `INV-M23`–`INV-M26`, `INV-M31`–`INV-M33`.
-- [ ] Step 2: record fail-first evidence `FF-MENU-02`, `FF-MENU-05`, and `FF-MENU-07` by citing the current Technical Documentation contract’s projection ownership without a direct umbrella requested-work route and the absence of a menu-level Matrix classification.
-- [ ] Step 3: execute the fail-first inspection and confirm that direct Technical Documentation requests lack bounded subselection semantics, that Matrix is not represented as a Product-qualified view with explicit no-new-identity behavior, and that startup layers do not expose the route.
-- [ ] Step 4: add the canonical routing table with exact columns: user-facing label, routing class, owning contract, semantic owner, projection identity behavior, output confirmation requirement, Project validity, Product validity, and compatibility implication; use the approved values, including `UMBRELLA_OUTPUT_REQUEST` for Technical Documentation, `CANONICAL_PROJECTION_REQUEST` for exact outputs, and `QUALIFIED_VIEW_REQUEST` for Product-only Matrix.
-- [ ] Step 5: define umbrella behavior: broad Technical Documentation resolves supported candidate sections/views, requires bounded confirmation, persists confirmed scope, then resolves dependencies; an exact bounded output selects only its existing section/projection and never silently expands to the complete package.
-- [ ] Step 6: define each standalone dependency route through existing Evidence → accepted STM/Technical Model Gate → existing Technical Documentation projection/package; preserve `IF-*`, `INT-*`, `DS-*`, `EVENT-*`, `MIGRATION_AUTHORITY`, and external fact boundaries, including no inference from URLs/connections/migration declarations and no runtime migration implication.
-- [ ] Step 7: define Matrix as Product-qualified view only, reusing existing interface/integration projection identities/selectors/lifecycle; state `new_PRJ_identity=NO`, `new_lifecycle=NO`, `new_semantic_authority=NO`, `compatibility_verdict=NOT_IMPLIED`, and `menu_work_item_identity != projection_identity`.
-- [ ] Step 8: restate sensitivity/limitation behavior at the routing boundary: `SECRET` omitted, `SENSITIVE_INTERNAL` redacted/aliased, `SAFE_TECHNICAL_IDENTIFIER` rendered only when permitted; partial/unavailable/stale/unresolved inputs remain explicit and never become empty/exact/compatible results.
-- [ ] Step 9: run focused static verification of all 11 required routing rows, existing PRJ references, Matrix prohibition, redaction boundary, exact/broad behavior, and no factual identity additions; record checks in Task 7 artifact.
-- [ ] Step 10: inspect exact diff, run `git diff --check`, and confirm the file adds routing cross-references without changing selectors, facts, lifecycle, or regeneration authority.
-- [ ] Step 11: commit exact file with subject `docs: route standalone technical documentation outputs`.
-- [ ] Step 12: record Task 3 contribution to `CP2` and stop if any routing row lacks an owning contract or identity behavior.
-
-## Task 4: Product output confirmation and qualified Matrix view
-
-**Files:**
-- Modify: `references/product-multi-project-review.md`
-- Read-only boundary: `references/technical-documentation.md`, `references/revalidation-and-freshness.md`
-- Test/Validate: `tests/menu-output-routing-remediation-contract-validation.md` (Task 7 owner; Task 4 contributes Product and Matrix evidence)
-
-**Interfaces:**
-- Consumes: Task 1 `scope` and output confirmation fields; Task 3 canonical output IDs and existing Product-qualified selectors/snapshots.
-- Produces: Product-context/output-confirmation separation, canonical Project/Product output identity reuse, Product umbrella confirmation, and Matrix-qualified-view routing.
-
-- [ ] Step 1: read/extract approved design sections 15–17, 21, 24–25, and invariants `INV-M07`, `INV-M08`, `INV-M21), `INV-M24`–`INV-M30`, `INV-M34`.
-- [ ] Step 2: record fail-first evidence `FF-MENU-03`, `FF-MENU-05`, and `FF-MENU-06` by identifying current Product output selection that can be read as context-only/all-output selection and any Product-specific display naming that could imply duplicate identity.
-- [ ] Step 3: execute the fail-first inspection and confirm broad Product documentation lacks a separate required output confirmation, Product context can be mistaken for requested work, and the current named Product views need explicit canonical-ID wording.
-- [ ] Step 4: add the exact two-step Product flow: confirm Product identity, accepted revision, immutable baseline, membership, availability, coverage, freshness, and limitations; separately confirm requested output scope. Product context alone remains invalid and grants no permissions.
-- [ ] Step 5: replace any duplicate Product output identity wording with canonical output plus `scope=PRODUCT`; retain existing Product-qualified resolution snapshots and exact Project/source qualification.
-- [ ] Step 6: define broad Product Technical Documentation as `AMBIGUOUS_BROAD`/`UMBRELLA_OUTPUT_REQUEST` requiring deterministic subsection selection before substantive work; keep exact External Integrations, Interface Catalog, Integration Map, Data Access Map, and Migration Responsibility requests bounded.
-- [ ] Step 7: define Provider / Consumer Matrix as a Product-qualified `QUALIFIED_VIEW_REQUEST` reusing existing Technical Documentation projections, with no Matrix PRJ identity/lifecycle/factual family and no CC verdict; keep single-project generic compatibility independent and available through Task 5’s CC route.
-- [ ] Step 8: run focused static verification for Product context/output confirmation, all exact Product examples, Matrix scope, accepted revision/baseline preservation, partial availability, and no authorization escalation; record in Task 7 artifact.
-- [ ] Step 9: inspect exact diff, run `git diff --check`, and verify no Product factual authority or projection lifecycle was added.
-- [ ] Step 10: commit exact file with subject `docs: separate Product context from output routing`.
-- [ ] Step 11: record `CP2` cumulative state after Tasks 3–4; stop if Product context can satisfy requested-work validity or Matrix receives a new identity.
-
-## Task 5: Capability-owned output normalization and compatibility decoupling
-
-**Files:**
-- Modify: `capabilities/test-review/SKILL.md`
-- Modify: `capabilities/test-review/references/test-engineering-contract.md`
-- Read-only boundary: `references/technical-documentation.md`, `references/shared-technical-model.md`
-- Test/Validate: `tests/menu-output-routing-remediation-contract-validation.md` (Task 7 owner; Task 5 contributes capability/CC evidence)
-
-**Interfaces:**
-- Consumes: Task 1 direct-output normalization and Task 3 Matrix routing; existing Test Engineering output booleans, Behavior Model dependency, automatic applicability rule, and `CC-*` authority.
-- Produces: canonical owner normalization for Test Assurance, Test Plan, Contract Consistency Report, Test Environment Design, Service Simulator Design, Service Simulator Implementation Plan, E2E Test Plan, and direct compatibility requests.
-
-- [ ] Step 1: read/extract approved design sections 7, 9, 12, 15, 18, 22–23, and invariants `INV-M04`, `INV-M09`, `INV-M10`, `INV-M13`, `INV-M15`, `INV-M29), `INV-M31`–`INV-M34`.
-- [ ] Step 2: record fail-first evidence `FF-MENU-05` and `FF-MENU-06` by citing current capability/output wording and compatibility wording that do not explicitly state direct Test Engineering ownership for each output and direct CC routing independent of Matrix/Product.
-- [ ] Step 3: execute the fail-first inspection and confirm that a direct Test Plan request could be treated as a standalone duplicate or that generic compatibility could be coupled to a Matrix/Product route under the current menu framing.
-- [ ] Step 4: add the capability-owned normalization table: each listed Test Engineering output sets its existing independent boolean; Test Assurance remains required core; Behavior Model is internal; applicable Contract Verification is automatic; runtime execution remains unsupported; simulator requests remain design/plan outputs only.
-- [ ] Step 5: add direct compatibility routing: exact qualified provider/consumer inputs → applicable Contract Verification → existing `CC-*`; valid Project scope does not require Product or Matrix; missing/stale/unresolved/inapplicable inputs remain CC-owned unresolved/candidate states; candidate matching cannot emit compatibility.
-- [ ] Step 6: add combined-request semantics: Matrix/relationship view and compatibility adjudication are separately owned routes; Matrix may render accepted CC outcomes but cannot create/adjudicate them; `matrix_scope != compatibility_scope`.
-- [ ] Step 7: preserve old output booleans and legacy endpoint normalization exactly; do not add a compatibility identity, Stage F capability, Product compatibility authority, runtime engine, or second Test Engineering ledger.
-- [ ] Step 8: run focused static verification of all seven Test Engineering outputs, core/dependency rules, Project/Product compatibility applicability, Matrix independence, candidate states, and runtime boundary; record in Task 7 artifact.
-- [ ] Step 9: inspect both exact diffs, run `git diff --check`, and confirm only Test Engineering-owned cross-references changed.
-- [ ] Step 10: commit exact files with subject `docs: preserve capability and CC output ownership`.
-- [ ] Step 11: record `CP3` cumulative state after Task 5; stop if any capability-owned output gains a second owner or CC is no longer sole compatibility authority.
-
-## Task 6: Umbrella integration and authorization/runtime boundaries
-
-**Files:**
-- Modify: `SKILL.md`
-- Read-only boundary: `references/session-orchestration.md`, `references/review-modes-and-orchestration.md`, `references/shared-evidence-model.md`, `references/shared-technical-model.md`, `references/revalidation-and-freshness.md`, `references/technical-documentation.md`, `references/product-multi-project-review.md`, `capabilities/test-review/SKILL.md`, `capabilities/test-review/references/test-engineering-contract.md`
-- Test/Validate: `tests/menu-output-routing-remediation-contract-validation.md` (Task 7 owner; Task 6 contributes umbrella boundary evidence)
-
-**Interfaces:**
-- Consumes: Tasks 1–5 canonical routing/state contracts and all existing authority boundaries.
-- Produces: umbrella-level navigation and resolved-plan handoff that points to owning contracts without restating or transferring their semantics.
-
-- [ ] Step 1: read/extract approved design sections 8–10, 13–14, 16–18, 21–23, 26–27, 31–32 and all authority rows in the approved scope ownership matrix.
-- [ ] Step 2: record fail-first evidence `FF-MENU-04`, `FF-MENU-06`, and `FF-MENU-07` by identifying the current umbrella text’s capability-first routing and missing explicit resolved-plan/output-layer handoff.
-- [ ] Step 3: execute the fail-first inspection and confirm that the umbrella Skill does not explicitly route standalone outputs through existing owners or expose the separate requested/resolved/authorization/runtime layers.
-- [ ] Step 4: add concise umbrella instructions: load requested-work selection from Session Orchestration, load persistence/intent behavior from Review Modes, route Technical Documentation through its owner, route Product through Product qualification, route compatibility through Test Engineering/CC, and use shared Evidence/STM contracts for facts.
-- [ ] Step 5: add the resolved-plan confirmation contract with exact fields `Session Intent`, `Scope Context`, `Review Capabilities`, `Requested Outputs`, `Required Internal Work`, and `Authorization / Execution Boundaries`; state `Requested Outputs != Required Internal Work` and `Product Context != Requested Outputs`.
-- [ ] Step 6: restate authorization and runtime boundaries by reference: selection does not grant source/test/code/Git/deployment permissions, and the Skill does not execute E2E, simulator runtime, environment provisioning, DB scanning, SQL, tracing, or external crawling.
-- [ ] Step 7: run focused static verification of cross-reference completeness, authority non-duplication, exact canonical labels, redaction pointer, all six intents, Product/Matrix/CC separation, and runtime/permission prohibitions; record in Task 7 artifact.
-- [ ] Step 8: inspect exact diff, run `git diff --check`, and confirm the umbrella file contains routing guidance only rather than duplicate semantic contracts.
-- [ ] Step 9: commit exact file with subject `docs: integrate menu routing into umbrella skill`.
-- [ ] Step 10: record `CP3` final semantic-boundary state; stop if any umbrella prose becomes an authority override.
-
-## Task 7: Fail-first, integrated acceptance, pressure, and compatibility validation
-
-**Files:**
-- Create: `tests/menu-output-routing-remediation-contract-validation.md`
-- Create: `tests/menu-output-routing-remediation-backward-compatibility.md`
-- Test/Validate: all modified contract files from Tasks 1–6; no runtime harness
-
-**Interfaces:**
-- Consumes: Tasks 1–6 contract changes, approved design tables, existing pressure conventions, and read-only shared authority contracts.
-- Produces: deterministic static evidence for FF-MENU-01..07, 48/48 acceptance, 32/32 pressure prevention, 26/26 plan-pressure prevention, migration compatibility, and integrated final verification.
-
-- [ ] Step 1: read/extract the approved design acceptance table M01–M20 and MR01–MR28, pressure table MD-P01–MD-P32, plan-pressure list PF-MENU-01..26, and repository convention from existing integrated validation artifacts; record `harness: DO_NOT_BUILD_HARNESS`.
-- [ ] Step 2: record fail-first evidence before normative changes by listing exact current-contract citations for FF-MENU-01..07 and their expected gaps; do not create a simulator, parser, fixture DSL, Markdown test framework, or meta-validator.
-- [ ] Step 3: execute each FF-MENU check against the completed contract set and record the expected remediation evidence; any remaining gap is `FAIL`, any unclear route is `AMBIGUOUS`, and validation must stop until corrected.
-- [ ] Step 4: create the integrated validation artifact with one deterministic row for every M/MR scenario: scenario ID, expected behavior, owning task, exact contract section/check, and result. Required final result is `48 PASS`, `0 AMBIGUOUS`, `0 FAIL`.
-- [ ] Step 5: create the backward-compatibility artifact with explicit checks for capability-only legacy sessions, absent standalone-output defaults, old Architecture Endpoint, old Test Engineering booleans, Product sessions, old `COMPLETE`/`USE_EXISTING`, old `RESUME`, no historical package rewrite, no `PRJ-*` rewrite, and `COMPATIBLE_EXTENSION`.
-- [ ] Step 6: map all 32 MD pressure scenarios to Task 1–6 checks in an integrated table with explicit prevention evidence; required final result is `32 PREVENTED`, `0 AMBIGUOUS`, `0 UNPREVENTED`.
-- [ ] Step 7: classify every PF-MENU-01..26 as `PLAN_PREVENTS`; include the exact invariant/task/check that prevents it. No PF case may be `PLAN_AMBIGUOUS` or `PLAN_ALLOWS_FAILURE`.
-- [ ] Step 8: run integrated final verification for: output-only validity; 0/0 invalidity; Product-context-only invalidity; capability-owned normalization; canonical Architecture Endpoint; Test Engineering ownership; Technical Documentation umbrella/bounded distinction; Product confirmation separation; Product-qualified Matrix/no new PRJ/lifecycle; compatibility without Matrix/Product; Project CC applicability; candidate non-authority; all six intents; legacy interpretation; no permission escalation; runtime unsupported; redaction; and `COMPATIBLE_EXTENSION`.
-- [ ] Step 9: inspect both validation files for exact 48/32/26 counts, no unowned scenario, no invented pressure IDs, no placeholder language, and no semantic authority claims; run `git diff --check`.
-- [ ] Step 10: commit exact files with subject `test: add menu output routing contract validation`.
-- [ ] Step 11: record `CP4` after Task 7 as the final integrated checkpoint; independent review is required before implementation begins or any promotion decision.
-
-## Acceptance scenario map: 48/48
-
-| Scenario ID | Expected behavior | Owning implementation task | Verification artifact/check |
-|---|---|---|---|
-| M01 | `NEW` Architecture request preserves depth/endpoint routing. | Task 1 | Contract validation M01 |
-| M02 | CQ-only `NEW` remains independent. | Task 1 | M02 |
-| M03 | Test Engineering + Test Plan uses existing output boolean. | Task 5 | M03 |
-| M04 | Standard full + Target uses Architecture Endpoint. | Task 1 | M04 |
-| M05 | Forensic + Roadmap uses existing endpoint. | Task 1 | M05 |
-| M06 | Accepted/current result uses `USE_EXISTING`. | Task 2 | M06, BC-05 |
-| M07 | Changed source uses impact-driven `REVALIDATE`. | Task 2 | M07 |
-| M08 | CQ addition uses additive `EXTEND`. | Task 2 | M08 |
-| M09 | Broken Mermaid uses `PROJECTION_REPAIR`. | Task 2 | M09 |
-| M10 | Provided/consumed API request routes to Interface Catalog. | Task 3 | M10 |
-| M11 | DB/table access routes to Data Access Map. | Task 3 | M11 |
-| M12 | External integrations routes to exact catalog. | Task 3 | M12 |
-| M13 | Product API map uses canonical output with Product scope after confirmation. | Task 4 | M13 |
-| M14 | Product data/migration uses two bounded canonical outputs. | Task 4 | M14 |
-| M15 | Broad Product “everything available” confirms bounded set and limitations. | Task 4 | M15 |
-| M16 | E2E execution is unsupported; E2E Test Plan may be confirmed. | Task 5 | M16 |
-| M17 | Simulator runtime is unsupported; design/plan may be confirmed. | Task 5 | M17 |
-| M18 | Generic compatibility routes directly to applicable CC; Matrix not required. | Task 5 | M18 |
-| M19 | Formatting repair uses `PROJECTION_REPAIR`. | Task 2 | M19 |
-| M20 | Interface Catalog works with zero capabilities. | Task 1/3 | M20 |
-| MR01 | Standalone Technical Documentation confirms section scope. | Task 3 | MR01 |
-| MR02 | Standalone Interface Catalog selects sections 02/03 only. | Task 3 | MR02 |
-| MR03 | Standalone Integration Map selects section 04. | Task 3 | MR03 |
-| MR04 | Standalone Data Access Map selects section 05. | Task 3 | MR04 |
-| MR05 | External catalog selects approved external subsection/section 07 when applicable. | Task 3 | MR05 |
-| MR06 | Product Matrix is qualified view with no CC verdict/new PRJ. | Task 4 | MR06 |
-| MR07 | Matrix + compatibility uses separate CC route. | Task 4/5 | MR07 |
-| MR08 | Product Interface Catalog is canonical `Interface Catalog`, `scope=PRODUCT`. | Task 4 | MR08 |
-| MR09 | No capability/output is `NO_REVIEW_SCOPE_SELECTED`. | Task 1 | MR09 |
-| MR10 | Product context only is invalid. | Task 1/4 | MR10 |
-| MR11 | Direct Test Plan normalizes to Test Engineering. | Task 5 | MR11 |
-| MR12 | Direct Target normalizes to Architecture Endpoint. | Task 1 | MR12 |
-| MR13 | Interface Catalog does not select Architecture. | Task 1/3 | MR13 |
-| MR14 | Multiple outputs deduplicate shared dependency acquisition. | Task 2/3 | MR14 |
-| MR15 | `EXTEND` adds Data Access Map without reopening Architecture. | Task 2 | MR15 |
-| MR16 | `REVALIDATE` impacts only Data Access slices. | Task 2 | MR16 |
-| MR17 | `RESUME` restores requested/resolved output state. | Task 2 | MR17 |
-| MR18 | Missing `USE_EXISTING` output routes to `EXTEND`. | Task 2 | MR18, BC-05 |
-| MR19 | Stage F formatting repair is projection-only. | Task 2/3 | MR19 |
-| MR20 | Stage F semantic correction escalates to technical revalidation. | Task 2/3 | MR20 |
-| MR21 | Broad Product documentation requires deterministic output confirmation. | Task 4 | MR21 |
-| MR22 | Exact Product external integrations remains bounded. | Task 4 | MR22 |
-| MR23 | Product API + DB request confirms only two candidates. | Task 4 | MR23 |
-| MR24 | Product context without work is invalid. | Task 1/4 | MR24 |
-| MR25 | Single-project compatibility remains CC-applicable without Matrix. | Task 5 | MR25 |
-| MR26 | Product compatibility does not implicitly select Matrix. | Task 4/5 | MR26 |
-| MR27 | Matrix absence does not block valid CC adjudication. | Task 5 | MR27 |
-| MR28 | Matrix with unresolved pair preserves CC unresolved state and no fabricated verdict. | Task 5 | MR28 |
-
-## Design pressure map: 32/32 prevented
-
-| Scenario ID | Prevention owner/check |
-|---|---|
-| MD-P01 | Task 1 validity predicate |
-| MD-P02 | Task 2 requested/resolved separation |
-| MD-P03 | Task 1 Architecture Endpoint normalization |
-| MD-P04 | Task 5 Test Engineering ownership |
-| MD-P05 | Task 1/4 Product context exclusion |
-| MD-P06 | Task 4 canonical output + Product scope |
-| MD-P07 | Task 5 Matrix/CC separation |
-| MD-P08 | Task 5 CC authority |
-| MD-P09 | Task 2 minimum dependency union |
-| MD-P10 | Task 2 impact-driven revalidation |
-| MD-P11 | Task 2 `USE_EXISTING` acceptance requirement |
-| MD-P12 | Task 2 persisted RESUME scope |
-| MD-P13 | Task 2 additive EXTEND |
-| MD-P14 | Task 2/3 semantic-drift escalation |
-| MD-P15 | Task 5/6 runtime boundary |
-| MD-P16 | Task 6 authorization boundary |
-| MD-P17 | Task 2 compatible legacy defaults |
-| MD-P18 | Task 1 canonical alias normalization |
-| MD-P19 | Task 1 explicit conflict outcome |
-| MD-P20 | Task 3 redaction boundary |
-| MD-P21 | Task 3 routing-class distinction |
-| MD-P22 | Task 3 no Matrix lifecycle |
-| MD-P23 | Task 3 umbrella confirmation |
-| MD-P24 | Task 4 separate Product/output confirmations |
-| MD-P25 | Task 4 revision/baseline vs deliverable distinction |
-| MD-P26 | Task 3 exact bounded route |
-| MD-P27 | Task 5 Project compatibility applicability |
-| MD-P28 | Task 5 direct CC route |
-| MD-P29 | Task 4 Matrix remains Product-qualified |
-| MD-P30 | Task 5 Matrix render-only CC behavior |
-| MD-P31 | Task 5 candidate matching non-authority |
-| MD-P32 | Task 4/5 Product qualification vs CC authority |
-
-## Plan-level pressure review: 26/26 PLAN_PREVENTS
-
-| ID | Classification | Exact prevention |
-|---|---|---|
-| PF-MENU-01 | PLAN_PREVENTS | Task 1 replaces capability-only validity with capability-or-valid-output. |
-| PF-MENU-02 | PLAN_PREVENTS | Task 2 persists dependencies under `resolved_work`, never capabilities. |
-| PF-MENU-03 | PLAN_PREVENTS | Tasks 1/3 keep Technical Documentation a routing output, not capability. |
-| PF-MENU-04 | PLAN_PREVENTS | Tasks 1/5 normalize capability-owned outputs through one owner. |
-| PF-MENU-05 | PLAN_PREVENTS | Task 1 routes Target through Architecture Endpoint. |
-| PF-MENU-06 | PLAN_PREVENTS | Task 5 routes Test Plan through Test Engineering. |
-| PF-MENU-07 | PLAN_PREVENTS | Tasks 1/4 exclude Product context from work validity. |
-| PF-MENU-08 | PLAN_PREVENTS | Task 4 separates Product context and output confirmation. |
-| PF-MENU-09 | PLAN_PREVENTS | Tasks 1/3 require umbrella subselection. |
-| PF-MENU-10 | PLAN_PREVENTS | Tasks 1/3 preserve exact bounded outputs. |
-| PF-MENU-11 | PLAN_PREVENTS | Tasks 3/4 Matrix has no new PRJ/lifecycle. |
-| PF-MENU-12 | PLAN_PREVENTS | Task 5 generic compatibility bypasses Matrix. |
-| PF-MENU-13 | PLAN_PREVENTS | Task 5 generic compatibility bypasses Product requirement. |
-| PF-MENU-14 | PLAN_PREVENTS | Task 5 candidate matching is non-authoritative. |
-| PF-MENU-15 | PLAN_PREVENTS | Task 5 Matrix cannot manufacture CC verdict. |
-| PF-MENU-16 | PLAN_PREVENTS | Task 5 retains single-project CC applicability. |
-| PF-MENU-17 | PLAN_PREVENTS | Task 2 `USE_EXISTING` requires accepted/current output. |
-| PF-MENU-18 | PLAN_PREVENTS | Task 2 `RESUME` restores persisted scope only. |
-| PF-MENU-19 | PLAN_PREVENTS | Task 2 `EXTEND` is additive and bounded. |
-| PF-MENU-20 | PLAN_PREVENTS | Task 2 `REVALIDATE` is impact-driven. |
-| PF-MENU-21 | PLAN_PREVENTS | Task 2/3 projection repair escalates semantic drift. |
-| PF-MENU-22 | PLAN_PREVENTS | Task 6 keeps selection separate from permissions. |
-| PF-MENU-23 | PLAN_PREVENTS | Tasks 5/6 retain unsupported runtime boundary. |
-| PF-MENU-24 | PLAN_PREVENTS | Task 2 uses additive legacy interpretation, no destructive migration. |
-| PF-MENU-25 | PLAN_PREVENTS | Task 3 preserves Evidence redaction and safe rendering. |
-| PF-MENU-26 | PLAN_PREVENTS | Tasks 1/3 restrict routing classes to orchestration. |
-
-## Commit and checkpoint strategy
-
-| Checkpoint | After commit | Cumulative range | Scope | Review questions | Stop conditions | Remote publication |
-|---|---|---|---|---|---|---|
-| CP1 — requested-work/session core | Task 2 | Task 1..2 | `session-orchestration.md`, `review-modes-and-orchestration.md` | Are output-only requests valid? Are requested/resolved state and all six intents distinct? Are legacy sessions additive/readable? | Any capability-only rule remains; Product context counts as work; scope changes on resume; old state requires rewrite. | No; local independent review only. |
-| CP2 — documentation/Product routing | Task 4 | Task 1..4 | Session/review modes plus Technical Documentation and Product contracts | Are all routing classes and 11 output rows owned? Does broad documentation confirm scope? Is Matrix Product-qualified with no new identity? | Missing row/owner; exact request expands; Product context substitutes output confirmation; Matrix becomes Project/PRJ/CC authority. | No; local independent review only. |
-| CP3 — capability/compatibility/umbrella integration | Task 6 | Task 1..6 | All seven modified normative files | Are capability-owned outputs single-owner? Does compatibility work without Matrix/Product? Are authorization/runtime boundaries preserved? | Duplicate owner/authority; CC displaced; implicit permission/runtime support; umbrella duplicates semantics. | No; local independent review only. |
-| CP4 — integrated validation | Task 7 | Task 1..7 | Two validation files plus all contract diffs | Are FF 7/7 closed, acceptance 48/48, pressure 32/32, PF 26/26, and backward compatibility explicit? | Any AMBIGUOUS/FAIL/UNPREVENTED result, placeholder, missing scenario, or harness expansion. | No; final plan/implementation review before any publication. |
-
-Each meaningful implementation task normally ends in exactly one commit with
-the subject shown in that task. Do not squash or amend these commits. No push,
-merge, promotion, PR, tag, or release is authorized by this plan.
-
-## Future implementation workspace
-
-Implementation must create the isolated workspace only at execution time after
-this plan is approved:
+**Commit 1:**
 
 ```text
-branch: feature/menu-output-routing-remediation
-worktree: /home/tod/skills/architecture-code-review-menu-output-routing-remediation
-baseline: the approved implementation-plan checkpoint, not 6419ad2 alone
+docs: implement requested-work session orchestration
 ```
 
-The executor must verify repository naming conventions and use the exact
-approved plan commit as the starting point. This planning task creates neither
-branch nor worktree.
+The commit contains the two modified Block A contract files and the newly
+created validation projection with its immutable pre-change section. No
+independent review gate occurs here; perform the required local checks only.
 
-## Integrated final verification contract
+## Block B — Documentation, Product & Compatibility Routing
 
-The final integrated validation must prove, with static citations and exact
-contract checks, all of the following: capability OR standalone-output
-validity; zero-capability standalone success; zero/zero failure; Product
-context-only failure; capability-owned normalization; Architecture Endpoint
-canonicality; Test Engineering ownership; Technical Documentation umbrella
-confirmation; exact bounded requests; Product confirmation separation;
-Product-qualified Matrix/no new PRJ/lifecycle; compatibility without Matrix or
-Product; single-project compatibility where applicable; CC authority;
-candidate non-authority; all six intents; legacy interpretability; no
-permission escalation; unsupported runtime execution; redaction; and
-`COMPATIBLE_EXTENSION`. The artifact must conclude exactly:
+**Owns:** standalone routing classes; Technical Documentation umbrella;
+`EXACT` / `BOUNDED_BUT_MULTI_OUTPUT` / `AMBIGUOUS_BROAD`; Product context versus
+output confirmation; Product-qualified routing; Provider / Consumer Matrix
+qualified-view boundary; generic compatibility independent of Matrix/Product;
+CC authority; single-project compatibility; capability-specific cross-
+references; authorization/runtime/redaction boundary references.
+
+**Files:** modify `SKILL.md`,
+`references/technical-documentation.md`,
+`references/product-multi-project-review.md`,
+`capabilities/test-review/SKILL.md`, and
+`capabilities/test-review/references/test-engineering-contract.md`; read the
+Block A files plus shared Evidence, STM, and Stage B references.
+
+**Required normative changes:**
+
+- Preserve the approved 11-row output taxonomy and exact owning contracts for
+  Technical Documentation, Provided Interfaces, Consumed Interfaces,
+  Interface Catalog, Integration Map, Events / Messages, Data Access Map,
+  Persistence / Data Resources, Migration Responsibility, External
+  Integrations Catalog, and Provider / Consumer Matrix.
+- Route exact outputs through existing projections/sections; route the
+  Technical Documentation umbrella only after bounded subsection confirmation;
+  preserve partial, unavailable, stale, unresolved, and inapplicable
+  limitations.
+- Keep Matrix a Product-qualified `QUALIFIED_VIEW_REQUEST` over existing
+  interface/integration projections with `new_PRJ_identity=NO`,
+  `new_lifecycle=NO`, `new_semantic_authority=NO`, and
+  `compatibility_verdict=NOT_IMPLIED`; do not invent a Project Matrix route.
+- Reuse canonical output identities with `scope=PRODUCT`; Product identity,
+  accepted revision, immutable baseline, membership, availability, coverage,
+  freshness, and limitations are separate from output confirmation.
+- Normalize direct Test Plan, E2E Test Plan, simulator design/plan, Test
+  Environment Design, Contract Consistency Report, and Test Assurance requests
+  into existing Test Engineering ownership; planning/design remains
+  non-executing. Preserve Code Quality and Architecture ownership pointers.
+- Route generic compatibility as qualified inputs → applicable Contract
+  Verification → existing `CC-*`, with no Matrix/Product prerequisite and with
+  single-project applicability. Candidate matching is non-authoritative; Matrix
+  may render accepted CC results but cannot create or adjudicate them.
+- Keep `SKILL.md` as a pointer layer to these owners and restate the
+  authorization, runtime, redaction, STM, Stage B, and factual boundaries by
+  reference only.
+
+**Concrete Block B checks:** run exact `rg` checks for each of the 11 canonical
+labels, all three routing-class tokens, `scope=PRODUCT`, the four Matrix
+prohibitions, the direct `CC-*` route, `matrix_scope != compatibility_scope`,
+`SECRET`/`SENSITIVE_INTERNAL`/`SAFE_TECHNICAL_IDENTIFIER`, unsupported runtime
+tokens, and no fourth capability. Inspect the Product broad/exact examples and
+the single-project compatibility clause. Run `git diff --check`.
+
+The 11 canonical routing rows are: `Technical Documentation` → umbrella;
+`Provided Interfaces` → existing section 02; `Consumed Interfaces` → existing
+section 03; `Interface Catalog` → existing sections 02/03; `Integration Map` →
+existing section 04; `Events / Messages` → existing section 04;
+`Data Access Map` → existing section 05; `Persistence / Data Resources` →
+existing section 05; `Migration Responsibility` → existing section 05 and
+`MIGRATION_AUTHORITY`; `External Integrations Catalog` → existing external
+section 04/07 when applicable; and `Provider / Consumer Matrix` → Product-
+qualified existing interface/integration projections only. For every row,
+record routing class, owning contract, semantic owner, projection behavior,
+confirmation requirement, Project/Product validity, and compatibility
+implication in the validation projection.
+
+**Block B execution checklist:**
+
+- [ ] Read the approved design routing, Product, compatibility, authority, runtime, and redaction sections.
+- [ ] Modify the five Block B contract files only, preserving existing facts, selectors, identities, lifecycle, and owners.
+- [ ] Execute the 11-row routing inspection, Product confirmation examples, Matrix prohibitions, direct CC inspection, and boundary checks above.
+- [ ] Run `git diff --check`, then create Commit 2.
+
+**Commit 2:**
+
+```text
+docs: route documentation product and compatibility outputs
+```
+
+This commit contains exactly the five Block B contract files. No independent
+review gate occurs here; local focused checks are required.
+
+## Block C — Integrated Validation
+
+**Owns:** post-change `FF-MENU-01`..`FF-MENU-07` verification; the 48/48
+acceptance matrix; the 32/32 concrete pressure matrix; the 26/26 plan-pressure
+matrix; backward compatibility; migration; authority boundaries; final
+`git diff --check`; and implementation-ready-for-review evidence.
+
+**Files:** complete
+`tests/menu-output-routing-remediation-contract-validation.md` and create
+`tests/menu-output-routing-remediation-backward-compatibility.md`; inspect all
+seven modified contract files and the read-only authority references. No
+normative contract file is modified in this block.
+
+**Validation procedure:**
+
+- Read the approved design acceptance rows M01–M20 and MR01–MR28, pressure
+  rows MD-P01–MD-P32, and PF-MENU-01..26. Preserve the immutable Block A
+  baseline, then append post-change evidence for all seven fail-first rows.
+- Record exactly one acceptance row for each of 48 cases with ID, expected
+  route, owning clause/file, exact command or bounded inspection, and result.
+  Required result: `48 PASS`, `0 AMBIGUOUS`, `0 FAIL`.
+- Record exactly one concrete pressure row for every MD-P ID using the matrix
+  below. Required result: `32 PREVENTED`, `0 AMBIGUOUS`, `0 UNPREVENTED`.
+- Record PF-MENU-01..26 as `PLAN_PREVENTS` with the exact block/clause/check
+  that prevents each case. Required result: `26/26 PLAN_PREVENTS`.
+- Record backward compatibility for old capability-only sessions, absent
+  standalone-output defaults, Architecture Endpoint, Test Engineering
+  booleans, Product sessions, `COMPLETE`/`USE_EXISTING`, `RESUME`, no package
+  or `PRJ-*` rewrite, and `COMPATIBLE_EXTENSION`.
+- Inspect both validation files for exact counts, no invented IDs, no
+  placeholders, no authority claims, and `harness: DO_NOT_BUILD_HARNESS`.
+
+**Block C execution checklist:**
+
+- [ ] Append post-change evidence for all seven fail-first rows without changing the immutable baseline.
+- [ ] Complete the 48 acceptance rows, 32 concrete pressure rows, and 26 plan-pressure rows below.
+- [ ] Complete backward-compatibility and migration evidence, inspect both validation files, and run the final integrated checks.
+- [ ] Run `git diff --check`, confirm the required final evidence, and create Commit 3.
+
+### Acceptance coverage map — 48/48
+
+The validation projection must contain one exact row for each ID below, with
+the named owner and a command or bounded clause inspection. These IDs and
+owners preserve the approved design matrix.
+
+| IDs | Owning block/route |
+|---|---|
+| M01–M02 | Block A: Architecture/CQ capability-only startup |
+| M03 | Block B: Test Engineering + Test Plan |
+| M04–M05 | Block A: Architecture Endpoint depth/endpoint |
+| M06–M09 | Block A: `USE_EXISTING`, `REVALIDATE`, `EXTEND`, `PROJECTION_REPAIR` |
+| M10–M12 | Block B: Interface Catalog, Data Access Map, External Integrations Catalog |
+| M13–M15 | Block B: Product exact/broad output confirmation |
+| M16–M18 | Block B: unsupported E2E/simulator and direct compatibility |
+| M19 | Block A/B: projection repair |
+| M20 | Block A/B: zero-capability Interface Catalog |
+| MR01–MR05 | Block B: standalone documentation sections 02/03/04/05/07 |
+| MR06–MR07 | Block B: Product Matrix and separate CC route |
+| MR08–MR10 | Block B/A: canonical Product output and invalid scope |
+| MR11–MR13 | Block A/B: Test Plan, Target, Interface Catalog ownership |
+| MR14–MR20 | Block A: dependency deduplication, intents, repair/escalation |
+| MR21–MR24 | Block B/A: broad/exact Product confirmation and invalid context |
+| MR25–MR28 | Block B: single-project/Product compatibility and unresolved Matrix pair |
+
+Expanded acceptance IDs: `M01`, `M02`, `M03`, `M04`, `M05`, `M06`, `M07`,
+`M08`, `M09`, `M10`, `M11`, `M12`, `M13`, `M14`, `M15`, `M16`, `M17`, `M18`,
+`M19`, `M20`, `MR01`, `MR02`, `MR03`, `MR04`, `MR05`, `MR06`, `MR07`, `MR08`,
+`MR09`, `MR10`, `MR11`, `MR12`, `MR13`, `MR14`, `MR15`, `MR16`, `MR17`,
+`MR18`, `MR19`, `MR20`, `MR21`, `MR22`, `MR23`, `MR24`, `MR25`, `MR26`,
+`MR27`, and `MR28`. The validation file must expand each ID to its exact
+scenario text, expected route, owner, command/clause check, and PASS result;
+the grouped table above is the ownership index, not a substitute for those
+rows.
+
+Required observable result: `acceptance: 48/48 PASS`.
+
+### Plan-pressure coverage map — 26/26 PLAN_PREVENTS
+
+| IDs | Exact prevention owner |
+|---|---|
+| PF-MENU-01–PF-MENU-03 | Block A/B validity and Technical Documentation routing |
+| PF-MENU-04–PF-MENU-06 | Block A/B capability-owned normalization and Architecture/Test owners |
+| PF-MENU-07–PF-MENU-10 | Block A/B Product exclusion, confirmation, umbrella, bounded outputs |
+| PF-MENU-11–PF-MENU-16 | Block B Matrix/CC/Product/single-project boundaries |
+| PF-MENU-17–PF-MENU-21 | Block A intent, extension, revalidation, and repair rules |
+| PF-MENU-22–PF-MENU-26 | Block A/B authorization, runtime, migration, redaction, routing classes |
+
+Each grouped row expands to every listed ID in the validation projection with
+classification `PLAN_PREVENTS` and an exact cited clause/check; no grouped ID
+may be omitted. Required observable result: `26/26 PLAN_PREVENTS`.
+
+### Concrete design-pressure verification matrix
+
+Each check is specific and must be executed against the named contract after
+Blocks A and B. The expected observable result is the prevention state recorded
+in the final validation projection.
+
+| ID | Failure prevented | Owning normative clause/file | Concrete verification check | Expected observable result |
+|---|---|---|---|---|
+| MD-P01 | Zero-capability valid output rejected | requested-work validity / `references/session-orchestration.md` | `rg -n "at least one.*capability|valid standalone output|NO_REVIEW_SCOPE_SELECTED" references/session-orchestration.md` and inspect 0/0/output-only rows. | Output-only valid; only 0/0 is `NO_REVIEW_SCOPE_SELECTED`. |
+| MD-P02 | Dependencies presented as selections | requested/resolved fields / `references/review-modes-and-orchestration.md` | `rg -n "requested_work|resolved_work|dependency_slice|never.*capabilit" references/review-modes-and-orchestration.md` and compare field tables. | Dependencies appear only under `resolved_work`. |
+| MD-P03 | Target bypasses Architecture Endpoint | endpoint normalization / `references/session-orchestration.md` | `rg -n "Target Architecture|REVIEW_PLUS_TARGET_ARCHITECTURE|Architecture Endpoint" references/session-orchestration.md` and inspect the normalization row. | Target maps to the existing Architecture Endpoint. |
+| MD-P04 | Test output gets a second owner | Test Engineering ownership / `capabilities/test-review/SKILL.md` | `rg -n "Test Plan|Test Assurance|capability-owned|existing.*boolean" capabilities/test-review/SKILL.md` and inspect owner table. | Every listed Test output remains Test Engineering-owned. |
+| MD-P05 | Product context counts as work | Product exclusion / `references/session-orchestration.md` | `rg -n "Product context alone|NO_REVIEW_SCOPE_SELECTED|not requested work" references/session-orchestration.md` and inspect validity row. | Product-only context is invalid, not conflict. |
+| MD-P06 | Product output gets duplicate identity | canonical Product output / `references/product-multi-project-review.md` | `rg -n "scope=PRODUCT|canonical output|duplicate.*identity|Product Interface Catalog" references/product-multi-project-review.md` and inspect exact-output example. | Canonical output plus Product scope is persisted. |
+| MD-P07 | Matrix manufactures compatibility | Matrix/CC separation / `references/technical-documentation.md` | `rg -n "QUALIFIED_VIEW_REQUEST|compatibility_verdict=NOT_IMPLIED|no.*CC verdict" references/technical-documentation.md` and inspect Matrix row. | Matrix is view-only; no verdict is created. |
+| MD-P08 | CC authority is displaced | CC authority / `capabilities/test-review/references/test-engineering-contract.md` | `rg -n "Contract Verification|CC-\\*|sole|semantic authority" capabilities/test-review/references/test-engineering-contract.md` and inspect compatibility route. | `CC-*` remains the sole adjudication authority. |
+| MD-P09 | Multiple outputs escalate to full suite | minimum dependency union / `references/review-modes-and-orchestration.md` | `rg -n "minimum.*slice|dependency union|deduplicat|complete Review Suite" references/review-modes-and-orchestration.md` and inspect resolver rule. | Shared dependencies deduplicate without unrelated capabilities. |
+| MD-P10 | Revalidation reopens everything | impact-driven revalidation / `references/review-modes-and-orchestration.md` | `rg -n "REVALIDATE|impacted|only.*slice|complete Review Suite" references/review-modes-and-orchestration.md` and inspect intent row. | Only impacted slices are revalidated. |
+| MD-P11 | USE_EXISTING fabricates output | accepted/current gate / `references/review-modes-and-orchestration.md` | `rg -n "USE_EXISTING|accepted/current|missing.*EXTEND" references/review-modes-and-orchestration.md` and inspect intent table. | Missing output routes to `EXTEND`. |
+| MD-P12 | RESUME silently broadens scope | persisted resume / `references/review-modes-and-orchestration.md` | `rg -n "RESUME|restores|without scope addition|persisted" references/review-modes-and-orchestration.md` and inspect resume rule. | Persisted scope is restored unchanged. |
+| MD-P13 | EXTEND reopens unrelated work | additive extension / `references/review-modes-and-orchestration.md` | `rg -n "EXTEND|additive|unrelated|read-only" references/review-modes-and-orchestration.md` and inspect extension rule. | Only confirmed additions are offered. |
+| MD-P14 | Projection repair hides semantic drift | repair escalation / `references/review-modes-and-orchestration.md` | `rg -n "PROJECTION_REPAIR|SEMANTIC_DRIFT_DETECTED|TECHNICAL_REVALIDATION_REQUIRED" references/review-modes-and-orchestration.md` and inspect repair rule. | Drift escalates; presentation repair cannot change facts. |
+| MD-P15 | Planning request executes runtime | runtime boundary / `SKILL.md` | `rg -n "E2E|simulator|environment|database|SQL|tracing|crawling|does not execute" SKILL.md` and inspect boundary list. | Runtime execution remains unsupported. |
+| MD-P16 | Selection grants authorization | authorization boundary / `SKILL.md` | `rg -n "no.*permission|source-read|semantic-write|commit|push|deploy" SKILL.md` and inspect authorization list. | Selection grants no listed permission. |
+| MD-P17 | Legacy session gains new outputs | legacy defaults / `references/review-modes-and-orchestration.md` | `rg -n "absent.*standalone|defaults.*empty|legacy|historical" references/review-modes-and-orchestration.md` and inspect default rule. | Legacy outputs default empty; no silent enrichment. |
+| MD-P18 | Alias creates new identity | alias normalization / `references/session-orchestration.md` | `rg -n "alias|canonical output|no new.*identity|normalization" references/session-orchestration.md` and inspect alias table. | Alias resolves to an existing canonical item. |
+| MD-P19 | Explicit/inferred conflict silently overwrites | conflict reconciliation / `references/session-orchestration.md` | `rg -n "REQUESTED_WORK_CONFLICT|explicit.*confirmed|inferred|reconciliation|do not.*silently" references/session-orchestration.md` and inspect both endpoint examples. | Conflict is shown and confirmed before persistence/work; explicit choice is not silently changed. |
+| MD-P20 | Sensitive facts render unsafely | redaction / `references/technical-documentation.md` | `rg -n "SECRET|SENSITIVE_INTERNAL|SAFE_TECHNICAL_IDENTIFIER|redact|omit" references/technical-documentation.md` and inspect rendering rule. | Secret omitted; sensitive value redacted/aliased. |
+| MD-P21 | Routing classes collapse | class taxonomy / `references/technical-documentation.md` | `rg -n "CANONICAL_PROJECTION_REQUEST|QUALIFIED_VIEW_REQUEST|UMBRELLA_OUTPUT_REQUEST" references/technical-documentation.md` and inspect 11-row class column. | Classes remain distinct and orchestration-only. |
+| MD-P22 | Matrix receives lifecycle | Matrix lifecycle prohibition / `references/technical-documentation.md` | `rg -n "new_PRJ_identity=NO|new_lifecycle=NO|no.*lifecycle" references/technical-documentation.md` and inspect Matrix route. | No Matrix identity or lifecycle is added. |
+| MD-P23 | Umbrella silently selects all | umbrella confirmation / `references/technical-documentation.md` | `rg -n "Technical Documentation|bounded.*confirmation|never silently|subsection" references/technical-documentation.md` and inspect broad-request example. | Broad request pauses for bounded selection. |
+| MD-P24 | Product context substitutes deliverable | separate confirmations / `references/product-multi-project-review.md` | `rg -n "Product context|output confirmation|separate|context.*alone" references/product-multi-project-review.md` and inspect two-step flow. | Both confirmations are separately required. |
+| MD-P25 | Revision/baseline becomes output | Product qualification fields / `references/product-multi-project-review.md` | `rg -n "accepted revision|immutable.*baseline|deliverable|output scope" references/product-multi-project-review.md` and inspect confirmation payload. | Qualification state remains distinct from requested output. |
+| MD-P26 | Exact output expands | bounded exact routing / `references/technical-documentation.md` | `rg -n "exact|bounded|never.*expand|Interface Catalog|Data Access Map" references/technical-documentation.md` and inspect exact route rows. | Only the confirmed sections/projections are selected. |
+| MD-P27 | Project compatibility requires Product | Project CC applicability / `capabilities/test-review/references/test-engineering-contract.md` | `rg -n "Project|single-project|does not require Product|compatibility" capabilities/test-review/references/test-engineering-contract.md` and inspect applicability clause. | Valid Project compatibility routes without Product. |
+| MD-P28 | Compatibility requires Matrix | direct CC route / `capabilities/test-review/references/test-engineering-contract.md` | `rg -n "direct|Contract Verification|Matrix.*not required|CC-\\*" capabilities/test-review/references/test-engineering-contract.md` and inspect route sequence. | Qualified inputs go directly to CC. |
+| MD-P29 | Matrix becomes non-Product view | Product-qualified Matrix / `references/product-multi-project-review.md` | `rg -n "Provider / Consumer Matrix|Product-qualified|QUALIFIED_VIEW_REQUEST|Project.*Matrix" references/product-multi-project-review.md` and inspect scope row. | Matrix remains Product-qualified; no Project route is invented. |
+| MD-P30 | Matrix renders a new verdict | render-only CC behavior / `capabilities/test-review/references/test-engineering-contract.md` | `rg -n "render|accepted CC|cannot create|candidate matching" capabilities/test-review/references/test-engineering-contract.md` and inspect combined route. | Matrix can render accepted CC only. |
+| MD-P31 | Candidate matching is authoritative | candidate non-authority / `capabilities/test-review/references/test-engineering-contract.md` | `rg -n "candidate|non-authoritative|MATCH_CANDIDATE|compatibility result" capabilities/test-review/references/test-engineering-contract.md` and inspect state table. | Candidate states never become compatibility results. |
+| MD-P32 | Product qualification owns CC | Product/CC boundary / `references/product-multi-project-review.md` | `rg -n "Product.*qualification|CC-\\*|compatibility authority|does not.*authority" references/product-multi-project-review.md` and inspect compatibility paragraph. | Product qualifies inputs; CC adjudicates. |
+
+**Final integrated check:** confirm `FF-MENU-01..07` were captured before
+normative edits and pass after changes; acceptance `48/48`; design pressure
+`32/32` concrete and `0 AMBIGUOUS`; plan pressure `26/26 PLAN_PREVENTS`;
+session intents `6/6`; migration `COMPATIBLE_EXTENSION`; design coverage
+preserved; no placeholders; no normative contract was changed by this plan
+task; and `git diff --check` passes.
+
+**Commit 3:**
+
+```text
+docs: add integrated menu output routing validation
+```
+
+This commit contains the newly created backward-compatibility validation file
+and the completed Block A validation projection. It is the last implementation
+commit in the future implementation worktree.
+
+## Commit and review strategy
+
+Expected implementation commits: exactly 3, with subjects:
+
+1. `docs: implement requested-work session orchestration`
+2. `docs: route documentation product and compatibility outputs`
+3. `docs: add integrated menu output routing validation`
+
+Use one future implementation worktree only, created at execution time from
+the future published approved plan checkpoint. Do not implement on `main`; do
+not create a worktree now; do not create one branch/worktree per block.
+
+After Block C, keep exactly one independent implementation review gate:
+
+```text
+IMPLEMENTATION_READY_FOR_REVIEW
+```
+
+The flow is approved plan checkpoint → one implementation worktree → Block A
+→ Block B → Block C → one independent implementation review → targeted
+remediation only if real findings → promotion. Block-local checks are not
+independent reviews. No intermediate semantic checkpoints, push, merge,
+promotion, PR, tag, or release is authorized by this plan.
+
+## Required final evidence
 
 ```text
 acceptance: 48/48 PASS
 pressure: 32/32 PREVENTED
 plan_pressure: 26/26 PLAN_PREVENTS
+fail_first: 7/7 PRECHANGE
+session_intents: 6/6 PASS
 harness: DO_NOT_BUILD_HARNESS
 migration: COMPATIBLE_EXTENSION
 ```
-
-## Self-review record
-
-- Spec coverage: every material design section 5–34 is owned by Tasks 1–7; the 48 acceptance rows, 32 pressure rows, 26 plan-pressure rows, authority matrix, migration, authorization, runtime, Product, Matrix, CC, and session-intent requirements are explicitly mapped.
-- Placeholder scan: no unresolved placeholder markers or vague implementation instructions are present.
-- File/task consistency: each implementation file has one primary task owner; read-only authority files are explicitly marked and are not planned for modification; validation files have one owner.
-- Interface consistency: `requested_work`, `resolved_work`, `standalone_outputs`, `confirmation_status`, `CANONICAL_PROJECTION_REQUEST`, `QUALIFIED_VIEW_REQUEST`, and `UMBRELLA_OUTPUT_REQUEST` are used consistently.
-- Commit consistency: seven unique task subjects are specified; each task has one commit and no amend/squash instruction.
-- Checkpoint consistency: CP1–CP4 have exact cumulative task ranges, scopes, questions, stop conditions, and no remote publication.
-- Validation completeness: 48/48 acceptance, 32/32 design pressure, 26/26 plan pressure are mapped with required zero ambiguity/failure targets.
-- Authority review: no new semantic capability, factual family, PRJ lifecycle, compatibility authority, runtime capability, or implicit authorization is introduced.
 
 ## Plan-only prohibitions
 
 ```text
 normative_contracts_modified: NO (by this planning task)
 implementation_performed: NO
-tests_created: NO (by this planning task; validation files are planned only)
-roadmap_modified: NO
 implementation_branch_created: NO
 worktree_created: NO
 push_performed: NO
-PR_created: NO
-tag_created: NO
-release_performed: NO
-deployment_performed: NO
 ```
