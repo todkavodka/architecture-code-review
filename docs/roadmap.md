@@ -65,7 +65,10 @@ Current Foundation
        +-----------------------------+
                                      |
                                      v
-                    Stage E Product / Multi-Project Review
+                    Stage E Product / Multi-Project Review [DONE]
+                                     |
+                                     v
+                    Stage F Interface, API & Data Integration Catalog [DONE]
 ```
 
 Stage B особенно важен для надёжности генерируемых результатов Stage A, C и D,
@@ -373,6 +376,52 @@ bounded `REVALIDATE` / additive `EXTEND`, Stage B projection/package reuse, and
 existing capability authority boundaries. Pressure scenarios `PS-132..PS-149`,
 integrated contract validation, and backward-compatibility validation passed.
 Promotion merge: `c0cb853e9c7656f0e045816773c9e79d650186fb`.
+
+## Stage F — Interface, API & Data Integration Catalog
+
+**Status: `DONE`**
+
+### Purpose
+
+Extend the evidence-first review workflow with bounded interface, API,
+integration, event, persistence, and data-access catalog projections while
+preserving existing STM, Test Engineering, Product, and single-project
+authority boundaries.
+
+### Completed scope
+
+Stage F completed its approved Discovery, Design, implementation planning,
+isolated implementation, independent review, and promotion cycle. The
+implementation provides:
+
+- qualified IF/INT/DS/EVENT/FLOW semantics and precise INT-backed data access;
+- evidence support and safe technical-identifier/redaction boundaries;
+- Service Technical Documentation and Product-qualified catalog projections;
+- compatibility display derived from existing Test Engineering `CC-*` authority;
+- bounded orchestration, selector, projection-lifecycle, and Product
+  qualification integration;
+- static pressure and integrated validation covering the complete Stage F
+  contract and backward compatibility.
+
+Product remains optional, single-project operation remains first-class, and no
+new factual identity family or compatibility authority was introduced.
+
+### Completion evidence
+
+Approved implementation-plan checkpoint: `dc9ffd6021b2484f64cd1237b1286572c91b629c`.
+Approved feature HEAD: `54d9ae6ad5c14b59684c5513dffb6e4ec5bff57a`.
+Final implementation verification: `STAGE_F_IMPLEMENTATION_COMPLETE`.
+Independent implementation verdict: `STAGE_F_IMPLEMENTATION_APPROVED`.
+Promotion merge: `9b8347bc263ef21fd2351a3c9295ab04a6992a42`.
+
+Pressure scenarios `PS-F01..PS-F26`: `26/26 GREEN`.
+Integrated contract validation: `PASS`.
+Backward compatibility: `PASS`.
+Migration: `COMPATIBLE_EXTENSION`.
+New factual identity family: `NO`.
+Authority conflicts: `0`.
+No automatic projection regeneration was introduced; existing `CC-*`
+compatibility authority remains authoritative.
 
 ## Cross-Stage Architectural Principles
 
