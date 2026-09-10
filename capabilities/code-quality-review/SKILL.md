@@ -128,6 +128,13 @@ Quality Summary, Maintainability Hotspots, and Roadmap Contribution. Generated
 outputs must use the shared Stage B projection lifecycle; no parallel Code
 Quality projection lifecycle is defined here.
 
+For NEW, selecting Code Quality Review starts with configuration_status=UNRESOLVED.
+Each user-selectable projection must be explicitly resolved as SELECTED or
+NOT_SELECTED and then confirmed. Zero selected projections is valid only when
+the user explicitly confirms semantic Code Quality review with no human-readable
+projection. Untouched defaults do not complete configuration, and substantive
+work is blocked until configuration_status=CONFIRMED.
+
 Projection repair cannot change CQ semantic authority, and semantic
 `REVALIDATE` is not projection regeneration. `working/INDEX.md` remains
 coordinator workflow authority only.

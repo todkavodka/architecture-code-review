@@ -26,7 +26,9 @@ never backfilled into selected capabilities. Multiple requested items use a
 deduplicated minimum dependency union and never escalate automatically to the
 complete Review Suite.
 
-`NEW` accepts capability-only, output-only, and mixed valid work. `USE_EXISTING`
+`NEW` accepts capability-only, output-only, and mixed valid work only after the
+selected capability configuration and standalone-output selection pass
+REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`
 consumes only an accepted/current registered output; a missing or new output
 routes to `EXTEND`. `RESUME` restores persisted requested and resolved scope
 without silently adding work. `REVALIDATE` preserves requested work and
@@ -384,6 +386,7 @@ registry. The following statuses reuse the existing workflow state vocabulary:
 capabilities:
   - id: architecture-review
     selected: false
+    configuration_status: UNRESOLVED | CONFIRMED   # present only when selected
     status: NOT_APPLICABLE | PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE
     mode: STANDARD_FULL | FORENSIC        # present only when selected
     endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP  # present only when selected
@@ -393,6 +396,7 @@ capabilities:
       - <artifact/ref + revision>
   - id: test-review
     selected: false
+    configuration_status: UNRESOLVED | CONFIRMED   # present only when selected
     status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
     endpoint: REVIEW_ONLY | REVIEW_PLUS_TEST_PLAN  # legacy Test Review input/projection
     outputs:
@@ -409,6 +413,7 @@ capabilities:
       - <artifact/ref + revision>
   - id: code-quality-review
     selected: false
+    configuration_status: UNRESOLVED | CONFIRMED   # present only when selected
     status: PENDING | IN_PROGRESS | REVIEW_REQUIRED | REVALIDATION_REQUIRED | BLOCKED | COMPLETE | NOT_APPLICABLE
     outputs:
       findings_view: false
@@ -441,6 +446,9 @@ Engineering or Code Quality capability from resolving its own shared factual
 dependencies.
 
 For Test Engineering, `outputs` is the persisted configuration authority; the
+fresh NEW menu represents each optional output as UNSPECIFIED until the user
+explicitly selects it or declines it as NOT_SELECTED. A false-valued registry
+example is not an explicit user decision. The
 legacy `endpoint` is retained only for backward-compatible Test Review packages
 and must not be used as the sole output selection or exposed as a current
 `NEW`/`EXTEND` menu option. `LEGACY_COMPATIBILITY_STATE` is not a
@@ -531,6 +539,9 @@ The `INDEX` ownership and revision binding are the invariant, not the exact path
 
 For Code Quality Review, the `outputs` fields are independent coordinator
 selection state, not semantic authority and not Stage B projection records.
+Fresh NEW state keeps each output UNSPECIFIED until explicit selection or
+decline; zero selected outputs is valid only after configuration_status is
+CONFIRMED by the user.
 Each listed Code Quality output is both `USER_SELECTABLE` and a
 `DERIVED_PROJECTION`: it is derived from accepted CQ authority, but it is not
 implicitly selected, mandatory, or always generated. `Code Quality Summary`,
