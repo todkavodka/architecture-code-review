@@ -286,6 +286,22 @@ IF-*:
   protocol_properties: optional controlled kind-specific properties
   precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
   observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
+  operation_children:
+    - operation_id: OP-<zero-padded-decimal-3-or-more-digits>
+      parent_if: IF-*<parent-revision>
+      revision: <integer revision>
+      interface_kind: <existing closed interface kind>
+      direction: PROVIDED | CONSUMED
+      contract_role: <existing role vocabulary>
+      operation_identity: <protocol-specific normalized identity>
+      precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
+      status: CANDIDATE | UNDER_REVIEW | ACCEPTED | SUPERSEDED | REJECTED
+      freshness: VALID | REVALIDATION_REQUIRED | UNKNOWN
+      authority: RESOLVED | UNRESOLVED
+      observed_views: [DECLARED | IMPLEMENTED | CONSUMED | TESTED ...]
+      protocol_properties: <existing controlled properties>
+      evidence_refs: WS-* / EV-*
+      supersedes: optional parent-qualified operation reference
   boundary_evidence: optional qualified transport/schema boundary observations
                      and enforcement-stage references
   project_binding: optional Project/repository/revision qualification
@@ -296,6 +312,23 @@ The shape does not require nullable properties to be fabricated. Direction,
 interface kind, identity/revision, evidence, and an applicable precision are
 the core fields; operation, address, version, contract, provider, auth, error,
 and protocol properties are required only when applicable or evidenced.
+
+`operation_children` is an IF-owned collection of subordinate operation
+contracts. `operation_id` is unique only within the parent-qualified IF
+identity, and `IF-*/OP-*` is a reference path, not a new global STM family.
+There is no top-level `OP-*` family. An operation cannot exist without an IF.
+The Technical Model Gate accepts, revises, and supersedes operation children;
+no downstream capability creates an operation. It allocates each
+`operation_id` monotonically within its parent and never reuses it. A semantic
+parent move creates a new parent-qualified child with `supersedes`, rather than
+moving the existing child. Historical surface-only IFs remain valid with no
+inferred children.
+
+Operation `status`, `freshness`, and `authority` do not imply any observed
+view. Persist `observed_views` as an explicit list so multiple independent
+existing views can coexist without changing their semantics. The child list
+does not alter the existing IF-level `observed_view`, lifecycle/status
+vocabulary, or the semantics of any existing IF view.
 
 When API input boundary observations are applicable, `boundary_evidence` is an
 optional qualified attribute on the existing `IF-*` record. It may reference
