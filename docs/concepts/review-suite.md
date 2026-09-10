@@ -126,6 +126,14 @@ Standalone outputs относятся только к самостоятельн
 standalone outputs и внутренними зависимостями только для чтения. Без
 REQUESTED_WORK_CONFIGURATION_COMPLETE содержательная работа не начинается.
 
+В NEW раздел Standalone Outputs / Technical Documentation показывается всегда
+после конфигурации выбранных модулей. Пользователь выбирает применимые
+зарегистрированные представления или явно подтверждает NONE; пустой список без
+такого подтверждения остаётся UNRESOLVED. Запрос API Report является
+ограниченной нормализацией к существующим разделам Provided Interfaces,
+Consumed Interfaces, Integrations, Auth and Trust и Failure Behavior. Он не
+создаёт четвёртый capability, новый PRJ или новую authority.
+
 ## Общий фактический фундамент
 
 Модули проверки не должны независимо «изобретать» систему каждый для себя.

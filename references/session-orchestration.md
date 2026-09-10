@@ -46,7 +46,9 @@ capability_configuration:
     outputs: <resolved independent projection selections>
 
 standalone_output_configuration:
-  selection_status: UNRESOLVED | CONFIRMED
+  status: UNRESOLVED | CONFIRMED
+  selection: [<canonical standalone output ids>]
+  explicit_none: true | false
 ```
 
 Internal STM, Evidence, Behavior Model, Contract Verification, Product
@@ -428,6 +430,11 @@ Review Suite
         Maintainability Hotspots: user-selectable derived projection
         Roadmap Contribution: user-selectable derived projection
 
+  Standalone Outputs / Technical Documentation
+      always shown in NEW after selected capability configuration:
+        applicable registered Technical Documentation outputs
+        NONE (explicitly confirm no standalone outputs)
+
   requested work item = selected capability OR valid standalone output/view
   zero capabilities + zero outputs: invalid (`NO_REVIEW_SCOPE_SELECTED`)
   standalone-output-only: valid
@@ -457,7 +464,26 @@ state; this rule does not rewrite them.
 requested_work.standalone_outputs is only standalone output/view routing. It
 does not contain or replace Architecture depth/endpoint or Test Engineering
 and Code Quality capability-owned output selections. Standalone selection and
-capability-owned selection are separate configuration states.
+capability-owned selection are separate configuration states. In fresh NEW,
+empty selection without explicit completion evidence is UNRESOLVED; it is not
+explicit NONE.
+
+After all selected capability configurations are resolved and before the final
+Requested Work summary, NEW always shows a compact Standalone Outputs /
+Technical Documentation step. It offers applicable registered Technical
+Documentation outputs and an explicit NONE choice. The step is shown even when
+the user did not mention documentation. It does not add a fourth capability.
+The user either selects one or more canonical standalone output identities or
+explicitly confirms NONE; only then does standalone_output_configuration.status
+become CONFIRMED.
+
+The human-facing umbrella request API Report normalizes to the bounded existing
+Technical Documentation set Provided Interfaces, Consumed Interfaces,
+Integrations, Auth and Trust, and Failure Behavior. The coordinator shows this
+candidate set for adjustment and confirmation, then persists only the existing
+canonical output identities; API Report is not a capability or projection
+identity. Full review and selecting all three semantic capabilities do not
+select standalone outputs.
 
 Before top-level requested-work confirmation, the coordinator presents one
 normalized, read-only summary containing scope, selected capabilities, all
@@ -467,8 +493,9 @@ REQUESTED_WORK_CONFIGURATION_COMPLETE.
 
 It is reached only when scope is resolved, every selected capability has
 configuration_status=CONFIRMED, no applicable optional output is UNSPECIFIED,
-standalone output selection is resolved, conditional dependencies are
-sufficient to validate the selection, and the normalized summary has been
+standalone_output_configuration.status=CONFIRMED, conditional dependencies
+are sufficient to validate the selection, and the normalized summary explicitly
+shows standalone outputs as NONE or the selected identities and has been
 confirmed. Otherwise stop with
 REQUESTED_WORK_CONFIGURATION_INCOMPLETE.
 

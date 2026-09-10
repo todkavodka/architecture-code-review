@@ -532,6 +532,7 @@ a fourth semantic capability. The canonical routing classes and outputs are:
 | Output | Routing class | Owner/route | Confirmation and scope |
 |---|---|---|---|
 | Technical Documentation | `UMBRELLA_OUTPUT_REQUEST` | Technical Documentation package | Bounded subsection confirmation; Project/Product valid. |
+| API Report | `UMBRELLA_OUTPUT_REQUEST` | Existing sections 02, 03, 04, 07, and 09 | Preselects a bounded factual API set; user may adjust and must confirm. |
 | Provided Interfaces | `CANONICAL_PROJECTION_REQUEST` | Existing section 02 / `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | Exact and bounded; Project/Product valid. |
 | Consumed Interfaces | `CANONICAL_PROJECTION_REQUEST` | Existing section 03 / `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | Exact and bounded; Project/Product valid. |
 | Interface Catalog | `CANONICAL_PROJECTION_REQUEST` | Existing sections 02 and 03 | Exact; no new projection identity. |
@@ -546,6 +547,20 @@ a fourth semantic capability. The canonical routing classes and outputs are:
 Exact output selects only its existing section/projection. An umbrella or broad
 request resolves candidates and requires bounded subsection confirmation before
 substantive work; it never silently selects the complete package.
+`API Report` is a human-facing umbrella normalization, not a new capability,
+projection, PRJ identity, or authority. Its default candidate set is
+`PRJ-TECH-DOC-02-PROVIDED-INTERFACES`,
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES`,
+`PRJ-TECH-DOC-04-INTEGRATIONS`,
+`PRJ-TECH-DOC-07-AUTH-AND-TRUST`, and
+`PRJ-TECH-DOC-09-FAILURE-BEHAVIOR`. The coordinator shows the exact set,
+allows bounded additions/removals, and persists only the confirmed canonical
+identities. “API interfaces only” narrows to sections 02 and 03; “API
+integrations” may select section 04. A materially ambiguous phrase requires
+clarification.
+“вся техническая документация” may preselect all applicable registered
+sections as a bounded candidate set, but the exact set must still be shown and
+confirmed; “full review” does not make that selection.
 `BOUNDED_BUT_MULTI_OUTPUT` confirms only listed outputs. Matrix has
 `new_PRJ_identity=NO`, `new_lifecycle=NO`, `new_semantic_authority=NO`, and
 `compatibility_verdict=NOT_IMPLIED`. Partial, unavailable, stale, unresolved,
