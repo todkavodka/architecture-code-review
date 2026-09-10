@@ -40,6 +40,31 @@ Code Quality does not create a private factual model, rewrite `STM`, or treat
 `working/INDEX.md` as semantic authority. Missing or stale prerequisites block
 only the dependent interpretation through the existing shared workflow.
 
+## API input robustness aspect
+
+Code Quality may review API input robustness as an implementation-quality
+aspect over accepted Stage F/STM interface facts and addressable evidence. It
+may identify missing, implausibly broad, declared-but-unenforced, or
+unknown-enforcement boundaries for request bodies, fields, collections, uploads,
+parsers, protocol metadata, and validation ordering. This does not create an
+API fact authority, a fourth capability, or a Security Review capability.
+
+The review keeps the layers separate:
+
+```text
+request → transport/container limit → parsing/materialization
+        → schema/field validation → business processing
+```
+
+A field constraint does not establish a pre-materialization request limit, and
+an unknown transport limit is neither safe nor automatically a confirmed
+vulnerability. Frontend validation, OpenAPI declarations, framework defaults,
+and proxy limits are implementation evidence only when their server path,
+deployment applicability, and enforcement point are evidenced. Otherwise the
+limitation remains unresolved. Detailed API boundary categories, finding
+classes, evidence fields, and severity guidance are defined in the Code Quality
+contract.
+
 ## Product scope
 
 When Product mode is explicitly selected, Code Quality may independently
