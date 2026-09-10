@@ -19,3 +19,18 @@ protocol-property table).
 
 This PRE-CHANGE evidence was recorded before the normative IF contract edit and
 must not be reconstructed from the edited contract.
+
+## Task 2 — protocol identity and route-composition edge checks
+
+| Check | Scenario | Expected contract outcome |
+|---|---|---|
+| A01 — method distinguishes HTTP operations | `GET /orders/{orderId}` and `POST /orders/{orderId}` are both declared under the same parent interface. | Two distinct parent-qualified operation identities; the normalized method is part of each identity. |
+| A02 — parameter names remain visible | `GET /orders/{orderId}` and `GET /orders/{id}` have otherwise equal route shapes. | Distinct identities unless the evidenced protocol contract explicitly declares the parameter names equivalent. |
+| A03 — nested prefix composition | A controller prefix `/api`, router prefix `/v1`, and local route `orders/{orderId}` are declared in that order. | Composition produces the effective path `/api/v1/orders/{orderId}` after separator normalization; each input remains separately evidenced. |
+| A04 — aliases require acceptance | One handler is declared at two routes and the declaration claims an alias. | Each route is distinct until an accepted alias relation proves intentional equivalence; a declaration alone does not collapse them. |
+| A05 — duplicate declarations remain candidates | Equivalent-looking route declarations appear through different registrations. | Account for each as a candidate until classified as a duplicate declaration or as separate operations. |
+| A06 — flags and computed registration limit precision | A feature flag, plugin, reflection, or computed registration controls the route. | Preserve the limitation and use `RESOURCE_BOUNDED` or `UNRESOLVED`; never fabricate an effective path. |
+| A07 — declaration and code conflict | A declaration and implementation evidence incompatible method or route values. | Preserve both observations as a conflict and retain an unresolved/bounded candidate pending adjudication. |
+| A08 — known HTTP address with unknown schema | An evidenced method and effective path exist, but parameter or request/response schema evidence is unavailable. | The HTTP operation identity is `EXACT`; missing schema is an explicit separate limitation. |
+| A09 — unresolved effective path | A local route is known but one required prefix or runtime path construction cannot be resolved. | No exact HTTP identity is claimed; retain only the bounded or unresolved operation with its missing composition input. |
+| A10 — dynamic consumer base URL | A consumer call supplies a method/path but obtains its base URL dynamically. | Record the consumer call-site and dynamic-base limitation; do not turn configuration or a runtime guess into an exact consumer address or identity. |

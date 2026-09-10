@@ -378,6 +378,67 @@ Protocol-specific properties remain under one controlled object selected by
 
 Unsupported or unobserved properties are absent rather than null claims.
 
+#### 10.1.1 Protocol operation identity
+
+An operation child's full semantic identity is parent-qualified: its `parent_if`
+revision, `interface_kind`, `direction`, `contract_role`, and normalized
+`operation_identity` qualify one another. A source location, handler symbol,
+or generated-client location is evidence provenance, never operation identity.
+The Technical Model Gate applies the following protocol-specific construction
+when an addressable operation surface is evidenced:
+
+| `interface_kind` | Normalized `operation_identity` |
+|---|---|
+| `HTTP_REST` | Uppercase normalized method plus normalized effective route/template. |
+| `GRAPHQL` | Operation type/name when present, or an addressable field/schema surface when no named operation is available. |
+| `GRPC_RPC` | Package, service, and method. |
+| `WEBSOCKET` | An addressable command or message only when its contract identity is evidenced; an endpoint alone does not invent an operation child. |
+| `CLI` | Command and subcommand surface. |
+| Other kinds | A bounded, documented protocol-specific identity only when the operation surface is addressable and evidenced. |
+
+`EVENT-*` remains the identity of a semantic event or message. An event is not
+recast as an IF operation merely because it has a transport endpoint. An
+operation child may represent only an independently addressable command surface
+that the event contract exposes; that child does not replace or alias the
+`EVENT-*` identity.
+
+#### 10.1.2 HTTP effective-route composition and precision
+
+For `HTTP_REST`, normalize the method to uppercase. Compose the effective path
+from separately evidenced mount, controller, and router prefixes plus the local
+route declaration, in their declaration order. Normalize that composed path to
+one leading slash and remove redundant separators. Preserve contract-visible
+template parameter names and version segments: `/v1/orders/{orderId}` and
+`/v1/orders/{id}` are distinct identities unless the protocol contract
+explicitly evidences them as equivalent. Do not infer equivalence from matching
+handler code, parameter position, or framework convention.
+
+Trailing-slash normalization is allowed only when the framework's evidenced
+route semantics establish the canonical result. Otherwise retain the declared
+slash spelling as provenance, do not collapse slash variants, and record their
+equivalence distinction as unresolved. No identity may be fabricated by
+silently removing or adding a trailing slash.
+
+Each prefix or mount, local route declaration, and method is a distinct
+composition input with its own evidence reference. The operation child records
+the normalized result, not an invented replacement for a missing input. Nested
+prefixes compose only in declaration order. `EXACT` is valid only when the
+method and effective path/template are evidenced; unavailable parameter or
+request/response schema evidence remains a separate explicit limitation and
+does not lower an otherwise exact method/path identity. When a bounded route
+surface is known but a computed, plugin-provided, feature-flagged, reflected,
+or runtime-only input prevents an exact result, use `RESOURCE_BOUNDED`; use
+`UNRESOLVED` when the effective route or method cannot be determined or the
+relevant declarations conflict. Never fabricate a path to upgrade precision.
+
+The same effective path with different methods is distinct. The same handler
+under distinct routes is also distinct unless an accepted alias relation,
+supported by evidence, proves intentional equivalence. Apparent duplicate
+declarations remain separately accounted candidates until the Technical Model
+Gate classifies them as a duplicate declaration or separate operations. A route
+exposed through two mounts has two parent-qualified operation identities, even
+when the local declaration or handler is shared.
+
 ### 10.2 INT-* concrete interaction and access shape
 
 `INT-*` is the primary accepted fact for one concrete source-to-target

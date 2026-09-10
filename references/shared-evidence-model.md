@@ -212,10 +212,11 @@ EV-*:
   observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
   stage_f_source_support: DIRECT_DECLARATION |
                           STRONG_INFERENCE | WEAK_HINT
-  subject_kind: interface | provider | consumer | interaction |
+  subject_kind: interface | provider | consumer | interaction | operation |
                 data_store | data_resource | access_operation |
                 event | migration | migration_authority | other
-  subject_ref: optional IF/INT/DS/EVENT/COMP or qualified external subject
+  subject_ref: optional IF/INT/DS/EVENT/COMP or qualified external subject;
+               operation uses parent-qualified IF-*@revision/OP-* reference
   provider_or_consumer_side: PROVIDER | CONSUMER | BOTH | NOT_APPLICABLE
   observed_fact
   limitation: optional bounded/dynamic/partial limitation
@@ -239,7 +240,43 @@ provider and consumer semantics, match their identities, or decide
 compatibility. Candidate matching and Contract Verification remain later
 semantic/verification concerns.
 
-### 7.3 Dynamic and partial evidence
+### 7.3 Operation-level and route-composition evidence
+
+An operation-level `EV-*` uses the parent-qualified operation reference when
+the child is known; otherwise it may identify the parent `IF-*` and state the
+explicit operation-resolution limitation. Record each independently observed
+composition input as its own addressable evidence, rather than collapsing it
+into a handler or route-location claim:
+
+```text
+operation_evidence_role:
+  ROUTE_DECLARATION | PREFIX_OR_MOUNT | HTTP_METHOD |
+  PARAMETERS_OR_SCHEMA | AUTH_MIDDLEWARE | CONSUMER_CALL_SITE |
+  GENERATED_CONTRACT | RUNTIME_OBSERVATION
+
+composition_order: required for each PREFIX_OR_MOUNT and ROUTE_DECLARATION
+                   input when route composition applies
+accepted_runtime_observation_ref: optional accepted runtime observation,
+                                  when available
+```
+
+Route declaration, every controller/router/mount prefix, method,
+parameters/schema, authentication middleware, consumer call site, and generated
+contract each retain their own source locator and baseline binding. When an
+accepted runtime observation is available, reference it explicitly without
+letting the evidence record itself decide acceptance. Evidence location is
+never semantic identity: it supports an operation or composition input but
+cannot turn a file, symbol, handler, or generated artifact into the operation's
+identity.
+
+Dynamic, partial, computed, plugin-provided, feature-flagged, reflected,
+runtime-only, and conflicting composition evidence remains explicit through
+its individual `limitation` and subject binding. Missing inputs are not filled
+from a nearby declaration, configuration value, or consumer base URL. In
+particular, a dynamic consumer base URL is evidence of a bounded consumer call
+site, not proof of an exact remote address or operation identity.
+
+### 7.4 Dynamic and partial evidence
 
 Dynamic targets, generated operations, unresolved resource names, unavailable
 external sources, and partial repository coverage remain explicit limitations.
