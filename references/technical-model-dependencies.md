@@ -193,6 +193,33 @@ accepted artifacts by default. Expand from the semantic object to its linked
 `EV-*` evidence and raw source only when accepted/fresh authority is missing,
 stale, disputed, incomplete, or insufficient for the decision.
 
+### 6.1 Operation-inventory depth requirements
+
+When a requested output needs detailed interface operations, `resolved_work`
+records an internal operation-depth dependency slice rather than selecting a
+capability:
+
+```text
+resolved_work:
+  dependency_slice:
+    - kind: OPERATION_INVENTORY
+      scope_id: <exact bounded scope>
+      required_direction: PROVIDED | CONSUMED
+      required_interface_kind: <closed kind or bounded set>
+      parent_if_revisions: [IF-*<revision> ...]
+      coverage_record_id: TMC-<stable-id>
+      coverage_record_revision: <integer revision>
+```
+
+The slice identifies the exact requested scope, direction, interface kind,
+parent IF revisions, and accepted coverage-record revision needed by the
+consumer. It is an internal prerequisite in the dependency slice, not a user
+selection: it must not select Architecture Review or any other capability,
+expand `requested_work`, or turn ordinary interface-surface coverage into an
+operation-inventory requirement. The consumer uses the bound coverage record's
+status and limitations; a missing, partial, blocked, or unknown inventory
+remains visible rather than being inferred from an index or projection.
+
 ## 7. REVALIDATE impact traversal
 
 For a changed source or baseline, route the minimum affected slice as:

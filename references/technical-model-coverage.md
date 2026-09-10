@@ -76,7 +76,89 @@ downstream semantics until this targeted acceptance is recorded. Targeted
 acceptance does not satisfy the `FULL` requirement of a full Architecture
 Review.
 
-## 5. Architecture mode projection
+## 5. Interface surface and operation inventory depth
+
+The controlled interface coverage-depth vocabulary is:
+
+```text
+SURFACE
+  -> INTERFACE_SURFACE_COMPLETE
+
+OPERATION_INVENTORY
+  -> OPERATION_INVENTORY_COMPLETE
+  -> OPERATION_INVENTORY_PARTIAL
+  -> OPERATION_INVENTORY_UNKNOWN
+```
+
+`SURFACE` preserves ordinary interface coverage: an
+`INTERFACE_SURFACE_COMPLETE` decision accepts the known material externally
+visible or architecturally relevant interface surface at the requested scope.
+It does not enumerate every operation merely because the domain row is
+`ACCEPTED` or a full Architecture Review is in progress.
+
+`OPERATION_INVENTORY` is requested only for a detailed `PROVIDED` or `CONSUMED`
+API/interface slice. It accounts for operation candidates beneath the specified
+parent interface revisions and does not change the ordinary `FULL` surface
+acceptance rule. It adds no mandatory `OPERATION_DETAIL` gate: incomplete
+schema, parameter, request, response, or other detail is a separate explicit
+limitation when the operation itself is accounted.
+
+An operation-inventory record uses this exact shape:
+
+```text
+operation_inventory:
+  coverage_id: TMC-<stable-id>
+  coverage_revision: <integer revision>
+  definition_revision: <integer revision>
+  scope_id: <bounded scope>
+  project_binding: <Project/repository/revision/baseline>
+  product_binding: optional exact Product/member bindings
+  direction: PROVIDED | CONSUMED
+  interface_kind: <closed kind or bounded set>
+  parent_if_slice: [IF-*<revision> ...]
+  depth: SURFACE | OPERATION_INVENTORY
+  discovered_candidates: N
+  accepted_exact_operations: N1
+  accepted_bounded_or_unresolved_operations: N2
+  accepted_not_applicable_or_duplicate_candidates: N3
+  unaccounted_candidates: N4
+  status: PENDING | IN_PROGRESS | ACCEPTED | PARTIAL | BLOCKED | UNKNOWN
+  evidence_refs: WS-* / EV-*
+  limitations: [<bounded reason> ...]
+```
+
+For `OPERATION_INVENTORY`, deterministic accounting is
+`N = N1 + N2 + N3 + N4`. Every discovered candidate is classified exactly
+once with evidence as an accepted exact operation, an accepted bounded or
+unresolved operation, or an accepted not-applicable or duplicate candidate;
+otherwise it is unaccounted. A bounded or unresolved classification preserves
+the limitation and never implies an exact operation identity. Dynamic
+operations are accounted only when their dynamic-discovery limitation is
+accepted and recorded in `limitations`.
+
+Large inventories may be partitioned only into explicitly bounded records. A
+partition retains its own scope, baseline, direction, interface kind, parent
+IF slice, and accounting equation; any aggregate accounts for each candidate in
+exactly one partition rather than deduplicating by an unqualified operation
+name.
+
+`OPERATION_INVENTORY_COMPLETE` requires `status: ACCEPTED`, `N4 = 0`, and an
+evidence-backed classification for every candidate. Its `scope_id`,
+`project_binding` baseline, `direction`, and `interface_kind` must be explicit.
+Unavailable, missing, or unbounded discovery does not become complete merely
+because known candidates are classified: it remains
+`OPERATION_INVENTORY_PARTIAL`, `OPERATION_INVENTORY_UNKNOWN`, or `BLOCKED` as
+the record status and limitation require. A `TARGETED` API/interface slice may
+accept this bounded inventory without selecting Architecture Review; an
+Architecture-only request with no detailed slice retains `SURFACE` depth.
+
+When Product scope is requested, `project_binding` and `product_binding` name
+the accepted Product revision, immutable baseline vector, and exact member
+bindings for the bounded slice. Identical-looking operations in different
+members do not alias. An unavailable or divergent member is preserved as a
+limitation rather than being silently treated as Product-wide completion.
+
+## 6. Architecture mode projection
 
 Both modes use one STM schema. They differ only in required population depth,
 evidence granularity, flow detail, contradiction treatment, and review rigor.
@@ -103,7 +185,7 @@ FORENSIC:
 `FORENSIC` enriches the same accepted model; it does not restart factual
 discovery or create a second schema.
 
-## 6. Technical Model Coverage Review gate
+## 7. Technical Model Coverage Review gate
 
 For a full Architecture Review, every material applicable row must be
 `ACCEPTED` before the independent Technical Model Coverage Review can emit
@@ -117,7 +199,7 @@ An editor, projection, or reviewer prose verdict cannot override
 `PARTIAL`, `BLOCKED`, or `UNKNOWN` rows; correct the bounded matrix and repeat
 the required review instead.
 
-## 7. Separate coverage authorities
+## 8. Separate coverage authorities
 
 Technical Model Coverage answers whether factual discovery bounded the required
 technical system surface. [Architecture Discovery Coverage](discovery-coverage.md)
@@ -125,7 +207,7 @@ answers whether Architecture Review investigated the material
 architecture/security/reliability mechanism classes required by its own
 contract. Neither gate accepts, replaces, or contains the other.
 
-## 8. Product coverage binding
+## 9. Product coverage binding
 
 When Product scope is requested, the existing Technical Model Coverage gate
 binds its matrix and decision to the accepted Product revision and immutable
