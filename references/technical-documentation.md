@@ -61,8 +61,8 @@ stable identities are independent of output path or section title:
 |---|---|---|
 | `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `00-system-overview.md` | accepted STM facts across the registered families |
 | `PRJ-TECH-DOC-01-COMPONENTS` | `01-components.md` | accepted `COMP-*` facts and their controlled runtime relations |
-| `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `02-provided-interfaces.md` | `IF-*` where `direction = PROVIDED` |
-| `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `03-consumed-interfaces.md` | `IF-*` where `direction = CONSUMED` |
+| `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `02-provided-interfaces.md` | `IF-*` where `direction = PROVIDED`; accepted detailed operation inventory only for the selected output scope |
+| `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `03-consumed-interfaces.md` | `IF-*` where `direction = CONSUMED`; accepted detailed operation inventory only for the selected output scope |
 | `PRJ-TECH-DOC-04-INTEGRATIONS` | `04-integrations.md` | accepted `INT-*` and `EVENT-*` facts |
 | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `05-data-and-persistence.md` | accepted `DS-*` facts and controlled data relations |
 | `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `06-runtime-and-deployment.md` | accepted `COMP-*`, `CFG-*`, and controlled runtime relations |
@@ -182,6 +182,60 @@ resource, unresolved provider, partial source, and stale or unavailable input
 are rendered as explicit limitations. They are not replaced with an empty
 section, `EXACT`, `COMPATIBLE`, or a clean result.
 
+### Detailed operation-inventory projection binding
+
+When a selected output explicitly requires detailed operations, the existing
+`PRJ-TECH-DOC-02-PROVIDED-INTERFACES` or
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` identity records the detailed
+operation-inventory dependency snapshot defined in
+[`projection-dependencies.md`](projection-dependencies.md). It binds exact
+accepted parent `IF-*` revisions, the accepted operation-inventory coverage
+ID and revision, the inventory definition revision through its stable
+`SEL-TMC-<coverage-id>` selector identity and `TMC-<coverage-id>` contract
+identity, and the stable ordered parent-qualified `IF-*/OP-*` child IDs,
+semantic revisions, precision, and bounded/unresolved state consumed by that
+selected output scope. The snapshot includes every accepted accounted
+operation, not only exact operations.
+
+The detailed binding does not create a projection identity, package member, or
+operation selection rule. The existing Provided/Consumed selectors still own
+the selected parent-interface scope; the accepted inventory accounts for the
+operations beneath those exact parent revisions. Stage B compares the
+canonical parent-qualified child identity set and then the retained child's
+semantic revision, precision, bounded/unresolved state, and known operation
+identity. An added or removed child, a distinct method/path or other distinct
+protocol operation identity, or a reparented child records the existing
+`SELECTOR_MEMBERSHIP_CHANGED` reason. When the same accepted child identity
+remains, an unresolved/bounded-to-exact or exact-to-unresolved/bounded
+transition records the existing `SELECTOR_MEMBER_REVISION_CHANGED` reason as
+a precision/semantic-state change; it does not replace the child identity.
+A selected child semantic revision change uses the same member-revision
+reason. A parent IF revision change uses the existing exact-dependency
+`DEPENDENCY_REVISION_CHANGED` reason. An inventory `definition_revision`
+change is bound to the existing Stage B `contract_changes` record with
+`contract_kind: SELECTOR`, `contract_id: TMC-<coverage-id>`,
+`selector_id: SEL-TMC-<coverage-id>`, previous/current definition revisions,
+and `authority_ref: TMC-<coverage-id>@<coverage-revision>`; the matching
+selector resolution carries `contract_change_id` and emits
+`SELECTOR_CONTRACT_CHANGED`. Each reason makes only the affected detailed
+projection `STALE` and requires `REGENERATE` when inputs remain usable.
+
+`PRJ-TECH-DOC-02-PROVIDED-INTERFACES` and
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` keep their stable identities regardless
+of whether their selected output uses ordinary surface depth or detailed
+operation inventory. Detailed package membership follows the already selected
+output scope. `PRJ-TECH-DOC-04-INTEGRATIONS`,
+`PRJ-TECH-DOC-07-AUTH-AND-TRUST`, and
+`PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` do not inherit an operation inventory
+merely because they can render related `IF-*` facts; they consume one only if
+their own existing direct dependency contract explicitly requires it.
+
+The renderer reads accepted authority and the recorded snapshot; it never
+scans source to reconstruct operation membership. Projection impact accounting
+does not alter selection. A `STALE` or `BLOCKED` projection is not current and
+cannot be repaired by prose; a fresh rendering requires the separate explicit
+`RG-*` workflow, never automatic regeneration.
+
 ### API input boundary evidence
 
 Provided and consumed interface views may render optional accepted
@@ -294,7 +348,10 @@ a substitute for the recorded predicate and snapshot.
 Each selected projection also records a `SEMANTIC_EXACT` dependency on the
 accepted Technical Model Coverage record bound to that projection. A `FULL`
 coverage record may satisfy that binding; a bounded document records its
-accepted targeted-coverage record instead. The coverage binding preserves
+accepted targeted-coverage record instead. A detailed Provided/Consumed output
+additionally binds the accepted operation-inventory coverage ID/revision and
+its definition revision in the recorded snapshot; it does not infer that
+binding from an index or rendered list. The coverage binding preserves
 `NOT_APPLICABLE`, partial, unknown, stale, and authority-unresolved states as
 visible limitations. It does not let the document fill a missing STM fact or
 turn incomplete coverage into accepted system knowledge.
