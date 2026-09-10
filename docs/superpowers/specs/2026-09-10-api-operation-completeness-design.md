@@ -493,4 +493,3 @@ and output-scoped operation completeness.
 13. Historical surface-only IF facts remain valid and interpretable.
 14. All D01–D20 scenarios have deterministic expected authority, coverage, and
     projection behavior.
-
