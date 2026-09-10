@@ -17,7 +17,9 @@ The canonical startup layers are:
 Session Intent
 Scope Context
 Review Capabilities
-Requested Outputs
+Capability-Owned Configuration
+Standalone Output Configuration
+Requested Work Confirmation
 Resolved Plan / Required Internal Work
 Authorization / Execution Boundaries
 ```
