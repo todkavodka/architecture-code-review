@@ -30,6 +30,21 @@ requested_work:
   standalone_outputs: [<canonical output ids>]
   scope: PROJECT | PRODUCT
   confirmation_status: CANDIDATE | CONFIRMED
+
+capability_configuration:
+  architecture:
+    configuration_status: UNRESOLVED | CONFIRMED
+    depth: STANDARD_FULL | FORENSIC
+    endpoint: REVIEW_ONLY | REVIEW_PLUS_TARGET_ARCHITECTURE | REVIEW_PLUS_TARGET_AND_ROADMAP
+  test_engineering:
+    configuration_status: UNRESOLVED | CONFIRMED
+    outputs: <required Test Assurance plus resolved optional selections>
+  code_quality:
+    configuration_status: UNRESOLVED | CONFIRMED
+    outputs: <resolved independent projection selections>
+
+standalone_output_configuration:
+  selection_status: UNRESOLVED | CONFIRMED
 ```
 
 Internal STM, Evidence, Behavior Model, Contract Verification, Product
@@ -421,6 +436,44 @@ Stack Addenda
   detected automatically; confirmed before substantive use
 ```
 
+For a selected Architecture Review, Depth and Endpoint must both be explicitly
+resolved and confirmed before its configuration_status becomes CONFIRMED;
+recommendations are not defaults. For Test Engineering, Test Assurance is
+visibly required/selected and every optional output is explicitly resolved as
+SELECTED or NOT_SELECTED. For Code Quality, every listed projection is
+explicitly resolved as SELECTED or NOT_SELECTED; zero selected projections is
+valid only after the user explicitly confirms the semantic review with no
+human-readable projections.
+
+In fresh NEW state, an optional output begins as UNSPECIFIED. It is not
+equivalent to NOT_SELECTED, FALSE, or a completed default. The coordinator must
+not set a selected capability's configuration to CONFIRMED while any
+applicable optional output remains UNSPECIFIED. Legacy confirmed packages may
+interpret historical true/false values through their existing accepted package
+state; this rule does not rewrite them.
+
+requested_work.standalone_outputs is only standalone output/view routing. It
+does not contain or replace Architecture depth/endpoint or Test Engineering
+and Code Quality capability-owned output selections. Standalone selection and
+capability-owned selection are separate configuration states.
+
+Before top-level requested-work confirmation, the coordinator presents one
+normalized, read-only summary containing scope, selected capabilities, all
+applicable capability configuration, standalone outputs, and resolved/internal
+work separately. The user may Confirm or Change selection. The hard gate is
+REQUESTED_WORK_CONFIGURATION_COMPLETE.
+
+It is reached only when scope is resolved, every selected capability has
+configuration_status=CONFIRMED, no applicable optional output is UNSPECIFIED,
+standalone output selection is resolved, conditional dependencies are
+sufficient to validate the selection, and the normalized summary has been
+confirmed. Otherwise stop with
+REQUESTED_WORK_CONFIGURATION_INCOMPLETE.
+
+Only after REQUESTED_WORK_CONFIGURATION_COMPLETE may
+requested_work.confirmation_status become CONFIRMED, resolved dependency
+closure proceed, authorization be evaluated, or substantive work begin.
+
 The three top-level capabilities are independently selectable. No capability is
 the implicit parent of another. Configuration under a capability is shown only
 when that capability is selected. A `NEW` session with no selected capability is
@@ -448,7 +501,8 @@ authoritative matrix, review, and acceptance semantics are in
 
 Test Engineering is a separate startup choice from Architecture Review. When it
 is enabled, `Test Assurance` is the required core and each other listed output
-is selected independently. Lightweight reconnaissance may recommend Test
+is selected independently as SELECTED or NOT_SELECTED after initially being
+UNSPECIFIED. Lightweight reconnaissance may recommend Test
 Engineering when a material automated-test surface exists, but it must never be
 silently enabled. Stack addenda are lenses, not capabilities. `RESUME` reuses
 reconciled persisted configuration by default; `REVALIDATE` shows the previous
@@ -458,8 +512,9 @@ does not reopen configuration choices by default.
 
 Code Quality Review is an independent capability selection, separate from
 Architecture Review and Test Engineering. Selecting the capability does not
-implicitly select every Code Quality projection. When enabled, persist its
-selected outputs independently and retain the capability's owning semantic
+implicitly select every Code Quality projection. When enabled, initialize its
+configuration as UNRESOLVED, resolve each output as SELECTED or NOT_SELECTED,
+then persist its selected outputs and retain the capability's owning semantic
 records and qualified coverage state by reference. `NEW` may select Code
 Quality without selecting either other capability; `EXTEND` adds only the
 requested Code Quality slice and reuses accepted/fresh shared evidence or STM

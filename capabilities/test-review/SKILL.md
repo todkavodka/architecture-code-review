@@ -124,6 +124,13 @@ Service Simulator Implementation Plan [optional; requires accepted simulator spe
 E2E Test Plan [optional]
 ```
 
+For NEW, selecting Test Engineering starts with configuration_status=UNRESOLVED.
+Test Assurance is visibly required, and every optional output must be explicitly
+resolved as SELECTED or NOT_SELECTED before the user confirms the capability.
+An explicit confirmation of no optional outputs is the valid Test Assurance-only
+configuration. No optional output is enabled by an untouched false/default
+value, and substantive work is blocked until configuration_status=CONFIRMED.
+
 Behavior Model is an internal dependency, not a checkbox. Contract Verification
 is automatic when materially applicable. The extension designs and plans test
 capability; it does not implement product tests, a Service Simulator, or test
