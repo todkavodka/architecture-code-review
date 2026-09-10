@@ -286,6 +286,8 @@ IF-*:
   protocol_properties: optional controlled kind-specific properties
   precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
   observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
+  boundary_evidence: optional qualified transport/schema boundary observations
+                     and enforcement-stage references
   project_binding: optional Project/repository/revision qualification
   evidence_refs: WS-* / EV-* references
 ```
@@ -294,6 +296,16 @@ The shape does not require nullable properties to be fabricated. Direction,
 interface kind, identity/revision, evidence, and an applicable precision are
 the core fields; operation, address, version, contract, provider, auth, error,
 and protocol properties are required only when applicable or evidenced.
+
+When API input boundary observations are applicable, `boundary_evidence` is an
+optional qualified attribute on the existing `IF-*` record. It may reference
+transport/container and schema/field limits, evidence state, and the expected
+enforcement stage. It does not create a boundary fact family, alter interface
+identity, or make Code Quality or Test Engineering authority factual. A
+`TESTED` observed view still requires accepted execution evidence under the
+existing Test Engineering semantics; a generated or accepted case and its
+expected result cannot populate it. Missing boundary metadata remains absent
+or unknown and does not invalidate a historical IF record.
 
 `contract_role` is a perspective qualifier, not a lifecycle. `observed_view`
 remains the existing observation vocabulary. The Technical Model Gate applies
