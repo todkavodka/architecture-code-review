@@ -601,6 +601,24 @@ Verification and `CC-*` remain compatibility authority. Generic compatibility
 does not require Product or Matrix, and single-project compatibility remains
 available when Contract Verification applies.
 
+### API boundary evidence qualification
+
+Product-qualified API boundary findings and Test Engineering case definitions
+are views over exact member Project/source/revision/baseline evidence. Product
+membership or a grouped output does not establish an API limit, CQ finding,
+executed test, or Stage F `TESTED` view. One member's generated or accepted
+case is not Product-tested; one member's executed result does not imply that
+other Projects or the Product baseline were tested. A Product-wide `TESTED`
+claim requires separately accepted execution evidence qualified to every
+claimed Project, environment, and baseline.
+
+Different member limits, gateway paths, framework configurations, and schema
+revisions remain separate observations and may produce a bounded divergence or
+unavailable limitation. Product composition cannot flatten them into one
+unqualified limit or infer a safe boundary from membership. Existing
+authorization, redaction, freshness, and projection-lifecycle contracts remain
+unchanged.
+
 ## 11. Storage and layout
 
 Product context is stored in the coordinator review workspace under a

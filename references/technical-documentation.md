@@ -182,6 +182,43 @@ resource, unresolved provider, partial source, and stale or unavailable input
 are rendered as explicit limitations. They are not replaced with an empty
 section, `EXACT`, `COMPATIBLE`, or a clean result.
 
+### API input boundary evidence
+
+Provided and consumed interface views may render optional accepted
+`boundary_evidence` from the existing `IF-*` record. Rendering preserves the
+two independent layers and their evidence:
+
+```text
+transport/container limit
+  → parsing/materialization
+  → schema/field validation
+  → business processing
+```
+
+Field constraints, request-body/container limits, enforcement order, and
+unknown/unavailable enforcement are shown separately with their evidence and
+Project/revision qualification. A field declaration does not establish a
+transport limit, and a frontend hint, undocumented framework default, or
+unqualified proxy limit is not rendered as server enforcement. CQ findings and
+Test Engineering cases may be linked as owning-capability references, but the
+Stage F projection does not adjudicate CQ safety or accept a test result.
+
+Gateway, ingress, reverse-proxy, and application limits are qualified to the
+actual traffic path and reachability. A gateway/ingress rejection may be
+recorded as an expected early enforcement stage, but it does not prove the
+application validates the request or protect a directly reachable application.
+Streaming and buffered input paths are recorded separately; aggregate body
+limits also cover chunked input when `Content-Length` is absent, while upload,
+multipart, JSON, and decompression limits remain distinct.
+The same boundary evidence is supported for a single Project without Product
+context and remains qualified to that Project's source revision and baseline.
+
+Generated or accepted Test Engineering boundary cases and expected outcomes
+cannot populate `observed_view: TESTED`. That view remains the existing factual
+view and requires accepted execution evidence under the Test Engineering
+contract. Missing boundary metadata remains an explicit limitation and does
+not invalidate or enrich a historical interface fact.
+
 ### Integrations and events
 
 `PRJ-TECH-DOC-04-INTEGRATIONS` renders concrete `INT-*` edges with source,

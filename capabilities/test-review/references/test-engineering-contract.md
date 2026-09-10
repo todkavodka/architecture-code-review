@@ -27,6 +27,76 @@ Contract Verification, Service Simulator scenarios, and E2E scenarios. Existing
 tests are observations mapped by `TM-*`; executable-evidence verdicts do not
 belong inside a `BC-*` record.
 
+## API input boundary case semantics
+
+API input robustness extends existing Test Engineering assurance work; it does
+not create a new test authority or identity family. Boundary categories are
+dimensions on existing behavior/assurance/case records. The controlled
+dimensions are:
+
+```text
+REQUEST_BODY_SIZE STRING_LENGTH COLLECTION_SIZE NUMERIC_RANGE NESTING_DEPTH
+UPLOAD_SIZE MULTIPART_LIMITS HEADER_LIMITS QUERY_LIMITS COOKIE_LIMITS
+CONTENT_TYPE MALFORMED_PAYLOAD UNEXPECTED_FIELDS SCHEMA_ENFORCEMENT
+VALIDATION_ORDER PARSER_RESOURCE_EXHAUSTION COMPRESSION_EXPANSION
+PAGINATION_LIMITS
+```
+
+A generated case records, using the existing Test Plan/assurance artifact
+semantics, at least:
+
+```text
+case_key: NEG-API-<stable case key>
+interface: <qualified IF-* or exact interface reference>
+input_location: <body, field, upload, query, header, cookie, or parser scope>
+boundary_dimension: <controlled dimension>
+precondition: <route/configuration state>
+input_strategy: <type-aware value or size construction>
+expected_result: <acceptance or rejection>
+expected_stage: <transport | parser | schema | processing | UNKNOWN>
+evidence_basis: <declaration/implementation/test references and strength>
+open_assumptions: <bounded unresolved facts, or NONE>
+```
+
+`NEG-API-*` is a case key convention only. It is not a new semantic identity,
+test result, or authority family. Known exact bounds produce type-aware
+below/at/above candidates: numeric min/max, string length, collection item
+count, body/upload bytes, pagination range, enum valid/invalid member, and
+required/null/absent distinctions where the contract defines them. Unknown
+thresholds produce an `ESTABLISH_BOUNDARY` requirement or the equivalent
+existing unresolved-assurance state and never invent a numeric value.
+
+Case planning and execution evidence are separate:
+
+```text
+accepted_test_case != executed_test != tested_result
+accepted_test_case != executed_test
+expected_result != observed_result
+```
+
+`DEFINED`/`ACCEPTED` case-planning or governance state does not imply
+`EXECUTED`, `TESTED`, `PASSED`, `FAILED`, `OBSERVED`, or
+`VERIFIED_AT_RUNTIME`. An expected 4xx, exact payload, or precise rejection
+stage is still only a requirement without an execution record. In this v1,
+generated cases remain planned/not executed because runtime execution,
+fuzzing, DAST, payload submission, and environment provisioning are
+`UNAVAILABLE`.
+
+`TESTED` may be derived only under the existing Test Engineering evidence
+semantics from accepted actual execution/observation evidence. Where those
+contracts require it, that evidence links the case to an execution/result
+record, exact environment and baseline, execution time, status/result, and
+provenance. A case being accepted is insufficient. This design does not add a
+runtime ingestion mechanism or a parallel result ledger.
+
+Stage F's `observed_view: TESTED` therefore cannot be populated by a generated
+or accepted API boundary case or its expected result. A boundary case informs
+`WHAT MUST BE PROVEN`; it does not change the Stage F `WHAT EXISTS` view. A
+Product Test Review likewise requires exact Project, Product baseline,
+environment, and execution-result qualification. One Project's generated,
+accepted, or executed case does not make another Project or the whole Product
+`TESTED`.
+
 ## Contract Verification
 
 When a materially relevant declared external contract exists, Contract

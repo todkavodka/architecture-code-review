@@ -131,6 +131,64 @@ Categories are semantic lenses, not a framework-rule catalog. One semantic
 issue has one primary category and may use secondary tags; symptoms do not
 automatically create duplicate findings.
 
+### API input robustness categories and findings
+
+API input robustness reuses the primary-category field and existing `CQ-*`
+finding lifecycle. The following controlled boundary categories are attributes
+of an observation/finding, not identity families:
+
+```text
+REQUEST_BODY_SIZE       STRING_LENGTH          COLLECTION_SIZE
+NUMERIC_RANGE           NESTING_DEPTH          UPLOAD_SIZE
+MULTIPART_LIMITS        HEADER_LIMITS          QUERY_LIMITS
+COOKIE_LIMITS           CONTENT_TYPE           MALFORMED_PAYLOAD
+UNEXPECTED_FIELDS       SCHEMA_ENFORCEMENT     VALIDATION_ORDER
+PARSER_RESOURCE_EXHAUSTION  COMPRESSION_EXPANSION  PAGINATION_LIMITS
+```
+
+The controlled implementation-quality classifications are:
+
+```text
+MISSING_REQUEST_SIZE_LIMIT       UNBOUNDED_STRING
+UNBOUNDED_COLLECTION             UNBOUNDED_UPLOAD
+SCHEMA_NOT_ENFORCED              VALIDATION_AFTER_MATERIALIZATION
+UNEXPECTED_FIELD_ACCEPTANCE      PARSER_RESOURCE_EXHAUSTION
+UNBOUNDED_PAGINATION             UNBOUNDED_NUMERIC_INPUT
+UNBOUNDED_NESTING                UNBOUNDED_MULTIPART
+COMPRESSION_EXPANSION_RISK
+```
+
+These values classify CQ observations; they do not create a second API fact
+record, a compatibility result, a projection lifecycle, or a security
+authority. One input may carry several category tags, while one accepted
+semantic issue retains one primary CQ category and explicit secondary context.
+
+The API boundary review records the qualified interface/input location, layer
+(`TRANSPORT_CONTAINER` or `SCHEMA_FIELD`), observed state, expected boundary,
+evidence/provenance, impact, recommendation, source/baseline binding, and
+severity. It distinguishes:
+
+- `DECLARED`: a contract or configuration states a constraint;
+- `IMPLEMENTED`: the relevant server path enforces it at an evidenced point;
+- `TESTED`: accepted execution evidence supports the existing Test Engineering
+  tested view; a generated or accepted test case alone is not tested evidence.
+
+The transport/container check covers body bytes, upload/multipart limits,
+headers, query/cookie aggregates, parser/resource limits, and compression
+expansion. The schema/field check covers string/collection/numeric limits,
+unknown-field policy, media type, nesting, pagination, and validator use. A
+field `maxLength` with an unknown body limit and buffering before validation
+therefore records field evidence but unresolved transport protection and may
+support `VALIDATION_AFTER_MATERIALIZATION` or
+`MISSING_REQUEST_SIZE_LIMIT`; it never implies `SAFE`.
+
+Static patterns include an unbounded parser or upload handler, an undocumented
+framework default, validation after buffering/deserialization, a bypassed
+schema validator, frontend-only validation, permissive unknown fields,
+unbounded pagination/numeric input, recursive parsing, and decompression before
+bounded enforcement. Tool output remains candidate/evidence and must pass the
+normal CQ applicability, materiality, lifecycle, and adjudication chain.
+
 ## Materiality, severity, and confidence
 
 Materiality answers whether an observation deserves persistent CQ identity. A
@@ -176,6 +234,17 @@ Minimum evidence by category:
 | `FRAMEWORK_MISUSE` | Applicable framework/version rule, concrete misuse, and consequence in scope. |
 | `LOCALIZATION` | User-facing path, localization context, affected locale behavior, and consequence. |
 | `DEPENDENCY_USAGE` | Dependency/version/use site, applicable contract, and concrete maintenance, reliability, security, or lifecycle consequence. |
+| `API_OR_LIFECYCLE_MISUSE` | Qualified API/input path, applicable transport or schema layer, concrete enforcement/order evidence, and material consequence. |
+
+For API boundary findings, a missing or broad limit is not material solely
+because a field lacks a maximum. The expected threshold must come from an
+accepted contract, explicit policy, resource budget, or evidenced context. A
+frontend `maxlength` is a weak hint, an OpenAPI limit is a declaration, a
+framework default requires deployed applicability, and a reverse-proxy limit
+requires qualified traffic-path reachability. Unknown enforcement is not safe
+and is not by itself a confirmed vulnerability; severity remains dependent on
+reachability, resource consequence, evidence strength, and effective alternate
+boundaries.
 
 Observation, interpretation, and consequence remain distinguishable. A static
 tool result is evidence for adjudication, never an accepted finding by itself.

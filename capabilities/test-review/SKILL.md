@@ -129,6 +129,17 @@ is automatic when materially applicable. The extension designs and plans test
 capability; it does not implement product tests, a Service Simulator, or test
 infrastructure during review.
 
+### API boundary cases
+
+Test Engineering may define API input robustness as a boundary dimension of
+existing Test Assurance/Test Plan work. It may generate negative and boundary
+case definitions for transport/container and schema/field limits, but it does
+not execute them. A case definition or its acceptance is
+`WHAT MUST BE PROVEN`, not runtime evidence. The detailed case fields,
+type-aware generation, execution-evidence requirement, Stage F `TESTED`
+protection, and Product qualification are defined in the Test Engineering
+contract.
+
 Persist the selected outputs as independent fields. Existing `REVIEW_ONLY` and
 `REVIEW_PLUS_TEST_PLAN` packages are legacy input and normalize conservatively:
 the former selects only Test Assurance; the latter selects Test Assurance plus
