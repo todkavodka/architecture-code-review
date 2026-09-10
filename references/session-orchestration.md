@@ -288,6 +288,71 @@ single impact-accounting handoff. If output freshness is requested, use
 upstream prerequisites only; downstream impact is not silently added to the
 execution scope.
 
+### Targeted operation-depth enrichment during `EXTEND`
+
+When `EXTEND` selects detailed `Provided Interfaces`, detailed `Consumed
+Interfaces`, or the corresponding detailed sections of `API Report`, inspect
+the accepted Technical Model Coverage depth for the exact selected
+Project/baseline, direction, interface kind, and parent `IF-*` slice. If the
+accepted STM has only `SURFACE` depth (including
+`INTERFACE_SURFACE_COMPLETE`) and no accepted operation inventory for that
+slice, emit an `OPERATION_INVENTORY` depth requirement. Surface acceptance is
+not treated as detailed-operation acceptance, and the old surface facts are
+not invalidated.
+
+The resolved plan persists this requirement as internal work:
+
+```text
+resolved_work:
+  dependency_slice:
+    - kind: OPERATION_INVENTORY
+      project_binding:
+        project_id: <exact Project identity>
+        repository: <exact repository identity>
+        source_revision: <exact committed source revision>
+        baseline_ref: <exact Project baseline>
+      scope_id: <exact bounded operation scope>
+      required_direction: PROVIDED | CONSUMED
+      required_interface_kind: <closed kind or bounded set>
+      parent_if_revisions: [IF-*<revision> ...]
+      source_scope: <bounded declarations/implementations/consumer scope>
+      evidence_scope: <bounded WS-*/EV-* scope>
+      required_depth: OPERATION_INVENTORY
+      coverage_record_id: TMC-<stable-id>
+      coverage_record_revision: <integer revision>
+```
+
+For Product scope, the same record additionally binds the accepted Product
+revision and exact member/baseline bindings. This dependency remains internal
+to `resolved_work`: it does not add Architecture Review, Test Engineering, or
+Code Quality Review to `requested_work.capabilities`, and it does not add an
+output that the user did not select. Detailed sections not selected in the
+umbrella `API Report` do not create an operation-depth requirement.
+
+The targeted enrichment route is:
+
+```text
+accepted surface STM facts
+→ exact Project/baseline and parent-IF binding
+→ targeted operation discovery and evidence
+→ Technical Model Gate operation acceptance/revision
+→ targeted OPERATION_INVENTORY coverage acceptance
+→ detailed projection dependency satisfaction
+→ explicit generation/regeneration request
+→ V1–V4
+→ CURRENT
+```
+
+The existing surface facts remain accepted throughout. Discovery is bounded by
+the persisted source/evidence scope; unresolved dynamic operations remain
+explicit inventory limitations. Projection dependency satisfaction consumes
+accepted operation children, the matching coverage record, and its frozen
+membership/revision snapshot; it never reconstructs private facts from source.
+If fresh output was not explicitly requested, the route ends after semantic
+acceptance and `PROJECTION_IMPACT_ACCOUNTED`, with any detailed projection
+remaining `STALE` or otherwise visible under the package policy. Impact
+accounting and `EXTEND` never start generation or regeneration implicitly.
+
 `REVALIDATE` uses the impact-driven semantic flow in
 `revalidation-and-freshness.md`. Once its semantic delta is stabilized, the
 coordinator runs Projection Impact Analysis as a separate accounting step using

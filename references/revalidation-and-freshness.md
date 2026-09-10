@@ -325,6 +325,56 @@ reconciliation under the idempotent impact rules, not implicit regeneration.
 No intent may turn Projection Impact Analysis into a content writer or start an
 `RG-*` session without a separate explicit output/package freshness request.
 
+### 7.1 Operation-inventory delta routing
+
+When `REVALIDATE` affects a detailed Provided/Consumed operation inventory,
+restore and preserve the previously requested bounded operation scope: exact
+Project/baseline (or pinned Product member/baseline), direction, interface kind,
+parent `IF-*` revisions, source/evidence scope, and selected output sections.
+`REVALIDATE` does not add outputs, enable Architecture Review, Test Engineering,
+or Code Quality Review, or become a new `EXTEND` configuration flow.
+
+Route the minimum operation delta as:
+
+```text
+changed source/baseline
+→ compare the matching operation-inventory snapshot
+→ targeted STM/evidence revalidation for affected IF-owned children
+→ accept/revise/supersede affected operation children through the Technical Model Gate
+→ update matching OPERATION_INVENTORY accounting
+→ record selector membership/revision/precision impact
+→ PROJECTION_IMPACT_ACCOUNTED
+```
+
+For the matching bounded inventory, an added or removed operation changes
+membership; a method/path or parent change creates a revised
+parent-qualified identity with explicit history; and a precision change
+(`EXACT`, `RESOURCE_BOUNDED`, or `UNRESOLVED`) changes the inventory snapshot
+meaning. These changes make the matching detailed projection `STALE` under its
+existing Stage B dependency rules after impact accounting. A child removed from
+the current set remains in authoritative history as the prior revision with its
+accepted supersession/removal disposition; its identifier is not silently
+reused, and a current renderer does not retain it from an old snapshot.
+
+Auth, boundary, schema, or other operation evidence revisions affect the
+operation and any other downstream record only where that consumer's owning
+dependency metadata declares the material edge. A matching detailed projection
+therefore receives the changed accepted detail or explicit limitation without
+turning projection freshness into a semantic verdict.
+
+For Product scope, compare qualified Project/member revisions and the pinned
+Product baseline before classifying membership. Identical method/path text from
+different member revisions does not alias the operations; divergence, missing
+members, or unavailable evidence remains explicitly Product-qualified and may
+require `CONTEXT_EXPANSION_REQUIRED`. Unaffected Project/member slices remain
+preserved only when their direct dependency and freshness bindings support that
+claim.
+
+Operation impact accounting changes freshness state only; it does not add a
+requested output or start generation/regeneration. Any fresh detailed output
+requires a separate explicit `RG-*` request with the accepted revised
+inventory/snapshot as input.
+
 `REVALIDATE` binds the previous accepted baseline to the selected current
 baseline and produces a bounded, delta-oriented overlay:
 

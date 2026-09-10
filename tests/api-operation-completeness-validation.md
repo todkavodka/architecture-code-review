@@ -57,6 +57,7 @@ must not be reconstructed from the edited contract.
 |---|---|---|
 | D03 — nested route rendering | A provided operation is composed from controller prefix `/api`, router prefix `/v1`, and local route `orders/{orderId}`. | Render one row for the accepted child with parent IF, child reference, `PROVIDED` role, protocol kind, exact method/effective path `/api/v1/orders/{orderId}`, precision, views, evidence, and no omitted route component. |
 | D07 — providerless consumer rendering | A consumed operation is evidenced at a call site but no provider IF is accepted. | Render the consumed operation row and its evidence with an explicit unmatched-provider limitation; do not omit the operation or invent a provider match. |
+| D11 — EXTEND from surface-only STM | A detailed Provided/Consumed or API Report section is selected while the matching accepted STM is only `SURFACE`. | Emit an internal `OPERATION_INVENTORY` requirement in `resolved_work` for the exact Project/baseline, direction, kind, parent IF slice, source/evidence scope, and required depth; preserve the accepted surface facts and do not select Architecture, TE, or CQ. |
 | D12 — endpoint addition | A new accepted operation child is added beneath a selected parent IF. | The detailed snapshot membership changes, the matching projection becomes `STALE`, and explicit regeneration is required; the new operation is rendered only from the accepted refreshed snapshot. |
 | D13 — endpoint removal | An accepted operation child is removed or superseded. | The old child remains in history, the selected snapshot detects removal and stales only the affected detailed projection, and no renderer silently retains it as current content. |
 | D14 — path/identity change | An accepted operation keeps its scope but changes its method or effective path identity. | The identity change is detected through the parent-qualified snapshot, stales the affected detailed projection, and the renderer shows the new identity only after accepted authority and an explicit refresh. |
@@ -68,3 +69,19 @@ must not be reconstructed from the edited contract.
 | COMPLETE_CLAIM_01 | “Complete API” or “all endpoints” with missing, partial, unknown, unresolved, stale, blocked, or mismatched selected inventory. | Reject the complete wording and require explicit `PARTIAL`, `UNKNOWN`, or `UNRESOLVED` limitation wording. |
 | COMPLETE_CLAIM_02 | “Full endpoint list” with projection `CURRENT` but without an accepted matching `OPERATION_INVENTORY_COMPLETE` and valid snapshot. | Reject the claim; `CURRENT` alone is insufficient. |
 | COMPLETE_CLAIM_03 | Provided-only detailed scope with accepted matching Provided inventory complete and Consumed deselected. | Allow the Provided complete claim without requiring Consumed inventory; retain any row-level limitations. |
+
+## Task 6 — EXTEND and REVALIDATE routing checks
+
+| ID | Scenario | Expected contract outcome |
+|---|---|---|
+| R01 — preserve requested operation scope | A completed detailed output is revalidated against a changed Project baseline. | Preserve the selected output, direction, kind, parent IF slice, and exact baseline-qualified scope; route only the affected operation/evidence dependency slice and do not add outputs or capabilities. |
+| R02 — added operation freshness | A new operation child is accepted under a parent in the previously selected detailed scope. | The matching inventory membership/snapshot and detailed projection become `STALE` after impact accounting; no generation or regeneration starts automatically. |
+| R03 — removed operation history | An accepted operation is removed or superseded in the current source revision. | Retain the prior parent-qualified child and its removal/supersession history, detect snapshot membership removal, and require an explicit refreshed projection before omitting it from current content. |
+| R04 — revised precision and Product qualification | An operation changes identity/precision or one Product member diverges at a new qualified revision. | Revise the matching operation/snapshot and stale only materially dependent detailed projections; keep Project/member/baseline qualification and do not alias divergent members. |
+
+## Task 6 — adversarial routing checks
+
+| ID | Adversarial scenario | Expected contract outcome |
+|---|---|---|
+| A11 — Product v1/v2 divergence | Two Product members expose the same method/path text but bind to different Project revisions or immutable baseline members. | Keep separate qualified operation identities/inventory memberships; identical text does not create an alias, and missing/divergent evidence remains an explicit limitation. |
+| A12 — operation removal and identifier reuse | A removed operation is reintroduced or a sibling is allocated after the original child left the current inventory. | Preserve the removed child in history, never reuse its parent-qualified operation allocation, and represent any semantically new child with explicit revision/history rather than silently restoring stale projection content. |
