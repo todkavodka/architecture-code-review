@@ -134,6 +134,48 @@ REQUESTED_WORK_CONFIGURATION_COMPLETE содержательная работа 
 Consumed Interfaces, Integrations, Auth and Trust и Failure Behavior. Он не
 создаёт четвёртый capability, новый PRJ или новую authority.
 
+### API surface и operation detail
+
+Фактическим владельцем интерфейса остаётся `IF-*` в Shared Technical Model;
+operation children — адресуемые дочерние записи этого интерфейса, а не новая
+глобальная семантическая семья. Подробные `Provided Interfaces` и `Consumed
+Interfaces` перечисляют каждую принятую учтённую операцию в выбранном срезе и
+сохраняют родителя, направление, протокол, идентичность, evidence и
+ограничения. `PARTIAL`, `UNKNOWN` и `UNRESOLVED` означают видимую границу
+знания, а не пустой результат.
+
+Technical Model Coverage — единственный владелец решения о покрытии. Обычный
+`Architecture Review` может иметь `FULL` для материальной поверхности без
+перечисления каждого endpoint; это не является operation inventory. Для
+подробного API-выхода complete-claim требует принятого
+`OPERATION_INVENTORY_COMPLETE` на точном bounded Provided или Consumed scope и
+действительного snapshot. `CURRENT` сам по себе такой claim не подтверждает.
+При выбранном только `Provided` покрытие `Consumed` не требуется, а
+ограничения отдельных операций сохраняются.
+
+`EXTEND` при surface-only STM запрашивает только адресное operation-depth
+enrichment для выбранных Project/baseline, direction, protocol kind,
+родительских IF и evidence scope. Это остаётся во внутреннем `resolved_work`:
+оно не выбирает capability, не создаёт новый API authority и не пересобирает
+несвязанные области. CQ, TE и CC могут ссылаться на принятую операцию или её
+evidence, но не создают, не классифицируют и не переписывают operation
+inventory; они сохраняют собственные владение и жизненный цикл.
+
+Обычный scope остаётся однопроектным и использует Project/source revision и
+baseline. `Product` — опциональная composition/view-область: её inventory
+сохраняет точные Product revision, immutable baseline и member bindings.
+Одинаковые method/path у разных участников не сливаются, а недоступный или
+расходящийся участник остаётся явным ограничением. Product не получает права
+писать факты, тесты или проекции участника.
+
+Исторические surface-only `IF-*` не переписываются и остаются пригодными для
+surface-depth consumers; их operation inventory считается `UNASSESSED` или
+`UNKNOWN`, пока отдельное принятие не докажет иное. Такие записи не могут
+удовлетворить новую detailed inventory dependency. Изменения membership,
+identity, operation detail, auth, boundary или evidence проходят существующий
+учёт влияния и жизненный цикл `STALE`/`RG-*`; текст проекции не создаёт
+автоматическую regeneration или новую фактическую authority.
+
 ## Общий фактический фундамент
 
 Модули проверки не должны независимо «изобретать» систему каждый для себя.
