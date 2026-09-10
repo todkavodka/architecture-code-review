@@ -39,7 +39,56 @@ can affect persistent projection lifecycle state:
 the first failing condition (and may record all independent failures) against
 the candidate and its frozen input snapshot.
 
-## 2.1 Legacy registration gate
+## 2.1 Detailed operation and API claim verification
+
+For a selected detailed Provided or Consumed projection, `V3 CONTRACT
+COMPLETENESS` additionally checks that the candidate declares the exact
+selected scope and represents the matching operation-inventory dependency
+state. A limited or blocked inventory state remains limited or blocked under
+the existing lifecycle; it cannot be presented as a complete claim. The
+check includes:
+
+```text
+operation_inventory_status:
+  accepted matching OPERATION_INVENTORY_COMPLETE for an unqualified
+  complete-operation claim; otherwise an explicit PARTIAL, UNKNOWN, or
+  UNRESOLVED limitation
+operation_inventory_snapshot:
+  exact parent IF revisions, coverage ID/revision, definition revision,
+  and stable parent-qualified operation child IDs/revisions, precision,
+  and limitation state
+required_operation_fields:
+  parent IF, operation_ref child reference/revision, direction/role, protocol
+  kind, exact method/effective path when established, precision, observed
+  views, evidence/provenance, and applicable limitation
+declared_claim_rule:
+  complete API/all endpoints/full endpoint list wording is permitted only
+  for the exact selected scope with the accepted complete inventory and
+  valid dependency snapshot; CURRENT alone never satisfies the rule
+```
+
+An operation inventory may be complete while individual operations remain
+`RESOURCE_BOUNDED` or `UNRESOLVED`; V3 checks that those limitations are
+declared and does not turn inventory completeness into a requirement that all
+detail fields be known. `WHEN_APPLICABLE_REQUIRED` fields are required when
+material and evidenced, and additional fields are `WHEN_EVIDENCED`; absent
+detail is not silently rendered as an exact value. For API Report, these
+operation checks apply only to selected detailed sections 02 and 03. The
+umbrella has no identity of its own, and sections 04, 07, and 09 do not gain
+operation-depth obligations without an existing direct requirement.
+
+`V4 AUTHORITY CONSISTENCY` compares the candidate with the accepted snapshot
+and verifies one faithful rendered row for every accepted accounted operation,
+including every bounded/unresolved operation and its limitation. It checks
+that no accepted operation is omitted, duplicated, or replaced by a guessed
+identity, and that no unaccepted operation was introduced by rendering. V4
+does not adjudicate route conflicts, provider matching, coverage status, or
+semantic authority; it reports the mismatch to the owning gate. The verifier
+does not scan private source, regenerate a projection automatically, change
+selection, or modify STM/Coverage/operation authority to make the candidate
+pass.
+
+## 2.2 Legacy registration gate
 
 For a pre-Stage-B artifact without accepted `PRJ-*` lifecycle metadata, the
 existing content is only a registration candidate. The verifier must receive

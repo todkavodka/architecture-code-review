@@ -50,3 +50,21 @@ must not be reconstructed from the edited contract.
 | D18 — gRPC inventory | A requested gRPC interface slice contains several package/service/method operations. | `GRPC_RPC` candidates are independently accounted using package, service, and method identities. |
 | D19 — Product member divergence | Two Product members expose identical-looking operations but bind to different Project revisions or baseline members. | Coverage retains qualified Project/member bindings; the operations do not alias, and an unavailable or divergent member remains an explicit limitation. |
 | D20 — Product slice acceptance | A Product-scoped requested interface inventory covers only a bounded set of member interfaces. | The coverage record binds the Product revision and immutable baseline vector plus exact member bindings; it accepts only the bounded slice without claiming Product-wide inventory completeness. |
+
+## Task 5 — operation rendering, API Report, and complete-claim checks
+
+| Check | Scenario | Expected contract outcome |
+|---|---|---|
+| D03 — nested route rendering | A provided operation is composed from controller prefix `/api`, router prefix `/v1`, and local route `orders/{orderId}`. | Render one row for the accepted child with parent IF, child reference, `PROVIDED` role, protocol kind, exact method/effective path `/api/v1/orders/{orderId}`, precision, views, evidence, and no omitted route component. |
+| D07 — providerless consumer rendering | A consumed operation is evidenced at a call site but no provider IF is accepted. | Render the consumed operation row and its evidence with an explicit unmatched-provider limitation; do not omit the operation or invent a provider match. |
+| D12 — endpoint addition | A new accepted operation child is added beneath a selected parent IF. | The detailed snapshot membership changes, the matching projection becomes `STALE`, and explicit regeneration is required; the new operation is rendered only from the accepted refreshed snapshot. |
+| D13 — endpoint removal | An accepted operation child is removed or superseded. | The old child remains in history, the selected snapshot detects removal and stales only the affected detailed projection, and no renderer silently retains it as current content. |
+| D14 — path/identity change | An accepted operation keeps its scope but changes its method or effective path identity. | The identity change is detected through the parent-qualified snapshot, stales the affected detailed projection, and the renderer shows the new identity only after accepted authority and an explicit refresh. |
+| D15 — auth/trust change | Accepted auth/trust evidence for an operation changes while method/path remains stable. | The operation row keeps its identity but renders the changed accepted auth/trust detail or limitation; verification does not adjudicate or fabricate the security fact. |
+| D16 — boundary-evidence change | Accepted request-boundary evidence changes while the operation identity remains stable. | The operation row keeps its identity and renders the changed boundary evidence/limitation; no automatic regeneration or operation-detail authority is created. |
+
+| Complete-claim check | Candidate claim and dependency state | Expected contract outcome |
+|---|---|---|
+| COMPLETE_CLAIM_01 | “Complete API” or “all endpoints” with missing, partial, unknown, unresolved, stale, blocked, or mismatched selected inventory. | Reject the complete wording and require explicit `PARTIAL`, `UNKNOWN`, or `UNRESOLVED` limitation wording. |
+| COMPLETE_CLAIM_02 | “Full endpoint list” with projection `CURRENT` but without an accepted matching `OPERATION_INVENTORY_COMPLETE` and valid snapshot. | Reject the claim; `CURRENT` alone is insufficient. |
+| COMPLETE_CLAIM_03 | Provided-only detailed scope with accepted matching Provided inventory complete and Consumed deselected. | Allow the Provided complete claim without requiring Consumed inventory; retain any row-level limitations. |

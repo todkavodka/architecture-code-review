@@ -182,6 +182,59 @@ resource, unresolved provider, partial source, and stale or unavailable input
 are rendered as explicit limitations. They are not replaced with an empty
 section, `EXACT`, `COMPATIBLE`, or a clean result.
 
+#### Operation rows and detail classes
+
+When a selected Provided or Consumed output requests detailed operations, the
+renderer emits one row for every accepted accounted operation in the frozen
+`operation_inventory_snapshot`. The row is an accounting rendering of an
+accepted child; it is not a new operation record and it is never synthesized
+from private source inspection. Each row contains the following fields:
+
+| Field | Rendering requirement |
+|---|---|
+| Parent interface | Exact parent-qualified `IF-*<revision>` reference. |
+| `operation_ref` | Canonical `IF-*<parent revision>/OP-*<child ID>` reference and the accepted child revision. |
+| Direction and role | `PROVIDED` or `CONSUMED` plus the accepted `contract_role`. |
+| Protocol kind | Accepted `interface_kind` and protocol kind/properties when present. |
+| Method/effective path | The exact method and composed effective path when the operation identity is exact; otherwise `not established` with its limitation. |
+| Precision | Accepted `EXACT`, `RESOURCE_BOUNDED`, or `UNRESOLVED`. |
+| Observed views | The explicit accepted `DECLARED`, `IMPLEMENTED`, `CONSUMED`, `TESTED`, or other existing views. |
+| Evidence/provenance | The accepted operation `evidence_refs` and safe provenance/source-support metadata. |
+| Limitation | The bounded, unresolved, unavailable, conflicting, or provider-match limitation when applicable. |
+
+The renderer must show bounded and unresolved operations as rows. A dynamic
+route, unresolved prefix, computed registration, providerless consumer, or
+other accepted limitation is not an omission: the row retains its child
+reference, precision, observed views, and evidence, and states what is not
+known. An unresolved operation identity remains absent or explicitly
+unestablished; the renderer never fills it with a guessed path, method,
+provider, or runtime observation.
+
+Detail fields have separate obligations and must not be conflated with
+inventory accounting:
+
+```text
+IDENTITY_REQUIRED_WHEN_EXACT:
+  HTTP method and effective path/template when exact
+
+WHEN_APPLICABLE_REQUIRED:
+  path/query parameters, relevant headers, request media/schema,
+  response statuses/schemas, auth/trust, error contract, pagination,
+  multipart/upload, and boundary evidence when material and evidenced
+
+WHEN_EVIDENCED:
+  additional operation detail supported by accepted evidence
+```
+
+`operation_identity` follows the protocol-specific identity rules; for HTTP,
+method and effective path are identity fields only when exact. An
+`OPERATION_INVENTORY_COMPLETE` result means that every discovered candidate is
+accounted for as exact, bounded/unresolved, duplicate/not-applicable, or
+otherwise accepted by the coverage contract. It does not mean that every
+schema, parameter, header, status, auth, error, pagination, upload, or
+boundary detail is known. Such missing detail remains a visible limitation;
+there is no mandatory operation-detail gate.
+
 ### Detailed operation-inventory projection binding
 
 When a selected output explicitly requires detailed operations, the existing
@@ -615,6 +668,50 @@ allows bounded additions/removals, and persists only the confirmed canonical
 identities. “API interfaces only” narrows to sections 02 and 03; “API
 integrations” may select section 04. A materially ambiguous phrase requires
 clarification.
+
+API Report keeps this umbrella section set and has no API identity of its own.
+Only a selected detailed `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` member requires
+the accepted matching `PROVIDED` operation inventory and valid detailed
+snapshot; only a selected detailed
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` member requires the accepted matching
+`CONSUMED` operation inventory and valid detailed snapshot. Deselecting
+Consumed removes the Consumed inventory requirement and does not make the
+Provided scope incomplete. The sections 04 Integrations, 07 Auth and Trust,
+and 09 Failure Behavior do not inherit operation depth merely because they
+render related `IF-*` facts; they require operation inventory only if their
+own existing direct contract separately requires it. API Report selection,
+projection `CURRENT`, or a readable rendered list does not change this rule.
+
+For a selected detailed interface member, the matching inventory is exact to
+the confirmed Project/baseline, direction, interface kind, parent IF revision
+slice, coverage ID/revision, definition revision, and ordered child snapshot.
+The dependency is satisfied only by that accepted dependency binding, not by
+reconstructing a list from private source or by trusting a generated index.
+
+### Complete-claim guard
+
+The renderer may use `complete API`, `all endpoints`, `full endpoint list`, or
+equivalent unqualified completeness wording only for the exact selected
+Provided or Consumed detailed scope when all of the following hold:
+
+1. the matching operation inventory is accepted with
+   `OPERATION_INVENTORY_COMPLETE`;
+2. its scope, Project/baseline, direction, interface kind, parent IF
+   revisions, coverage/definition revisions, and operation-membership
+   snapshot match the selected output; and
+3. the dependency snapshot is valid and fresh enough for the candidate's
+   verification contract.
+
+The guard is evaluated per selected detailed scope. A Provided-only complete
+claim therefore requires Provided inventory only; it does not require
+Consumed inventory when Consumed is not selected. If the matching inventory
+or snapshot is absent, partial, unknown, unresolved, stale, blocked, or
+scope-mismatched, the output must use explicit `PARTIAL`, `UNKNOWN`, or
+`UNRESOLVED` limitation wording and must not make a complete claim. `CURRENT`
+alone is insufficient. Even when the accounting claim is allowed, row-level
+bounded/unresolved operations and unknown detail remain visible limitations;
+inventory completeness never asserts that every operation detail is known.
+
 “вся техническая документация” may preselect all applicable registered
 sections as a bounded candidate set, but the exact set must still be shown and
 confirmed; “full review” does not make that selection.
