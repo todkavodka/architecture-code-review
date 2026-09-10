@@ -48,6 +48,8 @@ semantics, at least:
 ```text
 case_key: NEG-API-<stable case key>
 interface: <qualified IF-* or exact interface reference>
+operation_ref: <optional parent-qualified IF-*/OP-* accepted child reference>
+operation_field: <optional operation property or boundary field under test>
 input_location: <body, field, upload, query, header, cookie, or parser scope>
 boundary_dimension: <controlled dimension>
 precondition: <route/configuration state>
@@ -65,6 +67,16 @@ count, body/upload bytes, pagination range, enum valid/invalid member, and
 required/null/absent distinctions where the contract defines them. Unknown
 thresholds produce an `ESTABLISH_BOUNDARY` requirement or the equivalent
 existing unresolved-assurance state and never invent a numeric value.
+
+Boundary, negative, and contract cases may target an accepted parent-qualified
+operation child with `operation_ref` and may identify the particular
+`operation_field` or boundary dimension under test. This makes a case
+addressable to a route, RPC method, GraphQL operation/field, or other accepted
+operation surface without making Test Engineering the authority for operation
+identity, precision, inventory accounting, or schema facts. If the operation is
+bounded or unresolved, retain the limitation and target the accepted parent or
+accepted bounded child as supported; do not infer a missing method, path, or
+consumer base URL.
 
 Case planning and execution evidence are separate:
 
@@ -179,6 +191,8 @@ fabrication:
 ```text
 provider_if_ref: IF-*@accepted_revision
 consumer_if_ref: IF-*@accepted_revision
+provider_operation_ref: optional exact parent-qualified IF-*/OP-*<accepted revision>
+consumer_operation_ref: optional exact parent-qualified IF-*/OP-*<accepted revision>
 provider_project/repository/revision/baseline
 consumer_project/repository/revision/baseline
 protocol/interface_kind
@@ -197,6 +211,13 @@ identities. A `CC-*` comparison references both exact IF revisions and their
 qualified Project/source bindings; it never aliases, rewrites, or merges the
 two IFs. Product identity, membership, or baseline does not replace either
 Project/revision qualification.
+
+When an operation child is available, the existing comparison record may carry
+`provider_operation_ref` and `consumer_operation_ref` alongside the parent IF
+references. These are qualified comparison inputs only. Same method/path text
+can help identify a matching candidate, but it never establishes automatic
+compatibility; schemas, statuses, auth, errors, operation-detail limitations,
+and final adjudication remain under Contract Verification and `CC-*` authority.
 
 Similarity of path, method, service name, Product membership, or external
 provider name is not sufficient to fabricate a comparison input. Candidate

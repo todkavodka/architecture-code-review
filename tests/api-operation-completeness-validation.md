@@ -85,3 +85,17 @@ must not be reconstructed from the edited contract.
 |---|---|---|
 | A11 — Product v1/v2 divergence | Two Product members expose the same method/path text but bind to different Project revisions or immutable baseline members. | Keep separate qualified operation identities/inventory memberships; identical text does not create an alias, and missing/divergent evidence remains an explicit limitation. |
 | A12 — operation removal and identifier reuse | A removed operation is reintroduced or a sibling is allocated after the original child left the current inventory. | Preserve the removed child in history, never reuse its parent-qualified operation allocation, and represent any semantically new child with explicit revision/history rather than silently restoring stale projection content. |
+
+## Task 7 — CQ, TE, and CC operation-reference checks
+
+| Check | Scenario | Expected contract outcome |
+|---|---|---|
+| T7-A06 — CQ bounded operation evidence | A feature flag, plugin, reflection, or computed registration limits operation precision. | CQ may point to the accepted parent and specific operation evidence with the limitation; it does not fabricate or classify an exact operation child. |
+| T7-A07 — CQ declaration/code mismatch | Declaration and implementation evidence disagree on method or effective route. | CQ may reference the relevant operation evidence and preserve the conflict; CQ does not revise STM operation facts or decide CC compatibility. |
+| T7-A08 — exact identity with unknown schema | Method and effective path are exact while request/response schema evidence is unavailable. | CQ/TE may target the exact operation and record unknown schema as a limitation; unknown schema does not become a fabricated field fact or TESTED result. |
+| T7-A09 — unresolved effective path | A required prefix or runtime path construction cannot be resolved. | TE targets the accepted parent or bounded child with the unresolved limitation; neither TE nor CQ guesses a method/path or creates an operation identity. |
+| T7-A10 — dynamic consumer base URL | A consumer call supplies method/path but obtains its base URL dynamically. | CC may retain qualified consumer operation evidence or an explicit dynamic-base limitation; same method/path does not auto-match or establish compatibility. |
+| T7-D05 — operation mismatch ownership | A declaration/code mismatch is raised during CQ or TE review. | The observation remains evidence for the owning STM/CC workflow; CQ and TE may reference it but cannot create, revise, or classify operation inventory facts. |
+| T7-D06 — partial operation detail | An accepted operation identity lacks schema or parameter detail. | TE may target the operation field in a boundary/negative/contract case, while `accepted_test_case != executed_test != tested_result` and inventory completeness is not redefined as detail completeness. |
+| T7-D07 — providerless consumer operation | A consumed operation is evidenced without an accepted provider IF. | The consumer operation reference/evidence and unmatched-provider limitation remain visible; CC does not invent a provider or compatibility result. |
+| T7-D08 — Architecture-only surface review | Architecture requests ordinary interface coverage without detailed API enumeration. | CQ/TE operation references remain optional downstream links; they do not create an operation inventory requirement or change Architecture’s surface-depth contract. |
