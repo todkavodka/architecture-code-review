@@ -101,6 +101,36 @@ reconciliation.
 переиспользовать review, а conflict resolution, divergence или недоказанный
 partial cherry-pick требуют дополнительной проверки.
 
+## Координация аудита продукта
+
+Продукт можно координировать из обычного каталога без Git, например:
+
+```text
+/projects/
+├── backend/
+├── frontend/
+├── gateway/
+└── shared/
+```
+
+Каталог является только Coordination Root: файловая структура не определяет
+членство в Product и не создаёт новый Project или repository.
+
+В режиме TOP-DOWN Product обнаруживает изменение дочернего Project, показывает
+Product Coordination Plan, запускает существующий дочерний workflow, принимает
+стабильный локальный результат, повторно проверяет точный Product-вектор и
+только затем предлагает принять новый Product baseline.
+
+В режиме BOTTOM-UP независимо проверенный child сначала получает свой локальный
+accepted результат. Product позже квалифицирует его и выбирает Product
+`REVALIDATE` для обновления accepted state или новый полный-векторный
+`CHANGE_REVIEW` для read-only оценки кандидата. Product baseline принимается
+отдельно и явно.
+
+Таблицы состояния и готовности Product — это производные views, а не новая
+semantic authority. Приведённые пользовательские фразы и русские примеры
+запросов являются иллюстрацией нормализации, а не формальным CLI-синтаксисом.
+
 ## См. также
 
 - [Change Review](change-review.md)
