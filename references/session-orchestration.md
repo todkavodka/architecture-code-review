@@ -228,6 +228,49 @@ comparison remains a read-only view over immutable CRs. In Product mode, a
 changed member vector, selected Product revision, or member qualification
 rejects reuse even when source text or tree appears equal.
 
+### Contextual reconciliation and baseline advancement
+
+`RECONCILE_CHANGE` is eligible only when the completed CR is reusable
+(`EXACT`, `TREE_EQUIVALENT`, or a supported `ADVANCED` continuation), its
+candidate binding is the exact intended source binding, its evidence is usable,
+the bounded material-delta accounting is complete, and the user explicitly
+confirms the action. An incomplete or non-reusable CR cannot dispatch. This is
+a contextual action after `CHANGE_REVIEW`, never a startup intent.
+
+Dispatch only the minimum candidate slices to their existing owners:
+
+| Candidate input | Owner | Required record |
+|---|---|---|
+| `CF-*` technical facts | Technical Model Gate | owner result and `candidate_origin` |
+| Architecture assessment | Architecture authority | owner result and `candidate_origin` |
+| `CRF-*` and existing-finding effects | Code Quality authority | owner result and `candidate_origin` |
+| test impact | Test Engineering | owner result and `candidate_origin` |
+| provider/consumer contract impact | Contract Verification / CC | owner result and `candidate_origin` |
+| Product composition | existing Product semantics | owner result and `candidate_origin` |
+
+`candidate_origin` remains the originating `CR-*`/`CRF-*` traceability value;
+the owner result records the owner-controlled disposition and any new
+canonical reference. Reconciliation never reuses a candidate identity as an
+accepted owner identity.
+
+Baseline advancement is a separate coordinator gate:
+
+```text
+BASELINE_ADVANCE_ALLOWED
+```
+
+The gate requires the exact intended source binding, all material delta
+accounted for, required owners complete, required technical and coverage
+gates satisfied, and unknowns handled by an explicit applicable policy. The
+gate is not release, merge, or deployment approval. partial reconciliation
+never completes the baseline; open findings may remain when existing policy
+allows them, but every such finding remains explicitly accounted for.
+
+Before this gate is accepted, compare the candidate commit/tree and qualified
+Project/Product/member vector with the bound candidate. If any changes, discard
+reconciliation eligibility and classify reuse again; do not mutate the CR or
+advance the baseline.
+
 The recommendation matrix is:
 
 | State | Recommendation |

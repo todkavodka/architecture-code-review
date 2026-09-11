@@ -33,6 +33,26 @@ Only explicit `RECONCILE_CHANGE` may route the minimum candidate slice to its
 existing owning authorities; their accepted outputs, not candidate identities,
 may subsequently enter direct dependency metadata.
 
+## Reconciliation delta and source invalidation
+
+An eligible `RECONCILE_CHANGE` dispatch must carry bounded material-delta
+accounting: every changed dependency or affected boundary is either routed to
+its owner, explicitly found non-material with evidence, or retained as an
+unknown under an applicable policy. The dispatch records each owner result and
+the originating `candidate_origin`; a `CR-*`, `CF-*`, or `CRF-*` identity is not
+written as an accepted dependency or canonical owner record.
+
+`BASELINE_ADVANCE_ALLOWED` requires this accounting to be complete, the exact
+intended source binding to remain current, and all required dependency and
+technical coverage gates to pass. partial reconciliation never completes the
+baseline, and open findings may remain only when existing policy explicitly
+allows them.
+
+If the candidate commit/tree or qualified Project/Product/member vector changes
+before advancement, invalidate the reconciliation eligibility and classify
+reuse again. Do not mutate the completed CR, accepted dependency metadata, or
+baseline as a consequence of that invalidation.
+
 ### Change Review discovery expansion
 
 For bounded Change Review discovery, a changed boundary is routing context for

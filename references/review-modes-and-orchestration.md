@@ -197,6 +197,35 @@ Comparing candidates is a read-only view over immutable CR artifacts. It may
 show differences in effects, risks, migration impact, and unknowns, but it
 cannot adjudicate, accept, or create canonical semantic authority.
 
+### Contextual `RECONCILE_CHANGE` owner dispatch
+
+After a completed reusable CR passes the exact intended source-binding,
+usable-evidence, bounded material-delta, and explicit-confirmation checks,
+the coordinator may expose contextual `RECONCILE_CHANGE`. Incomplete or
+non-reusable CRs are blocked from dispatch, and reconciliation is not a
+startup intent. Dispatch is owner-routed: `CF-*` goes to the Technical Model
+Gate; Architecture assessment goes to the Architecture authority; `CRF-*`
+and finding effects go to Code Quality; test impact goes to Test Engineering;
+provider/consumer contract impact goes to Contract Verification / CC; and
+Product composition uses existing Product semantics.
+
+Each dispatch records the owner result and `candidate_origin` while retaining
+the candidate as review evidence. An owner may create or link a canonical
+record, but candidate identity is never reused as that owner identity.
+
+The coordinator may emit `BASELINE_ADVANCE_ALLOWED` only after the exact
+intended source binding is still current, all material delta is accounted for,
+required owner results are complete, required technical and coverage gates
+pass, and unknowns are handled by explicit policy. partial reconciliation
+never completes the baseline, and open findings may remain only where existing
+policy allows. This gate is baseline bookkeeping and authority advancement,
+not release approval.
+
+If the candidate commit/tree or qualified Project/Product/member vector changes
+before advancement, invalidate eligibility, reclassify reuse, and abandon
+pending dispatch. The completed CR remains immutable and the baseline does not
+advance.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`

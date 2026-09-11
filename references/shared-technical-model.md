@@ -154,6 +154,27 @@ not promote a `CF-*` identity into an STM identity. Until that owner decision,
 Architecture, Code Quality, Test Engineering, Contract Verification, Product,
 and projections cannot consume a candidate record as accepted factual state.
 
+### 5.2 Reconciliation input and baseline advancement gate
+
+The Technical Model Gate accepts a `CF-*` candidate only as an input to an
+explicit `RECONCILE_CHANGE` dispatch. Its owner result must state whether each
+candidate fact is accepted, revised, superseded, duplicated, rejected, or
+retained as unresolved evidence; the candidate `CF-*` identity is never
+promoted into STM identity. Reconciliation records preserve
+`candidate_origin` and the owner-created canonical reference separately.
+
+The coordinator may record `BASELINE_ADVANCE_ALLOWED` only when the exact
+intended source binding remains current, all material delta is accounted for,
+required owner dispatches are complete, required technical-model and coverage
+gates are satisfied, and any unknown is allowed by an explicit policy. This
+gate advances the accepted baseline only; it is not release, merge, or
+deployment approval. partial reconciliation never completes the baseline, and
+open findings may remain only under existing policy with explicit accounting.
+
+If the candidate commit/tree or qualified Product/member vector changes while
+reconciliation is pending, the candidate input is stale: discard eligibility,
+reclassify reuse, leave the CR immutable, and do not advance STM or baseline.
+
 ## 6. Persistent package shape
 
 The recommended package layout is:
