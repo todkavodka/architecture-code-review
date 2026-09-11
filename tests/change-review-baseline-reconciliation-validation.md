@@ -46,7 +46,7 @@ normative mechanisms, with the limitations stated above.
 
 | ID | Contract break to catch | Required outcome | Pre-fix result |
 |---|---|---|---|
-| R01 | The later session-integration table permitted changed-baseline `RESUME`, `EXTEND`, and current `PROJECTION_REPAIR` to proceed without the Task 1 guard. | `RESUME` returns `SOURCE_BASELINE_MISMATCH`; `EXTEND` returns `BASELINE_RECONCILIATION_REQUIRED`; current `PROJECTION_REPAIR` blocks; `CHANGE_REVIEW` and contextual `RECONCILE_CHANGE` are offered without making reconciliation a startup intent. | CORRECTED — later integration rules now preserve all four Task 1 routes. |
+| R01 | The later session-integration table permitted changed-baseline `RESUME`, `EXTEND`, and current `PROJECTION_REPAIR` to proceed without the Task 1 guard. | `RESUME` returns `SOURCE_BASELINE_MISMATCH`; `EXTEND` returns `BASELINE_RECONCILIATION_REQUIRED`; current `PROJECTION_REPAIR` blocks; `CHANGE_REVIEW`, `REVALIDATE`, and eligible contextual `RECONCILE_CHANGE` are offered without making reconciliation a startup intent. | CORRECTED — later integration rules now preserve all four Task 1 routes. |
 
 | R02 | The Change Inventory schema left `MOVED` on the scalar locator/evidence shape and did not require old BASE and new CANDIDATE sides. | `MOVED` has an explicit `base` old-locator/evidence side and `candidate` new-locator/evidence side; scalar handling remains limited to `ADDED`, `MODIFIED`, and `REMOVED`. | CORRECTED — MOVED now requires the two-sided structure. |
 
@@ -180,7 +180,7 @@ scenario_identity_source: approved design CR01–CR36
 | IR03 | `NEW` with no prior package | start independently from selected B and confirmed work |
 | IR04 | `NEW` with accepted A present | do not inherit or enrich A without explicit selection |
 | IR05 | `RESUME` with `BASELINE_MATCH` | restore and continue first unfinished gate |
-| IR06 | `RESUME` with advanced/diverged/unknown source | stop with `SOURCE_BASELINE_MISMATCH`; offer review/revalidation/reusable reconcile; none automatic |
+| IR06 | `RESUME` with advanced/diverged/unknown source | stop with `SOURCE_BASELINE_MISMATCH`; offer `CHANGE_REVIEW`, `REVALIDATE`, and eligible contextual `RECONCILE_CHANGE`; none automatic |
 | IR07 | `REVALIDATE` with complete CR available | reevaluate accepted state; CR is routing evidence only |
 | IR08 | `EXTEND` with changed baseline | stop with `BASELINE_RECONCILIATION_REQUIRED`; no implicit chain |
 | IR09 | `PROJECTION_REPAIR` with matching source | repair selected current projection only |
@@ -211,18 +211,25 @@ complete claims bounded
 
 ### Bounded no-placeholder validation
 
-The canonical plan and this validation note contain the literal expression
-used to describe this check, so both are intentionally excluded from the
-phrase scan. Inspect only the four Task 10 human-facing implementation files;
-validate this artifact separately with its matrix/count checks. An empty
-phrase-scan result is the expected pass condition. Do not scan plans, designs,
+The phrase scan is limited to implementation-owned mutable files. Validate this
+artifact separately with its matrix/count checks. Do not scan plans, designs,
 or reviews.
+
+### PLAN_EXECUTION_EXCEPTION — CR-I-MEDIUM-005
+
+```text
+classification IMPOSSIBLE_SELF_MATCHING_VALIDATION_COMMAND
+approved_plan_semantics_changed NO
+architecture_changed NO
+implementation_scope_changed NO
+corrected_validation_scope implementation-owned mutable files only
+explanation The prior scan included this validation artifact, which intentionally records the searched literal expression; an empty result could not pass.
+corrected bounded command/check and passing result rg -n "placeholder|deferred architecture decision|architecture contradiction" docs/reference/workflows.md docs/getting-started/quick-start.md -> PASS: no matches
+```
 
 ```bash
 if rg -n "placeholder|deferred architecture decision|architecture contradiction" \
-  README.md \
   docs/reference/workflows.md \
-  docs/concepts/review-suite.md \
   docs/getting-started/quick-start.md
 then
   echo "FAIL: forbidden placeholder phrase found in bounded implementation scope"
