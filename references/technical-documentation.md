@@ -61,8 +61,8 @@ stable identities are independent of output path or section title:
 |---|---|---|
 | `PRJ-TECH-DOC-00-SYSTEM-OVERVIEW` | `00-system-overview.md` | accepted STM facts across the registered families |
 | `PRJ-TECH-DOC-01-COMPONENTS` | `01-components.md` | accepted `COMP-*` facts and their controlled runtime relations |
-| `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `02-provided-interfaces.md` | `IF-*` where `direction = PROVIDED` |
-| `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `03-consumed-interfaces.md` | `IF-*` where `direction = CONSUMED` |
+| `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` | `02-provided-interfaces.md` | `IF-*` where `direction = PROVIDED`; accepted detailed operation inventory only for the selected output scope |
+| `PRJ-TECH-DOC-03-CONSUMED-INTERFACES` | `03-consumed-interfaces.md` | `IF-*` where `direction = CONSUMED`; accepted detailed operation inventory only for the selected output scope |
 | `PRJ-TECH-DOC-04-INTEGRATIONS` | `04-integrations.md` | accepted `INT-*` and `EVENT-*` facts |
 | `PRJ-TECH-DOC-05-DATA-AND-PERSISTENCE` | `05-data-and-persistence.md` | accepted `DS-*` facts and controlled data relations |
 | `PRJ-TECH-DOC-06-RUNTIME-AND-DEPLOYMENT` | `06-runtime-and-deployment.md` | accepted `COMP-*`, `CFG-*`, and controlled runtime relations |
@@ -182,6 +182,113 @@ resource, unresolved provider, partial source, and stale or unavailable input
 are rendered as explicit limitations. They are not replaced with an empty
 section, `EXACT`, `COMPATIBLE`, or a clean result.
 
+#### Operation rows and detail classes
+
+When a selected Provided or Consumed output requests detailed operations, the
+renderer emits one row for every accepted accounted operation in the frozen
+`operation_inventory_snapshot`. The row is an accounting rendering of an
+accepted child; it is not a new operation record and it is never synthesized
+from private source inspection. Each row contains the following fields:
+
+| Field | Rendering requirement |
+|---|---|
+| Parent interface | Exact parent-qualified `IF-*<revision>` reference. |
+| `operation_ref` | Canonical `IF-*<parent revision>/OP-*<child ID>` reference and the accepted child revision. |
+| Direction and role | `PROVIDED` or `CONSUMED` plus the accepted `contract_role`. |
+| Protocol kind | Accepted `interface_kind` and protocol kind/properties when present. |
+| Method/effective path | The exact method and composed effective path when the operation identity is exact; otherwise `not established` with its limitation. |
+| Precision | Accepted `EXACT`, `RESOURCE_BOUNDED`, or `UNRESOLVED`. |
+| Observed views | The explicit accepted `DECLARED`, `IMPLEMENTED`, `CONSUMED`, `TESTED`, or other existing views. |
+| Evidence/provenance | The accepted operation `evidence_refs` and safe provenance/source-support metadata. |
+| Limitation | The bounded, unresolved, unavailable, conflicting, or provider-match limitation when applicable. |
+
+The renderer must show bounded and unresolved operations as rows. A dynamic
+route, unresolved prefix, computed registration, providerless consumer, or
+other accepted limitation is not an omission: the row retains its child
+reference, precision, observed views, and evidence, and states what is not
+known. An unresolved operation identity remains absent or explicitly
+unestablished; the renderer never fills it with a guessed path, method,
+provider, or runtime observation.
+
+Detail fields have separate obligations and must not be conflated with
+inventory accounting:
+
+```text
+IDENTITY_REQUIRED_WHEN_EXACT:
+  HTTP method and effective path/template when exact
+
+WHEN_APPLICABLE_REQUIRED:
+  path/query parameters, relevant headers, request media/schema,
+  response statuses/schemas, auth/trust, error contract, pagination,
+  multipart/upload, and boundary evidence when material and evidenced
+
+WHEN_EVIDENCED:
+  additional operation detail supported by accepted evidence
+```
+
+`operation_identity` follows the protocol-specific identity rules; for HTTP,
+method and effective path are identity fields only when exact. An
+`OPERATION_INVENTORY_COMPLETE` result means that every discovered candidate is
+accounted for as exact, bounded/unresolved, duplicate/not-applicable, or
+otherwise accepted by the coverage contract. It does not mean that every
+schema, parameter, header, status, auth, error, pagination, upload, or
+boundary detail is known. Such missing detail remains a visible limitation;
+there is no mandatory operation-detail gate.
+
+### Detailed operation-inventory projection binding
+
+When a selected output explicitly requires detailed operations, the existing
+`PRJ-TECH-DOC-02-PROVIDED-INTERFACES` or
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` identity records the detailed
+operation-inventory dependency snapshot defined in
+[`projection-dependencies.md`](projection-dependencies.md). It binds exact
+accepted parent `IF-*` revisions, the accepted operation-inventory coverage
+ID and revision, the inventory definition revision through its stable
+`SEL-TMC-<coverage-id>` selector identity and `TMC-<coverage-id>` contract
+identity, and the stable ordered parent-qualified `IF-*/OP-*` child IDs,
+semantic revisions, precision, and bounded/unresolved state consumed by that
+selected output scope. The snapshot includes every accepted accounted
+operation, not only exact operations.
+
+The detailed binding does not create a projection identity, package member, or
+operation selection rule. The existing Provided/Consumed selectors still own
+the selected parent-interface scope; the accepted inventory accounts for the
+operations beneath those exact parent revisions. Stage B compares the
+canonical parent-qualified child identity set and then the retained child's
+semantic revision, precision, bounded/unresolved state, and known operation
+identity. An added or removed child, a distinct method/path or other distinct
+protocol operation identity, or a reparented child records the existing
+`SELECTOR_MEMBERSHIP_CHANGED` reason. When the same accepted child identity
+remains, an unresolved/bounded-to-exact or exact-to-unresolved/bounded
+transition records the existing `SELECTOR_MEMBER_REVISION_CHANGED` reason as
+a precision/semantic-state change; it does not replace the child identity.
+A selected child semantic revision change uses the same member-revision
+reason. A parent IF revision change uses the existing exact-dependency
+`DEPENDENCY_REVISION_CHANGED` reason. An inventory `definition_revision`
+change is bound to the existing Stage B `contract_changes` record with
+`contract_kind: SELECTOR`, `contract_id: TMC-<coverage-id>`,
+`selector_id: SEL-TMC-<coverage-id>`, previous/current definition revisions,
+and `authority_ref: TMC-<coverage-id>@<coverage-revision>`; the matching
+selector resolution carries `contract_change_id` and emits
+`SELECTOR_CONTRACT_CHANGED`. Each reason makes only the affected detailed
+projection `STALE` and requires `REGENERATE` when inputs remain usable.
+
+`PRJ-TECH-DOC-02-PROVIDED-INTERFACES` and
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` keep their stable identities regardless
+of whether their selected output uses ordinary surface depth or detailed
+operation inventory. Detailed package membership follows the already selected
+output scope. `PRJ-TECH-DOC-04-INTEGRATIONS`,
+`PRJ-TECH-DOC-07-AUTH-AND-TRUST`, and
+`PRJ-TECH-DOC-09-FAILURE-BEHAVIOR` do not inherit an operation inventory
+merely because they can render related `IF-*` facts; they consume one only if
+their own existing direct dependency contract explicitly requires it.
+
+The renderer reads accepted authority and the recorded snapshot; it never
+scans source to reconstruct operation membership. Projection impact accounting
+does not alter selection. A `STALE` or `BLOCKED` projection is not current and
+cannot be repaired by prose; a fresh rendering requires the separate explicit
+`RG-*` workflow, never automatic regeneration.
+
 ### API input boundary evidence
 
 Provided and consumed interface views may render optional accepted
@@ -294,7 +401,10 @@ a substitute for the recorded predicate and snapshot.
 Each selected projection also records a `SEMANTIC_EXACT` dependency on the
 accepted Technical Model Coverage record bound to that projection. A `FULL`
 coverage record may satisfy that binding; a bounded document records its
-accepted targeted-coverage record instead. The coverage binding preserves
+accepted targeted-coverage record instead. A detailed Provided/Consumed output
+additionally binds the accepted operation-inventory coverage ID/revision and
+its definition revision in the recorded snapshot; it does not infer that
+binding from an index or rendered list. The coverage binding preserves
 `NOT_APPLICABLE`, partial, unknown, stale, and authority-unresolved states as
 visible limitations. It does not let the document fill a missing STM fact or
 turn incomplete coverage into accepted system knowledge.
@@ -558,6 +668,50 @@ allows bounded additions/removals, and persists only the confirmed canonical
 identities. “API interfaces only” narrows to sections 02 and 03; “API
 integrations” may select section 04. A materially ambiguous phrase requires
 clarification.
+
+API Report keeps this umbrella section set and has no API identity of its own.
+Only a selected detailed `PRJ-TECH-DOC-02-PROVIDED-INTERFACES` member requires
+the accepted matching `PROVIDED` operation inventory and valid detailed
+snapshot; only a selected detailed
+`PRJ-TECH-DOC-03-CONSUMED-INTERFACES` member requires the accepted matching
+`CONSUMED` operation inventory and valid detailed snapshot. Deselecting
+Consumed removes the Consumed inventory requirement and does not make the
+Provided scope incomplete. The sections 04 Integrations, 07 Auth and Trust,
+and 09 Failure Behavior do not inherit operation depth merely because they
+render related `IF-*` facts; they require operation inventory only if their
+own existing direct contract separately requires it. API Report selection,
+projection `CURRENT`, or a readable rendered list does not change this rule.
+
+For a selected detailed interface member, the matching inventory is exact to
+the confirmed Project/baseline, direction, interface kind, parent IF revision
+slice, coverage ID/revision, definition revision, and ordered child snapshot.
+The dependency is satisfied only by that accepted dependency binding, not by
+reconstructing a list from private source or by trusting a generated index.
+
+### Complete-claim guard
+
+The renderer may use `complete API`, `all endpoints`, `full endpoint list`, or
+equivalent unqualified completeness wording only for the exact selected
+Provided or Consumed detailed scope when all of the following hold:
+
+1. the matching operation inventory is accepted with
+   `OPERATION_INVENTORY_COMPLETE`;
+2. its scope, Project/baseline, direction, interface kind, parent IF
+   revisions, coverage/definition revisions, and operation-membership
+   snapshot match the selected output; and
+3. the dependency snapshot is valid and fresh enough for the candidate's
+   verification contract.
+
+The guard is evaluated per selected detailed scope. A Provided-only complete
+claim therefore requires Provided inventory only; it does not require
+Consumed inventory when Consumed is not selected. If the matching inventory
+or snapshot is absent, partial, unknown, unresolved, stale, blocked, or
+scope-mismatched, the output must use explicit `PARTIAL`, `UNKNOWN`, or
+`UNRESOLVED` limitation wording and must not make a complete claim. `CURRENT`
+alone is insufficient. Even when the accounting claim is allowed, row-level
+bounded/unresolved operations and unknown detail remain visible limitations;
+inventory completeness never asserts that every operation detail is known.
+
 “вся техническая документация” may preselect all applicable registered
 sections as a bounded candidate set, but the exact set must still be shown and
 confirmed; “full review” does not make that selection.

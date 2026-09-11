@@ -55,6 +55,41 @@ Integrations, Auth and Trust и Failure Behavior добавляются по н�
 существующим разделам, а не новый output или PRJ identity. Выбор этих разделов
 не включает Architecture Review, Test Engineering или Code Quality.
 
+### Подробные API-выходы
+
+Когда выбран подробный срез `Provided Interfaces` или `Consumed Interfaces`,
+проекция выводит по одной строке на каждую принятую и учтённую операцию в
+пределах этого среза. Строка сохраняет родительский `IF-*`, parent-qualified
+ссылку на операцию, направление, protocol kind, нормализованные method/path
+или другую протокольную идентичность, precision, доступные views, evidence и
+явные ограничения. Операция с точным адресом может иметь неполную schema или
+parameter detail: это отдельное ограничение, а не причина скрыть операцию или
+понизить operation inventory до отсутствующего.
+
+Technical Model Coverage остаётся единственным владельцем решения о покрытии.
+`INTERFACE_SURFACE_COMPLETE` достаточно для обычного архитектурного среза; оно
+не означает, что перечислены все endpoints. Для подробного `Provided`-среза
+нужен принятый `OPERATION_INVENTORY_COMPLETE` для его Project/baseline,
+направления, protocol kind и выбранных родительских IF; для `Consumed` действует
+такое же правило. Неучтённые кандидаты, динамические маршруты и недоступные
+источники оставляют `PARTIAL`, `UNKNOWN` или `UNRESOLVED` с видимым
+объяснением. Только принятый bounded inventory и действительный dependency
+snapshot разрешают формулировку о полном API; один `CURRENT` её не разрешает.
+
+`API Report` остаётся человекочитаемым umbrella над выбранными `Provided
+Interfaces`, `Consumed Interfaces`, `Integrations`, `Auth and Trust` и `Failure
+Behavior`. Он не владеет фактическими операциями и не создаёт новую authority,
+capability или PRJ identity; его подробные разделы используют соответствующие
+записи Technical Model Coverage. Если выбран только `Provided`, complete-claim
+не требует `Consumed`, а ограничения строк всё равно должны быть показаны.
+
+В однопроектном режиме scope квалифицирован локальным Project и его baseline.
+В `Product`-режиме каждая операция и inventory дополнительно привязаны к
+принятой ревизии Product, immutable baseline и точному member binding.
+Product может агрегировать такие проекции, но не сплющивает расходящиеся
+paths, schemas, limits, auth или availability и не становится владельцем
+фактов участников.
+
 ## Test Engineering
 
 ### Выбор `Test Assurance`

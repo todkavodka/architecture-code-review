@@ -89,6 +89,38 @@ An accepted `CQ-*` record must contain, or reference, all of the following:
 Counts, rankings, hotspot scores, labels, and prose summaries are derived or
 display fields, not substitutes for these fields.
 
+### Parent-qualified operation references
+
+An accepted `CQ-*` finding may narrow its interface or boundary context with
+references to accepted STM records. These references are addressability and
+evidence links, not Code Quality-owned operation facts:
+
+```text
+interface_ref: IF-*<accepted parent revision>
+operation_ref: IF-*/OP-*<accepted child revision>
+operation_property_evidence:
+  property: <method | effective_path | parameter | schema | auth | error |
+            request_boundary | response_boundary | other evidenced operation field>
+  evidence_ref: EV-*<addressable observation>
+  workset_ref: optional WS-*<accepted workset>
+```
+
+`operation_ref` is used only when the parent-qualified operation child is
+accepted and addressable. A bounded, unresolved, conflicting, dynamic, or
+partial observation may instead reference the accepted parent `interface_ref`
+and its specific `operation_property_evidence` with the limitation preserved;
+Code Quality must not guess an operation identity from a file, handler,
+configuration value, consumer base URL, or route fragment. An exact operation
+identity with unknown schema remains exact for identity purposes while the
+missing schema is an explicit limitation.
+
+Code Quality may use these references to explain an implementation-quality
+mechanism, request-boundary consequence, or evidence location. It cannot
+create, revise, classify, accept, supersede, or otherwise mutate the STM
+operation inventory or its operation-child facts. Operation identity,
+precision, inventory accounting, and operation-detail authority remain with the
+existing Technical Model and Coverage contracts.
+
 ## Candidate-to-finding rule
 
 The semantic flow is:
@@ -283,6 +315,12 @@ quality around seams, isolation, nondeterminism, observability, dependency use,
 concurrency, and fragile setup. Test Engineering owns its behavior, contract,
 assurance, evidence, gap, and task records. Shared evidence may support both
 interpretations, but Code Quality cannot create or mutate TE authority.
+
+An operation-targeted CQ finding may cite a provider or consumer operation
+evidence record, including a dynamic-base or declaration/implementation
+limitation, but that citation does not create a `CC-*` comparison or decide
+compatibility. Same method/path text is only an input to the existing Contract
+Verification process; it is never automatic compatibility.
 
 There is currently no independent Security Review capability. Security-relevant
 mechanisms route through existing Architecture/security semantics and severity

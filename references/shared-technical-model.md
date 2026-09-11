@@ -286,6 +286,22 @@ IF-*:
   protocol_properties: optional controlled kind-specific properties
   precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
   observed_view: DECLARED | IMPLEMENTED | CONSUMED | TESTED
+  operation_children:
+    - operation_id: OP-<zero-padded-decimal-3-or-more-digits>
+      parent_if: IF-*<parent-revision>
+      revision: <integer revision>
+      interface_kind: <existing closed interface kind>
+      direction: PROVIDED | CONSUMED
+      contract_role: <existing role vocabulary>
+      operation_identity: <protocol-specific normalized identity>
+      precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
+      status: CANDIDATE | UNDER_REVIEW | ACCEPTED | SUPERSEDED | REJECTED
+      freshness: VALID | REVALIDATION_REQUIRED | UNKNOWN
+      authority: RESOLVED | UNRESOLVED
+      observed_views: [DECLARED | IMPLEMENTED | CONSUMED | TESTED ...]
+      protocol_properties: <existing controlled properties>
+      evidence_refs: WS-* / EV-*
+      supersedes: optional parent-qualified operation reference
   boundary_evidence: optional qualified transport/schema boundary observations
                      and enforcement-stage references
   project_binding: optional Project/repository/revision qualification
@@ -296,6 +312,23 @@ The shape does not require nullable properties to be fabricated. Direction,
 interface kind, identity/revision, evidence, and an applicable precision are
 the core fields; operation, address, version, contract, provider, auth, error,
 and protocol properties are required only when applicable or evidenced.
+
+`operation_children` is an IF-owned collection of subordinate operation
+contracts. `operation_id` is unique only within the parent-qualified IF
+identity, and `IF-*/OP-*` is a reference path, not a new global STM family.
+There is no top-level `OP-*` family. An operation cannot exist without an IF.
+The Technical Model Gate accepts, revises, and supersedes operation children;
+no downstream capability creates an operation. It allocates each
+`operation_id` monotonically within its parent and never reuses it. A semantic
+parent move creates a new parent-qualified child with `supersedes`, rather than
+moving the existing child. Historical surface-only IFs remain valid with no
+inferred children.
+
+Operation `status`, `freshness`, and `authority` do not imply any observed
+view. Persist `observed_views` as an explicit list so multiple independent
+existing views can coexist without changing their semantics. The child list
+does not alter the existing IF-level `observed_view`, lifecycle/status
+vocabulary, or the semantics of any existing IF view.
 
 When API input boundary observations are applicable, `boundary_evidence` is an
 optional qualified attribute on the existing `IF-*` record. It may reference
@@ -344,6 +377,67 @@ Protocol-specific properties remain under one controlled object selected by
 | `OTHER` | bounded documented properties only when material and evidenced |
 
 Unsupported or unobserved properties are absent rather than null claims.
+
+#### 10.1.1 Protocol operation identity
+
+An operation child's full semantic identity is parent-qualified: its `parent_if`
+revision, `interface_kind`, `direction`, `contract_role`, and normalized
+`operation_identity` qualify one another. A source location, handler symbol,
+or generated-client location is evidence provenance, never operation identity.
+The Technical Model Gate applies the following protocol-specific construction
+when an addressable operation surface is evidenced:
+
+| `interface_kind` | Normalized `operation_identity` |
+|---|---|
+| `HTTP_REST` | Uppercase normalized method plus normalized effective route/template. |
+| `GRAPHQL` | Operation type/name when present, or an addressable field/schema surface when no named operation is available. |
+| `GRPC_RPC` | Package, service, and method. |
+| `WEBSOCKET` | An addressable command or message only when its contract identity is evidenced; an endpoint alone does not invent an operation child. |
+| `CLI` | Command and subcommand surface. |
+| Other kinds | A bounded, documented protocol-specific identity only when the operation surface is addressable and evidenced. |
+
+`EVENT-*` remains the identity of a semantic event or message. An event is not
+recast as an IF operation merely because it has a transport endpoint. An
+operation child may represent only an independently addressable command surface
+that the event contract exposes; that child does not replace or alias the
+`EVENT-*` identity.
+
+#### 10.1.2 HTTP effective-route composition and precision
+
+For `HTTP_REST`, normalize the method to uppercase. Compose the effective path
+from separately evidenced mount, controller, and router prefixes plus the local
+route declaration, in their declaration order. Normalize that composed path to
+one leading slash and remove redundant separators. Preserve contract-visible
+template parameter names and version segments: `/v1/orders/{orderId}` and
+`/v1/orders/{id}` are distinct identities unless the protocol contract
+explicitly evidences them as equivalent. Do not infer equivalence from matching
+handler code, parameter position, or framework convention.
+
+Trailing-slash normalization is allowed only when the framework's evidenced
+route semantics establish the canonical result. Otherwise retain the declared
+slash spelling as provenance, do not collapse slash variants, and record their
+equivalence distinction as unresolved. No identity may be fabricated by
+silently removing or adding a trailing slash.
+
+Each prefix or mount, local route declaration, and method is a distinct
+composition input with its own evidence reference. The operation child records
+the normalized result, not an invented replacement for a missing input. Nested
+prefixes compose only in declaration order. `EXACT` is valid only when the
+method and effective path/template are evidenced; unavailable parameter or
+request/response schema evidence remains a separate explicit limitation and
+does not lower an otherwise exact method/path identity. When a bounded route
+surface is known but a computed, plugin-provided, feature-flagged, reflected,
+or runtime-only input prevents an exact result, use `RESOURCE_BOUNDED`; use
+`UNRESOLVED` when the effective route or method cannot be determined or the
+relevant declarations conflict. Never fabricate a path to upgrade precision.
+
+The same effective path with different methods is distinct. The same handler
+under distinct routes is also distinct unless an accepted alias relation,
+supported by evidence, proves intentional equivalence. Apparent duplicate
+declarations remain separately accounted candidates until the Technical Model
+Gate classifies them as a duplicate declaration or separate operations. A route
+exposed through two mounts has two parent-qualified operation identities, even
+when the local declaration or handler is shared.
 
 ### 10.2 INT-* concrete interaction and access shape
 

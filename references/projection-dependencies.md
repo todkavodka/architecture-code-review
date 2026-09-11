@@ -156,7 +156,118 @@ regeneration under the new contract. Inspecting only the IDs in the previous
 snapshot is insufficient: additions and removals must be detected by
 re-resolving the controlled selector.
 
-## 5. Projection prerequisite graph
+## 5. Detailed operation-inventory dependency snapshots
+
+A detailed `PROVIDED` or `CONSUMED` interface projection that consumes an
+accepted `OPERATION_INVENTORY` slice records a frozen dependency shape in
+addition to its existing parent-interface selector snapshot. The shape is
+owned by the consuming projection and contains only accepted, bounded inputs:
+
+```text
+operation_inventory_snapshot:
+  parent_if_dependencies:
+    - IF-*<exact accepted parent revision>
+  coverage_record:
+    coverage_id: TMC-<accepted operation-inventory coverage ID>
+    coverage_revision: <accepted coverage revision>
+    definition_revision: <operation-inventory definition revision>
+    definition_contract:
+      contract_id: TMC-<same stable operation-inventory coverage ID>
+      contract_kind: SELECTOR
+      selector_id: SEL-TMC-<same stable operation-inventory coverage ID>
+      authority_ref: TMC-<same coverage ID>@<coverage revision>
+  accounted_operation_members:
+    - child_identity: IF-*<exact parent revision>/OP-*<child ID>
+      child_revision: <exact accepted child revision>
+      precision: EXACT | RESOURCE_BOUNDED | UNRESOLVED
+      operation_identity: <normalized identity when known; absent when
+                           unresolved and not established>
+  stable_order: parent-qualified child_identity ASC
+```
+
+`parent_if_dependencies` and the accepted coverage record are
+`SEMANTIC_EXACT` dependencies. `definition_contract` is the existing
+operation-inventory selector-contract binding for this coverage record; it is
+an identity/revision binding, not a new semantic authority. The accepted
+Technical Model Coverage record remains authoritative for accounting, and the
+Technical Model Gate remains authoritative for accepted IF children. The
+`accounted_operation_members` list is the stable, ordered snapshot of every
+accepted accounted operation in the detailed selected output scope, including
+both exact and bounded/unresolved children. A child is always identified by
+its exact parent IF revision and child ID, never by an unqualified `OP-*` ID.
+`precision` and the bounded/unresolved limitation state are comparison inputs;
+they are not prose notes and a bounded/unresolved entry never implies an exact
+operation identity. A detailed projection cannot substitute a broader
+surface-coverage record, a generated index, or a renderer-derived operation
+list for this snapshot.
+
+Impact comparison is deterministic and preserves the distinction between
+selection and freshness:
+
+```text
+compare canonical sets of accounted_operation_members by child_identity;
+compare each retained entry's child_revision, precision, limitation state,
+and any known operation_identity
+
+operation child_identity added or removed
+  -> SELECTOR_MEMBERSHIP_CHANGED (addition or removal)
+  -> dependent detailed projection is STALE
+
+the same child_identity is retained but a distinct method/path or other
+distinct protocol operation identity is introduced (or a reparenting creates
+a new parent-qualified child_identity)
+  -> SELECTOR_MEMBERSHIP_CHANGED (addition or removal)
+  -> dependent detailed projection is STALE
+
+the same child_identity remains the same accepted operation and changes
+between UNRESOLVED, RESOURCE_BOUNDED, and EXACT precision, including an
+unresolved/bounded operation becoming exact or becoming unresolved/bounded
+  -> SELECTOR_MEMBER_REVISION_CHANGED (precision/semantic-state transition)
+  -> dependent detailed projection is STALE
+
+retained selected child semantic revision changes
+  -> SELECTOR_MEMBER_REVISION_CHANGED
+  -> dependent detailed projection is STALE
+
+exact parent IF revision changes
+  -> DEPENDENCY_REVISION_CHANGED
+  -> dependent detailed projection is STALE
+
+accepted operation-inventory definition_revision changes
+  -> emit the existing Stage B contract_changes record with:
+       contract_change_id: <stable change identity>
+       contract_id: TMC-<same stable operation-inventory coverage ID>
+       contract_kind: SELECTOR
+       selector_id: SEL-TMC-<same stable operation-inventory coverage ID>
+       previous_revision: <previous definition_revision>
+       current_revision: <current definition_revision>
+       authority_ref: TMC-<same coverage ID>@<accepted coverage revision>
+  -> selector resolution carries that contract_change_id
+  -> SELECTOR_CONTRACT_CHANGED
+  -> dependent detailed projection is STALE, required_action REGENERATE
+```
+
+The existing `SEMANTIC_EXACT` coverage-record revision binding also detects a
+changed accepted coverage record and maps its accepted semantic revision
+change through the existing `DEPENDENCY_REVISION_CHANGED` reason. A
+`definition_revision` change uses the bound `contract_changes`/
+`selector_resolutions` shape above and the existing
+`SELECTOR_CONTRACT_CHANGED` reason; it is not a new dependency-contract impact
+category. In both cases the projection is `STALE` and requires explicit
+`REGENERATE` when inputs remain usable. These impact records do not change
+selector membership, accept an operation, or create a new coverage record.
+Evidence-only changes continue through the existing revalidation path and
+affect the projection only when that path changes a consumed semantic
+dependency or its accepted coverage contract.
+
+The renderer consumes the persisted snapshot and never scans source to
+reconstruct operations. Projection Impact Analysis compares accepted authority
+and snapshots but never changes selection. `STALE` or `BLOCKED` is never
+`CURRENT` and cannot be repaired by documentation prose. After impact is
+recorded, regeneration remains a separate explicit `RG-*` workflow; it is not
+automatic.
+
+## 6. Projection prerequisite graph
 
 The projection regeneration prerequisite graph contains `PROJECTION_EXACT`
 edges and any projection-level prerequisites required by the active
@@ -193,7 +304,7 @@ that become stale after that snapshot are recorded for a later plan rather
 than silently expanding the running plan. This is a scope rule over the DAG,
 not a change to the canonical edge direction.
 
-## 6. Product-qualified selector snapshots
+## 7. Product-qualified selector snapshots
 
 Product selectors reuse the controlled selector and resolution model. A
 Product-qualified resolution records the selector contract revision, accepted

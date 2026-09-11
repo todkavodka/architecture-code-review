@@ -193,6 +193,77 @@ accepted artifacts by default. Expand from the semantic object to its linked
 `EV-*` evidence and raw source only when accepted/fresh authority is missing,
 stale, disputed, incomplete, or insufficient for the decision.
 
+### 6.1 Operation-inventory depth requirements
+
+When a requested output needs detailed interface operations, `resolved_work`
+records an internal operation-depth dependency slice rather than selecting a
+capability:
+
+```text
+resolved_work:
+  dependency_slice:
+    - kind: OPERATION_INVENTORY
+      project_binding:
+        project_id: <exact Project identity>
+        repository: <exact repository identity>
+        source_revision: <exact committed source revision>
+        baseline_ref: <exact Project baseline>
+      scope_id: <exact bounded operation scope>
+      required_direction: PROVIDED | CONSUMED
+      required_interface_kind: <closed kind or bounded set>
+      parent_if_revisions: [IF-*<revision> ...]
+      source_scope: <bounded declarations/implementations/consumer scope>
+      evidence_scope: <bounded WS-*/EV-* scope>
+      required_depth: OPERATION_INVENTORY
+      coverage_record_id: TMC-<stable-id>
+      coverage_record_revision: <integer revision>
+```
+
+The slice identifies the exact requested scope, direction, interface kind,
+Project/baseline binding, source/evidence scope, parent IF revisions, required
+depth, and accepted coverage-record revision needed by the consumer. For
+Product scope, include the accepted Product revision and exact member/baseline
+bindings. It is an internal prerequisite in the dependency slice, not a user
+selection: it must not select Architecture Review, Test Engineering, Code
+Quality Review, or any other capability, expand `requested_work`, or turn
+ordinary interface-surface coverage into an operation-inventory requirement.
+The consumer uses the bound coverage record's status and limitations; a
+missing, partial, blocked, or unknown inventory remains visible rather than
+being inferred from an index or projection.
+
+### 6.2 Targeted `EXTEND` enrichment
+
+When a detailed Provided/Consumed output is selected during `EXTEND` and the
+matching accepted STM slice is surface-only, dependency resolution reports an
+insufficient operation-depth requirement and returns the minimum slice above.
+It reuses accepted parent `IF-*` surface facts and loads only the declared
+operation source/evidence scope. The route is:
+
+```text
+accepted SURFACE STM
+→ targeted discovery/evidence for the bound scope
+→ Technical Model Gate accepts/revises/supersedes IF-owned operation children
+→ Technical Model Coverage accepts targeted OPERATION_INVENTORY accounting
+→ resolve the detailed projection dependency and frozen membership snapshot
+→ explicit projection generation/regeneration
+→ V1–V4 verification
+→ CURRENT, when the requested package permits closeout
+```
+
+The Technical Model Gate remains the only authority that accepts operation
+facts, and Technical Model Coverage remains the only coverage authority. The
+existing surface facts remain accepted; this route does not rebuild the whole
+STM, reopen unrelated capabilities, select Architecture/TE/CQ, or create a
+second operation authority. A dynamic or unavailable source is counted only
+with its accepted `RESOURCE_BOUNDED`/`UNRESOLVED` limitation. The renderer and
+dependency index do not reconstruct operation facts from private source.
+
+Projection dependency satisfaction is not generation. If output freshness is
+not an explicit request, stop after the semantic/coverage state is accepted
+and account projection impact; leave stale or blocked projections visible. An
+explicit `RG-*` request is required for generation/regeneration and its
+`V1`–`V4` checks.
+
 ## 7. REVALIDATE impact traversal
 
 For a changed source or baseline, route the minimum affected slice as:
