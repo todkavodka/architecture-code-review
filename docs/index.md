@@ -5,6 +5,11 @@
 от первого запуска и типовых сценариев — к модели работы, затем к справочникам
 и эксплуатационным процедурам.
 
+## Текущий статус
+
+Актуальная принятая базовая точка, завершённые этапы и последнее promotion:
+[Current Project Status](current-status.md).
+
 ## С чего начать
 
 Если вы впервые используете этот инструмент:
@@ -26,6 +31,7 @@
 - [Architecture Review](guides/architecture-review.md)
 - [Test Engineering](guides/test-engineering.md)
 - [Code Quality Review](guides/code-quality-review.md)
+- [Change Review: branch, commit и pull request](guides/change-review.md)
 - [Повторное использование, изменения и расширение](guides/reuse-and-change.md)
 
 ## Справочник
@@ -41,7 +47,7 @@
 Чтобы одинаковые правила не расходились между руководствами, у каждого вида
 подробного объяснения есть одна каноническая человеческая страница:
 
-- [справочник процессов](reference/workflows.md) — сценарии `Session Intent`;
+- [справочник процессов](reference/workflows.md) — сценарии `Session Intent`, включая `CHANGE_REVIEW` и контекстный `RECONCILE_CHANGE`;
 - [жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) —
   состояние, повторная проверка и актуальность;
 - [проекции и пакеты результатов](concepts/projections-and-packages.md) —
@@ -65,6 +71,9 @@
 - [Анализ качества тестов](examples/test-engineering.md)
 - [Code Quality Review](examples/code-quality-review.md)
 - [Повторная проверка после изменений](examples/revalidation.md)
+
+Для pre-merge проверки branch/commit/PR используйте
+[Change Review](guides/change-review.md), а не обычный `REVALIDATE`.
 
 ## Нормативные источники
 
