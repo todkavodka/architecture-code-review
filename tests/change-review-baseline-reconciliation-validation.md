@@ -21,21 +21,26 @@ evidence.
 Expected pre-change result: `8/8 GAP PRESENT`; there is no post-change claim
 in this section.
 
-## Post-change Task 1 routing closure
+## POST-IMPLEMENTATION CLOSURE
 
-| ID | Pre-change gap retained above | Task 1 closure evidence | Expected |
-|---|---|---|---|
-| FF01 | no first-class Change Review mismatch route | `session-orchestration.md` defines `CHANGE_REVIEW`, baseline relation routing, and mismatch actions. | CLOSED FOR TASK 1 |
-| FF02 | no immutable base/candidate CR binding | Deferred to Task 2; Task 1 defines only the candidate requested/resolved-work route. | OPEN — TASK 2 |
-| FF03 | no review-local candidate fact/finding authority barrier | Deferred to Task 2; Task 1 establishes read-only candidate-mode routing only. | OPEN — TASK 2 |
-| FF04 | no exact TREE_EQUIVALENT proof contract | Deferred to Task 2. | OPEN — TASK 2 |
-| FF05 | no contextual reconciliation dispatch through owners | `session-orchestration.md` makes `RECONCILE_CHANGE` contextual, explicit, and limited to reusable completed review. | CLOSED FOR TASK 1 |
-| FF06 | no complete baseline-advancement gate after reconciliation | Deferred to later reconciliation work. | OPEN — LATER TASK |
-| FF07 | prediction not separated from actual Stage B impact | Deferred to later projection-impact work. | OPEN — LATER TASK |
-| FF08 | branch/commit/PR candidate mode is not first-class | Task 1 establishes the read-only candidate requested/resolved-work shape; exact source bindings are deferred to Task 2. | PARTIAL — TASK 2 REQUIRED |
+This section closes the historical findings only as normative contract closure.
+It does not claim a runtime SCM/PR service or harness was executed; the
+verification evidence is the retained deterministic contract matrices and
+their named owner mechanisms.
 
-Task 1 closure is limited to startup routing and candidate request/dependency
-separation. The PRE-CHANGE rows above remain immutable historical evidence.
+| finding_id | pre_change_status | closure_status | owning_contract | exact section/mechanism | verification evidence | implementation range/commit | limitations |
+|---|---|---|---|---|---|---|---|
+| FF01 | GAP PRESENT | CLOSED | `references/session-orchestration.md` | `Session Intent`; `Baseline relation and mismatch routing`: `CHANGE_REVIEW` is a read-only startup intent; non-matches stop `RESUME`, `EXTEND`, and current `PROJECTION_REPAIR`. | R01; IR06, IR08, and IR10 require the three mismatch routes and contextual-only reconciliation. | `bff1460`, `16bb095`, `46062b2` within `bff1460..615862c` | Static contract evidence only; no runtime route execution is claimed. |
+| FF02 | GAP PRESENT | CLOSED | `references/shared-evidence-model.md` | `4.1 Change Review immutable bindings and review-local artifacts`: separate immutable `base_binding` and `candidate_binding`, each with repository, qualification, ref input, resolved commit, and resolved tree. | CR04–CR06 require configured/bound A→B and main→PR-head review states; BB01–BB05 require exact binding equality for reconciliation. | `7c6ad7f` within `bff1460..615862c` | Binding resolution is specified and matrix-checked; no live branch or PR resolution is claimed. |
+| FF03 | GAP PRESENT | CLOSED | `references/shared-technical-model.md` | `5.1 Change Review candidate barrier`: `CR-*`, `CF-*`, and `CRF-*` remain review-qualified evidence; only explicit `RECONCILE_CHANGE` may present a candidate slice to the Technical Model Gate. | AB01–AB08 forbid candidate use as accepted STM, CQ, TE, CC, Product, or projection authority; Complete-claim checks retain the lifecycle barrier. | `7c6ad7f`, `1be5618`, `9f3d39e` within `bff1460..615862c` | Owner behavior is contract evidence, not runtime promotion/adjudication evidence. |
+| FF04 | GAP PRESENT | CLOSED | `references/shared-evidence-model.md` | `4.3 Reuse and tree-equivalence proof`: `TREE_EQUIVALENT` permits only `WHOLE_TREE_EQUAL` or `FROZEN_RELEVANT_SCOPE_EQUAL` with mandatory retained proof fields; fuzzy/partial proof is denied. | MR01–MR09 exercise exact reuse, both proof levels, merge/squash/cherry-pick conditions, and explicit denial without proof; CR09–CR12 and CR31 cover their routing consequences. | `d299700`, `5ef82c4` within `bff1460..615862c` | Proof retention is specified; no Git graph or tree comparison was executed by this artifact. |
+| FF05 | GAP PRESENT | CLOSED | `references/review-modes-and-orchestration.md` | `Contextual RECONCILE_CHANGE owner dispatch`: reusable, exact-bound, explicitly confirmed reviews dispatch only the minimum candidate slices to their existing owners and retain `candidate_origin`. | BB01–BB05 verify dispatch eligibility and rejection on binding mismatch; CR27–CR29 require owner-controlled writes or prohibit dispatch. | `bb0281d`, `615862c` within `bff1460..615862c` | The rows prove routing requirements, not that an owner mutation occurred. |
+| FF06 | GAP PRESENT | CLOSED | `references/session-orchestration.md` | `Contextual reconciliation and baseline advancement`: `BASELINE_ADVANCE_ALLOWED` requires exact current bindings, complete material-delta accounting, required owner/technical/coverage gates, and policy-handled unknowns. | BB01–BB05 exercise eligibility and mismatches; PRC01–PRC05 and CR30–CR35 retain no-advance partial and policy-accounting cases. | `bb0281d`, `615862c` within `bff1460..615862c` | Baseline advancement remains a gated normative decision; no baseline was advanced by validation. |
+| FF07 | GAP PRESENT | CLOSED | `references/projection-impact.md` | `0.1 Candidate prediction versus actual impact`: prediction is CR-bound advisory evidence and cannot write freshness; `1. Stabilized semantic-delta input` reserves actual impact for accepted stabilized semantics. | PI01–PI06 require prediction retention, reject candidate freshness writes, and defer explicit `RG-*`; CR22–CR23 and CR36 retain the prediction/actual split. | `5203e44`, `74b04f1` within `bff1460..615862c` | No Stage B impact analysis or regeneration was run; the closure is contract-level separation. |
+| FF08 | GAP PRESENT | CLOSED | `references/shared-evidence-model.md` | `4.1 Change Review immutable bindings and review-local artifacts`: branch, tag, PR ref, checkout state, and `HEAD` are input metadata resolved into immutable commit/tree bindings; `references/review-modes-and-orchestration.md` `Change Review candidate execution mode` defines `CHANGE_REVIEW_CANDIDATE`. | CR04–CR06 require feature-branch, unmerged, and main→PR-head candidate scenarios; CR07–CR08 preserve advance/diverge handling. | `bff1460`, `7c6ad7f`, `9f3d39e` within `bff1460..615862c` | Candidate mode is specified and matrix-checked; no live branch/commit/PR adapter is claimed. |
+
+Expected post-implementation result: `8/8 CLOSED` by directly identified
+normative mechanisms, with the limitations stated above.
 
 ## Task 1 review regression — later integration routing
 
@@ -102,44 +107,46 @@ regeneration boundaries.
 
 ## Complete Change Review matrix CR01–CR36
 
-| ID | Source relation | Allowed intent | Mutation | Candidate/canonical/projection state | Next action |
-|---|---|---|---|---|---|
-| CR01 | baseline matches candidate | `CHANGE_REVIEW` | none | candidate review only; canonical unchanged; projections unchanged | complete review or explicit reconciliation |
-| CR02 | baseline advanced to descendant | `CHANGE_REVIEW` | candidate evidence only | candidate bound to advanced source; canonical unchanged | classify reuse as `ADVANCED` or create linked CR |
-| CR03 | baseline diverged | `CHANGE_REVIEW` | none | candidate is not reusable; canonical unchanged | create new CR |
-| CR04 | baseline relation unknown | `CHANGE_REVIEW` | none | candidate relation unresolved; canonical/projection unchanged | resolve source relation or record limitation |
-| CR05 | branch resolves to exact commit/tree | `CHANGE_REVIEW` | none | exact base/candidate bindings; candidate-only outputs | retain immutable bindings |
-| CR06 | pull request resolves to candidate tree | `CHANGE_REVIEW` | none | PR metadata is input; CR remains source-bound | review selected lenses |
-| CR07 | dirty or noncanonical candidate source | `CHANGE_REVIEW` | none | candidate limitation; no accepted state | stop or obtain authorized clean binding |
-| CR08 | added file or interface | `CHANGE_REVIEW` | candidate `CF-*` | candidate-only fact; no STM/projection write | route through reconciliation if confirmed |
-| CR09 | modified accepted fact | `CHANGE_REVIEW` | candidate delta | affected accepted ref plus candidate interpretation | owner adjudication |
-| CR10 | removed source fact | `CHANGE_REVIEW` | candidate removal | accepted fact remains canonical; removal is candidate evidence | Technical Model Gate after reconciliation |
-| CR11 | moved source entry | `CHANGE_REVIEW` | two-sided MOVED observation | base and candidate locators/evidence remain distinct | correlate, then reconcile explicitly |
-| CR12 | changed method/path | `CHANGE_REVIEW` | candidate operation/property claim | candidate API evidence; accepted IF/OP unchanged | Technical Model Gate and applicable CC |
-| CR13 | changed auth boundary | `CHANGE_REVIEW` | candidate boundary claim | candidate evidence only; no accepted auth mutation | owner review and reconciliation |
-| CR14 | changed schema/error contract | `CHANGE_REVIEW` | candidate contract claim | candidate CF/CC input; compatibility not decided | Contract Verification adjudication |
-| CR15 | changed transport/container limit | `CHANGE_REVIEW` | candidate limit claim | candidate CQ/TE input; no `TESTED` claim | CQ/TE owner routing |
-| CR16 | changed dependency edge | `CHANGE_REVIEW` | candidate dependency observation | candidate dependency cannot satisfy accepted dependency | bounded dependency expansion |
-| CR17 | uninspected material boundary reached | `CHANGE_REVIEW` | none | candidate completeness partial/unknown | `CONTEXT_EXPANSION_REQUIRED` |
-| CR18 | evidence unavailable or dynamic | `CHANGE_REVIEW` | limitation only | candidate limitation; no inferred no-change | preserve limitation and bound scope |
-| CR19 | candidate finding appears | `CHANGE_REVIEW` | candidate `CRF-*` | review-local finding; no canonical lifecycle | CQ/owner adjudication |
-| CR20 | existing finding may be mitigated | `CHANGE_REVIEW` | effect record | candidate effect only; existing finding unchanged | reconcile with finding owner |
-| CR21 | candidate adds risk while resolving existing finding | `CHANGE_REVIEW` | two effect records | many-to-many candidate effects; canonical unchanged | adjudicate each owner result |
-| CR22 | candidate Architecture interpretation | `CHANGE_REVIEW` | review-local assessment | no accepted `RF-*` mutation | Architecture authority |
-| CR23 | candidate TE assurance need | `CHANGE_REVIEW` | candidate case/impact | not executed and not `TESTED` | Test Engineering reproof/planning |
-| CR24 | candidate provider/consumer match | `CHANGE_REVIEW` | comparison input | same method/path is not compatibility | CC adjudication |
-| CR25 | candidate Product member change | `CHANGE_REVIEW` | member-qualified effect | no Product-wide unqualified delta | Product-qualified reconciliation |
-| CR26 | candidate projection prediction | `CHANGE_REVIEW` | prediction record | no `CURRENT`/`STALE`/`BLOCKED` write | retain until accepted impact pass |
-| CR27 | accepted owner result is required | contextual `RECONCILE_CHANGE` | owner disposition | candidate identity not reused; canonical owner may write | record owner result |
-| CR28 | completed reusable CR with explicit confirmation | contextual `RECONCILE_CHANGE` | accepted-owner writes only | candidate remains evidence; canonical writes owner-controlled | run bounded reconciliation |
-| CR29 | incomplete or non-reusable CR | none | no dispatch | candidate remains non-authoritative | complete/new review first |
-| CR30 | exact intended binding still current | `RECONCILE_CHANGE` | accepted delta accounting | eligible for baseline gate | verify all material delta |
-| CR31 | candidate commit/tree changes during reconciliation | none | discard pending eligibility | CR immutable; baseline unchanged | reclassify reuse |
-| CR32 | qualified Product/member vector changes | none | discard pending eligibility | member-qualified CR immutable | reclassify vector/reuse |
-| CR33 | all material delta accounted | contextual `RECONCILE_CHANGE` | owner results recorded | technical/coverage gates may be evaluated | evaluate baseline gate |
-| CR34 | partial reconciliation | none | no baseline advancement | accepted baseline remains prior state | resolve remaining owners |
-| CR35 | open finding permitted by policy | contextual reconciliation | no forced closure | finding remains explicit; baseline may advance if all gates pass | retain policy/accounting evidence |
-| CR36 | accepted semantic delta stabilized | contextual reconciliation then Stage B | one actual impact handoff | actual freshness owned by Projection Impact Analysis; prediction retained | explicit `RG-*` only if requested |
+scenario_identity_source: approved design CR01–CR36
+
+| ID | Source relation / request | Allowed intent | Authority mutation | Candidate state | Canonical state | Projection state | Next action |
+|---|---|---|---|---|---|---|---|
+| CR01 | accepted A, current main B; open RESUME | mismatch route only | none | no CR yet | A retained | unchanged | CHANGE_REVIEW or REVALIDATE |
+| CR02 | A/B mismatch; EXTEND API Report | blocked EXTEND | none | no CR yet | A retained | unchanged | review/revalidate/reconcile |
+| CR03 | A/B mismatch; PROJECTION_REPAIR | blocked current repair | none | no CR | A retained | unchanged | reconcile or historical context |
+| CR04 | accepted A, feature B startup | CHANGE_REVIEW recommended | none | pending CR | A retained | unchanged | configure A→B |
+| CR05 | A→unmerged B | CHANGE_REVIEW | none | COMPLETE/NOT_RECONCILED | A | unchanged | keep or reconcile |
+| CR06 | main→PR head | CHANGE_REVIEW | none | candidate-bound | main state | unchanged | owner review/reconcile |
+| CR07 | reviewed A→B, branch advances C | linked B→C review | none | CR old immutable, new linked | A | unchanged | review C or reconcile reusable |
+| CR08 | reviewed B, candidate diverges D | new CHANGE_REVIEW | none | old historical, new candidate | A | unchanged | inspect D |
+| CR09 | B no-ff merged M, tree(M)=tree(B) | contextual reconcile | only after owner gates | TREE_EQUIVALENT | M after reconcile | actual impact after reconcile | explicit reconcile |
+| CR10 | B squash merged M, relevant tree equal | contextual reconcile | only after gates | TREE_EQUIVALENT | M after reconcile | actual impact after reconcile | explicit reconcile |
+| CR11 | conflict merge changes relevant tree | new/supplemental review | none initially | reuse denied | A | unchanged | review B→M or A→M |
+| CR12 | only b1,b2 of reviewed b1..b3 cherry-picked | conditional reuse | none without proof | partial/conditional | A | unchanged | decompose or new review |
+| CR13 | candidate adds endpoint | CHANGE_REVIEW | none | CF candidate + predicted API impact | old endpoint state | unchanged | reconcile via STM gate |
+| CR14 | candidate removes endpoint | CHANGE_REVIEW | none | candidate removal | old fact retained | unchanged | owner retirement on reconcile |
+| CR15 | path changes | CHANGE_REVIEW | none | identity delta candidate | old fact retained | unchanged | CC/STM owner adjudication |
+| CR16 | handler file moved, route same | CHANGE_REVIEW | none | source movement, likely no semantic delta | A | unchanged | evidence assessment |
+| CR17 | new MEDIUM CQ issue | CHANGE_REVIEW CQ | none | CRF MEDIUM | old CQ unchanged | unchanged | CQ adjudication if reconcile |
+| CR18 | candidate may fix HIGH CQ | CHANGE_REVIEW CQ | none | effect POTENTIALLY_RESOLVES | HIGH unchanged | unchanged | CQ re-adjudication |
+| CR19 | fixes HIGH, adds MEDIUM | CHANGE_REVIEW | none | effect + CRF | both old/new pending | unchanged | reconcile both owner slices |
+| CR20 | candidate finding rejected | reconcile | CQ may reject only | CRF historical rejected | no canonical finding | actual impact only if accepted facts changed | retain history |
+| CR21 | CRF maps existing CQ-088 | reconcile | CQ adjudicates duplicate/link | CRF origin retained | CQ-088 unchanged until adjudication | unchanged | record origin/adjudication |
+| CR22 | prediction says impact, actual none | reconcile then impact | accepted owners only | prediction retained | accepted unchanged | no actual impact | keep historical prediction |
+| CR23 | prediction none, actual impact | reconcile then impact | accepted owners only | prediction retained | accepted delta | dependent projections impacted | explicit RG if wanted |
+| CR24 | Product A changed only | Product CR | qualified A only | member-qualified | B untouched | Product impact qualified | reconcile affected vector |
+| CR25 | multiple member revisions | Product CR | qualified vector | vector-bound | per-member authority | qualified impact | reconcile each required owner |
+| CR26 | unknown cross-boundary impact | CR with expansion | none until evidence | CONTEXT_EXPANSION_REQUIRED | A | unchanged | expand or block completion |
+| CR27 | bounded review completes with unknown | CHANGE_REVIEW | none | COMPLETE + UNKNOWN_IMPACT | A | unchanged | show limitation; optional reconcile |
+| CR28 | user keeps review only | no reconcile | none | COMPLETE/KEPT_REVIEW_ONLY | A | unchanged | historical reuse/comparison |
+| CR29 | compare B and C | comparison view | none | two immutable CRs | A | unchanged | user chooses candidate |
+| CR30 | reconcile, decline regeneration | reconcile then defer RG | accepted owner changes only | RECONCILED | baseline B accepted if gate passes | affected projections STALE/deferred | explicit later RG |
+| CR31 | reviewed B, new main tree equivalent | contextual reconcile | only after proof/gates | TREE_EQUIVALENT | new main after reconcile | actual impact | reuse with proof |
+| CR32 | current branch advances B→C | linked incremental CR | none yet | ADVANCED | A | unchanged | review B→C |
+| CR33 | current branch diverges | new CR required | none | DIVERGED old review | A | unchanged | bind new candidate |
+| CR34 | no accepted baseline, compare commits | standalone CR | none | candidate comparison | no accepted baseline | unchanged | retain/review; no acceptance |
+| CR35 | source advances, no semantic delta | REVALIDATE/reconcile | owner confirms no delta | COMPLETE/RECONCILED | baseline may advance to B | actual no impact | continue normal workflow |
+| CR36 | documentation-only change | CHANGE_REVIEW | none unless accepted semantic effect | inventory/assessment docs delta | A | unchanged or actual doc-only impact after reconcile | keep or reconcile |
 
 ## Partial reconciliation matrix PRC01–PRC05
 
