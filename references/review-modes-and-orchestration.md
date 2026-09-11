@@ -161,6 +161,39 @@ owner record carries `candidate_origin: CR-*/CRF-*` traceability when it
 references a candidate finding or interpretation; promotion creates or links
 an owner-controlled canonical identity and never reuses the CRF identity.
 
+### Review reuse and candidate evolution
+
+Reuse is classified against the completed CR's immutable bindings, scope,
+lenses, and usable evidence. The classifier is:
+
+```text
+EXACT | TREE_EQUIVALENT | ADVANCED | DIVERGED | UNAVAILABLE
+```
+
+`EXACT` requires the same repository, exact candidate commit and tree, exact
+Project/Product qualification, a `COMPLETE` review, usable evidence, and
+compatible requested scope/lenses. `TREE_EQUIVALENT` requires a separate proof
+under one of the permitted levels in the shared evidence contract; a matching
+SHA alone is never sufficient.
+
+An `ADVANCED` candidate is a supported continuation of the reviewed candidate.
+It creates a linked immutable incremental CR, for example `B→C` with
+`parent_review: CR-*`; it does not rewrite the prior CR. `DIVERGED` means the
+candidate no longer safely represents the reviewed candidate and requires a
+new CR. `UNAVAILABLE` means the required relation or proof cannot be
+established. A completed CR's base, candidate, scope, and meaning are never
+rewritten.
+
+No-ff merges and squash merges can reuse a completed review only after a
+`WHOLE_TREE_EQUAL` or `FROZEN_RELEVANT_SCOPE_EQUAL` proof. A conflict
+resolution that changes relevant content requires a supplemental or new CR.
+Partial cherry-pick reuse is conditional and requires independently
+decomposable subset proof covering omitted commits; otherwise bind a new CR.
+
+Comparing candidates is a read-only view over immutable CR artifacts. It may
+show differences in effects, risks, migration impact, and unknowns, but it
+cannot adjudicate, accept, or create canonical semantic authority.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`

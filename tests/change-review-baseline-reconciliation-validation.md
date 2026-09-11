@@ -44,3 +44,18 @@ separation. The PRE-CHANGE rows above remain immutable historical evidence.
 | R01 | The later session-integration table permitted changed-baseline `RESUME`, `EXTEND`, and current `PROJECTION_REPAIR` to proceed without the Task 1 guard. | `RESUME` returns `SOURCE_BASELINE_MISMATCH`; `EXTEND` returns `BASELINE_RECONCILIATION_REQUIRED`; current `PROJECTION_REPAIR` blocks; `CHANGE_REVIEW` and contextual `RECONCILE_CHANGE` are offered without making reconciliation a startup intent. | CORRECTED — later integration rules now preserve all four Task 1 routes. |
 
 | R02 | The Change Inventory schema left `MOVED` on the scalar locator/evidence shape and did not require old BASE and new CANDIDATE sides. | `MOVED` has an explicit `base` old-locator/evidence side and `candidate` new-locator/evidence side; scalar handling remains limited to `ADDED`, `MODIFIED`, and `REMOVED`. | CORRECTED — MOVED now requires the two-sided structure. |
+
+## Task 5 review reuse validation
+
+| ID | Deterministic scenario | Required contract outcome |
+|---|---|---|
+| MR01 | Same repository, exact candidate commit/tree, exact qualification, complete CR, usable evidence, compatible scope/lenses. | `EXACT`; reuse is allowed. |
+| MR02 | No-ff or squash result has equal resolved whole-tree identity and matching repository, qualification, and scope. | `TREE_EQUIVALENT` at `WHOLE_TREE_EQUAL`; reuse is allowed only with retained proof. |
+| MR03 | Candidate differs in commit but the persisted included path/selector/member manifest, relevant-tree fingerprint, and omitted-path non-impact proof match. | `TREE_EQUIVALENT` at `FROZEN_RELEVANT_SCOPE_EQUAL`; reuse is allowed only with retained proof. |
+| MR04 | Only inspected files coincide, or proof is missing; branch name, ancestry, or fuzzy text appears equal. | `NOT_TREE_EQUIVALENT`; reuse is denied. |
+| MR05 | Reviewed candidate B advances to supported candidate C. | `ADVANCED`; create linked immutable incremental `B→C` CR. |
+| MR06 | Candidate no longer safely represents the reviewed candidate. | `DIVERGED`; create a new CR; never rewrite the completed CR. |
+| MR07 | Conflict resolution changes relevant content. | Supplemental or new CR; no reuse from the prior review. |
+| MR08 | Only an independently decomposable cherry-picked subset is selected and omitted-commit non-impact proof is retained. | Conditional reuse; absent proof requires a new CR. |
+| MR09 | Product member vector, selected Product revision, or member qualification differs despite equal-looking text/tree. | Reuse rejected as `DIVERGED`/`UNAVAILABLE`; preserve member-qualified bindings. |
+| MR10 | Compare A→B and A→C after each candidate is bound immutably. | Read-only comparison view over immutable CRs; no adjudication, acceptance, or canonical authority creation. |

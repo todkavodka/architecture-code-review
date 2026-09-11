@@ -208,6 +208,37 @@ and evidence are bound to CANDIDATE. A MOVED entry must not collapse either
 side into the scalar fields used by the other delta types. Multiple entries may
 refer to one source path when independently bounded surfaces are observed.
 
+## 4.3 Reuse and tree-equivalence proof
+
+A completed CR may be reused only after the coordinator records one exact
+reuse classification and its evidence. `TREE_EQUIVALENT` has exactly two
+permitted proof levels:
+
+```text
+reuse_proof:
+  reuse_state: TREE_EQUIVALENT
+  level: WHOLE_TREE_EQUAL | FROZEN_RELEVANT_SCOPE_EQUAL
+  repository_id
+  project_product_qualification
+  scope_and_lenses
+  candidate_commit
+  candidate_tree
+  proof_evidence
+```
+
+`WHOLE_TREE_EQUAL` requires equal resolved whole-tree identity, matching
+repository identity, exact Project/Product qualification, and compatible
+review scope/lenses. `FROZEN_RELEVANT_SCOPE_EQUAL` requires the persisted
+manifest of included paths, selectors, and member bindings; an equal
+relevant-tree fingerprint; and proof that omitted paths cannot affect the
+reviewed scope. The manifest and proof are retained with the reuse decision.
+
+Inspected-files coincidence, branch name, ancestry, fuzzy text, or missing
+proof yields `NOT_TREE_EQUIVALENT` and cannot authorize reuse. A commit SHA
+comparison without the required repository, qualification, scope, and proof
+is not a reuse decision. A merge, squash, or cherry-pick may therefore reuse
+only when its applicable whole-tree or frozen-scope proof is retained.
+
 The inventory is `WHAT CHANGED` only. Interpretation, risk, finding effects,
 test impact, contract impact, and predicted projection impact belong to the
 separate Change Assessment and its owning authorities.

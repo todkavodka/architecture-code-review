@@ -213,6 +213,21 @@ must show it separately from the candidate and cannot treat it as current.
 `CHANGE_REVIEW` may compare two authorized sources without creating accepted
 semantic state.
 
+### Reuse and candidate-update routing
+
+When a completed Change Review is considered for contextual reuse, route the
+candidate through the classifier and proof contract owned by the Change Review
+artifacts. `EXACT` or proven `TREE_EQUIVALENT` may expose contextual
+`RECONCILE_CHANGE` only after the existing completion, evidence, qualification,
+and scope checks. `ADVANCED` creates a linked incremental review for the next
+candidate; `DIVERGED` or `UNAVAILABLE` requires a new review or an explicit
+limitation. A completed CR is never rewritten to change its source meaning.
+
+No-ff, squash, and partial cherry-pick cases do not bypass proof. Candidate
+comparison remains a read-only view over immutable CRs. In Product mode, a
+changed member vector, selected Product revision, or member qualification
+rejects reuse even when source text or tree appears equal.
+
 The recommendation matrix is:
 
 | State | Recommendation |

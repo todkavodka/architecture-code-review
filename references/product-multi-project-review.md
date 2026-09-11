@@ -220,6 +220,22 @@ at the same Product revision does not rewrite or advance Product context. A
 source or coordination change creates a new baseline candidate and targeted
 impact/revalidation; accepted historical baselines remain addressable.
 
+### Product Change Review reuse qualification
+
+Product reuse requires equality of the complete qualified member vector, the
+selected accepted Product revision, and every member's Project/repository,
+scope, and source qualification. A Product candidate is not reusable when any
+member vector, selected Product revision, or member qualification differs,
+even if its text or resolved tree appears equal. Such a case is
+`DIVERGED`/`UNAVAILABLE` for reuse and requires a new or explicitly scoped
+review with the differing member bindings preserved.
+
+Product candidate comparison is a view over immutable, member-qualified CR
+artifacts. It does not merge equal-looking local IDs, infer cross-member
+equivalence, or create Product semantic authority. Project-local reuse remains
+qualified by exact local identity, revision, provenance, freshness, and scope;
+Product membership does not relax those requirements.
+
 ## 6. Coherency and dirty/noncanonical state
 
 `coherency` is one independent baseline dimension:
