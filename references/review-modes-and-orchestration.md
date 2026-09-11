@@ -512,6 +512,18 @@ RECONCILE_CHANGE (contextual action, not a startup intent) → after explicit co
 PROJECTION_REPAIR → with BASELINE_MATCH, repair only selected presentation projections from unchanged accepted authority; otherwise block current repair until source reconciliation. Semantic drift returns to technical revalidation.
 ```
 
+These rules consume the coordinator's deterministic intent matrix: an
+accepted package at A is always shown separately from current source B, and no
+intent may infer B from A. `USE_EXISTING` can consume A as current only on a
+matching binding; `NEW` starts an independently confirmed flow from B and never
+silently enriches A. `REVALIDATE` reevaluates accepted state against B, while a
+completed CR supplies routing evidence only and cannot satisfy the
+revalidation gate or bypass owner adjudication. `EXTEND` is additive only
+after an accepted matching B and never performs an implicit
+review-plus-reconcile-plus-extend chain. A mismatched
+`PROJECTION_REPAIR` is blocked as current repair; no historical-repair mode is
+created.
+
 After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the
 coordinator performs one Projection Impact Analysis handoff and persists
 `PROJECTION_IMPACT_ACCOUNTED`. This is an accounting gate, not a regeneration

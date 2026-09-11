@@ -307,6 +307,15 @@ PS-39, PS-40 и PS-43 были baseline-compliant и не являются ос�
 
 ## 7. Project-change targeted revalidation
 
+`REVALIDATE` is accepted-state reevaluation, not Change Review reuse. The
+coordinator binds the previously accepted baseline A and the selected current
+source B, shows both exact bindings, and routes only the affected accepted
+authority slices through the existing revalidation and owner-adjudication
+gates. A complete `CR-*` is routing evidence about B: it cannot satisfy the
+`REVALIDATE` gate, substitute for fresh required evidence, or bypass the owning
+authority's adjudication. Candidate `CF-*`/`CRF-*` records likewise remain
+non-authoritative until their existing owners decide.
+
 After the semantic delta reaches a stabilized accepted state, projection
 freshness is accounted for by [Projection impact accounting](projection-impact.md).
 That pass consumes revision-bound semantic identities, selector resolution

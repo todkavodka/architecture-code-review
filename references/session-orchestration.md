@@ -290,6 +290,29 @@ The recommendation matrix is:
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
 
+### Deterministic existing-intent routing
+
+For every intent, the coordinator presents the accepted baseline as A and the
+selected/current source as B when both exist. A package accepted at A is
+historical context only; current B is established from its own exact source
+binding and is never inferred from package A, a projection, or compact state.
+
+The routing decision is deterministic:
+
+| Intent | `BASELINE_MATCH` | `BASELINE_ADVANCED`, `BASELINE_DIVERGED`, or `BASELINE_UNKNOWN` |
+|---|---|---|
+| `USE_EXISTING` | consume the accepted A package as current | show A as historical and B separately; do not treat A as current; `NEW`, `CHANGE_REVIEW`, or `REVALIDATE` remain explicit alternatives |
+| `RESUME` | restore and continue the first non-accepted gate | return `SOURCE_BASELINE_MISMATCH` and stop; offer `CHANGE_REVIEW`, `REVALIDATE`, and contextual `RECONCILE_CHANGE` only when reusable; none runs automatically |
+| `REVALIDATE` | reevaluate accepted state only where applicable | bind A to B and perform accepted-state impact/revalidation; a CR is routing evidence only and cannot satisfy its revalidation gate |
+| `EXTEND` | perform only the confirmed additive request | return `BASELINE_RECONCILIATION_REQUIRED` and stop; no implicit review-plus-reconcile-plus-extend chain |
+| `PROJECTION_REPAIR` | repair only selected projections from unchanged accepted authority | block current repair until source reconciliation; do not create a historical-repair mode |
+| `NEW` | start an independently confirmed new flow | start from B with independently confirmed scope/configuration; never enrich or silently continue A |
+| `CHANGE_REVIEW` | compare explicitly selected sources in candidate mode | compare explicitly selected A/B sources in candidate mode; it does not promote B |
+
+`RECONCILE_CHANGE` remains a contextual action after a completed reusable
+Change Review, not a startup intent. It cannot be inserted automatically into
+any row above, and it cannot make a changed source appear matched.
+
 ## Product context selection and pinning
 
 Product mode is explicit and opt-in. A normal session remains Product-free;
