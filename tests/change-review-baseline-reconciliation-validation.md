@@ -191,3 +191,26 @@ safe reuse and Product qualification explicit
 projection regeneration explicit
 complete claims bounded
 ```
+
+### Bounded no-placeholder validation
+
+The canonical plan and this validation note contain the literal expression
+used to describe this check, so both are intentionally excluded from the
+phrase scan. Inspect only the four Task 10 human-facing implementation files;
+validate this artifact separately with its matrix/count checks. An empty
+phrase-scan result is the expected pass condition. Do not scan plans, designs,
+or reviews.
+
+```bash
+if rg -n "placeholder|deferred architecture decision|architecture contradiction" \
+  README.md \
+  docs/reference/workflows.md \
+  docs/concepts/review-suite.md \
+  docs/getting-started/quick-start.md
+then
+  echo "FAIL: forbidden placeholder phrase found in bounded implementation scope"
+  exit 1
+else
+  echo "PASS: no forbidden placeholder phrase in bounded implementation scope"
+fi
+```
