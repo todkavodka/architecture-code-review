@@ -218,12 +218,26 @@ permitted proof levels:
 reuse_proof:
   reuse_state: TREE_EQUIVALENT
   level: WHOLE_TREE_EQUAL | FROZEN_RELEVANT_SCOPE_EQUAL
+  compared_prior_review_id: CR-*
   repository_id
   project_product_qualification
   scope_and_lenses
-  candidate_commit
-  candidate_tree
-  proof_evidence
+  reviewed_candidate_tree: <resolved tree of compared prior CR candidate>
+  intended_candidate_tree: <resolved tree of intended candidate>
+  frozen_relevant_scope_manifest:
+    included_paths: [<persisted paths>]
+    selectors: [<persisted selectors>]
+    member_bindings: [<persisted Project/Product member bindings>]
+  relevant_tree_fingerprint: <deterministic fingerprint or NOT_APPLICABLE>
+  omitted_path_non_impact_proof: <explicit proof or NOT_APPLICABLE for whole tree>
+  scope_lens_compatibility: CONFIRMED | NOT_COMPATIBLE
+  evidence_usability: USABLE | UNUSABLE
+  merge_subset_proof:
+    kind: NONE | NO_FF_MERGE | SQUASH | PARTIAL_CHERRY_PICK
+    subset_manifest: <included commits/paths or NOT_APPLICABLE>
+    independently_decomposable: CONFIRMED | NOT_APPLICABLE | NOT_PROVEN
+    omitted_commit_non_impact_proof: <explicit proof or NOT_APPLICABLE>
+    evidence: <specific proof references>
 ```
 
 `WHOLE_TREE_EQUAL` requires equal resolved whole-tree identity, matching
@@ -231,7 +245,18 @@ repository identity, exact Project/Product qualification, and compatible
 review scope/lenses. `FROZEN_RELEVANT_SCOPE_EQUAL` requires the persisted
 manifest of included paths, selectors, and member bindings; an equal
 relevant-tree fingerprint; and proof that omitted paths cannot affect the
-reviewed scope. The manifest and proof are retained with the reuse decision.
+reviewed scope. The compared prior CR, reviewed candidate tree, intended tree,
+scope/lens compatibility, and evidence usability are always persisted. The
+relevant fingerprint and omitted-path proof are required for frozen-scope
+proof; whole-tree proof records them as not applicable because no paths are
+omitted. The manifest and proof are retained with the reuse decision.
+
+`merge_subset_proof` is `NO_FF_MERGE` or `SQUASH` for the corresponding merge
+case and `PARTIAL_CHERRY_PICK` for a subset. A partial cherry-pick requires a
+persisted subset manifest, confirmed independent decomposition, and explicit
+omitted-commit non-impact proof. `NONE` is valid only when no merge or subset
+transformation is being evaluated. The named fields are mandatory proof
+inputs; a generic `proof_evidence` pointer alone is insufficient.
 
 Inspected-files coincidence, branch name, ancestry, fuzzy text, or missing
 proof yields `NOT_TREE_EQUIVALENT` and cannot authorize reuse. A commit SHA

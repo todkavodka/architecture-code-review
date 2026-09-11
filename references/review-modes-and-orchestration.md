@@ -178,11 +178,14 @@ SHA alone is never sufficient.
 
 An `ADVANCED` candidate is a supported continuation of the reviewed candidate.
 It creates a linked immutable incremental CR, for example `B→C` with
-`parent_review: CR-*`; it does not rewrite the prior CR. `DIVERGED` means the
-candidate no longer safely represents the reviewed candidate and requires a
-new CR. `UNAVAILABLE` means the required relation or proof cannot be
-established. A completed CR's base, candidate, scope, and meaning are never
-rewritten.
+`parent_review: CR-*`. The linked CR must persist
+`base_binding == parent_review.candidate_binding` and its
+`candidate_binding` must be the exact next source state after B (for example,
+C), with the transition evidence retained. It does not rewrite the prior CR.
+`DIVERGED` means the candidate no longer safely represents the reviewed
+candidate and requires a new CR. `UNAVAILABLE` means the required relation or
+proof cannot be established. A completed CR's base, candidate, scope, and
+meaning are never rewritten.
 
 No-ff merges and squash merges can reuse a completed review only after a
 `WHOLE_TREE_EQUAL` or `FROZEN_RELEVANT_SCOPE_EQUAL` proof. A conflict

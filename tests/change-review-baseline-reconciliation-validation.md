@@ -50,10 +50,10 @@ separation. The PRE-CHANGE rows above remain immutable historical evidence.
 | ID | Deterministic scenario | Required contract outcome |
 |---|---|---|
 | MR01 | Same repository, exact candidate commit/tree, exact qualification, complete CR, usable evidence, compatible scope/lenses. | `EXACT`; reuse is allowed. |
-| MR02 | No-ff or squash result has equal resolved whole-tree identity and matching repository, qualification, and scope. | `TREE_EQUIVALENT` at `WHOLE_TREE_EQUAL`; reuse is allowed only with retained proof. |
-| MR03 | Candidate differs in commit but the persisted included path/selector/member manifest, relevant-tree fingerprint, and omitted-path non-impact proof match. | `TREE_EQUIVALENT` at `FROZEN_RELEVANT_SCOPE_EQUAL`; reuse is allowed only with retained proof. |
+| MR02 | No-ff or squash result has equal reviewed-candidate and intended-candidate whole-tree identity and matching repository, qualification, and scope. | `TREE_EQUIVALENT` at `WHOLE_TREE_EQUAL`; reuse is allowed only with the compared prior CR, both trees, compatibility, usability, and retained proof fields. |
+| MR03 | Candidate differs in commit but the persisted included path/selector/member-binding manifest, relevant-tree fingerprint, and omitted-path non-impact proof match. | `TREE_EQUIVALENT` at `FROZEN_RELEVANT_SCOPE_EQUAL`; reuse is allowed only with all auditable proof fields retained. |
 | MR04 | Only inspected files coincide, or proof is missing; branch name, ancestry, or fuzzy text appears equal. | `NOT_TREE_EQUIVALENT`; reuse is denied. |
-| MR05 | Reviewed candidate B advances to supported candidate C. | `ADVANCED`; create linked immutable incremental `B→C` CR. |
+| MR05 | Reviewed candidate B advances to supported candidate C. | `ADVANCED`; create linked immutable incremental `B→C` CR whose base binding equals the parent CR's candidate binding and whose candidate binding is the exact next source state. |
 | MR06 | Candidate no longer safely represents the reviewed candidate. | `DIVERGED`; create a new CR; never rewrite the completed CR. |
 | MR07 | Conflict resolution changes relevant content. | Supplemental or new CR; no reuse from the prior review. |
 | MR08 | Only an independently decomposable cherry-picked subset is selected and omitted-commit non-impact proof is retained. | Conditional reuse; absent proof requires a new CR. |
