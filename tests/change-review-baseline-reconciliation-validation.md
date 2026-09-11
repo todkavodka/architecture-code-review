@@ -89,3 +89,105 @@ regeneration boundaries.
 | PD04 | A selected member is present but its source is unavailable or unresolved. | Record the exact limitation and route bounded `CONTEXT_EXPANSION_REQUIRED` when the boundary may be material; do not admit a Product-wide negative. |
 | PD05 | Two members use the same local semantic ID or equal-looking text/tree but have different Project/source/revision bindings. | Keep member identities and effects separate; no cross-member alias or equivalence is inferred. |
 | PD06 | A Product summary groups effects from multiple members, including differing limits or one unavailable member. | Summary remains qualified to each member vector/evidence/scope; no Product-wide unqualified delta or universal status is created. |
+
+## Complete Change Review matrix CR01–CR36
+
+| ID | Source relation | Allowed intent | Mutation | Candidate/canonical/projection state | Next action |
+|---|---|---|---|---|---|
+| CR01 | baseline matches candidate | `CHANGE_REVIEW` | none | candidate review only; canonical unchanged; projections unchanged | complete review or explicit reconciliation |
+| CR02 | baseline advanced to descendant | `CHANGE_REVIEW` | candidate evidence only | candidate bound to advanced source; canonical unchanged | classify reuse as `ADVANCED` or create linked CR |
+| CR03 | baseline diverged | `CHANGE_REVIEW` | none | candidate is not reusable; canonical unchanged | create new CR |
+| CR04 | baseline relation unknown | `CHANGE_REVIEW` | none | candidate relation unresolved; canonical/projection unchanged | resolve source relation or record limitation |
+| CR05 | branch resolves to exact commit/tree | `CHANGE_REVIEW` | none | exact base/candidate bindings; candidate-only outputs | retain immutable bindings |
+| CR06 | pull request resolves to candidate tree | `CHANGE_REVIEW` | none | PR metadata is input; CR remains source-bound | review selected lenses |
+| CR07 | dirty or noncanonical candidate source | `CHANGE_REVIEW` | none | candidate limitation; no accepted state | stop or obtain authorized clean binding |
+| CR08 | added file or interface | `CHANGE_REVIEW` | candidate `CF-*` | candidate-only fact; no STM/projection write | route through reconciliation if confirmed |
+| CR09 | modified accepted fact | `CHANGE_REVIEW` | candidate delta | affected accepted ref plus candidate interpretation | owner adjudication |
+| CR10 | removed source fact | `CHANGE_REVIEW` | candidate removal | accepted fact remains canonical; removal is candidate evidence | Technical Model Gate after reconciliation |
+| CR11 | moved source entry | `CHANGE_REVIEW` | two-sided MOVED observation | base and candidate locators/evidence remain distinct | correlate, then reconcile explicitly |
+| CR12 | changed method/path | `CHANGE_REVIEW` | candidate operation/property claim | candidate API evidence; accepted IF/OP unchanged | Technical Model Gate and applicable CC |
+| CR13 | changed auth boundary | `CHANGE_REVIEW` | candidate boundary claim | candidate evidence only; no accepted auth mutation | owner review and reconciliation |
+| CR14 | changed schema/error contract | `CHANGE_REVIEW` | candidate contract claim | candidate CF/CC input; compatibility not decided | Contract Verification adjudication |
+| CR15 | changed transport/container limit | `CHANGE_REVIEW` | candidate limit claim | candidate CQ/TE input; no `TESTED` claim | CQ/TE owner routing |
+| CR16 | changed dependency edge | `CHANGE_REVIEW` | candidate dependency observation | candidate dependency cannot satisfy accepted dependency | bounded dependency expansion |
+| CR17 | uninspected material boundary reached | `CHANGE_REVIEW` | none | candidate completeness partial/unknown | `CONTEXT_EXPANSION_REQUIRED` |
+| CR18 | evidence unavailable or dynamic | `CHANGE_REVIEW` | limitation only | candidate limitation; no inferred no-change | preserve limitation and bound scope |
+| CR19 | candidate finding appears | `CHANGE_REVIEW` | candidate `CRF-*` | review-local finding; no canonical lifecycle | CQ/owner adjudication |
+| CR20 | existing finding may be mitigated | `CHANGE_REVIEW` | effect record | candidate effect only; existing finding unchanged | reconcile with finding owner |
+| CR21 | candidate adds risk while resolving existing finding | `CHANGE_REVIEW` | two effect records | many-to-many candidate effects; canonical unchanged | adjudicate each owner result |
+| CR22 | candidate Architecture interpretation | `CHANGE_REVIEW` | review-local assessment | no accepted `RF-*` mutation | Architecture authority |
+| CR23 | candidate TE assurance need | `CHANGE_REVIEW` | candidate case/impact | not executed and not `TESTED` | Test Engineering reproof/planning |
+| CR24 | candidate provider/consumer match | `CHANGE_REVIEW` | comparison input | same method/path is not compatibility | CC adjudication |
+| CR25 | candidate Product member change | `CHANGE_REVIEW` | member-qualified effect | no Product-wide unqualified delta | Product-qualified reconciliation |
+| CR26 | candidate projection prediction | `CHANGE_REVIEW` | prediction record | no `CURRENT`/`STALE`/`BLOCKED` write | retain until accepted impact pass |
+| CR27 | accepted owner result is required | contextual `RECONCILE_CHANGE` | owner disposition | candidate identity not reused; canonical owner may write | record owner result |
+| CR28 | completed reusable CR with explicit confirmation | contextual `RECONCILE_CHANGE` | accepted-owner writes only | candidate remains evidence; canonical writes owner-controlled | run bounded reconciliation |
+| CR29 | incomplete or non-reusable CR | none | no dispatch | candidate remains non-authoritative | complete/new review first |
+| CR30 | exact intended binding still current | `RECONCILE_CHANGE` | accepted delta accounting | eligible for baseline gate | verify all material delta |
+| CR31 | candidate commit/tree changes during reconciliation | none | discard pending eligibility | CR immutable; baseline unchanged | reclassify reuse |
+| CR32 | qualified Product/member vector changes | none | discard pending eligibility | member-qualified CR immutable | reclassify vector/reuse |
+| CR33 | all material delta accounted | contextual `RECONCILE_CHANGE` | owner results recorded | technical/coverage gates may be evaluated | evaluate baseline gate |
+| CR34 | partial reconciliation | none | no baseline advancement | accepted baseline remains prior state | resolve remaining owners |
+| CR35 | open finding permitted by policy | contextual reconciliation | no forced closure | finding remains explicit; baseline may advance if all gates pass | retain policy/accounting evidence |
+| CR36 | accepted semantic delta stabilized | contextual reconciliation then Stage B | one actual impact handoff | actual freshness owned by Projection Impact Analysis; prediction retained | explicit `RG-*` only if requested |
+
+## Partial reconciliation matrix PRC01–PRC05
+
+| ID | Scenario | Required deterministic result |
+|---|---|---|
+| PRC01 | only CF/STM owner result is complete | reconciliation remains partial; no baseline advancement |
+| PRC02 | Architecture or CQ owner remains pending | baseline gate is blocked; candidate identity is not canonical |
+| PRC03 | TE/CC owner is required but unresolved | required gate remains blocked; no compatibility or `TESTED` shortcut |
+| PRC04 | unknown delta is not covered by explicit policy | baseline advancement is blocked; limitation remains visible |
+| PRC05 | HIGH finding is resolved while MEDIUM finding remains open under existing policy | record both owner outcomes; baseline may advance only if every other gate passes, and the MEDIUM remains open |
+
+## Candidate authority-barrier matrix
+
+| ID | Forbidden shortcut | Required barrier |
+|---|---|---|
+| AB01 | `CF-*` used as accepted STM fact | Technical Model Gate must adjudicate; candidate remains evidence |
+| AB02 | `CF-*` used as accepted dependency | dependency metadata may use accepted owner output only |
+| AB03 | `CRF-*` promoted to `CQ-*` | Code Quality independently adjudicates and allocates canonical identity |
+| AB04 | candidate Architecture result mutates `RF-*` | Architecture authority owns canonical write |
+| AB05 | candidate TE case becomes `TESTED` | accepted execution evidence is required |
+| AB06 | candidate provider/consumer match becomes compatibility | CC remains adjudicator; method/path similarity is insufficient |
+| AB07 | candidate Product record becomes Product fact/status | Product qualification composes member-bound accepted records only |
+| AB08 | candidate prediction or projection text changes freshness | Projection Impact Analysis owns freshness; `RG-*` remains explicit |
+
+## Intent-routing matrix
+
+| ID | Intent case | Required route |
+|---|---|---|
+| IR01 | `USE_EXISTING` with matching accepted baseline | consume accepted package as current; metadata-only startup |
+| IR02 | `USE_EXISTING` with changed source | show A historical and B separately; do not treat A as current |
+| IR03 | `NEW` with no prior package | start independently from selected B and confirmed work |
+| IR04 | `NEW` with accepted A present | do not inherit or enrich A without explicit selection |
+| IR05 | `RESUME` with `BASELINE_MATCH` | restore and continue first unfinished gate |
+| IR06 | `RESUME` with advanced/diverged/unknown source | stop with `SOURCE_BASELINE_MISMATCH`; offer review/revalidation/reusable reconcile; none automatic |
+| IR07 | `REVALIDATE` with complete CR available | reevaluate accepted state; CR is routing evidence only |
+| IR08 | `EXTEND` with changed baseline | stop with `BASELINE_RECONCILIATION_REQUIRED`; no implicit chain |
+| IR09 | `PROJECTION_REPAIR` with matching source | repair selected current projection only |
+| IR10 | `PROJECTION_REPAIR` with changed source | block current repair; no historical-repair mode |
+
+## Complete-claim checks
+
+| Check | Required result |
+|---|---|
+| Candidate freshness claim | No CR prediction may claim accepted `CURRENT`, `STALE`, or `BLOCKED`; only Stage B impact authority writes those states. |
+| Review-only lifecycle claim | No review-only `CR-*`, `CF-*`, or `CRF-*` finding may use canonical `RESOLVED`, `CLOSED`, or `ACCEPTED` as its own lifecycle. |
+| Baseline completion claim | No baseline advances on `COMPLETE` alone; exact source binding, material-delta accounting, required owner results, technical/coverage gates, and policy-explicit unknown handling are required. |
+| Scope claim | CR01–CR36, MR01–MR10, PRC01–PRC05, AB01–AB08, IR01–IR10, PI01–PI06, and PD01–PD06 are all deterministic and retained in this artifact. |
+
+## Final validation checks
+
+Required tokens exist in their owning contracts and this artifact; no design,
+plan, or review artifact is modified by the implementation. Final checks:
+
+```text
+CHANGE_REVIEW lifecycle documented
+candidate/canonical/projection authority separated
+baseline mismatch and reconciliation routes explicit
+safe reuse and Product qualification explicit
+projection regeneration explicit
+complete claims bounded
+```
