@@ -60,6 +60,16 @@ separation. The PRE-CHANGE rows above remain immutable historical evidence.
 | MR09 | Product member vector, selected Product revision, or member qualification differs despite equal-looking text/tree. | Reuse rejected as `DIVERGED`/`UNAVAILABLE`; preserve member-qualified bindings. |
 | MR10 | Compare A→B and A→C after each candidate is bound immutably. | Read-only comparison view over immutable CRs; no adjudication, acceptance, or canonical authority creation. |
 
+## Baseline-binding gate regression BB01–BB05
+
+| ID | Deterministic scenario | Required contract outcome |
+|---|---|---|
+| BB01 | A completed reusable `A→B` CR has `base_binding` exactly equal to the current accepted binding A, including repository, Project/Product/member qualification, and source commit/tree/vector; its candidate binding is exact intended B. | `RECONCILE_CHANGE` is eligible, and `BASELINE_ADVANCE_ALLOWED` may be evaluated only after the existing evidence, delta, owner, technical/coverage, and policy gates pass. |
+| BB02 | A completed reusable `A→B` CR still has exact intended candidate B, but the current accepted source binding is independently advanced to A'. | Return `REVIEW_BASELINE_MISMATCH`; do not dispatch reconciliation or emit `BASELINE_ADVANCE_ALLOWED`; preserve the CR and classify/review from the current accepted binding. |
+| BB03 | CR and intended candidate match, but the current accepted binding differs in repository or Project qualification. | Return `REVIEW_BASELINE_MISMATCH`; source text/tree similarity does not permit reconciliation or baseline advancement. |
+| BB04 | CR and intended candidate match, but the current accepted Product revision, member qualification, or member baseline vector differs. | Return `REVIEW_BASELINE_MISMATCH`; do not flatten Product/member identity or advance the baseline. |
+| BB05 | A linked immutable `B→C` CR has `base_binding == parent_review.candidate_binding ==` current accepted binding B and exact intended candidate C. | The linked chain is eligible only with that equality; any broken parent/child or current-accepted-base equality returns `REVIEW_BASELINE_MISMATCH` and requires classification/review from the current accepted binding. |
+
 ## Task 8 projection-separation validation
 
 FF07 above remains immutable pre-change evidence. These rows provide the
@@ -176,7 +186,7 @@ regeneration boundaries.
 | Candidate freshness claim | No CR prediction may claim accepted `CURRENT`, `STALE`, or `BLOCKED`; only Stage B impact authority writes those states. |
 | Review-only lifecycle claim | No review-only `CR-*`, `CF-*`, or `CRF-*` finding may use canonical `RESOLVED`, `CLOSED`, or `ACCEPTED` as its own lifecycle. |
 | Baseline completion claim | No baseline advances on `COMPLETE` alone; exact source binding, material-delta accounting, required owner results, technical/coverage gates, and policy-explicit unknown handling are required. |
-| Scope claim | CR01–CR36, MR01–MR10, PRC01–PRC05, AB01–AB08, IR01–IR10, PI01–PI06, and PD01–PD06 are all deterministic and retained in this artifact. |
+| Scope claim | CR01–CR36, MR01–MR10, BB01–BB05, PRC01–PRC05, AB01–AB08, IR01–IR10, PI01–PI06, and PD01–PD06 are all deterministic and retained in this artifact. |
 
 ## Final validation checks
 

@@ -223,6 +223,14 @@ and scope checks. `ADVANCED` creates a linked incremental review for the next
 candidate; `DIVERGED` or `UNAVAILABLE` requires a new review or an explicit
 limitation. A completed CR is never rewritten to change its source meaning.
 
+For a supported `ADVANCED` continuation, the linked CR chain is eligible only
+when the eligible CR's `base_binding == parent_review.candidate_binding ==`
+the current accepted baseline binding, including repository, Project/Product/
+member qualification and source commit/tree/vector. A broken chain or any
+other base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it cannot
+dispatch reconciliation and must classify/review from the current accepted
+binding.
+
 No-ff, squash, and partial cherry-pick cases do not bypass proof. Candidate
 comparison remains a read-only view over immutable CRs. In Product mode, a
 changed member vector, selected Product revision, or member qualification
@@ -232,10 +240,15 @@ rejects reuse even when source text or tree appears equal.
 
 `RECONCILE_CHANGE` is eligible only when the completed CR is reusable
 (`EXACT`, `TREE_EQUIVALENT`, or a supported `ADVANCED` continuation), its
-candidate binding is the exact intended source binding, its evidence is usable,
-the bounded material-delta accounting is complete, and the user explicitly
-confirms the action. An incomplete or non-reusable CR cannot dispatch. This is
-a contextual action after `CHANGE_REVIEW`, never a startup intent.
+`base_binding` exactly equals the current accepted baseline binding, including
+repository, Project/Product/member qualification and source commit/tree/vector,
+its candidate binding is the exact intended source binding, its evidence is
+usable, the bounded material-delta accounting is complete, and the user
+explicitly confirms the action. If `CR.base_binding` differs from the current
+accepted baseline binding, return `REVIEW_BASELINE_MISMATCH`; do not dispatch
+reconciliation and classify/review from the current accepted binding. An
+incomplete or non-reusable CR cannot dispatch. This is a contextual action
+after `CHANGE_REVIEW`, never a startup intent.
 
 Dispatch only the minimum candidate slices to their existing owners:
 
@@ -259,12 +272,17 @@ Baseline advancement is a separate coordinator gate:
 BASELINE_ADVANCE_ALLOWED
 ```
 
-The gate requires the exact intended source binding, all material delta
-accounted for, required owners complete, required technical and coverage
-gates satisfied, and unknowns handled by an explicit applicable policy. The
-gate is not release, merge, or deployment approval. partial reconciliation
-never completes the baseline; open findings may remain when existing policy
-allows them, but every such finding remains explicitly accounted for.
+The gate requires `CR.base_binding` to still exactly equal the current accepted
+baseline binding, including repository, Project/Product/member qualification
+and source commit/tree/vector; the exact intended source binding; all material
+delta accounted for; required owners complete; required technical and coverage
+gates satisfied; and unknowns handled by an explicit applicable policy. If the
+base binding differs, return `REVIEW_BASELINE_MISMATCH`; do not emit
+`BASELINE_ADVANCE_ALLOWED` and classify/review from the current accepted
+binding. The gate is not release, merge, or deployment approval. partial
+reconciliation never completes the baseline; open findings may remain when
+existing policy allows them, but every such finding remains explicitly
+accounted for.
 
 Before this gate is accepted, compare the candidate commit/tree and qualified
 Project/Product/member vector with the bound candidate. If any changes, discard

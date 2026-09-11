@@ -207,6 +207,12 @@ It creates a linked immutable incremental CR, for example `B→C` with
 `base_binding == parent_review.candidate_binding` and its
 `candidate_binding` must be the exact next source state after B (for example,
 C), with the transition evidence retained. It does not rewrite the prior CR.
+For reconciliation eligibility, the linked CR's `base_binding` must also equal
+the current accepted baseline binding, including repository, Project/Product/
+member qualification and source commit/tree/vector. A broken chain or any
+other base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it cannot
+dispatch reconciliation and must classify/review from the current accepted
+binding.
 `DIVERGED` means the candidate no longer safely represents the reviewed
 candidate and requires a new CR. `UNAVAILABLE` means the required relation or
 proof cannot be established. A completed CR's base, candidate, scope, and
@@ -224,9 +230,13 @@ cannot adjudicate, accept, or create canonical semantic authority.
 
 ### Contextual `RECONCILE_CHANGE` owner dispatch
 
-After a completed reusable CR passes the exact intended source-binding,
-usable-evidence, bounded material-delta, and explicit-confirmation checks,
-the coordinator may expose contextual `RECONCILE_CHANGE`. Incomplete or
+After a completed reusable CR passes exact `CR.base_binding ==` current
+accepted baseline binding, including repository, Project/Product/member
+qualification and source commit/tree/vector; the exact intended source-binding;
+usable evidence; bounded material-delta; and explicit-confirmation checks, the
+coordinator may expose contextual `RECONCILE_CHANGE`. A base-binding inequality
+returns `REVIEW_BASELINE_MISMATCH`; it does not dispatch reconciliation and
+must classify/review from the current accepted binding. Incomplete or
 non-reusable CRs are blocked from dispatch, and reconciliation is not a
 startup intent. Dispatch is owner-routed: `CF-*` goes to the Technical Model
 Gate; Architecture assessment goes to the Architecture authority; `CRF-*`
@@ -238,13 +248,17 @@ Each dispatch records the owner result and `candidate_origin` while retaining
 the candidate as review evidence. An owner may create or link a canonical
 record, but candidate identity is never reused as that owner identity.
 
-The coordinator may emit `BASELINE_ADVANCE_ALLOWED` only after the exact
-intended source binding is still current, all material delta is accounted for,
-required owner results are complete, required technical and coverage gates
-pass, and unknowns are handled by explicit policy. partial reconciliation
-never completes the baseline, and open findings may remain only where existing
-policy allows. This gate is baseline bookkeeping and authority advancement,
-not release approval.
+The coordinator may emit `BASELINE_ADVANCE_ALLOWED` only after
+`CR.base_binding` still exactly equals the current accepted baseline binding,
+including repository, Project/Product/member qualification and source
+commit/tree/vector; the exact intended source binding is still current; all
+material delta is accounted for; required owner results are complete; required
+technical and coverage gates pass; and unknowns are handled by explicit
+policy. A base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; do not
+emit the gate and classify/review from the current accepted binding. partial
+reconciliation never completes the baseline, and open findings may remain only
+where existing policy allows. This gate is baseline bookkeeping and authority
+advancement, not release approval.
 
 If the candidate commit/tree or qualified Project/Product/member vector changes
 before advancement, invalidate eligibility, reclassify reuse, and abandon
