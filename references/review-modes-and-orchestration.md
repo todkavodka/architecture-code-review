@@ -26,6 +26,35 @@ never backfilled into selected capabilities. Multiple requested items use a
 deduplicated minimum dependency union and never escalate automatically to the
 complete Review Suite.
 
+### Change Review requested and resolved work
+
+For `CHANGE_REVIEW`, the user's requested work records only their confirmed
+review lenses and outputs. Lenses are user-facing review choices, not implicit
+capability selections; the ordinary three semantic capabilities remain the
+only selectable capabilities.
+
+```text
+requested_work:
+  change_review:
+    lenses: [change-only | architecture | code-quality | test |
+             interface-contract | explicit-full-change-review]
+    outputs: [summary | inventory | affected-facts | candidate-findings |
+              existing-finding-effects | test-impact | projection-prediction]
+
+resolved_work:
+  change_review:
+    diff_slice: [<minimum candidate comparison slice>]
+    evidence_slice: [<minimum accepted and candidate evidence refs>]
+    owner_slices: [<minimum owning-authority review/reconciliation inputs>]
+```
+
+Candidate mode is read-only with respect to accepted authority. Its diff,
+evidence, and owner slices are internal dependencies and do not populate
+`requested_work.capabilities`, select an otherwise unselected capability, or
+expand the request to the complete Review Suite. Candidate findings and source
+bindings are defined by their owning Change Review contracts; this routing
+shape does not make them accepted state.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`

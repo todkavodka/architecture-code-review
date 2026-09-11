@@ -16,12 +16,13 @@ The canonical startup layers are:
 ```text
 Session Intent
 Scope Context
-Review Capabilities
-Capability-Owned Configuration
-Standalone Output Configuration
-Requested Work Confirmation
-Resolved Plan / Required Internal Work
-Authorization / Execution Boundaries
+Baseline Relation
+Contextual Available Actions
+Requested Work
+Capability/Output Configuration
+Dependency Resolution
+Authorization Summary
+Substantive Work
 ```
 
 Persist the routing record as:
@@ -163,11 +164,54 @@ An unsafe or ambiguous package yields `PREVIOUS_AUDIT_RECONCILIATION_REQUIRED`; 
 
 ## Session Intent
 
-Persist exactly these six intents:
+Persist exactly these seven intents:
 
 ```text
-USE_EXISTING | NEW | RESUME | REVALIDATE | EXTEND | PROJECTION_REPAIR
+USE_EXISTING | NEW | RESUME | REVALIDATE | EXTEND | CHANGE_REVIEW |
+PROJECTION_REPAIR
 ```
+
+`CHANGE_REVIEW` is a startup orchestration intent, not a semantic capability.
+It compares an accepted baseline with an explicitly selected candidate source,
+then performs only the user-confirmed review lenses and outputs in read-only
+candidate mode. It does not select a capability, mutate accepted authority, or
+promote a candidate. `RECONCILE_CHANGE` is not a startup intent: it is a
+contextual action available only for a completed reusable review and after
+explicit confirmation.
+
+### Baseline relation and mismatch routing
+
+After Session Intent and Scope Context, the coordinator compares the accepted
+Project baseline (or exact Product member baseline vector) with the intended
+source and records exactly one routing relation:
+
+```text
+BASELINE_MATCH | BASELINE_ADVANCED | BASELINE_DIVERGED | BASELINE_UNKNOWN
+```
+
+`BASELINE_MATCH` permits normal `RESUME`, `EXTEND`, and current
+`PROJECTION_REPAIR`. `BASELINE_ADVANCED` records a descendant or other advance
+from the accepted binding; `BASELINE_DIVERGED` records that no safe linear
+relation was established; `BASELINE_UNKNOWN` records an unavailable source or
+relation. These are routing metadata only: none marks STM or a projection
+stale, resolves a finding, or proves semantic change.
+
+For any non-match, Contextual Available Actions show Change Review and/or
+Revalidate, plus `RECONCILE_CHANGE` only when a reusable completed review is
+available. They never invoke review, revalidation, or reconciliation
+automatically:
+
+- `RESUME` returns `SOURCE_BASELINE_MISMATCH` and does not continue as current.
+- `EXTEND` returns `BASELINE_RECONCILIATION_REQUIRED`; it cannot add work as if
+  accepted semantics described the candidate source.
+- Current `PROJECTION_REPAIR` is blocked until source reconciliation; it does
+  not repair a current representation against a mismatched source baseline.
+
+`USE_EXISTING` may present the accepted package as historical context, but
+must show it separately from the candidate and cannot treat it as current.
+`NEW` remains independently available. Where no accepted baseline exists,
+`CHANGE_REVIEW` may compare two authorized sources without creating accepted
+semantic state.
 
 The recommendation matrix is:
 
@@ -175,11 +219,12 @@ The recommendation matrix is:
 |---|---|
 | no previous audit | `NEW` |
 | `IN_PROGRESS` + same baseline | `RESUME` |
-| `IN_PROGRESS` + changed baseline | `RESUME` with reconciliation |
+| `IN_PROGRESS` + changed baseline | `SOURCE_BASELINE_MISMATCH`; offer contextual review/revalidation/reconciliation |
 | `COMPLETE` + same committed baseline, consume accepted result | `USE_EXISTING` |
 | `COMPLETE` + same committed baseline, repair only final/user-facing documents | `PROJECTION_REPAIR` |
-| `COMPLETE` + changed committed baseline | `REVALIDATE` |
-| new assurance scope/capability/endpoint | `EXTEND` |
+| `COMPLETE` + changed committed baseline | offer `CHANGE_REVIEW` or `REVALIDATE` |
+| new assurance scope/capability/endpoint with changed baseline | `BASELINE_RECONCILIATION_REQUIRED` before `EXTEND` |
+| new assurance scope/capability/endpoint with matching baseline | `EXTEND` |
 
 `RESUME_WITH_RECONCILIATION` is a flow/recommendation under `RESUME`, never a separate persisted intent. Explicit `NEW` remains available in every reusable case.
 
