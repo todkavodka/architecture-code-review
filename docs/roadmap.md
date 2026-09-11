@@ -25,25 +25,34 @@ Discovery
 
 ## Current Baseline
 
-На текущем `main` уже приняты следующие основы:
+Актуальная сводка текущего состояния вынесена в
+[Current Project Status](current-status.md). На принятой семантической базе уже
+завершены:
 
 ```text
-Discovery Coverage Assurance                 COMPLETE
-Umbrella Review Suite Integration            COMPLETE
-Orchestrator v0.3                            COMPLETE
-Test Engineering Foundation                 COMPLETE
-Test Engineering NEW / EXTEND output UX     COMPLETE
+Discovery Coverage Assurance                       COMPLETE
+Umbrella Review Suite Integration                  COMPLETE
+Orchestrator v0.3                                  COMPLETE
+Shared Technical Model Foundation                  DONE
+Audit Projection & Regeneration                    DONE
+Test Engineering                                   DONE
+Code Quality Review                                DONE
+Product / Multi-Project Review                     DONE
+Interface, API & Data Integration Catalog          DONE
+API Operation Completeness                         DONE
+Change Review & Baseline Reconciliation            DONE
 ```
 
-Это означает, что в репозитории описаны и проверены соответствующие
+Это означает, что в репозитории описаны, проверены и продвинуты соответствующие
 методологические и orchestration-контракты. Это не означает, что Skill уже
-реализует выполнение тестов, реализацию симуляторов, provisioning окружения
-или другие будущие execution-функции.
+реализует выполнение тестов, реализацию симуляторов, provisioning окружения,
+runtime source scanner или другие execution-функции.
 
 Текущая основа сохраняет evidence-first review, authority и freshness bindings,
 минимально необходимую работу для `EXTEND` и `REVALIDATE`, независимые
-capabilities и отдельную модель Test Engineering outputs. `Behavior Model` и
-применимая `Contract Verification` остаются внутренними зависимостями.
+capabilities, operation-completeness gates и отдельную модель candidate Change
+Review. `Behavior Model` и применимая `Contract Verification` остаются
+внутренними зависимостями и сохраняют собственное authority.
 
 ## Forward Roadmap
 
@@ -60,7 +69,7 @@ Current Foundation
        |
        +--> Stage C Test Engineering Execution [DONE]
        |
-       +--> Stage D Code Quality Review
+       +--> Stage D Code Quality Review [DONE]
        |
        +-----------------------------+
                                      |
@@ -69,10 +78,15 @@ Current Foundation
                                      |
                                      v
                     Stage F Interface, API & Data Integration Catalog [DONE]
+                                     |
+                                     v
+                    Cross-cutting Change Review & Baseline Reconciliation [DONE]
 ```
 
 Stage B особенно важен для надёжности генерируемых результатов Stage A, C и D,
 но его наличие не отменяет независимые authority и freshness gates этих этапов.
+Change Review является cross-cutting orchestration lifecycle, а не новым
+semantic capability или Stage G authority.
 
 ## Stage A — Shared Technical Model Foundation
 
@@ -423,6 +437,63 @@ Authority conflicts: `0`.
 No automatic projection regeneration was introduced; existing `CC-*`
 compatibility authority remains authoritative.
 
+## Cross-Cutting Milestone — Change Review & Baseline Reconciliation
+
+**Status: `DONE`**
+
+### Purpose
+
+Добавить first-class pre-acceptance review source changes без смешения
+candidate state с canonical semantic authority. Lifecycle позволяет проверять
+branch, commit или pull request относительно immutable accepted baseline,
+оценивать влияние, а затем отдельно и явно reconcile выбранный candidate через
+существующих владельцев.
+
+### Completed scope
+
+Завершённая реализация включает:
+
+- новый orchestration intent `CHANGE_REVIEW`, не являющийся capability;
+- immutable base/candidate repository/Project/Product-qualified bindings;
+- review-local `CR-*`, `CF-*`, `CRF-*` с жёстким candidate authority barrier;
+- factual Change Inventory и bounded delta discovery с `CONTEXT_EXPANSION_REQUIRED`;
+- candidate Architecture/CQ/TE/Contract Verification assessment без canonical mutation;
+- exact reuse states `EXACT`, `TREE_EQUIVALENT`, `ADVANCED`, `DIVERGED`, `UNAVAILABLE`;
+- proof-gated `WHOLE_TREE_EQUAL` и `FROZEN_RELEVANT_SCOPE_EQUAL`;
+- contextual `RECONCILE_CHANGE` через существующих semantic owners;
+- hard requirement, что review base соответствует текущему accepted baseline либо missing delta полностью покрыт linked/supplemental review chain;
+- `BASELINE_ADVANCE_ALLOWED`, который запрещает full baseline advancement после partial reconciliation;
+- explicit mismatch guards для `RESUME`, `EXTEND` и current `PROJECTION_REPAIR`;
+- separation candidate projection prediction от actual Stage B Projection Impact;
+- сохранение explicit `RG-*` regeneration;
+- Product/member qualification, single-project compatibility и существующую API operation completeness authority.
+
+### Completion evidence
+
+```text
+Approved design HEAD:
+bc3d7410652a3c73ddb74da6de7e49a1815ec5b9
+
+Approved plan HEAD:
+e61f53ba560b50d3ca21475b40f572c9ac8c9085
+
+Approved feature HEAD:
+d870198eacaf1c2cd4d4ff685212fdb48491c3d7
+
+Promotion merge:
+2091a44622371bbc39fb913c00c1876d7f182dec
+```
+
+Final independent remediation re-review: `0 HIGH / 0 MEDIUM / 0 LOW`, no new
+findings. Validation preserved `36/36` Change Review scenarios, `10/10`
+merge/reuse scenarios, `5/5` partial reconciliation cases, `8/8` authority
+barrier cases, `10/10` intent-routing cases, `6/6` projection cases and `6/6`
+Product cases. Migration remains `COMPATIBLE_EXTENSION`; validation remains
+`DO_NOT_BUILD_HARNESS`.
+
+Closeout evidence:
+[Change Review & Baseline Reconciliation — Closeout](superpowers/reviews/2026-09-11-change-review-baseline-reconciliation-closeout.md).
+
 ## Cross-Stage Architectural Principles
 
 ### Evidence first
@@ -434,6 +505,12 @@ compatibility authority remains authoritative.
 Generated reports являются projections принятого semantic state, а не его
 заменой.
 
+### Candidate state before canonical reconciliation
+
+Candidate review может оценивать изменения и прогнозировать влияние, но не
+становится canonical authority и не продвигает baseline без явной reconciliation
+через существующих владельцев.
+
 ### Freshness and provenance
 
 Переиспользуемые artifacts должны оставаться привязанными к revision и
@@ -441,13 +518,14 @@ baseline, с понятной provenance.
 
 ### Minimum necessary work
 
-`EXTEND` и `REVALIDATE` продолжают использовать наименьший корректный
-dependency slice.
+`EXTEND`, `REVALIDATE` и Change Review продолжают использовать наименьший
+корректный dependency/evidence slice и явно расширяют контекст только при
+необходимости.
 
 ### No silent escalation
 
 Bounded operation не должна молча превращаться в full audit, product-wide review,
-simulator implementation или E2E execution.
+simulator implementation, E2E execution или automatic reconciliation.
 
 ### Single-project remains first class
 
@@ -455,14 +533,15 @@ Product-level support расширяет, а не заменяет project-level
 
 ### Independent capabilities
 
-Architecture Review, Code Quality Review, Test Engineering и Developer
-Documentation могут совместно использовать evidence, но сохраняют явное
-semantic ownership.
+Architecture Review, Code Quality Review и Test Engineering могут совместно
+использовать evidence, но сохраняют явное semantic ownership. Technical
+Documentation остаётся projection layer, а не четвёртой capability.
 
 ### Human-controlled execution
 
-Любая будущая реализация code/test/simulator/environment требует explicit
-authorization и verification gates.
+Любая будущая реализация code/test/simulator/environment, reconciliation или
+projection regeneration требует explicit authorization и соответствующих
+verification gates.
 
 ## Dependency and Sequencing
 
@@ -477,7 +556,7 @@ Stage B Audit Projection & Regeneration
   depends on:
     current artifact/projection semantics
   supports:
-    A, C, D, E
+    A, C, D, E and post-reconciliation projection refresh
 
 Stage C Test Engineering Execution
   depends on:
@@ -493,16 +572,30 @@ Stage E Product / Multi-Project Review
     mature orchestration/revalidation
   benefits strongly from:
     A, B, C, D
+
+Stage F Interface, API & Data Integration Catalog
+  depends on:
+    STM/evidence foundation
+    Product qualification where Product mode is selected
+
+Change Review & Baseline Reconciliation
+  depends on:
+    accepted baseline semantics
+    STM/owner authority boundaries
+    projection impact lifecycle
+  reuses:
+    Product qualification
+    API operation completeness
 ```
 
-`depends on` здесь означает необходимую основу. `supports` и `benefits strongly
-from` обозначают полезную связь, но не жёсткое требование последовательного
-завершения всех перечисленных этапов.
+`depends on` здесь означает необходимую основу. `supports`, `reuses` и
+`benefits strongly from` обозначают полезную связь, но не жёсткое требование
+последовательного завершения всех перечисленных этапов.
 
 ## Stage Entry Rule
 
-Каждый forward stage начинается со статуса `PLANNED` и остаётся в нём до
-отдельного Discovery. Допустимые последующие статусы:
+Каждый будущий forward stage начинается со статуса `PLANNED` и остаётся в нём
+до отдельного Discovery. Допустимые последующие статусы:
 
 ```text
 PLANNED
@@ -513,4 +606,5 @@ IMPLEMENTATION
 
 Roadmap bullets — candidate scope для Discovery, а не accepted detailed
 requirements. Отдельная стадия не получает статус `DESIGN` только потому, что
-в этом документе перечислены её идеи.
+в этом документе перечислены её идеи. Cross-cutting milestone не создаёт новую
+semantic capability только потому, что отражён в roadmap.
