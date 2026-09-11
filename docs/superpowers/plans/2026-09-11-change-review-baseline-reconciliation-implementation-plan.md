@@ -45,6 +45,8 @@
 | `references/projection-impact.md` | Actual impact boundary after accepted reconciliation; prediction exclusion | 35–37, 50 | Stage B projection lifecycle |
 | `references/projection-dependencies.md` | Candidate-ref exclusion from semantic dependencies and accepted snapshot rules | 19, 35–37, 42 | Technical Documentation and all projections |
 | `references/product-multi-project-review.md` | Project/member-qualified base/candidate vectors and Product reconciliation | 43, 48, 62 | Product views and qualified owners |
+| `capabilities/code-quality-review/SKILL.md` | Capability-facing candidate-mode CQ routing and canonical-write barrier | 17–19, 28, 38 | CQ capability and reconciliation |
+| `capabilities/test-review/SKILL.md` | Capability-facing candidate-mode TE routing and accepted-execution barrier | 17–19, 28, 39 | TE capability and reconciliation |
 | `capabilities/code-quality-review/references/code-quality-contract.md` | Candidate CQ mode, CRF/effect references, canonical CQ promotion boundary | 17–19, 28, 38 | CQ capability and reconciliation |
 | `capabilities/test-review/references/test-engineering-contract.md` | Candidate TE impact and execution-evidence barrier | 17–19, 28, 39 | TE capability and reconciliation |
 | `references/ownership-and-scenarios.md` | Candidate Architecture interpretation and accepted Architecture promotion boundary | 18, 28, 40 | Architecture review/reconciliation |
@@ -75,9 +77,7 @@
 | `references/projection-verification.md` | V1–V4 and accepted projection verification remain unchanged. |
 | `references/technical-documentation.md` | Existing factual projection and API operation-completeness semantics remain unchanged except for consuming accepted post-reconciliation state. |
 | `references/technical-model-coverage.md` | Existing coverage authority remains the sole authority; only Change Review routing references it. |
-| `capabilities/code-quality-review/SKILL.md` | CQ capability boundary and Product authorization remain authoritative. |
-| `capabilities/test-review/SKILL.md` | TE methodology and accepted execution evidence remain authoritative. |
-| `capabilities/test-review/references/test-engineering-contract.md` | CC ownership and compatibility adjudication remain authoritative except candidate input references. |
+| `capabilities/test-review/references/test-engineering-contract.md` | Existing CC ownership and compatibility adjudication remain authoritative; only additive candidate-input routing is allowed by Task 9. |
 | `references/review-method.md` | Existing Architecture methodology remains the owner of accepted interpretation. |
 
 No new capability directory, projection family, runtime subsystem, database, or generic menu engine is planned.
@@ -561,4 +561,3 @@ The implementation is ready for independent review only when:
 - [ ] Human documentation is synchronized.
 - [ ] git diff --check passes and only mapped files changed.
 - [ ] The one independent implementation review is complete with zero HIGH/MEDIUM findings.
-

@@ -57,3 +57,25 @@ frozen design decision.
 
 The next step after human plan review is implementation by task, followed by
 one independent implementation review.
+
+## Bounded consistency remediation
+
+`CR-PLAN-MEDIUM-001` — `PLAN_FILE_SCOPE_INCONSISTENCY`
+
+- `initial_status`: `FOUND_AFTER_INITIAL_PLAN_REVIEW`
+- `remediation`: moved `capabilities/code-quality-review/SKILL.md` and
+  `capabilities/test-review/SKILL.md` into `NORMATIVE_CHANGE`; retained
+  `capabilities/test-review/references/test-engineering-contract.md` only in
+  `NORMATIVE_CHANGE` and removed its duplicate `READ_ONLY_REFERENCE` row. The
+  latter remains semantically constrained: existing CC adjudication is
+  read-only authority for this feature, while Task 9 may add only candidate
+  routing language.
+- `recheck`: `PASS`. Every Task 1–10 Create/Modify path now has one compatible
+  File Map classification; no Modify path is whole-file read-only, and all
+  three affected paths have coherent ownership.
+- `final_status`: `CLOSED`
+
+The recheck was limited to File Map/task declarations, affected-file
+classification, frozen-decision preservation, and diff/placeholder checks. No
+architecture, design, task count, scenario matrix, or implementation scope was
+changed.
