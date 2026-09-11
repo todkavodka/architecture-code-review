@@ -332,11 +332,13 @@ Session integration rules:
 
 ```text
 USE_EXISTING → no technical stage transition solely for startup; metadata actions may update projection.
-RESUME → reconstruct true workflow state, reconcile changed baseline if required, then continue first non-accepted gate.
+RESUME → with BASELINE_MATCH, reconstruct true workflow state and continue the first non-accepted gate; otherwise return SOURCE_BASELINE_MISMATCH and stop. Offer CHANGE_REVIEW or REVALIDATE and, only for a reusable completed review, contextual RECONCILE_CHANGE; none auto-runs.
 REVALIDATE → delegate project-change evidence semantics to revalidation-and-freshness.md.
-EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
+EXTEND → with BASELINE_MATCH, reuse the capability registry/minimal dependency slice without reopening unrelated accepted stages; otherwise return BASELINE_RECONCILIATION_REQUIRED and stop. Offer CHANGE_REVIEW or REVALIDATE and, only for a reusable completed review, contextual RECONCILE_CHANGE; none auto-runs.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
-PROJECTION_REPAIR → repair only the selected presentation projections from unchanged accepted authority; semantic drift returns to technical revalidation.
+CHANGE_REVIEW → compare the accepted baseline with the selected candidate in read-only candidate mode; selected lenses and outputs remain requested work, and internal diff/evidence/owner slices remain resolved work.
+RECONCILE_CHANGE (contextual action, not a startup intent) → after explicit confirmation, route a completed reusable review through its existing owning authorities.
+PROJECTION_REPAIR → with BASELINE_MATCH, repair only selected presentation projections from unchanged accepted authority; otherwise block current repair until source reconciliation. Semantic drift returns to technical revalidation.
 ```
 
 After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the

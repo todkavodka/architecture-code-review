@@ -36,3 +36,9 @@ in this section.
 
 Task 1 closure is limited to startup routing and candidate request/dependency
 separation. The PRE-CHANGE rows above remain immutable historical evidence.
+
+## Task 1 review regression — later integration routing
+
+| ID | Contract break to catch | Required outcome | Pre-fix result |
+|---|---|---|---|
+| R01 | The later session-integration table permitted changed-baseline `RESUME`, `EXTEND`, and current `PROJECTION_REPAIR` to proceed without the Task 1 guard. | `RESUME` returns `SOURCE_BASELINE_MISMATCH`; `EXTEND` returns `BASELINE_RECONCILIATION_REQUIRED`; current `PROJECTION_REPAIR` blocks; `CHANGE_REVIEW` and contextual `RECONCILE_CHANGE` are offered without making reconciliation a startup intent. | CORRECTED — later integration rules now preserve all four Task 1 routes. |
