@@ -175,6 +175,22 @@ If the candidate commit/tree or qualified Product/member vector changes while
 reconciliation is pending, the candidate input is stale: discard eligibility,
 reclassify reuse, leave the CR immutable, and do not advance STM or baseline.
 
+### 5.3 Change Review API operation candidates
+
+In `CHANGE_REVIEW_CANDIDATE` mode, API additions, removals, and changes to
+method, path, auth, schema, error, or limit are `CF-*` candidate observations
+qualified to the parent `IF-*`, exact base/candidate bindings, and evidence.
+They may identify an operation/property delta but cannot satisfy accepted STM
+inventory, precision, coverage, dependency, or `TESTED` requirements.
+
+Only the Technical Model Gate may update the accepted `IF-*` operation
+inventory or coverage after explicit reconciliation. A candidate operation is
+not a top-level `OP-*` authority, and no downstream Architecture, Code
+Quality, Test Engineering, Contract Verification/CC, Product, or projection
+record may promote it or create a shadow registry. Provider/consumer candidate
+references remain comparison inputs; same method/path text is not a
+compatibility verdict.
+
 ## 6. Persistent package shape
 
 The recommended package layout is:

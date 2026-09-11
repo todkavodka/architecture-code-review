@@ -132,6 +132,13 @@ accepted assurance result. It cannot create, revise, close, or accept `BC-*`,
 routes the changed assurance need to Test Engineering for independent
 owner-controlled planning or reproof, retaining `candidate_origin`.
 
+For API changes, `candidate_test_impact` may identify operation additions or
+removals and changed method, path, auth, schema, error, or transport/schema
+limit evidence. Each candidate case remains qualified to its parent operation,
+exact source binding, and evidence. A generated or accepted case is still
+`WHAT MUST BE PROVEN`, not execution evidence, and cannot populate an accepted
+`TESTED` view.
+
 ## Contract Verification
 
 When a materially relevant declared external contract exists, Contract

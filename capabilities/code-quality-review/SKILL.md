@@ -117,6 +117,14 @@ defined by the repository contracts referenced by this capability. This
 entrypoint summarizes those integrations without duplicating their detailed
 rules.
 
+`CHANGE_REVIEW_CANDIDATE` is an additional execution mode, not a new CQ
+authority. It produces review-local candidate assessments over qualified
+operation, property, and boundary evidence. Candidate output may reference
+`CR-*`, `CF-*`, and `CRF-*`, but cannot create, revise, resolve, supersede, or
+otherwise mutate an accepted `CQ-*`, `CQRA-*`, `RF-*`, or STM record. An
+explicit `RECONCILE_CHANGE` dispatch returns the input to Code Quality for
+independent owner adjudication.
+
 ## Outputs and projections
 
 Semantic CQ findings remain authority, not a projection or output toggle.

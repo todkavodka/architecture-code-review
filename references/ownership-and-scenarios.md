@@ -164,6 +164,13 @@ state. An explicit `RECONCILE_CHANGE` dispatch routes the qualified input to
 Architecture authority, which independently adjudicates and creates or links
 the canonical record while retaining `candidate_origin` traceability.
 
+`CHANGE_REVIEW_CANDIDATE` is the Architecture candidate mode for a selected
+Change Review. It may interpret changed accepted references, including
+parent-qualified API operation, property, and boundary evidence, but it must
+remain review-local: it cannot allocate or mutate an accepted `RF-*`, STM
+fact, invariant, root, severity, or lifecycle state. The later Architecture
+authority decision is the only path to canonical acceptance.
+
 ## 8. Supporting Engineering Risks
 
 Broad structural patterns могут повышать вероятность повторения дефектов, не являясь сами одним runtime root finding:

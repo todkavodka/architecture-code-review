@@ -162,6 +162,14 @@ quote an existing canonical state. On explicit `RECONCILE_CHANGE`, Code
 Quality independently adjudicates the input and creates or links the
 owner-controlled `CQ-*` identity, retaining `candidate_origin`.
 
+For API changes, the candidate assessment may separately reference an
+operation addition/removal or a changed method, path, auth, schema, error, or
+transport/container limit. These are candidate claims qualified to their
+parent `IF-*`, exact source binding, and evidence; they do not change the
+accepted operation inventory or CQ lifecycle. The owner must explicitly
+decide `NEW`, `DUPLICATE`, `REJECT`, or canonical finding treatment during
+adjudication rather than allowing a candidate label to decide lifecycle.
+
 ## Language-neutral taxonomy
 
 The bounded primary categories are:
