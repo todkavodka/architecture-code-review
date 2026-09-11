@@ -16,12 +16,13 @@ The canonical startup layers are:
 ```text
 Session Intent
 Scope Context
-Review Capabilities
-Capability-Owned Configuration
-Standalone Output Configuration
-Requested Work Confirmation
-Resolved Plan / Required Internal Work
-Authorization / Execution Boundaries
+Baseline Relation
+Contextual Available Actions
+Requested Work
+Capability/Output Configuration
+Dependency Resolution
+Authorization Summary
+Substantive Work
 ```
 
 Persist the routing record as:
@@ -163,11 +164,130 @@ An unsafe or ambiguous package yields `PREVIOUS_AUDIT_RECONCILIATION_REQUIRED`; 
 
 ## Session Intent
 
-Persist exactly these six intents:
+Persist exactly these seven intents:
 
 ```text
-USE_EXISTING | NEW | RESUME | REVALIDATE | EXTEND | PROJECTION_REPAIR
+USE_EXISTING | NEW | RESUME | REVALIDATE | EXTEND | CHANGE_REVIEW |
+PROJECTION_REPAIR
 ```
+
+`CHANGE_REVIEW` is a startup orchestration intent, not a semantic capability.
+It compares an accepted baseline with an explicitly selected candidate source,
+then performs only the user-confirmed review lenses and outputs in read-only
+candidate mode. It does not select a capability, mutate accepted authority, or
+promote a candidate. `RECONCILE_CHANGE` is not a startup intent: it is a
+contextual action available only for a completed reusable review and after
+explicit confirmation.
+
+### Baseline relation and mismatch routing
+
+After Session Intent and Scope Context, the coordinator compares the accepted
+Project baseline (or exact Product member baseline vector) with the intended
+source and records exactly one routing relation:
+
+```text
+BASELINE_MATCH | BASELINE_ADVANCED | BASELINE_DIVERGED | BASELINE_UNKNOWN
+```
+
+`BASELINE_MATCH` permits normal `RESUME`, `EXTEND`, and current
+`PROJECTION_REPAIR`. `BASELINE_ADVANCED` records a descendant or other advance
+from the accepted binding; `BASELINE_DIVERGED` records that no safe linear
+relation was established; `BASELINE_UNKNOWN` records an unavailable source or
+relation. These are routing metadata only: none marks STM or a projection
+stale, resolves a finding, or proves semantic change.
+
+For any non-match, Contextual Available Actions show Change Review and/or
+Revalidate, plus `RECONCILE_CHANGE` only when a reusable completed review is
+available. They never invoke review, revalidation, or reconciliation
+automatically:
+
+- `RESUME` returns `SOURCE_BASELINE_MISMATCH` and does not continue as current.
+- `EXTEND` returns `BASELINE_RECONCILIATION_REQUIRED`; it cannot add work as if
+  accepted semantics described the candidate source.
+- Current `PROJECTION_REPAIR` is blocked until source reconciliation; it does
+  not repair a current representation against a mismatched source baseline.
+
+`USE_EXISTING` may present the accepted package as historical context, but
+must show it separately from the candidate and cannot treat it as current.
+`NEW` remains independently available. Where no accepted baseline exists,
+`CHANGE_REVIEW` may compare two authorized sources without creating accepted
+semantic state.
+
+### Reuse and candidate-update routing
+
+When a completed Change Review is considered for contextual reuse, route the
+candidate through the classifier and proof contract owned by the Change Review
+artifacts. `EXACT` or proven `TREE_EQUIVALENT` may expose contextual
+`RECONCILE_CHANGE` only after the existing completion, evidence, qualification,
+and scope checks. `ADVANCED` creates a linked incremental review for the next
+candidate; `DIVERGED` or `UNAVAILABLE` requires a new review or an explicit
+limitation. A completed CR is never rewritten to change its source meaning.
+
+For a supported `ADVANCED` continuation, the linked CR chain is eligible only
+when the eligible CR's `base_binding == parent_review.candidate_binding ==`
+the current accepted baseline binding, including repository, Project/Product/
+member qualification and source commit/tree/vector. A broken chain or any
+other base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it cannot
+dispatch reconciliation and must classify/review from the current accepted
+binding.
+
+No-ff, squash, and partial cherry-pick cases do not bypass proof. Candidate
+comparison remains a read-only view over immutable CRs. In Product mode, a
+changed member vector, selected Product revision, or member qualification
+rejects reuse even when source text or tree appears equal.
+
+### Contextual reconciliation and baseline advancement
+
+`RECONCILE_CHANGE` is eligible only when the completed CR is reusable
+(`EXACT`, `TREE_EQUIVALENT`, or a supported `ADVANCED` continuation), its
+`base_binding` exactly equals the current accepted baseline binding, including
+repository, Project/Product/member qualification and source commit/tree/vector,
+its candidate binding is the exact intended source binding, its evidence is
+usable, the bounded material-delta accounting is complete, and the user
+explicitly confirms the action. If `CR.base_binding` differs from the current
+accepted baseline binding, return `REVIEW_BASELINE_MISMATCH`; do not dispatch
+reconciliation and classify/review from the current accepted binding. An
+incomplete or non-reusable CR cannot dispatch. This is a contextual action
+after `CHANGE_REVIEW`, never a startup intent.
+
+Dispatch only the minimum candidate slices to their existing owners:
+
+| Candidate input | Owner | Required record |
+|---|---|---|
+| `CF-*` technical facts | Technical Model Gate | owner result and `candidate_origin` |
+| Architecture assessment | Architecture authority | owner result and `candidate_origin` |
+| `CRF-*` and existing-finding effects | Code Quality authority | owner result and `candidate_origin` |
+| test impact | Test Engineering | owner result and `candidate_origin` |
+| provider/consumer contract impact | Contract Verification / CC | owner result and `candidate_origin` |
+| Product composition | existing Product semantics | owner result and `candidate_origin` |
+
+`candidate_origin` remains the originating `CR-*`/`CRF-*` traceability value;
+the owner result records the owner-controlled disposition and any new
+canonical reference. Reconciliation never reuses a candidate identity as an
+accepted owner identity.
+
+Baseline advancement is a separate coordinator gate:
+
+```text
+BASELINE_ADVANCE_ALLOWED
+```
+
+The gate requires `CR.base_binding` to still exactly equal the current accepted
+baseline binding, including repository, Project/Product/member qualification
+and source commit/tree/vector; the exact intended source binding; all material
+delta accounted for; required owners complete; required technical and coverage
+gates satisfied; and unknowns handled by an explicit applicable policy. If the
+base binding differs, return `REVIEW_BASELINE_MISMATCH`; do not emit
+`BASELINE_ADVANCE_ALLOWED` and classify/review from the current accepted
+binding. The gate is not release, merge, or deployment approval. partial
+reconciliation never completes the baseline; open findings may remain when
+existing policy allows them, but every such finding remains explicitly
+accounted for.
+
+Before this gate is accepted, compare the candidate commit/tree and qualified
+Project/Product/member vector with the bound candidate. If any changes, discard
+reconciliation eligibility and classify reuse again; do not mutate the CR or
+advance the baseline.
 
 The recommendation matrix is:
 
@@ -175,17 +295,41 @@ The recommendation matrix is:
 |---|---|
 | no previous audit | `NEW` |
 | `IN_PROGRESS` + same baseline | `RESUME` |
-| `IN_PROGRESS` + changed baseline | `RESUME` with reconciliation |
+| `IN_PROGRESS` + changed baseline | `SOURCE_BASELINE_MISMATCH`; offer contextual review/revalidation/reconciliation |
 | `COMPLETE` + same committed baseline, consume accepted result | `USE_EXISTING` |
 | `COMPLETE` + same committed baseline, repair only final/user-facing documents | `PROJECTION_REPAIR` |
-| `COMPLETE` + changed committed baseline | `REVALIDATE` |
-| new assurance scope/capability/endpoint | `EXTEND` |
+| `COMPLETE` + changed committed baseline | offer `CHANGE_REVIEW` or `REVALIDATE` |
+| new assurance scope/capability/endpoint with changed baseline | `BASELINE_RECONCILIATION_REQUIRED` before `EXTEND` |
+| new assurance scope/capability/endpoint with matching baseline | `EXTEND` |
 
 `RESUME_WITH_RECONCILIATION` is a flow/recommendation under `RESUME`, never a separate persisted intent. Explicit `NEW` remains available in every reusable case.
 
 `USE_EXISTING` performs no technical stage transition solely for startup. It may run metadata-only actions. `REVALIDATE` delegates impact and fresh-evidence semantics to `revalidation-and-freshness.md`; it does not imply a full audit. `EXTEND` adds only the requested assurance scope and does not reopen unrelated accepted stages.
 
 `PROJECTION_REPAIR` is a bounded repair intent for accepted final/user-facing projections. It is not a project-change audit and is not a substitute for `REVALIDATE` when source/baseline changes may affect accepted semantics. It requires reusable accepted technical authority and delegates the repair/re-review boundary to `PROJECTION_REVALIDATION` in `revalidation-and-freshness.md`.
+
+### Deterministic existing-intent routing
+
+For every intent, the coordinator presents the accepted baseline as A and the
+selected/current source as B when both exist. A package accepted at A is
+historical context only; current B is established from its own exact source
+binding and is never inferred from package A, a projection, or compact state.
+
+The routing decision is deterministic:
+
+| Intent | `BASELINE_MATCH` | `BASELINE_ADVANCED`, `BASELINE_DIVERGED`, or `BASELINE_UNKNOWN` |
+|---|---|---|
+| `USE_EXISTING` | consume the accepted A package as current | show A as historical and B separately; do not treat A as current; `NEW`, `CHANGE_REVIEW`, or `REVALIDATE` remain explicit alternatives |
+| `RESUME` | restore and continue the first non-accepted gate | return `SOURCE_BASELINE_MISMATCH` and stop; offer `CHANGE_REVIEW`, `REVALIDATE`, and contextual `RECONCILE_CHANGE` only when reusable; none runs automatically |
+| `REVALIDATE` | reevaluate accepted state only where applicable | bind A to B and perform accepted-state impact/revalidation; a CR is routing evidence only and cannot satisfy its revalidation gate |
+| `EXTEND` | perform only the confirmed additive request | return `BASELINE_RECONCILIATION_REQUIRED` and stop; no implicit review-plus-reconcile-plus-extend chain |
+| `PROJECTION_REPAIR` | repair only selected projections from unchanged accepted authority | block current repair until source reconciliation; do not create a historical-repair mode |
+| `NEW` | start an independently confirmed new flow | start from B with independently confirmed scope/configuration; never enrich or silently continue A |
+| `CHANGE_REVIEW` | compare explicitly selected sources in candidate mode | compare explicitly selected A/B sources in candidate mode; it does not promote B |
+
+`RECONCILE_CHANGE` remains a contextual action after a completed reusable
+Change Review, not a startup intent. It cannot be inserted automatically into
+any row above, and it cannot make a changed source appear matched.
 
 ## Product context selection and pinning
 

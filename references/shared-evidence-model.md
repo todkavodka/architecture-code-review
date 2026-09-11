@@ -86,6 +86,188 @@ observations to make historical evidence look current. Freshness and impact
 decisions are governed by [Revalidation and compact-state freshness](revalidation-and-freshness.md),
 not by silently changing the earlier record.
 
+## 4.1 Change Review immutable bindings and review-local artifacts
+
+Change Review persists two separate, immutable source bindings. A friendly
+branch, tag, PR ref, checkout state, or `HEAD` is input metadata only; none is
+sufficient without its resolved commit and tree. Each binding contains:
+
+```text
+base_binding:
+  repository_id
+  project_binding
+  product_member_binding: <optional exact Product member/vector qualification>
+  ref_input
+  resolved_commit
+  resolved_tree
+  qualification
+  source_availability
+  evidence_availability
+
+candidate_binding:
+  repository_id
+  project_binding
+  product_member_binding: <optional exact Product member/vector qualification>
+  ref_input
+  resolved_commit
+  resolved_tree
+  qualification
+  source_availability
+  evidence_availability
+```
+
+`qualification` records the exact Project scope and, when applicable, accepted
+Product revision and member baseline vector. Source and evidence availability
+remain independent limitations. Persist both bindings with the review; later
+branch movement or a different checkout cannot retarget them.
+
+`CR-*` is the stable, review-qualified Change Review identity. `CF-*` candidate
+facts and `CRF-*` candidate findings are unique only within their owning
+`CR-*`; use the qualified identities `CR-*/CF-*` and `CR-*/CRF-*`. They are
+neither global STM identities nor canonical finding identities. A CR record
+contains its two bindings, bounded scope/lenses, candidate references, and:
+
+```text
+review_status: DRAFT | IN_PROGRESS | REVIEW_REQUIRED | COMPLETE | BLOCKED |
+               SUPERSEDED
+decision: NOT_RECONCILED | RECONCILED | KEPT_REVIEW_ONLY
+```
+
+The normal CR lifecycle is `DRAFT → IN_PROGRESS → REVIEW_REQUIRED → COMPLETE`;
+unavailable required evidence may produce `BLOCKED`, and later linked review
+work may mark the prior CR `SUPERSEDED` without rewriting it. `COMPLETE`
+describes bounded review work only, never candidate acceptance. Candidate fact
+and finding status is separate from canonical lifecycle and is recorded on the
+qualified candidate, for example:
+
+```text
+candidate_status: CANDIDATE | UNRESOLVED | DUPLICATE_OF |
+                  SUPERSEDES_CANDIDATE | NON_MATERIAL | REJECTED
+```
+
+`CR-*`, `CF-*`, and `CRF-*` are accepted only as review evidence, routing
+context, historical comparison, or reconciliation input. Candidate records
+cannot become STM facts, canonical findings, tests, compatibility decisions,
+Product state, or projection dependencies merely through persistence in an
+evidence workset.
+
+## 4.2 Change Inventory
+
+Each Change Review may persist one bounded, immutable `CI-*` Change Inventory
+for its frozen base/candidate bindings and selected scope. The inventory
+records factual source delta observations; it does not clone the STM schema or
+assign severity, materiality, compatibility, architectural meaning, finding
+lifecycle, or owner decisions.
+
+Each entry contains:
+
+```text
+change_inventory:
+  inventory_id: CI-*
+  review_id: CR-*
+  base_binding_ref
+  candidate_binding_ref
+  entries:
+    - delta_type: ADDED | MODIFIED | REMOVED
+      source_path_or_locator
+      source_evidence_binding: WS-*/EV-* or explicit limitation
+      candidate_surface_kind: COMPONENT | INTERFACE | OPERATION |
+                             INTEGRATION | DATA_STORE | MIGRATION | EVENT |
+                             FLOW | AUTH_CONFIG | CONTRACT | OTHER
+      correlated_accepted_ref: <STM/owner ref or NONE>
+      candidate_ref: <qualified candidate ref or NONE>
+      discovery_status: COMPLETE | PARTIAL | UNKNOWN
+      limitation: <bounded source, evidence, or scope limitation>
+    - delta_type: MOVED
+      moved:
+        base:
+          source_binding: BASE
+          old_source_locator
+          old_source_evidence_binding: WS-*/EV-* or explicit limitation
+        candidate:
+          source_binding: CANDIDATE
+          new_source_locator
+          new_source_evidence_binding: WS-*/EV-* or explicit limitation
+      candidate_surface_kind: COMPONENT | INTERFACE | OPERATION |
+                             INTEGRATION | DATA_STORE | MIGRATION | EVENT |
+                             FLOW | AUTH_CONFIG | CONTRACT | OTHER
+      correlated_accepted_ref: <STM/owner ref or NONE>
+      candidate_ref: <qualified candidate ref or NONE>
+      discovery_status: COMPLETE | PARTIAL | UNKNOWN
+      limitation: <bounded source, evidence, or scope limitation>
+```
+
+`source_path_or_locator` and `source_evidence_binding` remain qualified to the
+exact source state; a changed path alone is not an observed fact. `ADDED`
+entries may have `correlated_accepted_ref: NONE` and remain candidate
+observations. `REMOVED` entries preserve the correlated accepted reference and
+record the candidate absence; they do not delete or retire canonical state.
+`MOVED` entries must use the two-sided `moved.base` and `moved.candidate`
+structure: the old locator and evidence are bound to BASE, and the new locator
+and evidence are bound to CANDIDATE. A MOVED entry must not collapse either
+side into the scalar fields used by the other delta types. Multiple entries may
+refer to one source path when independently bounded surfaces are observed.
+
+## 4.3 Reuse and tree-equivalence proof
+
+A completed CR may be reused only after the coordinator records one exact
+reuse classification and its evidence. `TREE_EQUIVALENT` has exactly two
+permitted proof levels:
+
+```text
+reuse_proof:
+  reuse_state: TREE_EQUIVALENT
+  level: WHOLE_TREE_EQUAL | FROZEN_RELEVANT_SCOPE_EQUAL
+  compared_prior_review_id: CR-*
+  repository_id
+  project_product_qualification
+  scope_and_lenses
+  reviewed_candidate_tree: <resolved tree of compared prior CR candidate>
+  intended_candidate_tree: <resolved tree of intended candidate>
+  frozen_relevant_scope_manifest:
+    included_paths: [<persisted paths>]
+    selectors: [<persisted selectors>]
+    member_bindings: [<persisted Project/Product member bindings>]
+  relevant_tree_fingerprint: <deterministic fingerprint or NOT_APPLICABLE>
+  omitted_path_non_impact_proof: <explicit proof or NOT_APPLICABLE for whole tree>
+  scope_lens_compatibility: CONFIRMED | NOT_COMPATIBLE
+  evidence_usability: USABLE | UNUSABLE
+  merge_subset_proof:
+    kind: NONE | NO_FF_MERGE | SQUASH | PARTIAL_CHERRY_PICK
+    subset_manifest: <included commits/paths or NOT_APPLICABLE>
+    independently_decomposable: CONFIRMED | NOT_APPLICABLE | NOT_PROVEN
+    omitted_commit_non_impact_proof: <explicit proof or NOT_APPLICABLE>
+    evidence: <specific proof references>
+```
+
+`WHOLE_TREE_EQUAL` requires equal resolved whole-tree identity, matching
+repository identity, exact Project/Product qualification, and compatible
+review scope/lenses. `FROZEN_RELEVANT_SCOPE_EQUAL` requires the persisted
+manifest of included paths, selectors, and member bindings; an equal
+relevant-tree fingerprint; and proof that omitted paths cannot affect the
+reviewed scope. The compared prior CR, reviewed candidate tree, intended tree,
+scope/lens compatibility, and evidence usability are always persisted. The
+relevant fingerprint and omitted-path proof are required for frozen-scope
+proof; whole-tree proof records them as not applicable because no paths are
+omitted. The manifest and proof are retained with the reuse decision.
+
+`merge_subset_proof` is `NO_FF_MERGE` or `SQUASH` for the corresponding merge
+case and `PARTIAL_CHERRY_PICK` for a subset. A partial cherry-pick requires a
+persisted subset manifest, confirmed independent decomposition, and explicit
+omitted-commit non-impact proof. `NONE` is valid only when no merge or subset
+transformation is being evaluated. The named fields are mandatory proof
+inputs; a generic `proof_evidence` pointer alone is insufficient.
+
+Inspected-files coincidence, branch name, ancestry, fuzzy text, or missing
+proof yields `NOT_TREE_EQUIVALENT` and cannot authorize reuse. A commit SHA
+comparison without the required repository, qualification, scope, and proof
+is not a reuse decision. A merge, squash, or cherry-pick may therefore reuse
+only when its applicable whole-tree or frozen-scope proof is retained.
+
+The inventory is `WHAT CHANGED` only. Interpretation, risk, finding effects,
+test impact, contract impact, and predicted projection impact belong to the
+separate Change Assessment and its owning authorities.
+
 ## 5. Shared reuse and reading order
 
 Consumers use the smallest sufficient context in this order:

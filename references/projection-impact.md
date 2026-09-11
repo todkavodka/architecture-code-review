@@ -7,7 +7,21 @@ and selector rules in [Projection dependency contracts](projection-dependencies.
 It records which projections lost a freshness proof; it does not regenerate
 projections, change semantic authority, or treat projection prose as evidence.
 
-## 0.1 Operational impact view
+## 0.1 Candidate prediction versus actual impact
+
+Change Review may retain a candidate-qualified prediction using only:
+
+```text
+NO_EXPECTED_IMPACT | LIKELY_AFFECTED |
+DEFINITELY_AFFECTED_IF_ACCEPTED | UNKNOWN_IMPACT
+```
+
+The record is bound to its `CR-*`, exact base binding, exact candidate
+binding, and frozen scope/lenses. It is advisory routing evidence only. A
+candidate prediction must never write `CURRENT`, `STALE`, or `BLOCKED`, create
+an impact reason, or change projection freshness.
+
+## 0.2 Operational impact view
 
 Impact accounting may publish a generated, non-authoritative summary at:
 
@@ -186,6 +200,15 @@ projection is current. A verified upstream revision change always propagates
 reconciled or regenerated.
 
 ## 5. `PROJECTION_IMPACT_ACCOUNTED`
+
+After `RECONCILE_CHANGE` owner decisions have stabilized the accepted
+semantic delta, the coordinator invokes this existing Projection Impact
+Analysis handoff once for that accepted delta. The handoff persists the
+ordinary direct and propagated reasons and freshness states defined below;
+candidate prediction remains retained unchanged beside the actual result.
+Declining or deferring explicit regeneration leaves affected projections
+`STALE`/deferred under the applicable policy and does not change canonical
+semantic authority.
 
 The coordinator may persist:
 

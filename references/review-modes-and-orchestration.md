@@ -26,6 +26,245 @@ never backfilled into selected capabilities. Multiple requested items use a
 deduplicated minimum dependency union and never escalate automatically to the
 complete Review Suite.
 
+### Change Review requested and resolved work
+
+For `CHANGE_REVIEW`, the user's requested work records only their confirmed
+review lenses and outputs. Lenses are user-facing review choices, not implicit
+capability selections; the ordinary three semantic capabilities remain the
+only selectable capabilities.
+
+```text
+requested_work:
+  change_review:
+    lenses: [change-only | architecture | code-quality | test |
+             interface-contract | explicit-full-change-review]
+    outputs: [summary | inventory | affected-facts | candidate-findings |
+              existing-finding-effects | test-impact | projection-prediction]
+
+resolved_work:
+  change_review:
+    diff_slice: [<minimum candidate comparison slice>]
+    evidence_slice: [<minimum accepted and candidate evidence refs>]
+    owner_slices: [<minimum owning-authority review/reconciliation inputs>]
+```
+
+Candidate mode is read-only with respect to accepted authority. Its diff,
+evidence, and owner slices are internal dependencies and do not populate
+`requested_work.capabilities`, select an otherwise unselected capability, or
+expand the request to the complete Review Suite. Candidate findings and source
+bindings are defined by their owning Change Review contracts; this routing
+shape does not make them accepted state.
+
+### Change Review candidate execution mode
+
+`CHANGE_REVIEW_CANDIDATE` is the execution mode for a configured
+`CHANGE_REVIEW`. Every owner output in this mode is candidate-qualified to its
+`CR-*` and exact base/candidate bindings. A candidate output may contain
+`CF-*`, `CRF-*`, capability assessment, existing-finding effect, or
+reconciliation input, but cannot write or revise accepted STM, Architecture,
+Code Quality, Test Engineering, Contract Verification/CC, Product, or
+projection authority.
+
+Canonical writes are legal only inside an explicit, confirmation-gated
+`RECONCILE_CHANGE` dispatch to the existing owning authority. Completing,
+blocking, superseding, or retaining a candidate review is separate from the
+canonical lifecycle of every referenced fact, finding, test, compatibility,
+Product record, or projection.
+
+### Bounded Change Inventory and delta discovery
+
+`CHANGE_REVIEW` starts from the exact `BASE..CANDIDATE` bindings and performs
+bounded, diff-guided discovery:
+
+```text
+BASE..CANDIDATE diff
+→ changed paths and evidence scope
+→ bounded candidate discovery
+→ ADDED | MODIFIED | REMOVED | MOVED inventory entries
+→ correlate with accepted references
+→ Change Assessment
+```
+
+A changed path starts discovery but proves nothing by itself. The coordinator
+inspects only the selected scope and the minimum evidence needed to identify a
+candidate surface. If a changed boundary references an uninspected material
+dependency, it records `CONTEXT_EXPANSION_REQUIRED`, names the missing slice,
+and expands only that evidence/dependency slice after resolving availability
+and authorization. Dynamic or unavailable source evidence is an explicit
+limitation, not an assertion of no change; full repository rediscovery is not
+the default.
+
+Change Inventory is factual delta observation and remains separate from Change
+Assessment. In particular, a new candidate with no accepted edge is retained
+as candidate-only evidence, while a candidate removal never deletes an
+accepted STM fact or owner record before explicit reconciliation.
+
+Persist bounded review completeness with the CR:
+
+```text
+review_completeness:
+  change_inventory: COMPLETE | PARTIAL | UNKNOWN
+  affected_authority_coverage: COMPLETE | PARTIAL | UNKNOWN
+  candidate_discovery_coverage: COMPLETE | PARTIAL | UNKNOWN
+  selected_capability_assessment: COMPLETE | PARTIAL | UNKNOWN
+  unknown_impact: NONE | PRESENT
+```
+
+`COMPLETE` means complete for the frozen base, candidate, qualified scope,
+available evidence, and selected lenses only. It may coexist with
+`unknown_impact: PRESENT` and never claims exhaustive repository impact or
+that every semantic effect was found.
+
+### Change Assessment and effect axes
+
+Change Assessment is a separate, candidate-qualified interpretation of the
+immutable Change Inventory. It records:
+
+```text
+change_assessment:
+  affected_existing_facts: [<accepted fact/revision refs>]
+  candidate_facts: [<CR-*/CF-* refs>]
+  removed_facts: [<accepted refs plus candidate removal refs>]
+  existing_finding_effects: [<existing finding effect records>]
+  candidate_findings: [<CR-*/CRF-* refs>]
+  architecture_impact: <candidate-qualified interpretation or NONE>
+  test_impact: <candidate-qualified assurance impact or NONE>
+  contract_impact: <candidate-qualified contract impact or NONE>
+  risk: <candidate-qualified risk interpretation or UNKNOWN>
+  limitations: [<bounded limitations>]
+```
+
+Inventory change types remain `ADDED | MODIFIED | REMOVED | MOVED`. Assessment
+effects use this independent axis:
+
+```text
+INTRODUCES_RISK | WORSENS_EXISTING | MITIGATES |
+POTENTIALLY_RESOLVES | NO_MATERIAL_IMPACT | UNKNOWN_IMPACT
+```
+
+Existing finding effects use exactly:
+
+```text
+UNAFFECTED | POTENTIALLY_RESOLVES | MITIGATES | WORSENS |
+INVALIDATES_PRIOR_ASSUMPTION | UNKNOWN_IMPACT
+```
+
+Effect records are many-to-many and preserve the affected existing finding,
+candidate ref, evidence, and limitation. A `MODIFIED` candidate may therefore
+have `POTENTIALLY_RESOLVES` for one existing finding while another effect is
+`INTRODUCES_RISK`; one candidate may fix a HIGH existing issue and add a
+MEDIUM candidate issue. No effect is a lifecycle decision.
+
+### Candidate projection-impact prediction
+
+Change Review may record a prediction for projection impact, but prediction is
+not Stage B impact accounting. The prediction is qualified to the immutable
+`CR-*`, exact base binding, exact candidate binding, and selected scope:
+
+```text
+projection_prediction:
+  review: CR-*
+  base_binding: <exact CR base binding>
+  candidate_binding: <exact CR candidate binding>
+  scope: <frozen review scope/lenses>
+  classification: NO_EXPECTED_IMPACT | LIKELY_AFFECTED |
+                 DEFINITELY_AFFECTED_IF_ACCEPTED | UNKNOWN_IMPACT
+  evidence: [<candidate assessment/evidence refs>]
+  limitations: [<bounded limitations>]
+```
+
+`projection_prediction.classification` is the complete vocabulary. A
+candidate review cannot write `CURRENT`, `STALE`, or `BLOCKED`, cannot alter a
+`PRJ-*` freshness state, and cannot imply that regeneration occurred. Once
+owner reconciliation stabilizes accepted semantic state, the coordinator
+hands the accepted delta to the existing Projection Impact Analysis exactly
+once; that later actual result is not a rewrite of this prediction.
+
+`RESOLVED`, `CLOSED`, and `ACCEPTED` may appear only as quoted state from an
+existing canonical owner record. They are not CRF outcomes. Every candidate
+owner record carries `candidate_origin: CR-*/CRF-*` traceability when it
+references a candidate finding or interpretation; promotion creates or links
+an owner-controlled canonical identity and never reuses the CRF identity.
+
+### Review reuse and candidate evolution
+
+Reuse is classified against the completed CR's immutable bindings, scope,
+lenses, and usable evidence. The classifier is:
+
+```text
+EXACT | TREE_EQUIVALENT | ADVANCED | DIVERGED | UNAVAILABLE
+```
+
+`EXACT` requires the same repository, exact candidate commit and tree, exact
+Project/Product qualification, a `COMPLETE` review, usable evidence, and
+compatible requested scope/lenses. `TREE_EQUIVALENT` requires a separate proof
+under one of the permitted levels in the shared evidence contract; a matching
+SHA alone is never sufficient.
+
+An `ADVANCED` candidate is a supported continuation of the reviewed candidate.
+It creates a linked immutable incremental CR, for example `B→C` with
+`parent_review: CR-*`. The linked CR must persist
+`base_binding == parent_review.candidate_binding` and its
+`candidate_binding` must be the exact next source state after B (for example,
+C), with the transition evidence retained. It does not rewrite the prior CR.
+For reconciliation eligibility, the linked CR's `base_binding` must also equal
+the current accepted baseline binding, including repository, Project/Product/
+member qualification and source commit/tree/vector. A broken chain or any
+other base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it cannot
+dispatch reconciliation and must classify/review from the current accepted
+binding.
+`DIVERGED` means the candidate no longer safely represents the reviewed
+candidate and requires a new CR. `UNAVAILABLE` means the required relation or
+proof cannot be established. A completed CR's base, candidate, scope, and
+meaning are never rewritten.
+
+No-ff merges and squash merges can reuse a completed review only after a
+`WHOLE_TREE_EQUAL` or `FROZEN_RELEVANT_SCOPE_EQUAL` proof. A conflict
+resolution that changes relevant content requires a supplemental or new CR.
+Partial cherry-pick reuse is conditional and requires independently
+decomposable subset proof covering omitted commits; otherwise bind a new CR.
+
+Comparing candidates is a read-only view over immutable CR artifacts. It may
+show differences in effects, risks, migration impact, and unknowns, but it
+cannot adjudicate, accept, or create canonical semantic authority.
+
+### Contextual `RECONCILE_CHANGE` owner dispatch
+
+After a completed reusable CR passes exact `CR.base_binding ==` current
+accepted baseline binding, including repository, Project/Product/member
+qualification and source commit/tree/vector; the exact intended source-binding;
+usable evidence; bounded material-delta; and explicit-confirmation checks, the
+coordinator may expose contextual `RECONCILE_CHANGE`. A base-binding inequality
+returns `REVIEW_BASELINE_MISMATCH`; it does not dispatch reconciliation and
+must classify/review from the current accepted binding. Incomplete or
+non-reusable CRs are blocked from dispatch, and reconciliation is not a
+startup intent. Dispatch is owner-routed: `CF-*` goes to the Technical Model
+Gate; Architecture assessment goes to the Architecture authority; `CRF-*`
+and finding effects go to Code Quality; test impact goes to Test Engineering;
+provider/consumer contract impact goes to Contract Verification / CC; and
+Product composition uses existing Product semantics.
+
+Each dispatch records the owner result and `candidate_origin` while retaining
+the candidate as review evidence. An owner may create or link a canonical
+record, but candidate identity is never reused as that owner identity.
+
+The coordinator may emit `BASELINE_ADVANCE_ALLOWED` only after
+`CR.base_binding` still exactly equals the current accepted baseline binding,
+including repository, Project/Product/member qualification and source
+commit/tree/vector; the exact intended source binding is still current; all
+material delta is accounted for; required owner results are complete; required
+technical and coverage gates pass; and unknowns are handled by explicit
+policy. A base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; do not
+emit the gate and classify/review from the current accepted binding. partial
+reconciliation never completes the baseline, and open findings may remain only
+where existing policy allows. This gate is baseline bookkeeping and authority
+advancement, not release approval.
+
+If the candidate commit/tree or qualified Project/Product/member vector changes
+before advancement, invalidate eligibility, reclassify reuse, and abandon
+pending dispatch. The completed CR remains immutable and the baseline does not
+advance.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`
@@ -303,12 +542,26 @@ Session integration rules:
 
 ```text
 USE_EXISTING → no technical stage transition solely for startup; metadata actions may update projection.
-RESUME → reconstruct true workflow state, reconcile changed baseline if required, then continue first non-accepted gate.
+RESUME → with BASELINE_MATCH, reconstruct true workflow state and continue the first non-accepted gate; otherwise return SOURCE_BASELINE_MISMATCH and stop. Offer CHANGE_REVIEW or REVALIDATE and, only for a reusable completed review, contextual RECONCILE_CHANGE; none auto-runs.
 REVALIDATE → delegate project-change evidence semantics to revalidation-and-freshness.md.
-EXTEND → reuse capability registry/minimal dependency slice; do not reopen unrelated accepted stages.
+EXTEND → with BASELINE_MATCH, reuse the capability registry/minimal dependency slice without reopening unrelated accepted stages; otherwise return BASELINE_RECONCILIATION_REQUIRED and stop. Offer CHANGE_REVIEW or REVALIDATE and, only for a reusable completed review, contextual RECONCILE_CHANGE; none auto-runs.
 NEW → enter existing full review flow with selected mode/endpoints/capabilities.
-PROJECTION_REPAIR → repair only the selected presentation projections from unchanged accepted authority; semantic drift returns to technical revalidation.
+CHANGE_REVIEW → compare the accepted baseline with the selected candidate in read-only candidate mode; selected lenses and outputs remain requested work, and internal diff/evidence/owner slices remain resolved work.
+RECONCILE_CHANGE (contextual action, not a startup intent) → after explicit confirmation, route a completed reusable review through its existing owning authorities.
+PROJECTION_REPAIR → with BASELINE_MATCH, repair only selected presentation projections from unchanged accepted authority; otherwise block current repair until source reconciliation. Semantic drift returns to technical revalidation.
 ```
+
+These rules consume the coordinator's deterministic intent matrix: an
+accepted package at A is always shown separately from current source B, and no
+intent may infer B from A. `USE_EXISTING` can consume A as current only on a
+matching binding; `NEW` starts an independently confirmed flow from B and never
+silently enriches A. `REVALIDATE` reevaluates accepted state against B, while a
+completed CR supplies routing evidence only and cannot satisfy the
+revalidation gate or bypass owner adjudication. `EXTEND` is additive only
+after an accepted matching B and never performs an implicit
+review-plus-reconcile-plus-extend chain. A mismatched
+`PROJECTION_REPAIR` is blocked as current repair; no historical-repair mode is
+created.
 
 After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the
 coordinator performs one Projection Impact Analysis handoff and persists

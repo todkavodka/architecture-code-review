@@ -139,6 +139,58 @@ not consume a disputed required fact or dependency as accepted downstream truth.
 This gate governs STM facts only; capability-owned interpretations retain their
 own semantic authority.
 
+### 5.1 Change Review candidate barrier
+
+`CR-*`, `CF-*`, and `CRF-*` are review-qualified evidence, never STM input
+that is already accepted. A candidate `CF-*` cannot satisfy an STM fact,
+relation, coverage requirement, `EVIDENCED_BY` dependency, or Technical Model
+Gate prerequisite. Candidate facts may be considered only as review evidence,
+routing context, historical comparison, or reconciliation input.
+
+Only an explicit `RECONCILE_CHANGE` dispatch may present a candidate slice to
+the Technical Model Gate. The Gate alone then decides whether to create,
+revise, supersede, duplicate, reject, or retain an accepted STM fact; it does
+not promote a `CF-*` identity into an STM identity. Until that owner decision,
+Architecture, Code Quality, Test Engineering, Contract Verification, Product,
+and projections cannot consume a candidate record as accepted factual state.
+
+### 5.2 Reconciliation input and baseline advancement gate
+
+The Technical Model Gate accepts a `CF-*` candidate only as an input to an
+explicit `RECONCILE_CHANGE` dispatch. Its owner result must state whether each
+candidate fact is accepted, revised, superseded, duplicated, rejected, or
+retained as unresolved evidence; the candidate `CF-*` identity is never
+promoted into STM identity. Reconciliation records preserve
+`candidate_origin` and the owner-created canonical reference separately.
+
+The coordinator may record `BASELINE_ADVANCE_ALLOWED` only when the exact
+intended source binding remains current, all material delta is accounted for,
+required owner dispatches are complete, required technical-model and coverage
+gates are satisfied, and any unknown is allowed by an explicit policy. This
+gate advances the accepted baseline only; it is not release, merge, or
+deployment approval. partial reconciliation never completes the baseline, and
+open findings may remain only under existing policy with explicit accounting.
+
+If the candidate commit/tree or qualified Product/member vector changes while
+reconciliation is pending, the candidate input is stale: discard eligibility,
+reclassify reuse, leave the CR immutable, and do not advance STM or baseline.
+
+### 5.3 Change Review API operation candidates
+
+In `CHANGE_REVIEW_CANDIDATE` mode, API additions, removals, and changes to
+method, path, auth, schema, error, or limit are `CF-*` candidate observations
+qualified to the parent `IF-*`, exact base/candidate bindings, and evidence.
+They may identify an operation/property delta but cannot satisfy accepted STM
+inventory, precision, coverage, dependency, or `TESTED` requirements.
+
+Only the Technical Model Gate may update the accepted `IF-*` operation
+inventory or coverage after explicit reconciliation. A candidate operation is
+not a top-level `OP-*` authority, and no downstream Architecture, Code
+Quality, Test Engineering, Contract Verification/CC, Product, or projection
+record may promote it or create a shadow registry. Provider/consumer candidate
+references remain comparison inputs; same method/path text is not a
+compatibility verdict.
+
 ## 6. Persistent package shape
 
 The recommended package layout is:

@@ -220,6 +220,50 @@ at the same Product revision does not rewrite or advance Product context. A
 source or coordination change creates a new baseline candidate and targeted
 impact/revalidation; accepted historical baselines remain addressable.
 
+### Product Change Review reuse qualification
+
+Product reuse requires equality of the complete qualified member vector, the
+selected accepted Product revision, and every member's Project/repository,
+scope, and source qualification. A Product candidate is not reusable when any
+member vector, selected Product revision, or member qualification differs,
+even if its text or resolved tree appears equal. Such a case is
+`DIVERGED`/`UNAVAILABLE` for reuse and requires a new or explicitly scoped
+review with the differing member bindings preserved.
+
+Product candidate comparison is a view over immutable, member-qualified CR
+artifacts. It does not merge equal-looking local IDs, infer cross-member
+equivalence, or create Product semantic authority. Project-local reuse remains
+qualified by exact local identity, revision, provenance, freshness, and scope;
+Product membership does not relax those requirements.
+
+### Product Change Review candidate qualification
+
+Product Change Review compares an exact immutable member vector, including
+each member's Project/repository identity, source revision/content binding,
+selected scope, and qualification. For every member, bind the effects
+separately:
+
+```text
+product_change_review:
+  product_id: PROD-*
+  product_revision: <selected Product revision>
+  base_vector: <exact immutable member vector A>
+  candidate_vector: <exact immutable member vector B>
+  member_effects:
+    - member: <qualified member key>
+      base_binding: <member A source binding>
+      candidate_binding: <member B source binding>
+      effect: <member-qualified candidate effect>
+      evidence: [<member-qualified refs>]
+```
+
+Missing member or unavailable member source is recorded as an explicit
+limitation and, when the missing boundary may be material, routes
+`CONTEXT_EXPANSION_REQUIRED` for the minimum member/source slice. It is never
+treated as unchanged or as a Product-wide negative. No Product-wide
+unqualified delta is admitted: member effects remain qualified to their own
+bindings, evidence, and scope, even when a summary groups them.
+
 ## 6. Coherency and dirty/noncanonical state
 
 `coherency` is one independent baseline dimension:

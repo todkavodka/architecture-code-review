@@ -147,6 +147,14 @@ type-aware generation, execution-evidence requirement, Stage F `TESTED`
 protection, and Product qualification are defined in the Test Engineering
 contract.
 
+In `CHANGE_REVIEW_CANDIDATE` mode, Test Engineering may assess candidate API
+operation additions/removals and changed method, path, auth, schema, error, or
+limit evidence as bounded assurance impact. The assessment remains review-local
+and cannot create or revise `BC-*`, `MAT-*`, `TM-*`, `GAP-*`, `CC-*`, or any
+accepted `TESTED` result. Candidate case definitions are not executed and do
+not become `TESTED`; explicit `RECONCILE_CHANGE` routes the qualified need to
+the existing Test Engineering owner.
+
 Persist the selected outputs as independent fields. Existing `REVIEW_ONLY` and
 `REVIEW_PLUS_TEST_PLAN` packages are legacy input and normalize conservatively:
 the former selects only Test Assurance; the latter selects Test Assurance plus

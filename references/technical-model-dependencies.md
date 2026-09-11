@@ -15,6 +15,55 @@ Each authoritative artifact owns its direct outbound dependency metadata. A
 generated registry may aggregate that metadata, but direct metadata remains the
 source of truth for the artifact's semantic dependencies.
 
+## Change Review candidate dependency barrier
+
+`CR-*`, `CF-*`, and `CRF-*` are not authoritative artifacts for this contract.
+Candidate records may be referenced only as review evidence, routing context,
+historical comparison, or reconciliation input; candidate records cannot
+satisfy an accepted `DEPENDS_ON`, `DERIVED_FROM`, `EVIDENCED_BY`, or
+`PROJECTS_FROM` dependency.
+
+Generated indexes may expose a candidate record for review navigation, but
+cannot list it as an accepted semantic prerequisite, projection input, or
+impact root. Architecture, Code Quality, Test Engineering, Contract
+Verification/CC, Product, and projection workflows therefore cannot derive
+accepted semantics, canonical findings, `TESTED` execution, compatibility,
+Product state, freshness, or regeneration from `CR-*`, `CF-*`, or `CRF-*`.
+Only explicit `RECONCILE_CHANGE` may route the minimum candidate slice to its
+existing owning authorities; their accepted outputs, not candidate identities,
+may subsequently enter direct dependency metadata.
+
+## Reconciliation delta and source invalidation
+
+An eligible `RECONCILE_CHANGE` dispatch must carry bounded material-delta
+accounting: every changed dependency or affected boundary is either routed to
+its owner, explicitly found non-material with evidence, or retained as an
+unknown under an applicable policy. The dispatch records each owner result and
+the originating `candidate_origin`; a `CR-*`, `CF-*`, or `CRF-*` identity is not
+written as an accepted dependency or canonical owner record.
+
+`BASELINE_ADVANCE_ALLOWED` requires this accounting to be complete, the exact
+intended source binding to remain current, and all required dependency and
+technical coverage gates to pass. partial reconciliation never completes the
+baseline, and open findings may remain only when existing policy explicitly
+allows them.
+
+If the candidate commit/tree or qualified Project/Product/member vector changes
+before advancement, invalidate the reconciliation eligibility and classify
+reuse again. Do not mutate the completed CR, accepted dependency metadata, or
+baseline as a consequence of that invalidation.
+
+### Change Review discovery expansion
+
+For bounded Change Review discovery, a changed boundary is routing context for
+dependency lookup, not proof of a semantic dependency or change. If the
+boundary names or reaches an uninspected material dependency, resolution must
+persist `CONTEXT_EXPANSION_REQUIRED` with the missing artifact/scope and expand
+only that minimum evidence/dependency slice. Do not preload unrelated accepted
+artifacts or infer a candidate fact from a changed path alone. An unavailable,
+dynamic, or unresolved dependency remains an explicit limitation and keeps the
+affected or candidate discovery completeness bounded.
+
 ## 1. Typed direct dependencies
 
 Use this controlled edge vocabulary:
