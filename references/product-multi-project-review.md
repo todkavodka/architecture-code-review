@@ -236,6 +236,34 @@ equivalence, or create Product semantic authority. Project-local reuse remains
 qualified by exact local identity, revision, provenance, freshness, and scope;
 Product membership does not relax those requirements.
 
+### Product Change Review candidate qualification
+
+Product Change Review compares an exact immutable member vector, including
+each member's Project/repository identity, source revision/content binding,
+selected scope, and qualification. For every member, bind the effects
+separately:
+
+```text
+product_change_review:
+  product_id: PROD-*
+  product_revision: <selected Product revision>
+  base_vector: <exact immutable member vector A>
+  candidate_vector: <exact immutable member vector B>
+  member_effects:
+    - member: <qualified member key>
+      base_binding: <member A source binding>
+      candidate_binding: <member B source binding>
+      effect: <member-qualified candidate effect>
+      evidence: [<member-qualified refs>]
+```
+
+Missing member or unavailable member source is recorded as an explicit
+limitation and, when the missing boundary may be material, routes
+`CONTEXT_EXPANSION_REQUIRED` for the minimum member/source slice. It is never
+treated as unchanged or as a Product-wide negative. No Product-wide
+unqualified delta is admitted: member effects remain qualified to their own
+bindings, evidence, and scope, even when a summary groups them.
+
 ## 6. Coherency and dirty/noncanonical state
 
 `coherency` is one independent baseline dimension:

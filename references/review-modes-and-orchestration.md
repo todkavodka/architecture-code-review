@@ -155,6 +155,31 @@ have `POTENTIALLY_RESOLVES` for one existing finding while another effect is
 `INTRODUCES_RISK`; one candidate may fix a HIGH existing issue and add a
 MEDIUM candidate issue. No effect is a lifecycle decision.
 
+### Candidate projection-impact prediction
+
+Change Review may record a prediction for projection impact, but prediction is
+not Stage B impact accounting. The prediction is qualified to the immutable
+`CR-*`, exact base binding, exact candidate binding, and selected scope:
+
+```text
+projection_prediction:
+  review: CR-*
+  base_binding: <exact CR base binding>
+  candidate_binding: <exact CR candidate binding>
+  scope: <frozen review scope/lenses>
+  classification: NO_EXPECTED_IMPACT | LIKELY_AFFECTED |
+                 DEFINITELY_AFFECTED_IF_ACCEPTED | UNKNOWN_IMPACT
+  evidence: [<candidate assessment/evidence refs>]
+  limitations: [<bounded limitations>]
+```
+
+`projection_prediction.classification` is the complete vocabulary. A
+candidate review cannot write `CURRENT`, `STALE`, or `BLOCKED`, cannot alter a
+`PRJ-*` freshness state, and cannot imply that regeneration occurred. Once
+owner reconciliation stabilizes accepted semantic state, the coordinator
+hands the accepted delta to the existing Projection Impact Analysis exactly
+once; that later actual result is not a rewrite of this prediction.
+
 `RESOLVED`, `CLOSED`, and `ACCEPTED` may appear only as quoted state from an
 existing canonical owner record. They are not CRF outcomes. Every candidate
 owner record carries `candidate_origin: CR-*/CRF-*` traceability when it
