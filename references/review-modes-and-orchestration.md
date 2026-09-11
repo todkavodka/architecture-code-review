@@ -458,6 +458,29 @@ authorization is separate from source-read authorization and dirty-admission
 authorization; membership grants no repository, semantic-write, test, code,
 worktree, commit, push, PR, or deployment permission.
 
+### Frozen federated coordination state
+
+When Product coordination is dispatched from a Coordination Root, the
+resume-critical coordinator state stores references to one immutable or
+superseding plan under the existing `working/INDEX.md` authority:
+
+```text
+coordination_plan_ref
+selected_product_revision
+membership_snapshot_ref
+base_product_baseline_ref
+selected child actions
+child checkpoint refs
+Product baseline candidate ref
+limitations
+```
+
+On resume, reload the frozen plan and compare the current Product, member, and
+source context with it. A mismatch routes to bounded requalification or a new
+plan; it never mutates the old plan. The coordinator stores references rather
+than a second Product semantic record, and no Product root path, `HEAD`,
+`latest` audit, or convenience pointer retargets in-flight work.
+
 ### Product `REVALIDATE` and `EXTEND` routing
 
 In Product mode, `REVALIDATE` starts from the pinned Product baseline and
