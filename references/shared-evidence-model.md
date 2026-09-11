@@ -86,6 +86,71 @@ observations to make historical evidence look current. Freshness and impact
 decisions are governed by [Revalidation and compact-state freshness](revalidation-and-freshness.md),
 not by silently changing the earlier record.
 
+## 4.1 Change Review immutable bindings and review-local artifacts
+
+Change Review persists two separate, immutable source bindings. A friendly
+branch, tag, PR ref, checkout state, or `HEAD` is input metadata only; none is
+sufficient without its resolved commit and tree. Each binding contains:
+
+```text
+base_binding:
+  repository_id
+  project_binding
+  product_member_binding: <optional exact Product member/vector qualification>
+  ref_input
+  resolved_commit
+  resolved_tree
+  qualification
+  source_availability
+  evidence_availability
+
+candidate_binding:
+  repository_id
+  project_binding
+  product_member_binding: <optional exact Product member/vector qualification>
+  ref_input
+  resolved_commit
+  resolved_tree
+  qualification
+  source_availability
+  evidence_availability
+```
+
+`qualification` records the exact Project scope and, when applicable, accepted
+Product revision and member baseline vector. Source and evidence availability
+remain independent limitations. Persist both bindings with the review; later
+branch movement or a different checkout cannot retarget them.
+
+`CR-*` is the stable, review-qualified Change Review identity. `CF-*` candidate
+facts and `CRF-*` candidate findings are unique only within their owning
+`CR-*`; use the qualified identities `CR-*/CF-*` and `CR-*/CRF-*`. They are
+neither global STM identities nor canonical finding identities. A CR record
+contains its two bindings, bounded scope/lenses, candidate references, and:
+
+```text
+review_status: DRAFT | IN_PROGRESS | REVIEW_REQUIRED | COMPLETE | BLOCKED |
+               SUPERSEDED
+decision: NOT_RECONCILED | RECONCILED | KEPT_REVIEW_ONLY
+```
+
+The normal CR lifecycle is `DRAFT → IN_PROGRESS → REVIEW_REQUIRED → COMPLETE`;
+unavailable required evidence may produce `BLOCKED`, and later linked review
+work may mark the prior CR `SUPERSEDED` without rewriting it. `COMPLETE`
+describes bounded review work only, never candidate acceptance. Candidate fact
+and finding status is separate from canonical lifecycle and is recorded on the
+qualified candidate, for example:
+
+```text
+candidate_status: CANDIDATE | UNRESOLVED | DUPLICATE_OF |
+                  SUPERSEDES_CANDIDATE | NON_MATERIAL | REJECTED
+```
+
+`CR-*`, `CF-*`, and `CRF-*` are accepted only as review evidence, routing
+context, historical comparison, or reconciliation input. Candidate records
+cannot become STM facts, canonical findings, tests, compatibility decisions,
+Product state, or projection dependencies merely through persistence in an
+evidence workset.
+
 ## 5. Shared reuse and reading order
 
 Consumers use the smallest sufficient context in this order:

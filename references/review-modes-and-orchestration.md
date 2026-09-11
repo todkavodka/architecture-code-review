@@ -55,6 +55,22 @@ expand the request to the complete Review Suite. Candidate findings and source
 bindings are defined by their owning Change Review contracts; this routing
 shape does not make them accepted state.
 
+### Change Review candidate execution mode
+
+`CHANGE_REVIEW_CANDIDATE` is the execution mode for a configured
+`CHANGE_REVIEW`. Every owner output in this mode is candidate-qualified to its
+`CR-*` and exact base/candidate bindings. A candidate output may contain
+`CF-*`, `CRF-*`, capability assessment, existing-finding effect, or
+reconciliation input, but cannot write or revise accepted STM, Architecture,
+Code Quality, Test Engineering, Contract Verification/CC, Product, or
+projection authority.
+
+Canonical writes are legal only inside an explicit, confirmation-gated
+`RECONCILE_CHANGE` dispatch to the existing owning authority. Completing,
+blocking, superseding, or retaining a candidate review is separate from the
+canonical lifecycle of every referenced fact, finding, test, compatibility,
+Product record, or projection.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`

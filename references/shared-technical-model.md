@@ -139,6 +139,21 @@ not consume a disputed required fact or dependency as accepted downstream truth.
 This gate governs STM facts only; capability-owned interpretations retain their
 own semantic authority.
 
+### 5.1 Change Review candidate barrier
+
+`CR-*`, `CF-*`, and `CRF-*` are review-qualified evidence, never STM input
+that is already accepted. A candidate `CF-*` cannot satisfy an STM fact,
+relation, coverage requirement, `EVIDENCED_BY` dependency, or Technical Model
+Gate prerequisite. Candidate facts may be considered only as review evidence,
+routing context, historical comparison, or reconciliation input.
+
+Only an explicit `RECONCILE_CHANGE` dispatch may present a candidate slice to
+the Technical Model Gate. The Gate alone then decides whether to create,
+revise, supersede, duplicate, reject, or retain an accepted STM fact; it does
+not promote a `CF-*` identity into an STM identity. Until that owner decision,
+Architecture, Code Quality, Test Engineering, Contract Verification, Product,
+and projections cannot consume a candidate record as accepted factual state.
+
 ## 6. Persistent package shape
 
 The recommended package layout is:

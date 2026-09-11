@@ -15,6 +15,24 @@ Each authoritative artifact owns its direct outbound dependency metadata. A
 generated registry may aggregate that metadata, but direct metadata remains the
 source of truth for the artifact's semantic dependencies.
 
+## Change Review candidate dependency barrier
+
+`CR-*`, `CF-*`, and `CRF-*` are not authoritative artifacts for this contract.
+Candidate records may be referenced only as review evidence, routing context,
+historical comparison, or reconciliation input; candidate records cannot
+satisfy an accepted `DEPENDS_ON`, `DERIVED_FROM`, `EVIDENCED_BY`, or
+`PROJECTS_FROM` dependency.
+
+Generated indexes may expose a candidate record for review navigation, but
+cannot list it as an accepted semantic prerequisite, projection input, or
+impact root. Architecture, Code Quality, Test Engineering, Contract
+Verification/CC, Product, and projection workflows therefore cannot derive
+accepted semantics, canonical findings, `TESTED` execution, compatibility,
+Product state, freshness, or regeneration from `CR-*`, `CF-*`, or `CRF-*`.
+Only explicit `RECONCILE_CHANGE` may route the minimum candidate slice to its
+existing owning authorities; their accepted outputs, not candidate identities,
+may subsequently enter direct dependency metadata.
+
 ## 1. Typed direct dependencies
 
 Use this controlled edge vocabulary:
