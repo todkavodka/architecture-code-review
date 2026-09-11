@@ -142,6 +142,28 @@ remediation implication требует correction, используй
 `ARCH-CORRECTION-CANDIDATE`. Он не меняет factual owner/writer matrix и следует
 architecture correction/adjudication protocol.
 
+## 7.1 Change Review candidate Architecture assessment
+
+In `CHANGE_REVIEW_CANDIDATE` mode, Architecture records interpretation only:
+
+```text
+architecture_candidate_assessment:
+  candidate_origin: CR-*/CRF-*
+  affected_accepted_refs: [<accepted STM/Architecture refs>]
+  candidate_fact_refs: [<CR-*/CF-* refs>]
+  assessment_effect: INTRODUCES_RISK | WORSENS_EXISTING | MITIGATES |
+                     POTENTIALLY_RESOLVES | NO_MATERIAL_IMPACT | UNKNOWN_IMPACT
+  interpretation
+  limitations
+```
+
+This assessment cannot create an accepted Architecture finding, root,
+severity, invariant, or STM fact. `RESOLVED`, `CLOSED`, and `ACCEPTED` are not
+candidate Architecture outcomes; they may only quote an existing canonical
+state. An explicit `RECONCILE_CHANGE` dispatch routes the qualified input to
+Architecture authority, which independently adjudicates and creates or links
+the canonical record while retaining `candidate_origin` traceability.
+
 ## 8. Supporting Engineering Risks
 
 Broad structural patterns могут повышать вероятность повторения дефектов, не являясь сами одним runtime root finding:

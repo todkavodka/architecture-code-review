@@ -109,6 +109,29 @@ environment, and execution-result qualification. One Project's generated,
 accepted, or executed case does not make another Project or the whole Product
 `TESTED`.
 
+### Change Review candidate test impact
+
+In `CHANGE_REVIEW_CANDIDATE` mode, Test Engineering may identify changed
+assurance needs, invalidated assumptions, or candidate assurance cases without
+claiming execution:
+
+```text
+candidate_test_impact:
+  candidate_origin: CR-*/CRF-*
+  affected_behavior_refs: [<accepted BC/MAT/TM refs>]
+  changed_assurance_needs: [<bounded assurance or evidence needs>]
+  candidate_case_refs: [<candidate planning refs>]
+  assessment_effect: INTRODUCES_RISK | WORSENS_EXISTING | MITIGATES |
+                     POTENTIALLY_RESOLVES | NO_MATERIAL_IMPACT | UNKNOWN_IMPACT
+  limitations
+```
+
+Candidate test impact is not `TESTED`, `PASSED`, `FAILED`, `EXECUTED`, or an
+accepted assurance result. It cannot create, revise, close, or accept `BC-*`,
+`MAT-*`, `TM-*`, `GAP-*`, or `CC-*`. An explicit `RECONCILE_CHANGE` dispatch
+routes the changed assurance need to Test Engineering for independent
+owner-controlled planning or reproof, retaining `candidate_origin`.
+
 ## Contract Verification
 
 When a materially relevant declared external contract exists, Contract
@@ -223,6 +246,29 @@ Similarity of path, method, service name, Product membership, or external
 provider name is not sufficient to fabricate a comparison input. Candidate
 matching remains a non-authoritative discovery relation with the bounded
 states:
+
+### Change Review candidate contract impact
+
+In `CHANGE_REVIEW_CANDIDATE` mode, Contract Verification may consume
+candidate-qualified provider and consumer refs as comparison inputs:
+
+```text
+candidate_contract_impact:
+  candidate_origin: CR-*/CRF-*
+  provider_candidate_ref: CR-*/CF-* or qualified candidate evidence
+  consumer_candidate_ref: CR-*/CF-* or qualified candidate evidence
+  existing_cc_ref: <optional accepted CC-* reference>
+  assessment_effect: INTRODUCES_RISK | WORSENS_EXISTING | MITIGATES |
+                     POTENTIALLY_RESOLVES | NO_MATERIAL_IMPACT | UNKNOWN_IMPACT
+  limitations
+```
+
+Candidate provider/consumer refs are inputs only. They cannot create or
+adjudicate compatibility, and candidate comparison cannot be recorded as
+`COMPATIBLE`, `INCOMPATIBLE`, `RESOLVED`, `CLOSED`, or `ACCEPTED` CC state.
+Contract Verification remains the compatibility adjudicator. On explicit
+`RECONCILE_CHANGE`, it independently evaluates the qualified inputs and
+retains `candidate_origin` on any owner-controlled record.
 
 ```text
 MATCH_CANDIDATE

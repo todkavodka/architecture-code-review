@@ -115,6 +115,52 @@ available evidence, and selected lenses only. It may coexist with
 `unknown_impact: PRESENT` and never claims exhaustive repository impact or
 that every semantic effect was found.
 
+### Change Assessment and effect axes
+
+Change Assessment is a separate, candidate-qualified interpretation of the
+immutable Change Inventory. It records:
+
+```text
+change_assessment:
+  affected_existing_facts: [<accepted fact/revision refs>]
+  candidate_facts: [<CR-*/CF-* refs>]
+  removed_facts: [<accepted refs plus candidate removal refs>]
+  existing_finding_effects: [<existing finding effect records>]
+  candidate_findings: [<CR-*/CRF-* refs>]
+  architecture_impact: <candidate-qualified interpretation or NONE>
+  test_impact: <candidate-qualified assurance impact or NONE>
+  contract_impact: <candidate-qualified contract impact or NONE>
+  risk: <candidate-qualified risk interpretation or UNKNOWN>
+  limitations: [<bounded limitations>]
+```
+
+Inventory change types remain `ADDED | MODIFIED | REMOVED | MOVED`. Assessment
+effects use this independent axis:
+
+```text
+INTRODUCES_RISK | WORSENS_EXISTING | MITIGATES |
+POTENTIALLY_RESOLVES | NO_MATERIAL_IMPACT | UNKNOWN_IMPACT
+```
+
+Existing finding effects use exactly:
+
+```text
+UNAFFECTED | POTENTIALLY_RESOLVES | MITIGATES | WORSENS |
+INVALIDATES_PRIOR_ASSUMPTION | UNKNOWN_IMPACT
+```
+
+Effect records are many-to-many and preserve the affected existing finding,
+candidate ref, evidence, and limitation. A `MODIFIED` candidate may therefore
+have `POTENTIALLY_RESOLVES` for one existing finding while another effect is
+`INTRODUCES_RISK`; one candidate may fix a HIGH existing issue and add a
+MEDIUM candidate issue. No effect is a lifecycle decision.
+
+`RESOLVED`, `CLOSED`, and `ACCEPTED` may appear only as quoted state from an
+existing canonical owner record. They are not CRF outcomes. Every candidate
+owner record carries `candidate_origin: CR-*/CRF-*` traceability when it
+references a candidate finding or interpretation; promotion creates or links
+an owner-controlled canonical identity and never reuses the CRF identity.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`
