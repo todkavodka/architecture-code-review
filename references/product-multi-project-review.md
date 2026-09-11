@@ -445,6 +445,25 @@ and regeneration mechanics remain owned by
 [Revalidation and Freshness](revalidation-and-freshness.md), dependency, and
 projection contracts.
 
+### Bottom-up child advancement
+
+An independently accepted child authority can satisfy a qualified child
+readiness dependency, but it cannot directly advance Product state. Product
+accepted-state adoption uses Product `REVALIDATE` over the pinned Product
+baseline and candidate vector. Product read-only candidate assessment uses a
+new `CHANGE_REVIEW` bound to the complete exact accepted base vector and
+complete exact candidate vector. A prior Product Change Review is not
+reusable when any qualified member vector, Product revision, or member
+qualification differs. Contextual `RECONCILE_CHANGE` remains subject to the
+existing completed-review, exact-base-binding, material-delta, owner, and
+explicit-confirmation gates.
+
+An accepted Architecture, Code Quality, Test Engineering, or STM owner
+revision on the same exact member source binding does not change that
+member's source vector. It may reopen only the bounded Product-qualified
+freshness/impact dependencies that require the newer authority; it does not
+create a synthetic source baseline change or imply a full Product rescan.
+
 ## 10. Product outputs and packages
 
 Output selection is explicit. Product existence does not auto-create outputs.
