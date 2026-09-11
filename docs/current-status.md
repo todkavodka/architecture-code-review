@@ -1,16 +1,21 @@
 # Current Project Status
 
-Этот документ фиксирует текущую принятую базовую точку `architecture-code-review`.
-Стратегические направления остаются в [Product Roadmap](roadmap.md), а подробные
-нормативные правила — в `SKILL.md`, `references/` и capability-контрактах.
+Этот документ фиксирует текущую принятую функциональную базовую точку
+`architecture-code-review`. Стратегические направления остаются в
+[Product Roadmap](roadmap.md), а подробные нормативные правила — в `SKILL.md`,
+`references/` и capability-контрактах.
 
-## Canonical baseline
+## Canonical semantic baseline
 
 ```text
 canonical branch: main
-canonical baseline: 2091a44622371bbc39fb913c00c1876d7f182dec
+feature promotion merge: 2091a44622371bbc39fb913c00c1876d7f182dec
 status: PROMOTED
 ```
+
+После этого promotion в `main` могут появляться documentation-only closeout
+commits. Они не меняют принятую семантику Change Review lifecycle; для проверки
+точного текущего Git HEAD используйте сам `main`.
 
 ## Completed foundation
 
@@ -80,7 +85,7 @@ e61f53ba560b50d3ca21475b40f572c9ac8c9085
 approved feature head:
 d870198eacaf1c2cd4d4ff685212fdb48491c3d7
 
-promotion merge:
+feature promotion merge:
 2091a44622371bbc39fb913c00c1876d7f182dec
 ```
 
