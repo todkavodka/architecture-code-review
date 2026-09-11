@@ -49,6 +49,11 @@ command vocabulary. Membership and requested work are resolved and confirmed
 before substantive work; a broad request never silently selects every
 discovered repository, capability, or full Product review.
 
+The top-level semantic capabilities remain exactly Architecture Review, Test
+Engineering, and Code Quality Review. Federated coordination, Technical
+Documentation, and dependency/readiness views are orchestration or output
+concerns, not additional capabilities.
+
 ## Stage F Interface, API, and Data Integration Routing
 
 When a review includes interface, API, integration, event, persistence, or
