@@ -1,0 +1,71 @@
+# Federated Product Audit Coordination Validation
+
+## PRE-CHANGE EVIDENCE
+
+```text
+implementation_base: 9bf5c4c33034826a916b88b033ee4b8f1011bc18
+plan_source: docs/superpowers/plans/2026-09-11-federated-product-audit-coordination-implementation-plan.md
+claim_boundary: static contract evidence only; no runtime repository discovery/execution is claimed
+```
+
+This section is immutable historical evidence recorded before normative
+implementation edits. `GAP PRESENT` means the implementation-base owner
+contract lacks or insufficiently defines the federated rule. `ALREADY
+SATISFIED` means the existing owner contract already supplies the invariant;
+it is not a reason to manufacture an implementation gap.
+
+| ID | pre_change_status | pre_change_observation | pre_change_owner_contract | required_outcome | forbidden_outcome | closure_status | owning_contract | exact_section_or_mechanism | verification_evidence | implementation_commit_or_range | limitations |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| FC01 | GAP PRESENT | No non-Git Coordination Root startup route or locator-only boundary. | `references/session-orchestration.md` | Root is locator/discovery boundary only. | Root becomes repository, Project, Product, or baseline identity. | OPEN | — | — | Pre-edit owner inspection recorded the missing route. | — | Static contract evidence only. |
+| FC02 | GAP PRESENT | Existing startup contract has no bounded descent-stop rule for federated discovery. | `references/session-orchestration.md` | Stop ordinary descent at repository boundary. | Full recursive source scan or nested auto-membership. | OPEN | — | — | Pre-edit owner inspection recorded the missing rule. | — | No crawler execution claimed. |
+| FC03 | GAP PRESENT | No federated symlink escape, cycle, or visited-locator rule. | `references/session-orchestration.md` | Canonicalize only for traversal safety and bound cycles/escapes. | Path canonicalization becomes semantic identity or unbounded traversal. | OPEN | — | — | Pre-edit owner inspection recorded the missing rule. | — | Static traversal semantics only. |
+| FC04 | GAP PRESENT | Worktree/submodule/nested-repository treatment is not defined for Product discovery. | `references/session-orchestration.md` | Treat them as qualified candidates, never automatic members. | Alias/path presence creates membership. | OPEN | — | — | Pre-edit owner inspection recorded the missing rule. | — | No SCM adapter claimed. |
+| FC05 | ALREADY SATISFIED | Product contract already distinguishes Project identity from repository/path and supports explicit cardinalities, but federated mapping routing is not yet added. | `references/product-multi-project-review.md` | Preserve explicit Project/repository qualification. | Repository root allocates Project identity. | OPEN | — | — | Existing §§3–4 provide the base invariant. | — | Federated routing still requires later edits. |
+| FC06 | GAP PRESENT | No explicit qualification path for independently-created accepted child audits under Product consumption. | `references/product-multi-project-review.md` | Reuse only after exact identity/source/authority/scope/freshness qualification. | Product context clones or trusts an unqualified child package. | OPEN | — | — | Pre-edit owner inspection recorded missing Product reuse route. | — | Static qualification only. |
+| FC07 | GAP PRESENT | No frozen Product Coordination Plan envelope binding member actions and requested work. | `references/session-orchestration.md` | Freeze revision, membership, baseline, bindings, actions, work, and authorization. | Mutable HEAD/current/latest/path retargets in-flight work. | OPEN | — | — | Pre-edit owner inspection recorded missing envelope. | — | No runtime coordinator claimed. |
+| FC08 | GAP PRESENT | No federated aggregation invalidation when Product revision changes during child work. | `references/session-orchestration.md` | Reject cross-revision aggregation and replan. | Mixed Product revisions enter one candidate. | OPEN | — | — | Pre-edit owner inspection recorded missing race rule. | — | Static race contract only. |
+| FC09 | GAP PRESENT | No Product acceptance rule for child completing at B while source advances to C. | `references/session-orchestration.md` | Requalify/replan; B is never current C. | Candidate silently widens to C. | OPEN | — | — | Pre-edit owner inspection recorded missing final recheck. | — | No source watcher claimed. |
+| FC10 | GAP PRESENT | No Product writer-scope coordination rule for parallel child actions. | `references/session-orchestration.md` | Serialize conflicting writers; allow only safe parallelism. | Concurrent mutation of one owner/package record. | OPEN | — | — | Pre-edit owner inspection recorded missing federated barrier. | — | Static concurrency policy only. |
+| FC11 | ALREADY SATISFIED | Product contract already defines independent availability, coverage, semantic, projection, and package dimensions and rejects universal Product PARTIAL/BLOCKED. | `references/product-multi-project-review.md` | Readiness remains dependency/output-specific derived view. | New universal readiness lifecycle. | OPEN | — | — | Existing §7 provides base separation; federated presentation still requires integration. | — | Existing rule is imported, not rewritten. |
+| FC12 | GAP PRESENT | No explicit bottom-up Product route from accepted child advancement to Product REVALIDATE. | `references/revalidation-and-freshness.md` | Route accepted-state update through Product REVALIDATE. | Child authority directly advances Product baseline. | OPEN | — | — | Pre-edit owner inspection recorded missing Product route. | — | Static routing only. |
+| FC13 | GAP PRESENT | No explicit Product candidate route using complete base/candidate vectors. | `references/product-multi-project-review.md` | Use new complete-vector Product CHANGE_REVIEW for candidate assessment. | One child update substitutes for Product vector comparison. | OPEN | — | — | Pre-edit owner inspection recorded missing route. | — | Static Change Review integration only. |
+| FC14 | GAP PRESENT | No federated statement denying old Product CR reuse when complete vector differs. | `references/product-multi-project-review.md` | Deny reuse on vector/revision/qualification mismatch. | Equal-looking child tree permits Product reuse. | OPEN | — | — | Pre-edit owner inspection recorded missing federated reuse rule. | — | No live classifier claimed. |
+| FC15 | ALREADY SATISFIED | Existing Change Review contract already makes RECONCILE_CHANGE contextual and proof-gated. | `references/review-modes-and-orchestration.md` | Preserve contextual owner dispatch. | New startup intent or direct Product mutation. | OPEN | — | — | Existing reconciliation section supplies base barrier. | — | Federated references must not weaken it. |
+| FC16 | ALREADY SATISFIED | Existing Product impact routing already uses qualified dependencies and derived impact labels. | `references/product-multi-project-review.md` | Use AFFECTED/UNAFFECTED/UNKNOWN_IMPACT as derived labels. | Product impact becomes semantic authority. | OPEN | — | — | Existing §8 provides base routing. | — | Federated wiring still requires later edits. |
+| FC17 | ALREADY SATISFIED | Existing Product contract requires missing linkage to remain unknown/expandable, not unaffected. | `references/product-multi-project-review.md` | Incomplete dependency coverage yields UNKNOWN_IMPACT. | Missing edge proves UNAFFECTED. | OPEN | — | — | Existing §8 provides base rule. | — | No full rediscovery claimed. |
+| FC18 | GAP PRESENT | Existing logical namespace is not yet stated as the federated coordination namespace in the startup contract. | `references/product-multi-project-review.md` | Use one working/INDEX.md and Product-key namespace. | Singular root-local Product index becomes authority. | OPEN | — | — | Pre-edit owner inspection recorded missing federated namespace alignment. | — | Physical placement remains implementation detail. |
+| FC19 | ALREADY SATISFIED | Product contract already isolates Products by stable PROD identity and revision history. | `references/product-multi-project-review.md` | Keep multiple Products isolated. | One root or shared path aliases Products. | OPEN | — | — | Existing §4 provides isolation invariant. | — | Federated namespace wiring still requires later edits. |
+| FC20 | GAP PRESENT | Existing contract does not connect moved Coordination Root locators to unchanged Product identity/history. | `references/product-multi-project-review.md` | Root movement changes locator only. | Root path allocates a new Product. | OPEN | — | — | Pre-edit owner inspection recorded missing locator provenance rule. | — | No filesystem relocation performed. |
+| FC21 | GAP PRESENT | No Product candidate contract binds every selected member vector to a frozen plan. | `references/product-multi-project-review.md` | Candidate contains exact vector and plan reference. | Candidate combines unqualified or mixed-plan results. | OPEN | — | — | Pre-edit owner inspection recorded missing candidate envelope. | — | Static composition only. |
+| FC22 | GAP PRESENT | Existing Product baseline gate lacks federated exact final requalification fields and race outcome. | `references/product-multi-project-review.md` | Recheck Product/member/source/owner bindings before acceptance. | Moving binding is silently accepted. | OPEN | — | — | Pre-edit owner inspection recorded missing final federated recheck. | — | No baseline is accepted by this artifact. |
+| FC23 | ALREADY SATISFIED | Existing contracts prohibit automatic projection regeneration and retain explicit user/owner gates, though federated routing is absent. | `references/session-orchestration.md` | No automatic membership, review, revalidation, reconcile, or regeneration. | Discovery triggers mutation or full audit. | OPEN | — | — | Existing session/projection gates provide imported invariants. | — | Federated no-mega-audit rule still requires implementation. |
+| FC24 | ALREADY SATISFIED | STM/Technical Model Gate is already the accepted technical relation authority. | `references/shared-technical-model.md` | Product-qualified relations remain STM-owned. | Product relation store becomes factual authority. | OPEN | — | — | Existing STM ownership sections provide the base rule. | — | Federated qualification is additive routing. |
+
+## POST-IMPLEMENTATION CLOSURE
+
+Later tasks must update closure fields only; the PRE-CHANGE fields above remain
+unchanged. Every `CLOSED` row must cite the exact owner section/mechanism and
+map both required and forbidden outcomes to that text.
+
+## Backward-compatibility matrix
+
+| ID | required outcome | forbidden regression | owning contract/mechanism | status |
+|---|---|---|---|---|
+| BC01 | Single-repository Project startup remains unchanged. | Normal local startup becomes Product mode. | `references/session-orchestration.md` existing startup routing. | OPEN |
+| BC02 | Product mode remains explicit/opt-in. | Filesystem containment silently creates Product context. | `references/session-orchestration.md` Product selection boundary. | OPEN |
+| BC03 | Exactly seven persisted Session Intents remain. | Federated label becomes a persisted intent. | `references/session-orchestration.md` Session Intent enumeration. | OPEN |
+| BC04 | Exactly three top-level semantic capabilities remain. | Coordination/readiness/TD becomes a capability. | `SKILL.md` capability menu and Product routing. | OPEN |
+| BC05 | RECONCILE_CHANGE remains contextual. | Product coordination adds a startup reconciliation intent. | `references/review-modes-and-orchestration.md` reconciliation gate. | OPEN |
+| BC06 | Product baseline remains exact qualified vector. | Root SHA/current child pointer becomes baseline. | `references/product-multi-project-review.md` baseline vector. | OPEN |
+| BC07 | Existing Product Change Review complete-vector equality remains. | Equal child state bypasses complete vector comparison. | `references/product-multi-project-review.md` Change Review reuse qualification. | OPEN |
+| BC08 | All existing Project↔repository cardinalities remain supported. | Discovery forces one repo per Project or one Project per repo. | `references/product-multi-project-review.md` Project/repository distinction. | OPEN |
+| BC09 | Reports, projections, readiness, and indexes remain non-authoritative. | Summary/index becomes semantic authority. | `SKILL.md` and Product ownership contracts. | OPEN |
+| BC10 | Projection regeneration remains explicit. | Child/Product change starts RG automatically. | `references/projection-impact.md` and regeneration boundary. | OPEN |
+| BC11 | Child local authority remains local. | Product coordinator clones or writes child authority. | `references/product-multi-project-review.md` authority boundary. | OPEN |
+| BC12 | `working/INDEX.md` remains sole coordinator workflow authority. | Second Product index/state machine appears. | `references/review-modes-and-orchestration.md` and Product namespace. | OPEN |
+
+## Validation status
+
+This artifact is the pre-change and post-change contract evidence surface. It
+does not claim runtime discovery, Git worktree manipulation, PR integration,
+source execution, or semantic-owner promotion.
