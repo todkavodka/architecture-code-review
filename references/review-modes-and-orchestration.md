@@ -71,6 +71,50 @@ blocking, superseding, or retaining a candidate review is separate from the
 canonical lifecycle of every referenced fact, finding, test, compatibility,
 Product record, or projection.
 
+### Bounded Change Inventory and delta discovery
+
+`CHANGE_REVIEW` starts from the exact `BASE..CANDIDATE` bindings and performs
+bounded, diff-guided discovery:
+
+```text
+BASE..CANDIDATE diff
+→ changed paths and evidence scope
+→ bounded candidate discovery
+→ ADDED | MODIFIED | REMOVED | MOVED inventory entries
+→ correlate with accepted references
+→ Change Assessment
+```
+
+A changed path starts discovery but proves nothing by itself. The coordinator
+inspects only the selected scope and the minimum evidence needed to identify a
+candidate surface. If a changed boundary references an uninspected material
+dependency, it records `CONTEXT_EXPANSION_REQUIRED`, names the missing slice,
+and expands only that evidence/dependency slice after resolving availability
+and authorization. Dynamic or unavailable source evidence is an explicit
+limitation, not an assertion of no change; full repository rediscovery is not
+the default.
+
+Change Inventory is factual delta observation and remains separate from Change
+Assessment. In particular, a new candidate with no accepted edge is retained
+as candidate-only evidence, while a candidate removal never deletes an
+accepted STM fact or owner record before explicit reconciliation.
+
+Persist bounded review completeness with the CR:
+
+```text
+review_completeness:
+  change_inventory: COMPLETE | PARTIAL | UNKNOWN
+  affected_authority_coverage: COMPLETE | PARTIAL | UNKNOWN
+  candidate_discovery_coverage: COMPLETE | PARTIAL | UNKNOWN
+  selected_capability_assessment: COMPLETE | PARTIAL | UNKNOWN
+  unknown_impact: NONE | PRESENT
+```
+
+`COMPLETE` means complete for the frozen base, candidate, qualified scope,
+available evidence, and selected lenses only. It may coexist with
+`unknown_impact: PRESENT` and never claims exhaustive repository impact or
+that every semantic effect was found.
+
 `NEW` accepts capability-only, output-only, and mixed valid work only after the
 selected capability configuration and standalone-output selection pass
 REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`

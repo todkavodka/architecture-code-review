@@ -33,6 +33,17 @@ Only explicit `RECONCILE_CHANGE` may route the minimum candidate slice to its
 existing owning authorities; their accepted outputs, not candidate identities,
 may subsequently enter direct dependency metadata.
 
+### Change Review discovery expansion
+
+For bounded Change Review discovery, a changed boundary is routing context for
+dependency lookup, not proof of a semantic dependency or change. If the
+boundary names or reaches an uninspected material dependency, resolution must
+persist `CONTEXT_EXPANSION_REQUIRED` with the missing artifact/scope and expand
+only that minimum evidence/dependency slice. Do not preload unrelated accepted
+artifacts or infer a candidate fact from a changed path alone. An unavailable,
+dynamic, or unresolved dependency remains an explicit limitation and keeps the
+affected or candidate discovery completeness bounded.
+
 ## 1. Typed direct dependencies
 
 Use this controlled edge vocabulary:

@@ -151,6 +151,47 @@ cannot become STM facts, canonical findings, tests, compatibility decisions,
 Product state, or projection dependencies merely through persistence in an
 evidence workset.
 
+## 4.2 Change Inventory
+
+Each Change Review may persist one bounded, immutable `CI-*` Change Inventory
+for its frozen base/candidate bindings and selected scope. The inventory
+records factual source delta observations; it does not clone the STM schema or
+assign severity, materiality, compatibility, architectural meaning, finding
+lifecycle, or owner decisions.
+
+Each entry contains:
+
+```text
+change_inventory:
+  inventory_id: CI-*
+  review_id: CR-*
+  base_binding_ref
+  candidate_binding_ref
+  entries:
+    - delta_type: ADDED | MODIFIED | REMOVED | MOVED
+      source_path_or_locator
+      source_evidence_binding: WS-*/EV-* or explicit limitation
+      candidate_surface_kind: COMPONENT | INTERFACE | OPERATION |
+                             INTEGRATION | DATA_STORE | MIGRATION | EVENT |
+                             FLOW | AUTH_CONFIG | CONTRACT | OTHER
+      correlated_accepted_ref: <STM/owner ref or NONE>
+      candidate_ref: <qualified candidate ref or NONE>
+      discovery_status: COMPLETE | PARTIAL | UNKNOWN
+      limitation: <bounded source, evidence, or scope limitation>
+```
+
+`source_path_or_locator` and `source_evidence_binding` remain qualified to the
+exact source state; a changed path alone is not an observed fact. `ADDED`
+entries may have `correlated_accepted_ref: NONE` and remain candidate
+observations. `REMOVED` entries preserve the correlated accepted reference and
+record the candidate absence; they do not delete or retire canonical state.
+`MOVED` records both the old and new locators when available. Multiple entries
+may refer to one source path when independently bounded surfaces are observed.
+
+The inventory is `WHAT CHANGED` only. Interpretation, risk, finding effects,
+test impact, contract impact, and predicted projection impact belong to the
+separate Change Assessment and its owning authorities.
+
 ## 5. Shared reuse and reading order
 
 Consumers use the smallest sufficient context in this order:
