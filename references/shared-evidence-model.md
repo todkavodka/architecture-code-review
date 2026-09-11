@@ -168,9 +168,26 @@ change_inventory:
   base_binding_ref
   candidate_binding_ref
   entries:
-    - delta_type: ADDED | MODIFIED | REMOVED | MOVED
+    - delta_type: ADDED | MODIFIED | REMOVED
       source_path_or_locator
       source_evidence_binding: WS-*/EV-* or explicit limitation
+      candidate_surface_kind: COMPONENT | INTERFACE | OPERATION |
+                             INTEGRATION | DATA_STORE | MIGRATION | EVENT |
+                             FLOW | AUTH_CONFIG | CONTRACT | OTHER
+      correlated_accepted_ref: <STM/owner ref or NONE>
+      candidate_ref: <qualified candidate ref or NONE>
+      discovery_status: COMPLETE | PARTIAL | UNKNOWN
+      limitation: <bounded source, evidence, or scope limitation>
+    - delta_type: MOVED
+      moved:
+        base:
+          source_binding: BASE
+          old_source_locator
+          old_source_evidence_binding: WS-*/EV-* or explicit limitation
+        candidate:
+          source_binding: CANDIDATE
+          new_source_locator
+          new_source_evidence_binding: WS-*/EV-* or explicit limitation
       candidate_surface_kind: COMPONENT | INTERFACE | OPERATION |
                              INTEGRATION | DATA_STORE | MIGRATION | EVENT |
                              FLOW | AUTH_CONFIG | CONTRACT | OTHER
@@ -185,8 +202,11 @@ exact source state; a changed path alone is not an observed fact. `ADDED`
 entries may have `correlated_accepted_ref: NONE` and remain candidate
 observations. `REMOVED` entries preserve the correlated accepted reference and
 record the candidate absence; they do not delete or retire canonical state.
-`MOVED` records both the old and new locators when available. Multiple entries
-may refer to one source path when independently bounded surfaces are observed.
+`MOVED` entries must use the two-sided `moved.base` and `moved.candidate`
+structure: the old locator and evidence are bound to BASE, and the new locator
+and evidence are bound to CANDIDATE. A MOVED entry must not collapse either
+side into the scalar fields used by the other delta types. Multiple entries may
+refer to one source path when independently bounded surfaces are observed.
 
 The inventory is `WHAT CHANGED` only. Interpretation, risk, finding effects,
 test impact, contract impact, and predicted projection impact belong to the
