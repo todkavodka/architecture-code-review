@@ -59,3 +59,33 @@ separation. The PRE-CHANGE rows above remain immutable historical evidence.
 | MR08 | Only an independently decomposable cherry-picked subset is selected and omitted-commit non-impact proof is retained. | Conditional reuse; absent proof requires a new CR. |
 | MR09 | Product member vector, selected Product revision, or member qualification differs despite equal-looking text/tree. | Reuse rejected as `DIVERGED`/`UNAVAILABLE`; preserve member-qualified bindings. |
 | MR10 | Compare A→B and A→C after each candidate is bound immutably. | Read-only comparison view over immutable CRs; no adjudication, acceptance, or canonical authority creation. |
+
+## Task 8 projection-separation validation
+
+FF07 above remains immutable pre-change evidence. These rows provide the
+post-change validation for prediction versus actual impact and explicit
+regeneration boundaries.
+
+| Historical row | Task 8 closure evidence | Expected |
+|---|---|---|
+| FF07 — candidate projection prediction is not separated from actual Stage B impact | PI01–PI06 below cover immutable candidate prediction, accepted actual handoff, forbidden candidate freshness writes, unknown limitations, and explicit regeneration deferral. | CLOSED FOR TASK 8 |
+
+| ID | Deterministic scenario | Required contract outcome |
+|---|---|---|
+| PI01 | A completed CR predicts `NO_EXPECTED_IMPACT`, but accepted owner reconciliation later produces an accepted semantic delta affecting a projection. | Retain the prediction unchanged; run existing Projection Impact Analysis once after semantic stabilization and persist the actual impact separately. |
+| PI02 | A CR predicts `LIKELY_AFFECTED` or `DEFINITELY_AFFECTED_IF_ACCEPTED`, but reconciliation rejects the candidate delta. | Prediction remains candidate-qualified evidence; no actual impact or freshness change is created from the prediction. |
+| PI03 | A candidate prediction attempts to write `CURRENT`. | Reject the candidate write; only the existing accepted Stage B impact authority may determine freshness. |
+| PI04 | A candidate prediction attempts to write `STALE` or `BLOCKED`. | Reject both candidate writes; candidate mode cannot create impact reasons or alter projection freshness. |
+| PI05 | A candidate is `UNKNOWN_IMPACT` because required authority or linkage is unavailable. | Preserve the bounded limitation and route the affected scope to the existing semantic/contract revalidation path; do not guess freshness. |
+| PI06 | Accepted actual impact marks projections `STALE`/deferred and the user declines explicit `RG-*` regeneration. | Leave affected projections stale/deferred, retain reasons, and preserve canonical semantics; no regeneration starts implicitly. |
+
+## Task 8 Product-member qualification validation
+
+| ID | Deterministic scenario | Required contract outcome |
+|---|---|---|
+| PD01 | Product Change Review compares identical complete qualified member vectors A and B, including Product revision and every member source binding. | Effects are bound to the exact vectors; no unqualified Product-wide delta is admitted. |
+| PD02 | One member's source revision/content binding changes while the other member bindings remain equal. | Record a separate member A/B effect qualified to that member; do not flatten the change across the Product. |
+| PD03 | A Product candidate omits a member present in the accepted vector. | Record an explicit missing-member limitation; never treat the member as unchanged or silently remove its scope. |
+| PD04 | A selected member is present but its source is unavailable or unresolved. | Record the exact limitation and route bounded `CONTEXT_EXPANSION_REQUIRED` when the boundary may be material; do not admit a Product-wide negative. |
+| PD05 | Two members use the same local semantic ID or equal-looking text/tree but have different Project/source/revision bindings. | Keep member identities and effects separate; no cross-member alias or equivalence is inferred. |
+| PD06 | A Product summary groups effects from multiple members, including differing limits or one unavailable member. | Summary remains qualified to each member vector/evidence/scope; no Product-wide unqualified delta or universal status is created. |
