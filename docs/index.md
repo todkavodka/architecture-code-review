@@ -8,7 +8,10 @@
 ## Текущий статус
 
 Актуальная принятая базовая точка, завершённые этапы и последнее promotion:
-[Current Project Status](current-status.md).
+[Current Project Status](current-status.md). Текущий baseline включает
+Federated Product Audit Coordination для координации нескольких дочерних
+репозиториев из общего non-Git Coordination Root без превращения этого каталога
+в Product, Project или semantic authority.
 
 ## С чего начать
 
@@ -32,7 +35,7 @@
 - [Test Engineering](guides/test-engineering.md)
 - [Code Quality Review](guides/code-quality-review.md)
 - [Change Review: branch, commit и pull request](guides/change-review.md)
-- [Повторное использование, изменения и расширение](guides/reuse-and-change.md)
+- [Повторное использование, изменения и Product coordination](guides/reuse-and-change.md) — включая top-down и bottom-up federated Product flow, переиспользование child audits и exact Product requalification.
 
 ## Справочник
 
@@ -54,7 +57,8 @@
   проекции, пересборка и состав пакета;
 - [справочник артефактов](reference/artifacts.md) — сохраняемые записи;
 - [справочник итоговых документов](reference/outputs.md) — выбираемые и
-  обязательные документы.
+  обязательные документы;
+- [повторное использование, изменения и Product coordination](guides/reuse-and-change.md) — практический federated Product workflow. Нормативные правила Product membership, exact baseline, frozen coordination plan и revalidation остаются в `references/`.
 
 Другие страницы дают контекст для своей аудитории и ссылаются на эти источники
 за полными правилами.
@@ -74,6 +78,11 @@
 
 Для pre-merge проверки branch/commit/PR используйте
 [Change Review](guides/change-review.md), а не обычный `REVALIDATE`.
+
+Для большого продукта из нескольких child repositories используйте Product
+coordination: существующие принятые child audits сначала квалифицируются и
+переиспользуются, а Product baseline принимается только после stable barrier и
+точной requalification всего выбранного member/source vector.
 
 ## Нормативные источники
 
