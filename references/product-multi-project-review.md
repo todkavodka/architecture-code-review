@@ -318,6 +318,64 @@ owned and updated by its existing workflow. Independent local semantics,
 projections, and packages may remain usable when a bounded Product dependency
 is unavailable.
 
+### Federated coordination barrier and baseline acceptance
+
+An independently-created accepted child audit may be reused by Product only
+after qualification of Project identity, repository/source identity, selected
+scope, exact source binding, accepted owner identity and revision,
+lineage/provenance, consuming-dependency freshness and coverage,
+availability/limitations, and Product/member qualification at consumption
+time. Reuse of a child authority does not transfer its ownership or advance
+Product state.
+
+Product coordination records a stable child checkpoint for each selected
+member. The checkpoint binds the member/project key, frozen
+`coordination_plan_ref`, exact analyzed source binding, accepted owner
+revisions/results consumed, requested dependency/output coverage,
+limitations, and completion/provenance trace. Product aggregation may use
+`REUSE_READY`, `UPDATED_READY`, `PARTIAL_USABLE`, `UNAVAILABLE`, and `BLOCKED`
+as derived coordination views only. They are not Product semantic, freshness,
+package-gate, or universal lifecycle states.
+
+Product Baseline Acceptance follows the stable barrier and composes an
+immutable exact vector from one frozen coordination plan. The candidate binds:
+
+```text
+product_id
+accepted product_revision
+coordination_plan_ref
+membership_snapshot_ref
+exact qualified member/source vector
+availability/dirty/noncanonical limitations
+qualified accepted owner refs needed by consuming Product work
+```
+
+It cannot combine child results from different Product revisions, membership
+snapshots, plan revisions, or requested-work scopes. Immediately before
+acceptance, re-resolve and compare `product_id`, selected accepted Product
+revision, membership snapshot and selected members, base Product baseline,
+Project/repository/scope qualification, intended and completed source
+bindings, accepted owner revisions/results, requested work/lenses/outputs and
+authorization scope, and relevant availability/dirty/noncanonical
+limitations. A moved binding invalidates or supersedes the candidate and
+requires bounded requalification/replanning.
+
+If a child completed at B and its source is now C, B is not current C. B may
+be accepted only when the user and existing Product policy explicitly select
+B as the exact historical binding; otherwise acceptance requalifies/replans.
+A failed or unavailable child is included only as an explicit limitation when
+existing requiredness/coherency policy permits it. If policy requires that
+member, Product Baseline Acceptance blocks. Missing availability is never
+converted into accepted `UNKNOWN` technical evidence.
+
+Product Coordination Plan confirmation is a separate first human gate for
+orchestration. Product Baseline Acceptance is a separate second gate for the
+exact composition. Neither gate accepts technical facts/findings for an
+existing owner or bypasses child source-access, capability, test, Change
+Review/reconciliation, or owner-acceptance gates. Parallel child work is
+allowed only for non-conflicting writer scopes; overlapping monorepository
+scopes or shared audit records are serialized.
+
 ## 8. Qualified addressing and cross-project routing
 
 Cross-project references qualify the existing owner using at least:
@@ -386,6 +444,25 @@ This reference establishes routing and boundaries only; traversal, freshness,
 and regeneration mechanics remain owned by
 [Revalidation and Freshness](revalidation-and-freshness.md), dependency, and
 projection contracts.
+
+### Bottom-up child advancement
+
+An independently accepted child authority can satisfy a qualified child
+readiness dependency, but it cannot directly advance Product state. Product
+accepted-state adoption uses Product `REVALIDATE` over the pinned Product
+baseline and candidate vector. Product read-only candidate assessment uses a
+new `CHANGE_REVIEW` bound to the complete exact accepted base vector and
+complete exact candidate vector. A prior Product Change Review is not
+reusable when any qualified member vector, Product revision, or member
+qualification differs. Contextual `RECONCILE_CHANGE` remains subject to the
+existing completed-review, exact-base-binding, material-delta, owner, and
+explicit-confirmation gates.
+
+An accepted Architecture, Code Quality, Test Engineering, or STM owner
+revision on the same exact member source binding does not change that
+member's source vector. It may reopen only the bounded Product-qualified
+freshness/impact dependencies that require the newer authority; it does not
+create a synthetic source baseline change or imply a full Product rescan.
 
 ## 10. Product outputs and packages
 
@@ -685,7 +762,9 @@ working/
 └── projections/                     # existing Stage B operational records
 ```
 
-`working/INDEX.md` remains coordinator workflow authority and is not a Product
+The logical Product namespace is `working/products/<PROD-key>/` under the
+single `working/INDEX.md` coordinator authority. `working/INDEX.md` remains
+coordinator workflow authority and is not a Product
 semantic artifact or `PRJ-*` projection. Exact serialization and filenames are
 implementation details within this ownership boundary. Product namespace
 placement does not change STM or capability ownership.

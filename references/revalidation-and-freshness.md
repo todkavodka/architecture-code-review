@@ -498,7 +498,8 @@ context or refuse a material cross-boundary read merely to protect a budget.
 
 ## 8. Product impact routing and bounded revalidation
 
-When the selected context is Product mode, the generic `REVALIDATE` flow is
+When the selected context is Product mode, Product REVALIDATE uses the generic
+`REVALIDATE` flow and is
 applied to the pinned Product baseline vector without turning Product review
 into a full repository reread. The coordinator records this bounded chain:
 
@@ -536,6 +537,11 @@ preserves the prior accepted set, revalidates only the affected semantic
 slice, and separately accounts for projection freshness. It does not silently
 reopen unrelated Projects or regenerate projections.
 
+Incomplete dependency coverage is `UNKNOWN_IMPACT`, not a preserved
+`UNAFFECTED` conclusion. Product candidate assessment uses the complete exact
+candidate Product vector paired with the complete exact accepted base vector.
+The required binding is the complete exact candidate Product vector.
+
 Product `EXTEND` is additive. Adding a Project, capability, cross-project
 investigation, output, or shared-resource context preserves unaffected accepted
 state and resolves only the minimum new dependency/evidence slice. Removing or
@@ -544,6 +550,31 @@ declaration creates a new Product revision and requires explicit membership
 impact adjudication; it does not erase historical baselines or findings. A
 bounded downstream revalidation is required only for records that depend on
 the changed Product meaning.
+
+### Bottom-up Product child advancement
+
+When a child Project independently reaches an accepted source/authority state,
+qualified local state may satisfy the Product child-readiness dependency but
+does not advance the Product baseline directly. For a pinned Product baseline
+`PB-N` containing member A and a qualified local child accepted at B, route an
+accepted-state update through Product `REVALIDATE` over the pinned baseline
+and candidate member vector. When the user requests read-only candidate
+assessment instead, create a new Product `CHANGE_REVIEW` bound to the complete
+exact accepted base vector and complete exact candidate vector.
+
+An older Product Change Review is not reusable when the complete qualified
+member vector, selected Product revision, or member qualification differs.
+`RECONCILE_CHANGE` remains contextual and is available only after the existing
+completed-review, exact-base-binding, material-delta, owner-completion, and
+explicit-confirmation gates. No direct child-adoption shortcut advances a
+Product baseline.
+
+Source advancement and semantic-authority advancement are independent. A new
+accepted Architecture, Code Quality, Test Engineering, or STM owner revision
+on the same exact source binding leaves the Product member source vector
+unchanged. It may require only the bounded Product freshness/impact slice
+whose dependencies name that authority; it does not create a synthetic source
+change or trigger a full Product rescan.
 
 ### Delta reconciliation
 

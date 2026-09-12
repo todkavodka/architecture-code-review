@@ -162,6 +162,72 @@ Record a stable repository identity from the repository root and canonical remot
 
 An unsafe or ambiguous package yields `PREVIOUS_AUDIT_RECONCILIATION_REQUIRED`; stale compact state is not downstream authority. When multiple valid packages compete, rank identity, authority state, and lineage before recency and show the competing choices when user intent remains ambiguous.
 
+## Coordination Root startup and bounded discovery
+
+Product mode may start from an explicit non-Git `Coordination Root`, such as a
+parent directory containing several child repositories. The route is:
+
+```text
+non-Git Coordination Root
+  → resolve/confirm Product context
+  → load accepted Product revision and membership when present
+  → bounded child repository/source candidate discovery
+  → qualify existing previous audits per candidate
+  → propose Product Coordination Plan
+  → explicit plan confirmation
+  → dispatch existing child workflows
+```
+
+The Coordination Root is a locator and discovery boundary only. It is not a
+repository identity, Project identity, Product identity, Product baseline, or
+semantic authority. filesystem containment != Product membership. A
+discovered repository is a candidate until existing Project/Product identity,
+source binding, authorization, and explicit membership rules qualify it.
+
+Discovery is metadata-oriented and bounded. Canonicalize paths only for
+traversal and cycle detection; never use a canonical path as semantic identity.
+Maintain a visited filesystem/repository-worktree set, reject symlink traversal
+outside the explicit root by default, and prevent traversal cycles. Stop
+ordinary descent at a discovered repository root. Nested repositories,
+submodules, linked worktrees, and monorepository scopes are explicit source
+candidates requiring normal qualification, never automatic Product members.
+
+Missing or changed canonical remote metadata is a qualification limitation,
+not an automatic identity decision. Deduplicate only by qualified repository,
+worktree, and source identity; path strings, directory names, timestamps, and
+remote URL text alone are insufficient. Do not collapse distinct Project
+scopes sharing a repository, or split one known multi-repository Project into
+several Product members. Ambiguous Project/repository mapping is routed to the
+existing Product/Project descriptor and explicit user reconciliation. This
+contract does not require a crawler or source scan.
+
+An immutable/superseding Product Coordination Plan is persisted before child
+dispatch. It binds:
+
+```text
+plan_ref
+product_id
+selected_product_revision
+membership_snapshot_ref
+base_product_baseline_ref
+selected member/project keys
+per-member repository/source/scope qualification
+intended exact source binding
+confirmed child Session Intent/action
+requested capabilities
+standalone outputs/lenses
+coordination authorization result
+```
+
+The plan confirmation authorizes orchestration dispatch only. Child
+source-access, capability, Change Review/reconciliation, test, and owner
+acceptance gates remain separately required. Mutable `current_revision`, child
+`HEAD`, `latest audit`, or filesystem path cannot retarget a confirmed plan.
+Any later Product revision, membership, source, requested-work, or action
+change creates a new/superseding plan instead of changing the old execution
+meaning. Parallel child work is allowed only when writer scopes do not
+conflict; overlapping monorepository scopes or shared audit records serialize.
+
 ## Session Intent
 
 Persist exactly these seven intents:

@@ -38,6 +38,22 @@ additive. Neither implies a full Product reread or automatic projection
 regeneration. Product-free single-project sessions retain the existing route
 and do not require Product state.
 
+From a non-Git Coordination Root, Product requests such as `покажи состояние
+продукта`, `обнови существующие дочерние аудиты`, `доведи весь продукт до
+актуального аудита`, `что изменилось с прошлого общего аудита?`, `покажи
+влияние изменений backend`, `обнови backend и оцени влияние на продукт`, or
+`я уже обновил backend отдельно, подхвати изменения` are normalized to the
+existing Product/requested-work/child-intent semantics. These phrases are
+illustrative natural-language examples, not a formal CLI grammar or persisted
+command vocabulary. Membership and requested work are resolved and confirmed
+before substantive work; a broad request never silently selects every
+discovered repository, capability, or full Product review.
+
+The top-level semantic capabilities remain exactly Architecture Review, Test
+Engineering, and Code Quality Review. Federated coordination, Technical
+Documentation, and dependency/readiness views are orchestration or output
+concerns, not additional capabilities.
+
 ## Stage F Interface, API, and Data Integration Routing
 
 When a review includes interface, API, integration, event, persistence, or
