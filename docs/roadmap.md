@@ -41,6 +41,7 @@ Product / Multi-Project Review                     DONE
 Interface, API & Data Integration Catalog          DONE
 API Operation Completeness                         DONE
 Change Review & Baseline Reconciliation            DONE
+Federated Product Audit Coordination               DONE
 ```
 
 Это означает, что в репозитории описаны, проверены и продвинуты соответствующие
@@ -50,9 +51,10 @@ runtime source scanner или другие execution-функции.
 
 Текущая основа сохраняет evidence-first review, authority и freshness bindings,
 минимально необходимую работу для `EXTEND` и `REVALIDATE`, независимые
-capabilities, operation-completeness gates и отдельную модель candidate Change
-Review. `Behavior Model` и применимая `Contract Verification` остаются
-внутренними зависимостями и сохраняют собственное authority.
+capabilities, operation-completeness gates, отдельную модель candidate Change
+Review и federated Product coordination поверх нескольких child repositories.
+`Behavior Model` и применимая `Contract Verification` остаются внутренними
+зависимостями и сохраняют собственное authority.
 
 ## Forward Roadmap
 
@@ -81,12 +83,16 @@ Current Foundation
                                      |
                                      v
                     Cross-cutting Change Review & Baseline Reconciliation [DONE]
+                                     |
+                                     v
+                    Cross-cutting Federated Product Audit Coordination [DONE]
 ```
 
 Stage B особенно важен для надёжности генерируемых результатов Stage A, C и D,
 но его наличие не отменяет независимые authority и freshness gates этих этапов.
-Change Review является cross-cutting orchestration lifecycle, а не новым
-semantic capability или Stage G authority.
+Change Review и Federated Product Audit Coordination являются cross-cutting
+orchestration lifecycles, а не новыми semantic capabilities или Stage G
+authority.
 
 ## Stage A — Shared Technical Model Foundation
 
@@ -494,6 +500,76 @@ Product cases. Migration remains `COMPATIBLE_EXTENSION`; validation remains
 Closeout evidence:
 [Change Review & Baseline Reconciliation — Closeout](superpowers/reviews/2026-09-11-change-review-baseline-reconciliation-closeout.md).
 
+## Cross-Cutting Milestone — Federated Product Audit Coordination
+
+**Status: `DONE`**
+
+### Purpose
+
+Расширить Stage E/Product orchestration для большого продукта, чьи child
+repositories могут жить под общим non-Git Coordination Root и независимо
+обновлять свои локальные аудиты. Координатор должен переиспользовать уже
+принятые child результаты, выполнять только недостающую работу и принимать
+новый Product baseline только после exact qualification и explicit gates.
+
+### Completed scope
+
+Принятая реализация определяет:
+
+- non-Git Coordination Root как locator/discovery boundary, а не новую identity
+  или authority;
+- bounded metadata discovery с repository-boundary stop, cycle/symlink guards,
+  explicit handling nested repos, submodules и worktrees;
+- явное различие `Project != repository`, включая один Project в нескольких
+  repos и несколько Projects в одном monorepo;
+- immutable/frozen Product Coordination Plan, связывающий Product revision,
+  membership snapshot, base Product baseline, exact member/source/scope
+  qualifications, child actions, requested work и authorization;
+- qualified reuse independently-created accepted child audits;
+- stable child barrier и serialization только для реально конфликтующих writer
+  scopes;
+- derived dependency/output readiness без новой Product lifecycle authority;
+- exact Product baseline candidate и обязательную final requalification перед
+  Product Baseline Acceptance;
+- deterministic race handling: `B` не может быть представлен как current `C`
+  после source advancement;
+- bottom-up adoption через Product `REVALIDATE` или новый complete-vector
+  Product `CHANGE_REVIEW`, без direct child-to-Product baseline advancement;
+- независимые оси source advancement и semantic-authority advancement;
+- bounded derived impact `UNAFFECTED | AFFECTED | UNKNOWN_IMPACT` поверх
+  существующих dependency/freshness/capability owners;
+- policy-bound behavior для optional и required unavailable members;
+- сохранение единого `working/INDEX.md` и Product-qualified
+  `working/products/<PROD-key>/` namespace;
+- отсутствие новых Session Intent, capability, Product STM, `PIA-*` authority,
+  automatic membership, reconciliation или projection regeneration.
+
+### Completion evidence
+
+```text
+Approved design remediation:
+e8494f720d2cca7d53b57a4da08ed21dc9ca609a
+
+Approved implementation-plan remediation / implementation base:
+9bf5c4c33034826a916b88b033ee4b8f1011bc18
+
+Approved feature HEAD:
+9422f77c9cc0c2ecdcc66c217ce7006d4e57ff49
+
+Promotion merge:
+adb576e16067ec3113182f5b4f9a865a4ca7e062
+```
+
+Independent implementation review: `APPROVE / READY_FOR_PROMOTION` with
+`0 HIGH / 0 MEDIUM / 0 LOW` findings. Validation closed `FC01..FC24` as
+`24/24`, pressure scenarios `PV01..PV13` as `13/13 PASS`, and backward
+compatibility `BC01..BC12` as `12/12 PASS`.
+
+Validation remains contract-level Markdown evidence and smoke checking. The
+milestone does not claim live repository crawling, automatic child execution,
+SCM adapter execution, owner adjudication, baseline mutation or runtime
+projection regeneration.
+
 ## Cross-Stage Architectural Principles
 
 ### Evidence first
@@ -518,18 +594,21 @@ baseline, с понятной provenance.
 
 ### Minimum necessary work
 
-`EXTEND`, `REVALIDATE` и Change Review продолжают использовать наименьший
-корректный dependency/evidence slice и явно расширяют контекст только при
-необходимости.
+`EXTEND`, `REVALIDATE`, Change Review и federated Product coordination продолжают
+использовать наименьший корректный dependency/evidence slice и явно расширяют
+контекст только при необходимости.
 
 ### No silent escalation
 
 Bounded operation не должна молча превращаться в full audit, product-wide review,
-simulator implementation, E2E execution или automatic reconciliation.
+simulator implementation, E2E execution, automatic reconciliation или полный
+перезапуск всех child repositories.
 
 ### Single-project remains first class
 
 Product-level support расширяет, а не заменяет project-level workflow.
+Federated coordination также остаётся explicit Product mode и не перехватывает
+обычный single-project startup.
 
 ### Independent capabilities
 
@@ -539,9 +618,9 @@ Documentation остаётся projection layer, а не четвёртой capa
 
 ### Human-controlled execution
 
-Любая будущая реализация code/test/simulator/environment, reconciliation или
-projection regeneration требует explicit authorization и соответствующих
-verification gates.
+Любая будущая реализация code/test/simulator/environment, reconciliation,
+Product baseline acceptance или projection regeneration требует explicit
+authorization и соответствующих verification gates.
 
 ## Dependency and Sequencing
 
@@ -586,6 +665,16 @@ Change Review & Baseline Reconciliation
   reuses:
     Product qualification
     API operation completeness
+
+Federated Product Audit Coordination
+  depends on:
+    Stage E Product identity/membership/baseline semantics
+    existing Session Intent and revalidation orchestration
+    Change Review complete-vector/base-binding semantics
+  reuses:
+    STM/Technical Model Gate authority
+    capability-local accepted state
+    Product qualification and freshness/dependency contracts
 ```
 
 `depends on` здесь означает необходимую основу. `supports`, `reuses` и
