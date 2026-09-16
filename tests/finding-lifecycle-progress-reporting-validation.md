@@ -133,3 +133,49 @@ historical identities: 2
 ## Final marker
 
 `FINDING_LIFECYCLE_PROGRESS_VALIDATION_NOT_YET_RUN`
+
+## Product qualification fixtures
+
+### FF-07 — unavailable member
+
+```text
+PB-N includes Project C
+PB-N+1 cannot qualify Project C
+expected: Product result LIMITED/UNKNOWN for the affected aggregate
+Project C contribution: not zero and not UNCHANGED
+limitation: mandatory
+```
+
+### FF-08 — bottom-up semantic advancement
+
+```text
+PB-10 pins child RF-017 owner rev5 / same exact source
+child accepts RF-017 ACTIVE -> RESOLVED at owner rev6
+expected: child authority advances; PB-10 unchanged; semantic-authority
+advancement PRESENT; Product revalidation required; PB-11 only after
+Product Baseline Acceptance
+```
+
+### FF-09 — CFV-1 canonical payload
+
+```text
+schema: CFV-1
+product_revision: PROD-EXAMPLE@rev1
+product_baseline_key: PB-EXAMPLE
+rows: []
+canonical bytes: {"schema":"CFV-1","product_revision":"PROD-EXAMPLE@rev1","product_baseline_key":"PB-EXAMPLE","rows":[]}
+digest: sha256: computed from the exact canonical UTF-8 bytes
+```
+
+The same qualified rows produce the same digest after Markdown wording, row
+order, or workspace-path changes. Severity, lifecycle, disposition, relevant
+freshness, source binding, accepted owner revision, or qualification changes
+produce a different digest. Historical rows are outside the payload.
+
+### Cross-member identity
+
+`Project-A/RF-001` and `Project-B/RF-001` are two qualified rows because
+member/project, owner/family, source/baseline, accepted revision, freshness,
+and limitations are retained. Bare local IDs are never Product-global.
+
+`FINDING_LIFECYCLE_PROGRESS_VALIDATION_NOT_YET_RUN`

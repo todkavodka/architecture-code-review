@@ -852,3 +852,66 @@ aggregation, cannot redefine package policy, and cannot initiate a full
 Product revalidation or regeneration implicitly. Any future contract
 extension must preserve these boundaries and route semantic changes through
 the owning authority.
+
+
+## 15. Qualified child Current Findings and CFV-1
+
+Product consumes qualified child Current Findings views, never raw child
+ledgers or Markdown projections. Every consumed row retains:
+
+```text
+member_key
+project_key
+owner_capability
+finding_family
+finding_id
+accepted_owner_revision
+lifecycle
+owner_qualified_disposition
+severity
+freshness
+exact_source_or_content_binding
+semantic_limitation_marker
+```
+
+Equal local IDs in different Projects remain distinct. Product derives current
+technical risk, actionable findings, accepted residual risk, verified-current
+findings, and uncertainty from those qualified rows. An unavailable or
+unqualified member contributes a mandatory limitation, not zero findings,
+zero transitions, or `UNCHANGED`.
+
+The qualified Current Findings fingerprint is versioned as `CFV-1`. Its
+canonical JSON object has this exact field order:
+
+```text
+schema, product_revision, product_baseline_key, rows
+```
+
+Each row uses the exact order listed above. Before serialization, every Unicode
+string is normalized to NFC. Serialize as UTF-8 with no BOM, no insignificant
+whitespace, explicit JSON `null` for absent optional fields, standard JSON
+lexical forms for numbers/booleans, and canonical row ordering by the UTF-8
+lexicographic tuple of `member_key`, `project_key`, `owner_capability`,
+`finding_family`, `finding_id`, and `accepted_owner_revision`. Exclude
+timestamps, Markdown prose/order, filesystem/workspace paths, and rendering
+metadata. Only semantic limitation markers that change interpretation are
+included.
+
+Compute the fingerprint as SHA-256 over the exact canonical UTF-8 JSON bytes
+and serialize it as `sha256:` followed by 64 lowercase hexadecimal characters.
+Semantic changes to severity, lifecycle, materially relevant disposition or
+freshness, source/content binding, qualification, accepted owner revision, or
+interpretation-changing limitation alter the fingerprint. Presentation-only
+wording, row order, or path changes do not. A changed canonical payload must
+use a new schema identifier and cannot compare as `CFV-1`.
+
+The existing immutable Product baseline member/source/authority vector remains
+authoritative. Store only the `CFV-1` schema/fingerprint reference alongside
+the accepted child owner revision references; do not copy historical child
+ledgers or grant Product lifecycle authority.
+
+If a child accepts a newer owner revision on the same source, this is
+`SEMANTIC_AUTHORITY_ADVANCEMENT`, not source advancement. The accepted Product
+baseline remains unchanged and becomes subject to the existing Product
+`REVALIDATE` or complete-vector Change Review/reconciliation path. Only Product
+Baseline Acceptance creates the next Product baseline.
