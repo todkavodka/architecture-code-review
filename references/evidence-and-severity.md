@@ -1,19 +1,19 @@
-# Доказательства, жизненный цикл кандидата и критичность
+# Evidence, Candidate Lifecycle, and Severity
 
-Этот файл является авторитетным источником для evidence contract (контракта доказательств), promotion lifecycle (жизненного цикла кандидата), security attack chain (цепочки эксплуатации), Safe Reproduction / Evidence Validation и severity adjudication (оценки критичности).
+This file is the authoritative reference for the evidence contract, candidate promotion lifecycle, security attack-chain gate, Safe Reproduction / Evidence Validation, and severity adjudication.
 
 ## 1. Evidence contract
 
-Material finding должен разделять:
+A material finding must separate:
 
-1. **Observation (наблюдение)** — что код демонстративно делает.
-2. **Interpretation (интерпретация)** — почему механизм архитектурно значим.
-3. **Risk/impact (риск/последствие)** — конкретный failure/security/consistency effect.
-4. **Recommendation direction (направление исправления)** — без преждевременного To-Be design.
+1. **Observation** — what the code demonstrably does.
+2. **Interpretation** — why the mechanism is architecturally significant.
+3. **Risk/impact** — the concrete failure, security, or consistency effect.
+4. **Recommendation direction** — without prematurely designing the To-Be architecture.
 
-Для cross-layer claims приводи evidence с каждого существенного boundary. Одна строка с именем класса не доказывает архитектурную проблему.
+For cross-layer claims, provide evidence from every material boundary. One line naming a class does not prove an architectural problem.
 
-Формат evidence:
+Evidence format:
 
 ```text
 src/module/file.py:120-168
@@ -22,9 +22,9 @@ src/other/file.ts:41-77
 
 ## 2. Candidate lifecycle
 
-Discovery не создаёт authoritative finding напрямую.
+Discovery does not create an authoritative finding directly.
 
-Нормальная цепочка:
+Normal flow:
 
 ```text
 CANDIDATE
@@ -36,21 +36,21 @@ CANDIDATE
 → authoritative ledger
 ```
 
-`REFUTED` и superseded formulations должны сохраняться в working evidence trail, чтобы не воскреснуть позже.
+`REFUTED` candidates and superseded formulations must remain in the working evidence trail so they are not accidentally resurrected later.
 
-Discovery Coverage Review не заменяет эту цепочку: он проверяет полноту исследования mechanism classes, а не correctness уже найденного candidate.
+Discovery Coverage Review does not replace this flow: it checks completeness of mechanism-class investigation, not correctness of an already discovered candidate.
 
 ## 3. Evidence strength
 
-Используй confidence отдельно от severity:
+Track confidence separately from severity:
 
-- `HIGH` — mechanism и reachable flow доказаны кодом; желательно подтверждены проверкой/runtime evidence.
-- `MEDIUM` — сильное static evidence, но ключевой runtime condition не воспроизведён.
-- `LOW` — plausible, но evidence неполный; обычно open question/UNVERIFIED, не headline finding.
+- `HIGH` — the mechanism and reachable flow are established by code; preferably also confirmed by verification or runtime evidence.
+- `MEDIUM` — strong static evidence exists, but a key runtime condition has not been reproduced.
+- `LOW` — plausible but incomplete evidence; normally an open question or `UNVERIFIED`, not a headline finding.
 
-Не поднимай severity только из-за высокой уверенности: уверенность отвечает «правда ли», severity — «насколько плохо».
+Do not raise severity merely because confidence is high. Confidence answers “is this true?”; severity answers “how bad is it?”.
 
-Для clarity допускаются evidence descriptions:
+For clarity, evidence descriptions may include:
 
 ```text
 STATICALLY_CONFIRMED
@@ -58,42 +58,42 @@ RUNTIME_REPRODUCED
 RUNTIME_VALIDATION_UNAVAILABLE
 ```
 
-Это **не новые lifecycle statuses и не severity levels**. Они только описывают тип фактического evidence.
+These are **not lifecycle states or severity levels**. They describe the type of factual evidence only.
 
-`RUNTIME_REPRODUCED` можно указывать только когда runtime check реально выполнялся и его результат зафиксирован. Если проверка не выполнялась, не используй wording, создающее впечатление фактического воспроизведения.
+Use `RUNTIME_REPRODUCED` only when a runtime check was actually executed and its result was recorded. If no runtime check was performed, do not use wording that implies factual reproduction.
 
 ## 4. Safe Reproduction / Evidence Validation
 
-Runtime reproduction может повысить confidence и подтвердить reachability/semantics, но архитектурный audit Skill не является penetration-testing или exploitation framework.
+Runtime reproduction can increase confidence and establish reachability or semantics, but the architecture audit Skill is not a penetration-testing or exploitation framework.
 
-Safe Reproduction — **опциональный** способ усилить evidence. Он не является prerequisite для каждого finding.
+Safe Reproduction is an **optional** way to strengthen evidence. It is not a prerequisite for every finding.
 
-### Разрешённая цель
+### Allowed purpose
 
-Проверить минимальный harmless effect, достаточный чтобы различить:
+Demonstrate the minimum harmless effect needed to distinguish:
 
 ```text
-mechanism реально существует
+the mechanism actually exists
 vs
-static interpretation была ошибочной
+the static interpretation was wrong
 ```
 
-Предпочитай в таком порядке:
+Prefer, in order:
 
-1. существующий non-destructive test;
-2. existing local fixture/harness;
-3. isolated test environment;
-4. synthetic input / local semantic reproduction.
+1. an existing non-destructive test;
+2. an existing local fixture or harness;
+3. an isolated test environment;
+4. synthetic input or local semantic reproduction.
 
 ### Authorization boundary
 
-Выполняй runtime reproduction только на системе/environment/repository, которую пользователь авторизован проверять.
+Perform runtime reproduction only on a system, environment, or repository the user is authorized to test.
 
-Не используй audit как повод probing unrelated external targets или third-party infrastructure.
+Do not use an audit as justification for probing unrelated external targets or third-party infrastructure.
 
 ### Hard safety boundary
 
-Safe Reproduction не включает:
+Safe Reproduction does not include:
 
 - destructive actions;
 - persistence;
@@ -101,29 +101,29 @@ Safe Reproduction не включает:
 - credential theft;
 - lateral movement;
 - data exfiltration;
-- modification/corruption of real production data;
-- unrelated external target probing;
+- modification or corruption of real production data;
+- probing unrelated external targets;
 - reusable offensive payload packs.
 
-Demonstrate the **minimum effect necessary**. Не расширяй reproduction только потому, что уже доказан первый exploit primitive.
+Demonstrate the **minimum effect necessary**. Do not expand reproduction merely because the first exploit primitive has already been established.
 
 ### Injection-like mechanisms
 
-Для injection-like candidate предпочитай доказать:
+For an injection-like candidate, prefer proving:
 
 ```text
 construction semantics
-или
+or
 harmless local/test predicate manipulation
 ```
 
-Не извлекай реальные данные и не цепляй privileges только ради демонстрации severity.
+Do not extract real data or chain privileges merely to demonstrate severity.
 
-### Когда reproduction недоступна
+### When reproduction is unavailable
 
-Если безопасный runtime check невозможен, не forcing PoC.
+If a safe runtime check is not possible, do not force a PoC.
 
-Вместо этого:
+Instead:
 
 ```text
 preserve static evidence
@@ -131,27 +131,27 @@ preserve static evidence
 → keep confidence proportional to actual evidence
 ```
 
-`RUNTIME_VALIDATION_UNAVAILABLE` не означает, что static finding автоматически false или low severity; он описывает limitation evidence channel.
+`RUNTIME_VALIDATION_UNAVAILABLE` does not mean a static finding is automatically false or low severity. It describes a limitation of the evidence channel.
 
-### Связь с candidate lifecycle и severity
+### Relationship to candidate lifecycle and severity
 
-Успешная safe reproduction может:
+Successful Safe Reproduction may:
 
-- повысить confidence;
-- подтвердить reachable condition;
-- falsify неверную static interpretation.
+- increase confidence;
+- confirm a reachable condition;
+- falsify an incorrect static interpretation.
 
-Она **не**:
+It does **not**:
 
-- обходит independent verification;
-- обходит root-boundary adjudication;
-- назначает severity сама по себе;
-- автоматически поднимает severity;
-- превращает conditional capability в direct exploit без evidence.
+- bypass independent verification;
+- bypass root-boundary adjudication;
+- assign severity by itself;
+- automatically increase severity;
+- turn a conditional capability into a direct exploit without evidence.
 
 ## 5. Security attack-chain gate
 
-Серьёзный security finding (`HIGH`/`CRITICAL`) требует доказанной цепочки, где применимо:
+A serious security finding (`HIGH` or `CRITICAL`) requires an evidenced chain where applicable:
 
 ```text
 attacker capability
@@ -162,7 +162,7 @@ attacker capability
 → concrete impact
 ```
 
-Отдельно классифицируй exploitability:
+Classify exploitability separately:
 
 ```text
 DIRECT
@@ -170,107 +170,107 @@ CONDITIONAL
 DEFENSE_IN_DEPTH
 ```
 
-Отсутствие hardening control само по себе не является HIGH/CRITICAL vulnerability. Conditional post-compromise capability не наследует автоматически severity гипотетического prerequisite compromise.
+The absence of a hardening control is not by itself a `HIGH` or `CRITICAL` vulnerability. A conditional post-compromise capability does not automatically inherit the severity of a hypothetical prerequisite compromise.
 
-Runtime reproduction не обязана доходить до полного offensive attack chain; chain может быть доказан combination static/runtime evidence, пока каждый material link обоснован.
+Runtime reproduction does not need to reach a complete offensive attack chain. The chain may be established through a combination of static and runtime evidence as long as every material link is supported.
 
 ## 6. Severity adjudication
 
-Severity назначается **после** verification и root-boundary gate.
+Assign severity **after** verification and the root-boundary gate.
 
-Оцени:
+Evaluate:
 
 - impact;
 - reachability;
-- blast radius (масштаб воздействия);
-- recoverability (восстановимость);
+- blast radius;
+- recoverability;
 - frequency/exposure;
 - prerequisites;
-- attacker model для security;
-- product-intent dependency.
+- attacker model for security findings;
+- dependency on product intent.
 
-Для material finding явно проверь:
+For every material finding, explicitly ask:
 
 ```text
-Почему не на один уровень выше?
-Почему не на один уровень ниже?
+Why not one level higher?
+Why not one level lower?
 ```
 
 ### CRITICAL
 
-Только для evidence-backed catastrophic/systemic outcomes, например practical RCE/elevated code execution, broad auth bypass, вероятная существенная потеря/коррупция данных, unrecoverable secret exposure или systemic outage без разумного containment. Не используй как риторический усилитель.
+Use only for evidence-backed catastrophic or systemic outcomes, such as practical RCE or elevated code execution, broad authentication bypass, likely material loss/corruption of data, unrecoverable secret exposure, or systemic outage without reasonable containment. Do not use it as rhetorical emphasis.
 
 ### HIGH
 
-Serious realistic production impact: wrong-owner mutation, process-wide crash from reachable path, major auth/permission flaw, severe lifecycle/concurrency/data-consistency failure, security exploit с сильной цепочкой, но не уровня CRITICAL.
+Serious realistic production impact: wrong-owner mutation, process-wide crash through a reachable path, major authorization/permission flaw, severe lifecycle/concurrency/data-consistency failure, or a security exploit with a strong attack chain that does not reach `CRITICAL`.
 
 ### MEDIUM
 
-Material bounded reliability/security/maintainability/testability issue: lifecycle/resource leak, conditional security weakness, substantial fragility, local wrong behavior с ограниченным blast radius.
+Material but bounded reliability, security, maintainability, or testability problem: lifecycle/resource leak, conditional security weakness, substantial fragility, or localized wrong behavior with a limited blast radius.
 
 ### LOW
 
-Локальная проблема с небольшим practical impact.
+Localized problem with limited practical impact.
 
 ### INFORMATIONAL
 
-Defense-in-depth/architectural note без доказанного material incorrect behavior, но полезный для hardening/clarity.
+Defense-in-depth or architectural note with no evidenced material incorrect behavior, but useful for hardening or clarity.
 
 ### PENDING_PRODUCT_INTENT
 
-Используй, когда correctness/severity зависит от неустановленного product intent. Не угадывай policy.
+Use when correctness or severity depends on unresolved product intent. Do not invent policy.
 
 ## 7. Supporting Engineering Risks
 
-`SER-*` — recurrence/non-detection risk, не обязательный runtime defect. Примеры: owner identity не закодирован, lifecycle spread across flags, отсутствие deterministic local regression tests.
+`SER-*` represents recurrence or non-detection risk, not necessarily a runtime defect. Examples include ownership identity not encoded, lifecycle state spread across flags, or missing deterministic local regression tests.
 
-SER может иметь приоритет remediation, но не должен автоматически получать severity ближайшего RF.
+An SER may receive remediation priority, but it must not automatically inherit the severity of the nearest RF.
 
 ## 8. Finding shape
 
 ```markdown
-## RF-012 — Короткий русский заголовок
+## RF-012 — Short human-readable title
 
-**Критичность:** HIGH
-**Уверенность:** HIGH
+**Severity:** HIGH
+**Confidence:** HIGH
 **Exploitability:** DIRECT | CONDITIONAL | DEFENSE_IN_DEPTH | N/A
 
-**Корневой механизм.** ...
+**Root mechanism.** ...
 
-**Доказательства:**
+**Evidence:**
 - `path/file.ext:10-40`
 - `path/other.ext:80-120`
 
 **Evidence validation:** STATICALLY_CONFIRMED | RUNTIME_REPRODUCED | RUNTIME_VALIDATION_UNAVAILABLE
 
-**Достижимый сценарий.** ...
+**Reachable scenario.** ...
 
-**Практическое последствие.** ...
+**Practical consequence.** ...
 
-**Почему не выше / не ниже.** ...
+**Why not higher / lower.** ...
 
-**Проявления:** ...
+**Projections.** ...
 
-**Связанные SER / open questions:** ...
+**Related SER / open questions.** ...
 ```
 
-`Evidence validation` описывает фактический evidence mode и не обязано присутствовать, если существующее report contract уже выражает это яснее. Не создавай параллельную lifecycle state machine.
+`Evidence validation` describes the actual evidence mode and is not mandatory when the active report contract already expresses that distinction more clearly. Do not create a parallel lifecycle state machine.
 
-Recommendation direction может быть краткой, но detailed Target Architecture создаётся только если выбран соответствующий endpoint.
+Recommendation direction may be brief. Detailed Target Architecture is created only when the selected endpoint requests it.
 
 ## 9. Anti-noise rules
 
-Не продвигай в material finding без concrete impact:
+Do not promote any of the following to a material finding without concrete impact:
 
 - file length;
-- `unwrap`/`clone`/mocks;
+- `unwrap`, `clone`, or mocks;
 - TODO/comment;
 - framework choice;
 - lint warning count;
 - hardcoded literal;
-- отсутствие теста;
-- broad API surface без reachable misuse path;
-- raw-looking API name без provenance/effect;
+- absence of a test;
+- broad API surface without a reachable misuse path;
+- raw-looking API name without provenance/effect;
 - mere inability to produce a PoC.
 
 Absence evidence ≠ defect evidence.
@@ -281,31 +281,16 @@ Runtime reproduction successful ≠ severity automatically higher.
 
 ## 10. Stable identity
 
-До adjudication используй `CAND-*`. После root-boundary — stable `RF-*` для roots, `SER-*` для supporting engineering risks, `OQ-*` для open questions. Не создавай разные root IDs для одного механизма только потому, что он виден в разных файлах/layers.
+Before adjudication, use `CAND-*`. After the root-boundary gate, use stable `RF-*` identifiers for roots, `SER-*` for Supporting Engineering Risks, and `OQ-*` for open questions. Do not create separate root IDs for one mechanism merely because it appears in different files or layers.
 
 ## Product RF evidence and severity binding
 
-For a Product-scoped Architecture finding, severity adjudication consumes the
-independently verified Product revision and immutable baseline, affected
-Projects, qualified `WS-*`/`EV-*` observations, accepted STM facts/relations,
-and the material Product consequence. Product membership or a report
-aggregation is not sufficient evidence. The existing Architecture Review
-`RF-*` lifecycle and severity vocabulary remain authoritative; no Product
-severity family is introduced. Conflicting or unavailable evidence remains an
-explicit limitation and cannot be silently promoted to an accepted Product
-finding.
+For a Product-scoped Architecture finding, severity adjudication consumes the independently verified Product revision and immutable baseline, affected Projects, qualified `WS-*`/`EV-*` observations, accepted STM facts/relations, and the material Product consequence. Product membership or report aggregation is not sufficient evidence.
+
+The existing Architecture Review `RF-*` lifecycle and severity vocabulary remain authoritative; no Product severity family is introduced. Conflicting or unavailable evidence remains an explicit limitation and cannot be silently promoted to an accepted Product finding.
 
 ## Architecture RF resolution and revision gate
 
-Architecture Review alone accepts RF lifecycle, severity, disposition, and
-revision changes. An RF `RESOLVED` revision requires accepted evidence,
-revalidation against the exact proving source/evidence/dependency binding,
-owner adjudication, and retained provenance to the prior revision. A changed
-severity or disposition is a new accepted revision of the same stable identity
-when the root mechanism and correction boundary remain valid.
+Architecture Review alone accepts RF lifecycle, severity, disposition, and revision changes. An RF `RESOLVED` revision requires accepted evidence, revalidation against the exact proving source/evidence/dependency binding, owner adjudication, and retained provenance to the prior revision. A changed severity or disposition is a new accepted revision of the same stable identity when the root mechanism and correction boundary remain valid.
 
-Developer assertion, commit message, candidate Change Review, Product
-inference, projection prose/omission, or completed remediation alone cannot
-create `RESOLVED`. A materially different mechanism uses qualified
-supersession authority; recurrence of the same mechanism uses a newer
-`ACTIVE` revision with `reopened_from` provenance.
+Developer assertion, commit message, candidate Change Review, Product inference, projection prose/omission, or completed remediation alone cannot create `RESOLVED`. A materially different mechanism uses qualified supersession authority; recurrence of the same mechanism uses a newer `ACTIVE` revision with `reopened_from` provenance.
