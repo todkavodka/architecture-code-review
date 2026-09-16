@@ -9,6 +9,13 @@ Regeneration is separately requested after projection impact has been
 accounted for. `PROJECTION_IMPACT_ACCOUNTED` records known impact, not a
 request to regenerate or a claim that every projection is current.
 
+The REVALIDATE closeout boundary in
+[`revalidate-closeout-hardening.md`](revalidate-closeout-hardening.md) is
+mandatory. In particular, an `RG-*` target MUST resolve to an active,
+explicitly registered `PRJ-*` identity before an `RG-*` plan exists. A path,
+filename, stale-looking deliverable, semantic-authority document, or coordinator
+entry is never sufficient target identity.
+
 ## 1. Regeneration session identity
 
 Each planned regeneration session has an operational identity:
@@ -63,6 +70,33 @@ Following outbound edges from a consumer finds its upstream prerequisites.
 Reverse impact edges are not direct dependency authority and never add a
 downstream consumer to a regeneration plan.
 
+### Mandatory target preflight
+
+Before target resolution may create an `RG-*` plan, every requested target
+must pass this preflight:
+
+```text
+requested target
+→ resolve explicit projection registration
+→ require ACTIVE PRJ-* identity
+→ require owning projection contract + contract revision
+→ require declared path and lifecycle record
+→ reject semantic authority / coordinator authority / unregistered path
+→ only then admit target to TARGETED or ALL_STALE planning
+```
+
+If any requested target resolves to semantic authority, an unregistered file,
+an ambiguous artifact, or anything other than an active registered projection,
+fail before allocating the regeneration session:
+
+```text
+REGENERATION_TARGET_NOT_PROJECTION
+```
+
+Do not create a placeholder `PRJ-*`, infer projection identity from a path, or
+silently convert the target into semantic work. Route semantic changes to the
+owning revalidation/adjudication workflow.
+
 ### Target resolution before freeze
 
 Before planning, the request must resolve deterministically to active,
@@ -76,11 +110,12 @@ explicitly classified projection identities from exactly one of these forms:
 For a projection ID, named package, or capability set, resolve the named
 contract/membership to its member `PRJ-*` identities, reject unknown or
 ambiguous names and unknown identities, then deduplicate and order the result
-by stable projection identity. For `ALL_STALE`, take the active
-stale-at-planning snapshot and order its `PRJ-*` identities the same way. A
-free-form, partially resolved, or otherwise ambiguous scope is rejected before
-an `RG-*` plan exists; it must not be frozen as a selector, prose description,
-or unresolved name.
+by stable projection identity. For `ALL_STALE`, resolve exactly the set of
+`ACTIVE` explicitly registered `PRJ-*` identities whose persisted projection
+freshness is `STALE`, then order that set by stable projection identity. A
+free-form, partially resolved, path-derived, semantic-authority-derived, or
+otherwise ambiguous scope is rejected before an `RG-*` plan exists; it must
+not be frozen as a selector, prose description, unresolved name, or file list.
 
 The frozen `requested_targets` field is always the resulting explicit ordered
 `PRJ-*` set, including for `ALL_STALE`; the request form and the package or
@@ -102,7 +137,8 @@ Include an upstream projection only when the target cannot be safely restored
 without regenerating or resolving that stale/BLOCKED prerequisite. Record a
 current prerequisite as `SKIPPED_CURRENT`; do not regenerate it merely because
 it is in transitive closure. Do not add reverse-reachable downstream consumers,
-unrelated stale projections, or semantic work to the plan.
+unrelated stale projections, semantic authorities, or semantic work to the
+plan.
 
 For example, for `PRJ-C -> PRJ-B -> PRJ-A`, a `TARGETED(PRJ-C)` plan can include
 `PRJ-C` plus stale `PRJ-B` and `PRJ-A`, then execute `A, B, C`. A downstream
@@ -111,10 +147,22 @@ has marked it stale.
 
 ### `ALL_STALE`
 
-`ALL_STALE` first takes one stale-at-planning snapshot of active projections.
-The snapshot set, plus any required stale/BLOCKED upstream prerequisites needed
+`ALL_STALE` means exactly:
+
+```text
+all ACTIVE explicitly registered PRJ-* identities
+whose persisted projection freshness == STALE
+```
+
+It first freezes that registry-derived stale-at-planning snapshot. The snapshot
+set, plus any required stale/BLOCKED upstream projection prerequisites needed
 by its members, is the only candidate execution scope. Current prerequisites
 are recorded as `SKIPPED_CURRENT` rather than regenerated.
+
+`ALL_STALE` MUST NOT include files merely because they were described as stale,
+final documents that look outdated, changed semantic authorities, or paths
+listed in `working/INDEX.md`. In particular, semantic authority rejected by the
+mandatory target preflight never enters the frozen snapshot.
 
 `ALL_STALE` is not a loop that continues until repository-global freshness. A
 projection that becomes stale after the snapshot is recorded as deferred for a
@@ -218,6 +266,13 @@ publication](projection-verification.md) may become a dependency input or
 trigger downstream impact. The lifecycle contract alone determines whether the
 persistent freshness after a terminal state is `CURRENT`, `STALE`, or
 `BLOCKED`.
+
+A projection may be persisted as `CURRENT` only when its lifecycle record binds
+all evidence required by [Projection lifecycle authority](projection-lifecycle.md):
+active `PRJ-*` identity, projection contract revision, accepted dependency or
+selector snapshot, passing V1-V4 results, canonical fingerprint, and an accepted
+projection revision or verified `NO_CHANGE`. `RG-*` completion or rewritten
+Markdown alone never satisfies this rule.
 
 ## 6. Failure isolation and session outcome
 
