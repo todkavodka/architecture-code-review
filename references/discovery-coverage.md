@@ -1,18 +1,18 @@
 # Discovery Coverage Assurance
 
-Этот файл является **авторитетным источником** для доказательства полноты thematic discovery: Discovery Coverage Matrix, applicability/status semantics, proof-of-coverage, Independent Coverage Review, targeted coverage correction и coverage revalidation.
+This file is the **authoritative reference** for proving completeness of thematic discovery: the Discovery Coverage Matrix, applicability and status semantics, proof of coverage, Independent Coverage Review, targeted coverage correction, and coverage revalidation.
 
-Он отвечает на вопрос:
+It answers one question:
 
-> Какие material mechanism classes система действительно имеет, и есть ли evidence, что каждый применимый класс был исследован до завершения discovery?
+> Which material mechanism classes actually exist in the system, and is there evidence that every applicable class was investigated before discovery was considered complete?
 
-Он **не** заменяет `independent-verification.md`, `root-boundary-adjudication.md` или `evidence-and-severity.md`.
+It **does not** replace `independent-verification.md`, `root-boundary-adjudication.md`, or `evidence-and-severity.md`.
 
 ## 1. Core invariant
 
-Количество и критичность найденных замечаний не являются доказательством полноты аудита. Это architecture-review реализация общего bounded material accounting принципа из `shared-assurance-principles.md`; она не заменяет и не поглощает отдельный bounded target universe Test Review.
+The number and severity of findings do not prove audit completeness. This is the Architecture Review specialization of the shared bounded material-accounting principle in `shared-assurance-principles.md`; it does not replace or absorb the separate bounded target universe used by Test Review.
 
-Полнота discovery доказывается:
+Discovery completeness is established through:
 
 ```text
 accepted/fresh STM and the As-Built projection
@@ -21,22 +21,17 @@ accepted/fresh STM and the As-Built projection
 → independent coverage challenge
 ```
 
-Ноль findings допустим, если применимые domains реально исследованы и coverage evidence достаточен.
+Zero findings is acceptable when applicable domains were genuinely investigated and coverage evidence is sufficient.
 
-Много findings не позволяет закрыть нерассмотренный material domain.
+Many findings do not permit an unreviewed material domain to be marked complete.
 
-Discovery Coverage remains Architecture Review authority. It is distinct from
-the factual STM matrix and `TECHNICAL_MODEL_COVERAGE_ACCEPTED`: STM coverage
-asks whether the required technical surface is represented, while this matrix
-asks whether architecture and risk mechanism classes were investigated. STM
-acceptance does not prove architectural discovery, and `COVERAGE_ACCEPTED`
-does not make `PARTIAL`, `BLOCKED`, or `UNKNOWN` STM rows complete.
+Discovery Coverage remains Architecture Review authority. It is distinct from the factual STM matrix and `TECHNICAL_MODEL_COVERAGE_ACCEPTED`: STM coverage asks whether the required technical surface is represented, while this matrix asks whether architecture and risk mechanism classes were investigated. STM acceptance does not prove architectural discovery, and `COVERAGE_ACCEPTED` does not make `PARTIAL`, `BLOCKED`, or `UNKNOWN` STM rows complete.
 
 ## 2. Discovery Coverage Matrix
 
-Оба режима — `STANDARD_FULL` и `FORENSIC` — ведут Discovery Coverage Matrix.
+Both `STANDARD_FULL` and `FORENSIC` maintain a Discovery Coverage Matrix.
 
-Минимальная строка:
+Minimum row:
 
 ```text
 domain
@@ -52,7 +47,7 @@ limitations
 
 ### 2.1 Applicability
 
-Закрытый набор:
+Closed set:
 
 ```text
 YES
@@ -60,17 +55,17 @@ NO
 CONDITIONAL
 ```
 
-`YES` — механизм явно присутствует и требует coverage evidence.
+`YES` — the mechanism clearly exists and requires coverage evidence.
 
-`NO` — механизм архитектурно отсутствует на принятом baseline.
+`NO` — the mechanism is architecturally absent on the accepted baseline.
 
-`CONDITIONAL` — необходимость глубины зависит от фактически обнаруженной capability/implementation shape.
+`CONDITIONAL` — required depth depends on the actually discovered capability or implementation shape.
 
-`NO` не означает автоматически `NOT_APPLICABLE`: требуется evidence-based reason, связанный с accepted As-Built и/или targeted inventory.
+`NO` does not automatically mean `NOT_APPLICABLE`: an evidence-based reason tied to accepted As-Built and/or a targeted inventory is required.
 
 ### 2.2 Coverage status
 
-Закрытый набор:
+Closed set:
 
 ```text
 PENDING
@@ -88,32 +83,32 @@ PARTIALLY_COVERED != COMPLETE
 BLOCKED != COMPLETE
 ```
 
-`NOT_APPLICABLE` допустим только с конкретным evidence-based объяснением.
+`NOT_APPLICABLE` is allowed only with a concrete evidence-based explanation.
 
-Нельзя использовать формулировки вида:
+Statements such as:
 
 ```text
 Security: COVERED — security reviewed
 Controllers: COVERED — grep completed
 ```
 
-как достаточное доказательство.
+are not sufficient evidence.
 
-## 3. Что считается coverage evidence
+## 3. What counts as coverage evidence
 
-Coverage evidence может включать:
+Coverage evidence may include:
 
-- inspected paths и concrete call/data/control chains;
-- targeted inventory/search results, привязанные к baseline;
-- representative semantic traces высокорисковых sites;
-- positive controls;
-- considered-but-not-promoted conclusions/non-findings;
-- open questions для unresolved provenance/intent;
-- evidence-based proof отсутствия mechanism class.
+- inspected paths and concrete call/data/control chains;
+- targeted inventory or search results bound to the baseline;
+- representative semantic traces of high-risk sites;
+- Positive Controls;
+- considered-but-not-promoted conclusions and non-findings;
+- open questions for unresolved provenance or intent;
+- evidence-based proof that a mechanism class is absent.
 
-Search/grep — **inventory mechanism**, а не semantic proof.
+Search or grep is an **inventory mechanism**, not semantic proof.
 
-`COVERED` требует интерпретации, достаточной чтобы различать, где применимо:
+`COVERED` requires enough interpretation to distinguish, where applicable:
 
 ```text
 safe
@@ -122,7 +117,7 @@ ambiguous / unresolved
 not applicable
 ```
 
-Не требуй полного построчного reread всего repository, если bounded inventory + representative/high-risk semantic traces дают достаточную confidence о классе.
+Do not require a complete line-by-line reread of the repository when a bounded inventory plus representative and high-risk semantic traces provide sufficient confidence about the class.
 
 ## 4. Canonical coverage domains
 
@@ -156,24 +151,24 @@ QUAL-01 Performance / blocking / queue/cache pressure
 QUAL-02 Tests / testability / evidence quality
 ```
 
-Taxonomy mechanism-oriented и framework-neutral. Она не является vulnerability quota.
+The taxonomy is mechanism-oriented and framework-neutral. It is not a vulnerability quota.
 
-## 5. Общие proof-of-coverage правила
+## 5. Shared proof-of-coverage rules
 
-Для каждого применимого domain coverage closeout должен отвечать минимум на четыре вопроса:
+For every applicable domain, coverage closeout must answer at least four questions:
 
-1. **Что было инвентаризировано?**
-2. **Какие representative/high-risk traces реально прослежены?**
-3. **Как классифицированы material sites/mechanisms?**
-4. **Что осталось unresolved/blocked?**
+1. **What was inventoried?**
+2. **Which representative or high-risk traces were actually followed?**
+3. **How were material sites or mechanisms classified?**
+4. **What remains unresolved or blocked?**
 
-Если ответов нет, `COVERED` не обоснован.
+If these answers do not exist, `COVERED` is not justified.
 
-Для high-risk domains ниже generic thematic paragraph недостаточен.
+For the high-risk domains below, a generic thematic paragraph is insufficient.
 
 ## 6. High-risk proof-of-coverage contracts
 
-Усиленный proof обязателен для:
+Stronger proof is mandatory for:
 
 ```text
 SEC-01 Authentication / authorization / identity / scope
@@ -202,18 +197,18 @@ entrypoint / capability
 → alternate/fallback path
 ```
 
-Где применимо, проверь representative:
+Where applicable, inspect representative:
 
 - point-read;
 - list/bulk read;
 - write/mutation;
 - admin/service-token path;
 - versioned/compatibility path;
-- asynchronous/cross-service identity propagation.
+- asynchronous or cross-service identity propagation.
 
-Наличие auth middleware или успешного login-path не закрывает domain само по себе.
+The presence of auth middleware or a successful login path does not close the domain by itself.
 
-Если существуют session/token mechanisms, рассмотрение включает lifecycle semantics:
+If session or token mechanisms exist, coverage includes lifecycle semantics:
 
 - issuance;
 - refresh/rotation;
@@ -224,9 +219,9 @@ entrypoint / capability
 - session fixation;
 - issuer/audience/signature verification;
 - service/admin fallback credentials;
-- identity propagation across async/service boundaries.
+- identity propagation across asynchronous or service boundaries.
 
-Object-level/scope authorization и session/token lifecycle — разные dimensions внутри одного domain; наличие одного не доказывает другое.
+Object-level or scope authorization and session/token lifecycle are different dimensions within the same domain; evidence for one does not prove the other.
 
 ### 6.2 SEC-02 — Interpreter / dynamic construction
 
@@ -241,16 +236,16 @@ sink inventory
 → reachable effect
 ```
 
-Relevant mechanisms, если присутствуют:
+Relevant mechanisms, when present, include:
 
-- raw SQL / ORM escape hatches;
-- shell/CLI command construction;
-- template/eval/expression engines;
-- regex from external/persisted input;
-- query/search DSL;
+- raw SQL and ORM escape hatches;
+- shell or CLI command construction;
+- template, eval, or expression engines;
+- regex derived from external or persisted input;
+- query/search DSLs;
 - other interpreter-facing dynamic text.
 
-Для arguments/sources различай минимум:
+For arguments and sources, distinguish at least:
 
 ```text
 direct untrusted
@@ -260,9 +255,9 @@ persisted / second-order
 unresolved provenance
 ```
 
-Raw API name, f-string, string concatenation или dynamic expression сами по себе не finding.
+A raw API name, f-string, string concatenation, or dynamic expression is not a finding by itself.
 
-Пример semantic distinction:
+Example semantic distinction:
 
 ```text
 direct HTTP input -> raw SQL text          => material candidate if reachable effect exists
@@ -288,14 +283,14 @@ Consider where applicable:
 
 - path traversal;
 - symlink / TOCTOU;
-- temp files;
+- temporary files;
 - archive extraction;
 - object-store keys;
-- overwrite/collision;
+- overwrite or collision;
 - user-controlled filenames;
 - cleanup ownership.
 
-API/type names such as `Path` не считаются защитой сами по себе; доказывай actual normalization/root/authorization semantics.
+API or type names such as `Path` are not protection by themselves. Prove the actual normalization, root, and authorization semantics.
 
 ### 6.4 SEC-04 — Outbound network target control
 
@@ -311,15 +306,15 @@ source URL/target
 
 Consider:
 
-- user/config-controlled scheme/host/port;
-- webhooks/callbacks;
+- user- or configuration-controlled scheme, host, or port;
+- webhooks and callbacks;
 - redirects;
 - proxy/environment interaction;
 - credential forwarding;
-- internal/metadata-like destinations;
+- internal or metadata-like destinations;
 - destination validation before and after redirects where relevant.
 
-Не называй SSRF только потому, что существует HTTP client. Нужен control over destination + reachable effect.
+Do not label something SSRF merely because an HTTP client exists. Control over destination plus a reachable effect is required.
 
 ### 6.5 SEC-05 — Parsing / deserialization / content handling
 
@@ -336,13 +331,13 @@ input/content
 Consider where applicable:
 
 - object deserialization;
-- YAML/XML/document/image/archive parsers;
-- multipart/upload pipelines;
+- YAML, XML, document, image, or archive parsers;
+- multipart or upload pipelines;
 - active content;
-- parser recursion/size limits;
-- archive/decompression expansion.
+- parser recursion and size limits;
+- archive or decompression expansion.
 
-Если система не принимает material complex content и targeted inventory это подтверждает, `NOT_APPLICABLE` допустим с evidence.
+If the system does not accept materially complex content and a targeted inventory establishes that fact, evidence-backed `NOT_APPLICABLE` is allowed.
 
 ### 6.6 SEC-06 — Secrets / sensitive-data propagation
 
@@ -358,20 +353,20 @@ secret/sensitive source
 → cleanup/redaction
 ```
 
-Review не ограничивается местом хранения секрета.
+Review is not limited to where a secret is stored.
 
 Consider:
 
-- access/refresh/API tokens;
-- credentials/passwords;
-- DSN/service credentials;
-- sensitive business/user data;
+- access, refresh, and API tokens;
+- credentials and passwords;
+- DSN or service credentials;
+- sensitive business or user data;
 - exception bodies;
-- structured logs/tracing attributes;
-- query strings/URLs;
+- structured logs and tracing attributes;
+- query strings and URLs;
 - subprocess argv/env inheritance;
-- debug dumps/caches;
-- telemetry/exporters.
+- debug dumps and caches;
+- telemetry and exporters.
 
 ### 6.7 SEC-07 — Privilege / capability boundaries
 
@@ -388,16 +383,16 @@ caller/context
 
 Consider:
 
-- elevation/sudo-like flows;
+- elevation and sudo-like flows;
 - service accounts;
 - Docker/container/host-control sockets;
-- host mounts/devices;
+- host mounts and devices;
 - native APIs;
 - browser preload/native bridges;
-- privileged admin/local endpoints;
+- privileged admin or local endpoints;
 - dynamic plugin/module capabilities.
 
-Ключевой вопрос: кто реально может активировать capability и с каким scope/lifetime?
+The key question is: who can actually activate the capability, and with what scope and lifetime?
 
 ### 6.8 REL-02 — Availability / amplification / resource exhaustion
 
@@ -414,16 +409,16 @@ untrusted/request-driven work
 Consider where applicable:
 
 - unbounded request bodies;
-- decompression/parser expansion;
-- pathological regex/expression cost;
+- decompression or parser expansion;
+- pathological regex or expression cost;
 - expensive fan-out;
-- queue/cache growth;
+- queue or cache growth;
 - retry storms;
 - worker starvation;
-- blocking/exhausted resource pools;
+- blocking or exhausted resource pools;
 - request-driven amplification.
 
-Generic slowness/performance suspicion не является material security/reliability finding без reachable effect.
+Generic slowness or performance suspicion is not a material security/reliability finding without a reachable effect.
 
 ### 6.9 REL-03 — Business abuse / replay / ordering / idempotency
 
@@ -442,17 +437,17 @@ Consider:
 
 - duplicate submission;
 - replay;
-- stale/out-of-order completion;
+- stale or out-of-order completion;
 - duplicate durable side effect;
 - cancellation races;
 - retry changing business semantics;
-- quota/accounting/state-transition bypass.
+- quota, accounting, or state-transition bypass.
 
-Это material correctness/security domain даже когда классической injection/auth vulnerability нет.
+This is a material correctness/security domain even when no classic injection or authentication vulnerability exists.
 
 ### 6.10 COMP-01 — Cross-version / legacy / compatibility surfaces
 
-Когда material candidate найден в versioned/shared path, выполняй projection search по применимым:
+When a material candidate is found in a versioned or shared path, search applicable projections across:
 
 ```text
 sibling API versions
@@ -463,62 +458,62 @@ legacy/fallback paths
 copied equivalent blocks
 ```
 
-Не создавай автоматически отдельный root finding для каждого совпадения. Root/projection identity определяется downstream `root-boundary-adjudication.md`.
+Do not automatically create a separate root finding for every match. Root/projection identity is determined downstream by `root-boundary-adjudication.md`.
 
 ## 7. Conditional mechanisms
 
 ### 7.1 Cryptography / signatures / TLS
 
-Cryptography, signature/token verification и TLS-specific mechanisms не являются обязательным отдельным domain.
+Cryptography, signature/token verification, and TLS-specific mechanisms are not a mandatory separate domain.
 
-Когда они реально присутствуют, проверяй их внутри relevant `SEC-*` domain:
+When they actually exist, review them inside the relevant `SEC-*` domain:
 
 - issuer/audience/signature verification;
-- randomness/nonces/IVs;
-- certificate/TLS verification;
+- randomness, nonces, and IVs;
+- certificate and TLS verification;
 - key handling;
 - home-grown cryptographic constructions.
 
-Не придумывай crypto findings в проекте без соответствующего mechanism.
+Do not invent cryptography findings in a project that has no relevant mechanism.
 
 ### 7.2 Supply chain / dynamic loading / update path
 
-`OPS-02` имеет applicability-driven depth.
+`OPS-02` uses applicability-driven depth.
 
-Material applicability возникает, например, при наличии:
+Material applicability exists, for example, when the system contains:
 
-- plugin/module loading;
+- plugin or module loading;
 - runtime extensions;
-- installers/hooks;
+- installers or hooks;
 - update mechanisms;
-- executable/module search paths;
+- executable or module search paths;
 - dynamic imports from externally influenced locations.
 
-Если этих mechanisms нет, evidence-backed `NOT_APPLICABLE` допустим.
+If those mechanisms do not exist, evidence-backed `NOT_APPLICABLE` is allowed.
 
-## 8. STANDARD_FULL и FORENSIC
+## 8. STANDARD_FULL and FORENSIC
 
 ### STANDARD_FULL
 
-- одна compact Discovery Coverage Matrix обязательна;
-- один thematic artifact может закрывать несколько domains, если evidence действительно достаточен;
-- high-risk domains сохраняют concrete proof-of-coverage;
-- coverage closeout обязателен до candidate verification.
+- one compact Discovery Coverage Matrix is mandatory;
+- one thematic artifact may cover several domains when the evidence is genuinely sufficient;
+- high-risk domains retain concrete proof of coverage;
+- coverage closeout is mandatory before candidate verification.
 
 ### FORENSIC
 
-- та же matrix обязательна;
-- применимые high-risk domains имеют explicit evidence trail;
-- material domains получают отдельные thematic sections/artifacts по необходимости;
-- Independent Coverage Review является отдельным явным gate до candidate verification.
+- the same matrix is mandatory;
+- applicable high-risk domains have an explicit evidence trail;
+- material domains receive separate thematic sections or artifacts when needed;
+- Independent Coverage Review is a separate explicit gate before candidate verification.
 
-Не создавай механически отдельный Markdown-файл на каждый domain.
+Do not mechanically create one Markdown file per domain.
 
 ## 9. Discovery closeout
 
-Перед Independent Coverage Review coordinator сверяет каждую строку matrix.
+Before Independent Coverage Review, the coordinator reconciles every matrix row.
 
-Для каждого domain допускается только честное текущее состояние:
+For every domain, only an honest current state is allowed:
 
 ```text
 COVERED
@@ -527,13 +522,13 @@ BLOCKED
 NOT_APPLICABLE
 ```
 
-Если row остаётся `PARTIALLY_COVERED`, выполни targeted discovery до review или передай gap reviewer-у явно.
+If a row remains `PARTIALLY_COVERED`, perform targeted discovery before review or hand the gap to the reviewer explicitly.
 
-Если material row `BLOCKED`, обычный downstream acceptance запрещён.
+If a material row is `BLOCKED`, ordinary downstream acceptance is prohibited.
 
-`DISCOVERY_COMPLETE` означает, что planned thematic passes завершены как artifacts. Он **не означает**, что discovery coverage принято.
+`DISCOVERY_COMPLETE` means the planned thematic passes have finished as artifacts. It **does not** mean discovery coverage has been accepted.
 
-Candidate verification может начаться только при:
+Candidate verification may begin only when:
 
 ```text
 DISCOVERY_COMPLETE
@@ -545,50 +540,50 @@ COVERAGE_ACCEPTED
 
 ### 10.1 Purpose
 
-Coverage Reviewer не проверяет заново правильность каждого существующего `CAND-*`.
+The Coverage Reviewer does not re-check the correctness of every existing `CAND-*`.
 
-Главный вопрос:
+The primary question is:
 
-> Существует ли material mechanism/class, видимый из accepted As-Built или bounded probe, но не имеющий достаточного discovery coverage evidence?
+> Is there a material mechanism or class visible from accepted As-Built or a bounded probe that lacks sufficient discovery coverage evidence?
 
-Это проверка **absence of investigation**, а не candidate correctness.
+This is a review of **absence of investigation**, not candidate correctness.
 
 ### 10.2 Fresh-context packet
 
-По умолчанию reviewer получает bounded factual packet:
+By default, the reviewer receives a bounded factual packet:
 
 - accepted technical As-Built;
 - Discovery Coverage Matrix;
 - thematic artifact registry;
 - candidate registry;
-- positive controls;
+- Positive Controls;
 - open questions;
 - baseline/revision binding.
 
-Не передавай predecessor chain-of-thought/reasoning history как authority.
+Do not pass predecessor chain-of-thought or reasoning history as authority.
 
-Если packet недостаточен для конкретного coverage challenge, reviewer может расширить context только по concrete recorded trigger.
+If the packet is insufficient for a specific coverage challenge, the reviewer may expand context only from a concrete recorded trigger.
 
 ### 10.3 Pass 1 — As-Built reconciliation
 
-Сопоставь actual capabilities с matrix:
+Map actual capabilities to the matrix:
 
-- runtimes/processes;
-- APIs/IPC/events;
-- interpreters/dynamic construction;
-- stores/files/resources;
+- runtimes and processes;
+- APIs, IPC, and events;
+- interpreters and dynamic construction;
+- stores, files, and resources;
 - external network dependencies;
 - privileged capabilities;
-- background/lifecycle mechanisms;
-- versioned/legacy surfaces;
-- content/parser surfaces;
+- background and lifecycle mechanisms;
+- versioned and legacy surfaces;
+- content and parser surfaces;
 - sensitive-data flows.
 
-Если capability существует, а corresponding domain отсутствует/необоснованно `NOT_APPLICABLE`, это coverage gap.
+If a capability exists while the corresponding domain is absent or unjustifiably `NOT_APPLICABLE`, that is a coverage gap.
 
 ### 10.4 Pass 2 — Evidence-quality challenge
 
-Особенно challenge `COVERED`, когда row имеет:
+Challenge `COVERED` especially when the row contains:
 
 ```text
 inventory: none
@@ -600,17 +595,17 @@ open questions: none
 evidence_refs: generic thematic file only
 ```
 
-Ноль findings допустим. Ноль evidence исследования — нет.
+Zero findings is acceptable. Zero evidence of investigation is not.
 
 ### 10.5 Pass 3 — Bounded blind-spot probes
 
-Выбери несколько risk-driven probes, основанных на accepted As-Built и matrix claims.
+Choose several risk-driven probes based on accepted As-Built and matrix claims.
 
-Примеры:
+Examples:
 
 - raw/interpreter escape-hatch inventory;
 - dynamic outbound target sites;
-- representative list/read/write auth paths;
+- representative list/read/write authorization paths;
 - one session/token lifecycle path;
 - one secret-propagation path;
 - one request-driven amplification path;
@@ -626,11 +621,11 @@ probe finds material unreviewed class
 → targeted expansion only
 ```
 
-Coverage Reviewer не превращается во второй полный auditor.
+The Coverage Reviewer does not become a second full auditor.
 
 ## 11. Coverage review verdicts
 
-Закрытый набор:
+Closed set:
 
 ```text
 COVERAGE_ACCEPTED
@@ -641,30 +636,30 @@ COVERAGE_AUTHORITY_DRIFT
 
 ### COVERAGE_ACCEPTED
 
-Matrix claims достаточно подтверждены; material gaps не найдены.
+Matrix claims are sufficiently supported; no material gaps were found.
 
 ### COVERAGE_CORRECTION_REQUIRED
 
-Один или несколько domains недоисследованы или `COVERED` не подтверждён evidence.
+One or more domains were under-investigated or `COVERED` lacks sufficient evidence.
 
 ### COVERAGE_BLOCKED
 
-Material domain невозможно достаточно проверить из-за отсутствующего source/access/tool/runtime evidence. Blocker должен быть конкретным.
+A material domain cannot be reviewed sufficiently because required source, access, tool, or runtime evidence is unavailable. The blocker must be concrete.
 
 ### COVERAGE_AUTHORITY_DRIFT
 
-Accepted As-Built/baseline изменился или contradicted так, что matrix больше не связана с текущей authority.
+Accepted As-Built or baseline changed, or was contradicted, such that the matrix is no longer bound to current authority.
 
 Coverage Review:
 
-- не назначает severity;
-- не создаёт final `RF-*` напрямую;
-- не self-corrects owning thematic artifacts;
-- не принимает disputed As-Built как факт без authority reconciliation.
+- does not assign severity;
+- does not create final `RF-*` directly;
+- does not self-correct owning thematic artifacts;
+- does not accept disputed As-Built as fact without authority reconciliation.
 
 ## 12. Coverage correction
 
-При gap:
+When a gap is found:
 
 ```text
 COVERAGE_CORRECTION_REQUIRED
@@ -675,9 +670,9 @@ COVERAGE_CORRECTION_REQUIRED
 → COVERAGE_ACCEPTED | COVERAGE_BLOCKED
 ```
 
-Не перезапускай весь audit автоматически.
+Do not restart the entire audit automatically.
 
-Correction scope должен фиксировать:
+Correction scope records:
 
 ```text
 domain
@@ -691,9 +686,9 @@ new candidates / positive controls / open questions
 
 ## 13. Coverage freshness / revalidation
 
-Discovery coverage связано с accepted As-Built revision и repository baseline.
+Discovery Coverage is bound to the accepted As-Built revision and repository baseline.
 
-Если technical As-Built меняется после accepted coverage:
+If technical As-Built changes after accepted coverage:
 
 ```text
 As-Built correction
@@ -701,7 +696,7 @@ As-Built correction
 → only affected domains become REVALIDATION_REQUIRED
 ```
 
-Пример:
+Example:
 
 ```text
 new Webhook Dispatcher discovered
@@ -710,37 +705,35 @@ new Webhook Dispatcher discovered
 → SEC-06 Sensitive Data
 ```
 
-Не сбрасывай unrelated accepted rows без evidence impact.
+Do not invalidate unrelated accepted rows without evidence of impact.
 
-Compact coverage summary in `working/INDEX.md` is usable downstream only with
-the correct freshness/revision binding from `revalidation-and-freshness.md`;
-the summary is coordinator state, not a Stage B projection artifact.
+The compact coverage summary in `working/INDEX.md` is usable downstream only with the correct freshness/revision binding from `revalidation-and-freshness.md`; the summary is coordinator state, not a Stage B projection artifact.
 
 ## 14. Safe Reproduction / Evidence Validation interaction
 
-Coverage evidence и candidate verification могут использовать safe runtime reproduction по контракту `evidence-and-severity.md`, но reproduction:
+Coverage evidence and candidate verification may use Safe Reproduction according to `evidence-and-severity.md`, but reproduction:
 
-- не является обязательным для каждой row/finding;
-- не заменяет source/provenance/semantic tracing;
-- не позволяет превращать coverage probe в exploitation exercise;
-- не повышает severity автоматически.
+- is not mandatory for every row or finding;
+- does not replace source, provenance, or semantic tracing;
+- does not permit a coverage probe to become an exploitation exercise;
+- does not automatically increase severity.
 
-Если runtime validation недоступна или небезопасна, фиксируй limitation и используй фактическую силу static evidence.
+If runtime validation is unavailable or unsafe, record the limitation and use the actual strength of static evidence.
 
 ## 15. Anti-noise / precision rules
 
-Discovery Coverage Assurance не разрешает:
+Discovery Coverage Assurance does not permit:
 
-- finding quota по domain;
-- `Raw`/`eval`/HTTP client/path API как vulnerability keywords;
-- auto-promotion всех inventory hits;
-- severity во время coverage closeout;
-- giant repo reread для формального checkbox completion;
-- generic grep как достаточный proof;
-- invented findings для `NOT_APPLICABLE` domains;
-- false certainty для persisted/second-order sources без provenance.
+- a finding quota per domain;
+- treating `Raw`, `eval`, an HTTP client, or a path API as vulnerability keywords;
+- automatic promotion of every inventory hit;
+- severity assignment during coverage closeout;
+- a giant repository reread for checkbox completion;
+- generic grep as sufficient proof;
+- invented findings for `NOT_APPLICABLE` domains;
+- false certainty for persisted or second-order sources with unresolved provenance.
 
-Главный precision invariant:
+Primary precision invariant:
 
 ```text
 coverage completeness != finding inflation
@@ -748,7 +741,7 @@ coverage completeness != finding inflation
 
 ## 16. Completion contract
 
-Нельзя использовать обычный accepted downstream flow, если material coverage имеет любой из статусов/вердиктов:
+Ordinary accepted downstream flow is prohibited while material coverage has any of these statuses or verdicts:
 
 ```text
 PARTIALLY_COVERED
@@ -759,7 +752,7 @@ COVERAGE_AUTHORITY_DRIFT
 REVALIDATION_REQUIRED
 ```
 
-Для перехода к candidate verification требуется:
+Progression to candidate verification requires:
 
 ```text
 DISCOVERY_COMPLETE
@@ -767,4 +760,4 @@ AND
 COVERAGE_ACCEPTED
 ```
 
-Финальный `REVIEW_COMPLETE` невозможен, если coverage gate не принят или material coverage limitation скрыта.
+Final `REVIEW_COMPLETE` is impossible while the coverage gate is not accepted or a material coverage limitation is hidden.
