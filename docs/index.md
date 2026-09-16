@@ -1,8 +1,8 @@
 # Документация Architecture Code Review
 
-`architecture-code-review` — набор skills для инженерного анализа существующих программных систем. Документация разделена по задачам: сначала — установка и первый запуск, затем — рабочие сценарии, после этого — концепции, справочники и эксплуатация самого skill.
+`architecture-code-review` — набор skills для инженерного анализа существующих программных систем. Документация организована по задачам: сначала установка и первый запуск, затем рабочие сценарии, после этого — объяснение модели, справочники и эксплуатация самого skill.
 
-Если вы впервые здесь, начните не с `references/`, а с пользовательских руководств ниже.
+Если вы впервые знакомитесь с проектом, начинайте не с `references/`, а с пользовательских руководств.
 
 ## Быстрый маршрут
 
@@ -15,10 +15,16 @@
 
 ## Текущий статус разработки skill
 
-Актуальная принятая базовая точка, завершённые этапы и последнее promotion:
-[Current Project Status](current-status.md).
+Актуальная принятая точка, завершённые этапы и последнее продвижение изменений в `main` описаны в [Current Project Status](current-status.md).
 
-Текущий baseline включает federated Product coordination и Finding Lifecycle & Progress Reporting: current/historical views, baseline progress, accepted risk и conservative stale-resolution handling.
+Текущая версия поддерживает в том числе:
+
+- координацию Product, состоящего из нескольких дочерних репозиториев;
+- переиспользование принятых дочерних аудитов;
+- раздельное отображение текущих и исторических findings;
+- прогресс между принятыми baseline;
+- отдельное отображение принятого остаточного риска;
+- безопасную повторную проверку ранее закрытых findings после изменения исходного кода.
 
 ## Что читать в зависимости от задачи
 
@@ -32,23 +38,23 @@
 | Нужен готовый пример запроса | [Практические рецепты](guides/common-recipes.md) |
 | Понять, что хранится в пакете | [Структура пакета аудита](guides/audit-package-structure.md) |
 | Провести Architecture Review | [Architecture Review](guides/architecture-review.md) |
-| Проверить Test Engineering | [Test Engineering](guides/test-engineering.md) |
+| Проверить достаточность тестов | [Test Engineering](guides/test-engineering.md) |
 | Провести Code Quality Review | [Code Quality Review](guides/code-quality-review.md) |
-| Проверить branch/commit/PR | [Change Review](guides/change-review.md) |
-| Переиспользовать старый аудит или Product state | [Повторное использование и изменения](guides/reuse-and-change.md) |
-| Найти точный Session Intent | [Справочник процессов](reference/workflows.md) |
-| Найти точный артефакт или ID | [Справочник артефактов](reference/artifacts.md) |
+| Проверить ветку, commit или pull request | [Change Review](guides/change-review.md) |
+| Переиспользовать существующий аудит или Product state | [Повторное использование и изменения](guides/reuse-and-change.md) |
+| Найти точный `Session Intent` | [Справочник процессов](reference/workflows.md) |
+| Найти точный артефакт или идентификатор | [Справочник артефактов](reference/artifacts.md) |
 | Обновить сам skill | [Обновление самого skill и откат](operations/upgrade-and-rollback.md) |
 | Разобраться с несовместимостью | [Совместимость и миграция](operations/compatibility-and-migration.md) |
 | Диагностировать проблему | [Диагностика проблем](operations/troubleshooting.md) |
 
 ## Основные понятия
 
-- [Review Suite и модули проверки](concepts/review-suite.md) — что можно выбрать и как независимые проверки работают вместе.
+- [Review Suite и направления проверки](concepts/review-suite.md) — что можно выбрать и как независимые направления работают вместе.
 - [Доказательства и Shared Technical Model](concepts/evidence-and-technical-model.md) — как фиксируются наблюдения и принимаются общие технические факты.
-- [Источники истины и происхождение выводов](concepts/authority-and-provenance.md) — кто владеет смыслом и как проследить conclusion до source.
-- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — `ACTIVE`, `RESOLVED`, `SUPERSEDED`, freshness, reopening, progress и accepted risk.
-- [Проекции и пакеты результатов](concepts/projections-and-packages.md) — почему человекочитаемый документ не является semantic authority.
+- [Источники истины и происхождение выводов](concepts/authority-and-provenance.md) — кто владеет смыслом записи и как проследить вывод до исходного источника.
+- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — `ACTIVE`, `RESOLVED`, `SUPERSEDED`, freshness, повторное открытие, прогресс и принятый риск.
+- [Проекции и пакеты результатов](concepts/projections-and-packages.md) — почему человекочитаемый документ не является семантическим источником истины.
 
 ## Практические руководства
 
@@ -58,49 +64,49 @@
 
 ```text
 NEW
-→ evidence
+→ доказательства
 → Shared Technical Model
-→ capability authorities
-→ projections
-→ source change
+→ владельцы семантического состояния
+→ человекочитаемые проекции
+→ изменение исходного кода
 → CHANGE_REVIEW / REVALIDATE
-→ reconciliation
-→ next accepted baseline
+→ принятие изменений
+→ следующий accepted baseline
 ```
 
 Это основной документ, если нужно понять систему целиком.
 
 ### [Что делать после изменения кода](guides/after-code-changes.md)
 
-Пошаговая инструкция для branch, commit, pull request, merge, dependency/config change, Product child update, stale findings и projection regeneration.
+Пошаговая инструкция для ветки, commit, pull request, merge, изменения зависимостей и конфигурации, обновления дочернего Project, устаревших findings и повторной генерации документов.
 
 Главное различие:
 
 ```text
-candidate change   → CHANGE_REVIEW
-current source     → REVALIDATE
-accepted candidate → RECONCILE_CHANGE
+изменение ещё candidate        → CHANGE_REVIEW
+код уже является current source → REVALIDATE
+проверенный candidate принят    → RECONCILE_CHANGE
 ```
 
 ### [Практические рецепты](guides/common-recipes.md)
 
-Готовые prompts для обычных задач: первый аудит, PR review, revalidation после merge, добавление Target Architecture, API documentation, Product coordination и другие сценарии.
+Готовые запросы для обычных задач: первый аудит, проверка PR, повторная проверка после merge, добавление Target Architecture, технической документации API, координация Product и другие сценарии.
 
 ### [Структура пакета аудита](guides/audit-package-structure.md)
 
-Объясняет человеческим языком, что такое `working/INDEX.md`, `WS-*`, `EV-*`, STM, `RF-*`, Test Engineering, `CQ-*`, `PRJ-*` и Product state.
+Объясняет человеческим языком, что такое `working/INDEX.md`, `WS-*`, `EV-*`, Shared Technical Model, `RF-*`, Test Engineering, `CQ-*`, `PRJ-*` и состояние Product.
 
-### Capability guides
+### Руководства по направлениям проверки
 
 - [Architecture Review](guides/architecture-review.md)
 - [Test Engineering](guides/test-engineering.md)
 - [Code Quality Review](guides/code-quality-review.md)
 - [Change Review](guides/change-review.md)
-- [Повторное использование, изменения и Product coordination](guides/reuse-and-change.md)
+- [Повторное использование, изменения и координация Product](guides/reuse-and-change.md)
 
 ## Справочник
 
-Справочники нужны, когда уже понятен общий процесс и требуется точное правило.
+Справочник нужен, когда общий процесс уже понятен и требуется точное правило.
 
 - [Артефакты и состояние](reference/artifacts.md)
 - [Процессы и `Session Intent`](reference/workflows.md)
@@ -120,38 +126,38 @@ accepted candidate → RECONCILE_CHANGE
 
 ## Сквозные примеры
 
-- [Архитектурный аудит устаревшей серверной системы](examples/architecture-review.md)
-- [Анализ качества тестов](examples/test-engineering.md)
-- [Code Quality Review](examples/code-quality-review.md)
-- [Повторная проверка после изменений](examples/revalidation.md)
+- [Архитектурный аудит сервиса заказов](examples/architecture-review.md)
+- [Проверка достаточности тестов](examples/test-engineering.md)
+- [Проверка качества реализации](examples/code-quality-review.md)
+- [Адресная повторная проверка после изменения кода](examples/revalidation.md)
 
-## Где искать подробные правила
+## Где искать точные правила
 
 Чтобы одинаковые правила не расходились между руководствами, у каждой темы есть предпочтительный источник для человека:
 
 - `Session Intent`, условия входа и остановки — [reference/workflows.md](reference/workflows.md);
-- lifecycle/freshness — [concepts/lifecycle-and-freshness.md](concepts/lifecycle-and-freshness.md);
-- projections — [concepts/projections-and-packages.md](concepts/projections-and-packages.md);
+- жизненный цикл и актуальность — [concepts/lifecycle-and-freshness.md](concepts/lifecycle-and-freshness.md);
+- проекции — [concepts/projections-and-packages.md](concepts/projections-and-packages.md);
 - сохраняемые записи — [reference/artifacts.md](reference/artifacts.md);
-- outputs — [reference/outputs.md](reference/outputs.md);
+- итоговые документы — [reference/outputs.md](reference/outputs.md);
 - изменение исходного кода — [guides/after-code-changes.md](guides/after-code-changes.md);
-- длительный цикл аудита — [guides/audit-lifecycle.md](guides/audit-lifecycle.md);
-- Product coordination — [guides/reuse-and-change.md](guides/reuse-and-change.md).
+- длительный жизненный цикл аудита — [guides/audit-lifecycle.md](guides/audit-lifecycle.md);
+- координация Product — [guides/reuse-and-change.md](guides/reuse-and-change.md).
 
 ## Как читать результаты
 
 Удобный путь от общего к доказательствам:
 
 ```text
-summary / report
+краткое резюме или отчёт
   ↓
-owner semantic record
+владеющая семантическая запись
   ↓
 Shared Technical Model или связанная authority
   ↓
 WS-* / EV-*
   ↓
-source
+исходный код или другой источник
 ```
 
 Подробно: [Структура пакета аудита](guides/audit-package-structure.md).
