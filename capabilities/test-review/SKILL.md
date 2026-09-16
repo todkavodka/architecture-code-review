@@ -223,6 +223,37 @@ does not block closeout. The projection IDs, direct exact/selector dependencies,
 and condition-to-member rules are defined in
 [`test-engineering-contract.md`](references/test-engineering-contract.md).
 
+### Artifact path discipline
+
+When embedded in `architecture-code-review`, Test Engineering artifacts remain
+capability-owned and must use the exact paths resolved from the umbrella
+`references/artifact-layout-and-package-completeness.md`, `report-contract.md`,
+and this capability's output/projection contracts.
+
+For the compatible core package, the umbrella contract resolves the numbered
+capability-owned files under the capability location, including:
+
+```text
+capabilities/test-review/00-test-assurance-summary.md
+capabilities/test-review/01-test-assurance-map.md
+capabilities/test-review/02-test-plan.md          # only when selected
+```
+
+Extended numbered outputs remain capability-owned according to the existing
+Test Engineering contract and frozen manifest. Authoritative `BC-*`, `CC-*`,
+`MAT-*`, `TM-*`, and `GAP-*` ledgers remain under the capability's declared
+working area; they are not promoted into umbrella final-report numbering.
+
+Do not replace capability-owned outputs with invented umbrella files such as
+`05-test-engineering.md`, `06-test-engineering.md`, or a generic
+`working/test-engineering.md`. If an exact requested output path is not resolved
+by the owning contract/frozen manifest, stop with `ARTIFACT_PATH_NOT_DECLARED`
+rather than inventing a location.
+
+Directories are created lazily only when a declared selected artifact requires
+them. Test Engineering completion does not imply package completeness; umbrella
+closeout additionally requires `ARTIFACT_PACKAGE_RECONCILED`.
+
 Test Review closeout consumes the shared Stage B chain: accepted semantic
 capability gates, `PROJECTION_IMPACT_ACCOUNTED`, resolved package membership,
 and the package's `ALL_SCOPED_CURRENT` required projection set. It may request a
