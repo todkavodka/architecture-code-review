@@ -14,6 +14,11 @@ semantic workflow may finish with stale projections
 projection stale != semantic false
 ```
 
+For project-change `REVALIDATE`, the semantic closeout and baseline-advancement ordering in
+[REVALIDATE closeout hardening](revalidate-closeout-hardening.md) is mandatory.
+The overlay is proposed delta until owner gates accept it; projection impact and
+regeneration cannot be used to accept semantic changes or advance the baseline.
+
 Do not use this contract to redefine ordinary scope discipline, fresh-context review, or As-Built coverage; those behaviors are already governed by their existing reference contracts.
 
 ## 1. Projection-only revalidation
@@ -279,7 +284,8 @@ This contract exists for confirmed baseline gaps:
 
 - PS-41 → `PROJECTION_REVALIDATION` prevents a source or technical-gate restart for presentation-only correction;
 - PS-42B → revision/status binding blocks a stale compact projection before downstream dispatch;
-- PS-80 → `PROJECTION_REPAIR` makes projection-only repair a first-class startup intent while preserving the semantic-drift gate.
+- PS-80 → `PROJECTION_REPAIR` makes projection-only repair a first-class startup intent while preserving the semantic-drift gate;
+- REVALIDATE-CLOSEOUT-01 → the real invalid closeout captured in `revalidate-closeout-hardening.md` requires proposed-delta owner acceptance, coherent baseline roles, registered projection targets, and V1-V4 before `CURRENT`.
 
 PS-39, PS-40, and PS-43 were baseline-compliant and are not grounds for adding new orchestration restrictions.
 
@@ -287,9 +293,60 @@ PS-39, PS-40, and PS-43 were baseline-compliant and are not grounds for adding n
 
 `REVALIDATE` is accepted-state reevaluation, not Change Review reuse. The coordinator binds the previously accepted baseline A and the selected current source B, shows both exact bindings, and routes only the affected accepted authority slices through the existing revalidation and owner-adjudication gates. A complete `CR-*` is routing evidence about B: it cannot satisfy the `REVALIDATE` gate, substitute for fresh required evidence, or bypass the owning authority's adjudication. Candidate `CF-*`/`CRF-*` records likewise remain non-authoritative until their existing owners decide.
 
-After the semantic delta reaches a stabilized accepted state, projection freshness is accounted for by [Projection impact accounting](projection-impact.md). That pass consumes revision-bound semantic identities, selector resolution snapshots, and contract revisions; changed paths remain routing context rather than semantic proof. It persists direct impact and reverse-graph propagation before any separately requested regeneration. A successful pass returns `PROJECTION_IMPACT_ACCOUNTED`, which means impact is recorded, not that all projections are `CURRENT`. If accounting fails technically, accepted semantic authority is not rolled back, but projection-sensitive gates remain blocked until the impact record is durably reconciled.
+During this flow persist distinct baseline roles:
+
+```text
+accepted_baseline   # currently accepted semantic baseline
+candidate_baseline  # exact source baseline under REVALIDATE/adjudication
+source_head         # observed current source revision
+```
+
+The candidate may equal the observed source head while still differing from the accepted baseline. `accepted_baseline` MUST NOT move merely because the overlay is complete, impact is accounted, or a coordinator field was rewritten.
+
+The bounded REVALIDATE overlay is explicitly:
+
+```text
+PROPOSED_REVALIDATION_DELTA
+```
+
+until every affected owner gate has adjudicated its slice. The overlay may route and preserve evidence but cannot itself create accepted STM/RF/CQ/TE/Target/Roadmap semantics, satisfy downstream authority, or advance the accepted baseline.
+
+Every material delta item must be reconciled as one of:
+
+```text
+ACCEPTED_OWNER_CHANGE
+ACCEPTED_PRESERVED
+EVIDENCED_NON_MATERIAL
+POLICY_PERMITTED_UNRESOLVED
+BLOCKING_UNRESOLVED
+```
+
+`POLICY_PERMITTED_UNRESOLVED` requires an explicit applicable policy reference for that item or bounded class. A generic statement that open findings are allowed is not policy evidence.
+
+Only after owner adjudication is complete and required Technical Model / coverage gates are accepted against the exact candidate baseline may the coordinator evaluate:
+
+```text
+BASELINE_ADVANCE_ALLOWED
+```
+
+The gate requires:
+
+```text
+exact candidate source binding remains current for the decision
+all material delta is reconciled
+all required owner adjudications are accepted
+required Technical Model gates are accepted at candidate_baseline
+required coverage gates are accepted at candidate_baseline
+all remaining unresolved/unknown items are explicitly policy-permitted
+```
+
+Acceptance bound only to the previous baseline cannot satisfy this gate. If any condition fails, the accepted baseline remains unchanged and downstream work carries the blocker explicitly.
+
+After the semantic delta reaches a stabilized accepted state and baseline advancement is accepted where applicable, projection freshness is accounted for by [Projection impact accounting](projection-impact.md). That pass consumes revision-bound semantic identities, selector resolution snapshots, and contract revisions; changed paths remain routing context rather than semantic proof. It persists direct impact and reverse-graph propagation before any separately requested regeneration. A successful pass returns `PROJECTION_IMPACT_ACCOUNTED`, which means impact is recorded, not that all projections are `CURRENT`. If accounting fails technically, accepted semantic authority is not rolled back, but projection-sensitive gates remain blocked until the impact record is durably reconciled.
 
 This is one explicit post-semantic handoff per stabilized delta for `REVALIDATE`. The equivalent handoff is used at the end of `NEW` and `EXTEND` after their semantic work has stabilized. A retry after technical accounting failure is reconciliation under the idempotent impact rules, not implicit regeneration. No intent may turn Projection Impact Analysis into a content writer or start an `RG-*` session without a separate explicit output/package freshness request.
+
+Before any such `RG-*` request proceeds, the mandatory preflight in [Projection regeneration workflow](projection-regeneration.md) applies. Semantic authority, unregistered files, and path-derived targets fail with `REGENERATION_TARGET_NOT_PROJECTION`; `ALL_STALE` resolves only active registered `PRJ-*` identities with persisted `STALE` projection freshness.
 
 ### 7.1 Operation-inventory delta routing
 
@@ -453,7 +510,22 @@ capability_impacts
 unresolved_items
 ```
 
+For new state, prefer the unambiguous fields from the closeout hardening contract:
+
+```text
+accepted_baseline
+candidate_baseline
+source_head
+```
+
+If legacy overlay fields `previous_baseline` / `current_baseline` are retained,
+`current_baseline` MUST be qualified as candidate/source context until
+`BASELINE_ADVANCE_ALLOWED` is accepted; it must not silently mean accepted
+baseline.
+
 Link this overlay to the previous authoritative review rather than regenerating the entire report by default. `previous_accepted_evidence_preserved` means the impact analysis found no dependency requiring fresh verification. It does not mean freshly reread, runtime tested, independently reviewed, or newly proven.
+
+Before `DELTA_RECONCILIATION` completes, each material row must carry its owner result and one of the allowed reconciliation outcomes defined above. The overlay itself remains proposed and cannot be consumed as accepted authority.
 
 ### Code Quality semantic revalidation
 
