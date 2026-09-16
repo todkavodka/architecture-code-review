@@ -1,9 +1,8 @@
-# Режимы и управление процессом аудита
+# Review Modes and Workflow Orchestration
 
 ## Requested and resolved work state
 
-The coordinator persists confirmed user selections separately from dependency
-closure:
+The coordinator persists confirmed user selections separately from dependency closure:
 
 ```text
 requested_work:
@@ -20,18 +19,11 @@ resolved_work:
   authorization_requirements: [<separate approvals still required>]
 ```
 
-`requested_work != resolved_work`. Internal STM, Evidence, Behavior Model,
-Contract Verification, Product qualification, and projection dependencies are
-never backfilled into selected capabilities. Multiple requested items use a
-deduplicated minimum dependency union and never escalate automatically to the
-complete Review Suite.
+`requested_work != resolved_work`. Internal STM, Evidence, Behavior Model, Contract Verification, Product qualification, and projection dependencies are never backfilled into selected capabilities. Multiple requested items use a deduplicated minimum dependency union and never escalate automatically to the complete Review Suite.
 
 ### Change Review requested and resolved work
 
-For `CHANGE_REVIEW`, the user's requested work records only their confirmed
-review lenses and outputs. Lenses are user-facing review choices, not implicit
-capability selections; the ordinary three semantic capabilities remain the
-only selectable capabilities.
+For `CHANGE_REVIEW`, the user's requested work records only their confirmed review lenses and outputs. Lenses are user-facing review choices, not implicit capability selections; the ordinary three semantic capabilities remain the only selectable capabilities.
 
 ```text
 requested_work:
@@ -48,33 +40,17 @@ resolved_work:
     owner_slices: [<minimum owning-authority review/reconciliation inputs>]
 ```
 
-Candidate mode is read-only with respect to accepted authority. Its diff,
-evidence, and owner slices are internal dependencies and do not populate
-`requested_work.capabilities`, select an otherwise unselected capability, or
-expand the request to the complete Review Suite. Candidate findings and source
-bindings are defined by their owning Change Review contracts; this routing
-shape does not make them accepted state.
+Candidate mode is read-only with respect to accepted authority. Its diff, evidence, and owner slices are internal dependencies and do not populate `requested_work.capabilities`, select an otherwise unselected capability, or expand the request to the complete Review Suite. Candidate findings and source bindings are defined by their owning Change Review contracts; this routing shape does not make them accepted state.
 
 ### Change Review candidate execution mode
 
-`CHANGE_REVIEW_CANDIDATE` is the execution mode for a configured
-`CHANGE_REVIEW`. Every owner output in this mode is candidate-qualified to its
-`CR-*` and exact base/candidate bindings. A candidate output may contain
-`CF-*`, `CRF-*`, capability assessment, existing-finding effect, or
-reconciliation input, but cannot write or revise accepted STM, Architecture,
-Code Quality, Test Engineering, Contract Verification/CC, Product, or
-projection authority.
+`CHANGE_REVIEW_CANDIDATE` is the execution mode for a configured `CHANGE_REVIEW`. Every owner output in this mode is candidate-qualified to its `CR-*` and exact base/candidate bindings. A candidate output may contain `CF-*`, `CRF-*`, capability assessment, existing-finding effect, or reconciliation input, but cannot write or revise accepted STM, Architecture, Code Quality, Test Engineering, Contract Verification/CC, Product, or projection authority.
 
-Canonical writes are legal only inside an explicit, confirmation-gated
-`RECONCILE_CHANGE` dispatch to the existing owning authority. Completing,
-blocking, superseding, or retaining a candidate review is separate from the
-canonical lifecycle of every referenced fact, finding, test, compatibility,
-Product record, or projection.
+Canonical writes are legal only inside an explicit, confirmation-gated `RECONCILE_CHANGE` dispatch to the existing owning authority. Completing, blocking, superseding, or retaining a candidate review is separate from the canonical lifecycle of every referenced fact, finding, test, compatibility, Product record, or projection.
 
 ### Bounded Change Inventory and delta discovery
 
-`CHANGE_REVIEW` starts from the exact `BASE..CANDIDATE` bindings and performs
-bounded, diff-guided discovery:
+`CHANGE_REVIEW` starts from the exact `BASE..CANDIDATE` bindings and performs bounded, diff-guided discovery:
 
 ```text
 BASE..CANDIDATE diff
@@ -85,19 +61,9 @@ BASE..CANDIDATE diff
 → Change Assessment
 ```
 
-A changed path starts discovery but proves nothing by itself. The coordinator
-inspects only the selected scope and the minimum evidence needed to identify a
-candidate surface. If a changed boundary references an uninspected material
-dependency, it records `CONTEXT_EXPANSION_REQUIRED`, names the missing slice,
-and expands only that evidence/dependency slice after resolving availability
-and authorization. Dynamic or unavailable source evidence is an explicit
-limitation, not an assertion of no change; full repository rediscovery is not
-the default.
+A changed path starts discovery but proves nothing by itself. The coordinator inspects only the selected scope and the minimum evidence needed to identify a candidate surface. If a changed boundary references an uninspected material dependency, it records `CONTEXT_EXPANSION_REQUIRED`, names the missing slice, and expands only that evidence/dependency slice after resolving availability and authorization. Dynamic or unavailable source evidence is an explicit limitation, not an assertion of no change; full repository rediscovery is not the default.
 
-Change Inventory is factual delta observation and remains separate from Change
-Assessment. In particular, a new candidate with no accepted edge is retained
-as candidate-only evidence, while a candidate removal never deletes an
-accepted STM fact or owner record before explicit reconciliation.
+Change Inventory is factual delta observation and remains separate from Change Assessment. In particular, a new candidate with no accepted edge is retained as candidate-only evidence, while a candidate removal never deletes an accepted STM fact or owner record before explicit reconciliation.
 
 Persist bounded review completeness with the CR:
 
@@ -110,15 +76,11 @@ review_completeness:
   unknown_impact: NONE | PRESENT
 ```
 
-`COMPLETE` means complete for the frozen base, candidate, qualified scope,
-available evidence, and selected lenses only. It may coexist with
-`unknown_impact: PRESENT` and never claims exhaustive repository impact or
-that every semantic effect was found.
+`COMPLETE` means complete for the frozen base, candidate, qualified scope, available evidence, and selected lenses only. It may coexist with `unknown_impact: PRESENT` and never claims exhaustive repository impact or that every semantic effect was found.
 
 ### Change Assessment and effect axes
 
-Change Assessment is a separate, candidate-qualified interpretation of the
-immutable Change Inventory. It records:
+Change Assessment is a separate, candidate-qualified interpretation of the immutable Change Inventory. It records:
 
 ```text
 change_assessment:
@@ -134,8 +96,7 @@ change_assessment:
   limitations: [<bounded limitations>]
 ```
 
-Inventory change types remain `ADDED | MODIFIED | REMOVED | MOVED`. Assessment
-effects use this independent axis:
+Inventory change types remain `ADDED | MODIFIED | REMOVED | MOVED`. Assessment effects use this independent axis:
 
 ```text
 INTRODUCES_RISK | WORSENS_EXISTING | MITIGATES |
@@ -149,17 +110,11 @@ UNAFFECTED | POTENTIALLY_RESOLVES | MITIGATES | WORSENS |
 INVALIDATES_PRIOR_ASSUMPTION | UNKNOWN_IMPACT
 ```
 
-Effect records are many-to-many and preserve the affected existing finding,
-candidate ref, evidence, and limitation. A `MODIFIED` candidate may therefore
-have `POTENTIALLY_RESOLVES` for one existing finding while another effect is
-`INTRODUCES_RISK`; one candidate may fix a HIGH existing issue and add a
-MEDIUM candidate issue. No effect is a lifecycle decision.
+Effect records are many-to-many and preserve the affected existing finding, candidate ref, evidence, and limitation. A `MODIFIED` candidate may therefore have `POTENTIALLY_RESOLVES` for one existing finding while another effect is `INTRODUCES_RISK`; one candidate may fix a HIGH existing issue and add a MEDIUM candidate issue. No effect is a lifecycle decision.
 
 ### Candidate projection-impact prediction
 
-Change Review may record a prediction for projection impact, but prediction is
-not Stage B impact accounting. The prediction is qualified to the immutable
-`CR-*`, exact base binding, exact candidate binding, and selected scope:
+Change Review may record a prediction for projection impact, but prediction is not Stage B impact accounting. The prediction is qualified to the immutable `CR-*`, exact base binding, exact candidate binding, and selected scope:
 
 ```text
 projection_prediction:
@@ -173,167 +128,85 @@ projection_prediction:
   limitations: [<bounded limitations>]
 ```
 
-`projection_prediction.classification` is the complete vocabulary. A
-candidate review cannot write `CURRENT`, `STALE`, or `BLOCKED`, cannot alter a
-`PRJ-*` freshness state, and cannot imply that regeneration occurred. Once
-owner reconciliation stabilizes accepted semantic state, the coordinator
-hands the accepted delta to the existing Projection Impact Analysis exactly
-once; that later actual result is not a rewrite of this prediction.
+`projection_prediction.classification` is the complete vocabulary. A candidate review cannot write `CURRENT`, `STALE`, or `BLOCKED`, cannot alter a `PRJ-*` freshness state, and cannot imply that regeneration occurred. Once owner reconciliation stabilizes accepted semantic state, the coordinator hands the accepted delta to the existing Projection Impact Analysis exactly once; that later actual result is not a rewrite of this prediction.
 
-`RESOLVED`, `CLOSED`, and `ACCEPTED` may appear only as quoted state from an
-existing canonical owner record. They are not CRF outcomes. Every candidate
-owner record carries `candidate_origin: CR-*/CRF-*` traceability when it
-references a candidate finding or interpretation; promotion creates or links
-an owner-controlled canonical identity and never reuses the CRF identity.
+`RESOLVED`, `CLOSED`, and `ACCEPTED` may appear only as quoted state from an existing canonical owner record. They are not CRF outcomes. Every candidate owner record carries `candidate_origin: CR-*/CRF-*` traceability when it references a candidate finding or interpretation; promotion creates or links an owner-controlled canonical identity and never reuses the CRF identity.
 
 ### Review reuse and candidate evolution
 
-Reuse is classified against the completed CR's immutable bindings, scope,
-lenses, and usable evidence. The classifier is:
+Reuse is classified against the completed CR's immutable bindings, scope, lenses, and usable evidence. The classifier is:
 
 ```text
 EXACT | TREE_EQUIVALENT | ADVANCED | DIVERGED | UNAVAILABLE
 ```
 
-`EXACT` requires the same repository, exact candidate commit and tree, exact
-Project/Product qualification, a `COMPLETE` review, usable evidence, and
-compatible requested scope/lenses. `TREE_EQUIVALENT` requires a separate proof
-under one of the permitted levels in the shared evidence contract; a matching
-SHA alone is never sufficient.
+`EXACT` requires the same repository, exact candidate commit and tree, exact Project/Product qualification, a `COMPLETE` review, usable evidence, and compatible requested scope/lenses. `TREE_EQUIVALENT` requires a separate proof under one of the permitted levels in the shared evidence contract; a matching SHA alone is never sufficient.
 
-An `ADVANCED` candidate is a supported continuation of the reviewed candidate.
-It creates a linked immutable incremental CR, for example `B→C` with
-`parent_review: CR-*`. The linked CR must persist
-`base_binding == parent_review.candidate_binding` and its
-`candidate_binding` must be the exact next source state after B (for example,
-C), with the transition evidence retained. It does not rewrite the prior CR.
-For reconciliation eligibility, the linked CR's `base_binding` must also equal
-the current accepted baseline binding, including repository, Project/Product/
-member qualification and source commit/tree/vector. A broken chain or any
-other base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it cannot
-dispatch reconciliation and must classify/review from the current accepted
-binding.
-`DIVERGED` means the candidate no longer safely represents the reviewed
-candidate and requires a new CR. `UNAVAILABLE` means the required relation or
-proof cannot be established. A completed CR's base, candidate, scope, and
-meaning are never rewritten.
+An `ADVANCED` candidate is a supported continuation of the reviewed candidate. It creates a linked immutable incremental CR, for example `B→C` with `parent_review: CR-*`. The linked CR must persist `base_binding == parent_review.candidate_binding` and its `candidate_binding` must be the exact next source state after B (for example, C), with the transition evidence retained. It does not rewrite the prior CR. For reconciliation eligibility, the linked CR's `base_binding` must also equal the current accepted baseline binding, including repository, Project/Product/member qualification and source commit/tree/vector. A broken chain or any other base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it cannot dispatch reconciliation and must classify/review from the current accepted binding. `DIVERGED` means the candidate no longer safely represents the reviewed candidate and requires a new CR. `UNAVAILABLE` means the required relation or proof cannot be established. A completed CR's base, candidate, scope, and meaning are never rewritten.
 
-No-ff merges and squash merges can reuse a completed review only after a
-`WHOLE_TREE_EQUAL` or `FROZEN_RELEVANT_SCOPE_EQUAL` proof. A conflict
-resolution that changes relevant content requires a supplemental or new CR.
-Partial cherry-pick reuse is conditional and requires independently
-decomposable subset proof covering omitted commits; otherwise bind a new CR.
+No-ff merges and squash merges can reuse a completed review only after a `WHOLE_TREE_EQUAL` or `FROZEN_RELEVANT_SCOPE_EQUAL` proof. A conflict resolution that changes relevant content requires a supplemental or new CR. Partial cherry-pick reuse is conditional and requires independently decomposable subset proof covering omitted commits; otherwise bind a new CR.
 
-Comparing candidates is a read-only view over immutable CR artifacts. It may
-show differences in effects, risks, migration impact, and unknowns, but it
-cannot adjudicate, accept, or create canonical semantic authority.
+Comparing candidates is a read-only view over immutable CR artifacts. It may show differences in effects, risks, migration impact, and unknowns, but it cannot adjudicate, accept, or create canonical semantic authority.
 
 ### Contextual `RECONCILE_CHANGE` owner dispatch
 
-After a completed reusable CR passes exact `CR.base_binding ==` current
-accepted baseline binding, including repository, Project/Product/member
-qualification and source commit/tree/vector; the exact intended source-binding;
-usable evidence; bounded material-delta; and explicit-confirmation checks, the
-coordinator may expose contextual `RECONCILE_CHANGE`. A base-binding inequality
-returns `REVIEW_BASELINE_MISMATCH`; it does not dispatch reconciliation and
-must classify/review from the current accepted binding. Incomplete or
-non-reusable CRs are blocked from dispatch, and reconciliation is not a
-startup intent. Dispatch is owner-routed: `CF-*` goes to the Technical Model
-Gate; Architecture assessment goes to the Architecture authority; `CRF-*`
-and finding effects go to Code Quality; test impact goes to Test Engineering;
-provider/consumer contract impact goes to Contract Verification / CC; and
-Product composition uses existing Product semantics.
+After a completed reusable CR passes exact `CR.base_binding ==` current accepted baseline binding, including repository, Project/Product/member qualification and source commit/tree/vector; the exact intended source-binding; usable evidence; bounded material-delta; and explicit-confirmation checks, the coordinator may expose contextual `RECONCILE_CHANGE`. A base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; it does not dispatch reconciliation and must classify/review from the current accepted binding. Incomplete or non-reusable CRs are blocked from dispatch, and reconciliation is not a startup intent. Dispatch is owner-routed: `CF-*` goes to the Technical Model Gate; Architecture assessment goes to the Architecture authority; `CRF-*` and finding effects go to Code Quality; test impact goes to Test Engineering; provider/consumer contract impact goes to Contract Verification / CC; and Product composition uses existing Product semantics.
 
-Each dispatch records the owner result and `candidate_origin` while retaining
-the candidate as review evidence. An owner may create or link a canonical
-record, but candidate identity is never reused as that owner identity.
+Each dispatch records the owner result and `candidate_origin` while retaining the candidate as review evidence. An owner may create or link a canonical record, but candidate identity is never reused as that owner identity.
 
-The coordinator may emit `BASELINE_ADVANCE_ALLOWED` only after
-`CR.base_binding` still exactly equals the current accepted baseline binding,
-including repository, Project/Product/member qualification and source
-commit/tree/vector; the exact intended source binding is still current; all
-material delta is accounted for; required owner results are complete; required
-technical and coverage gates pass; and unknowns are handled by explicit
-policy. A base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; do not
-emit the gate and classify/review from the current accepted binding. partial
-reconciliation never completes the baseline, and open findings may remain only
-where existing policy allows. This gate is baseline bookkeeping and authority
-advancement, not release approval.
+The coordinator may emit `BASELINE_ADVANCE_ALLOWED` only after `CR.base_binding` still exactly equals the current accepted baseline binding, including repository, Project/Product/member qualification and source commit/tree/vector; the exact intended source binding is still current; all material delta is accounted for; required owner results are complete; required technical and coverage gates pass; and unknowns are handled by explicit policy. A base-binding inequality returns `REVIEW_BASELINE_MISMATCH`; do not emit the gate and classify/review from the current accepted binding. Partial reconciliation never completes the baseline, and open findings may remain only where existing policy allows. This gate is baseline bookkeeping and authority advancement, not release approval.
 
-If the candidate commit/tree or qualified Project/Product/member vector changes
-before advancement, invalidate eligibility, reclassify reuse, and abandon
-pending dispatch. The completed CR remains immutable and the baseline does not
-advance.
+If the candidate commit/tree or qualified Project/Product/member vector changes before advancement, invalidate eligibility, reclassify reuse, and abandon pending dispatch. The completed CR remains immutable and the baseline does not advance.
 
-`NEW` accepts capability-only, output-only, and mixed valid work only after the
-selected capability configuration and standalone-output selection pass
-REQUESTED_WORK_CONFIGURATION_COMPLETE. `USE_EXISTING`
-consumes only an accepted/current registered output; a missing or new output
-routes to `EXTEND`. `RESUME` restores persisted requested and resolved scope
-without silently adding work. `REVALIDATE` preserves requested work and
-revalidates only impacted slices. `EXTEND` is additive and reuses accepted/
-fresh dependencies. `PROJECTION_REPAIR` is presentation-only and escalates
-semantic drift to `SEMANTIC_DRIFT_DETECTED` plus
-`TECHNICAL_REVALIDATION_REQUIRED`.
+`NEW` accepts capability-only, output-only, and mixed valid work only after the selected capability configuration and standalone-output selection pass `REQUESTED_WORK_CONFIGURATION_COMPLETE`. `USE_EXISTING` consumes only an accepted/current registered output; a missing or new output routes to `EXTEND`. `RESUME` restores persisted requested and resolved scope without silently adding work. `REVALIDATE` preserves requested work and revalidates only impacted slices. `EXTEND` is additive and reuses accepted/fresh dependencies. `PROJECTION_REPAIR` is presentation-only and escalates semantic drift to `SEMANTIC_DRIFT_DETECTED` plus `TECHNICAL_REVALIDATION_REQUIRED`.
 
-Legacy records without standalone-output state read as an empty standalone
-output list. Existing capability selections, Architecture Endpoint state, Test
-Engineering output booleans, Product sessions, accepted `COMPLETE` packages,
-and old `RESUME` state remain readable. No historical package or `PRJ-*`
-identity is rewritten or silently enriched.
+Legacy records without standalone-output state read as an empty standalone output list. Existing capability selections, Architecture Endpoint state, Test Engineering output booleans, Product sessions, accepted `COMPLETE` packages, and old `RESUME` state remain readable. No historical package or `PRJ-*` identity is rewritten or silently enriched.
 
-Этот файл является **авторитетным источником** для выбора режима, конечного результата, структуры рабочего пакета, `working/INDEX.md`, статусов процесса, возобновления, передачи между агентами и отображения прогресса. Семантика Shared Technical Model (STM), её factual authority и Technical Model Gate определены в `shared-technical-model.md`.
+This file is the **authoritative source** for review-mode selection, endpoint selection, working-package structure, `working/INDEX.md`, workflow statuses, resume behavior, handoffs between agents, and progress presentation. Shared Technical Model semantics, factual authority, and the Technical Model Gate are defined in `shared-technical-model.md`.
 
-Discovery Coverage semantics определены в `discovery-coverage.md`; здесь фиксируется только их место в workflow state, artifacts, resume и revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`.
-Direct STM/capability/projection dependency metadata, generated indexes, and
-impact semantics are owned by `technical-model-dependencies.md`.
-Gate-scoped projection freshness and named package membership are owned by
-[`projection-gates-and-packages.md`](projection-gates-and-packages.md).
+Discovery Coverage semantics are defined in `discovery-coverage.md`; this file defines only their place in workflow state, artifacts, resume behavior, and revalidation. Factual STM domain coverage and the separate `TECHNICAL_MODEL_COVERAGE_ACCEPTED` gate are owned by `technical-model-coverage.md`. Direct STM/capability/projection dependency metadata, generated indexes, and impact semantics are owned by `technical-model-dependencies.md`. Gate-scoped projection freshness and named package membership are owned by [`projection-gates-and-packages.md`](projection-gates-and-packages.md).
 
-## 1. Стартовый выбор
+## 1. Startup selection
 
-Перед существенным исследованием покажи пользователю рекомендацию и два независимых выбора.
+Before substantive investigation, present a recommendation and two independent choices to the user.
 
-### Глубина
+### Depth
 
-`STANDARD_FULL (полный стандартный аудит)` — полный evidence-first аудит с подробной фактической архитектурой, thematic discovery, Discovery Coverage closeout, независимой проверкой кандидатов, проверкой корневых причин и отдельной оценкой критичности. Рабочие артефакты компактнее, чем в forensic-режиме.
+`STANDARD_FULL` — a complete evidence-first review with detailed factual architecture, thematic discovery, Discovery Coverage closeout, independent candidate verification, root-boundary review, and separate severity adjudication. Working artifacts are more compact than in forensic mode.
 
-`FORENSIC (углублённое архитектурное расследование)` — максимальная глубина для сложных, конкурентных, security-sensitive или спорных систем. Тематические области исследуются отдельными рабочими проходами, Discovery Coverage имеет отдельный independent gate, история исправлений/опровержений сохраняется подробнее, а gates разделены явно.
+`FORENSIC` — maximum depth for complex, concurrent, security-sensitive, or disputed systems. Thematic areas are investigated in separate working passes, Discovery Coverage has an explicit independent gate, correction/refutation history is retained in greater detail, and gates are more visibly separated.
 
-Оба режима требуют `FULL` factual STM coverage до full-model downstream use:
-`STANDARD_FULL` — `COMPACT`, `FORENSIC` — `FORENSIC`. Полная семантика
-coverage/depth, сохранение единой schema и independent review принадлежат
-`technical-model-coverage.md`.
+Both modes require `FULL` factual STM coverage before downstream use that requires the full model: `STANDARD_FULL` uses `COMPACT` depth and `FORENSIC` uses `FORENSIC` depth. Coverage/depth semantics, preservation of a single schema, and independent review belong to `technical-model-coverage.md`.
 
-Skill может рекомендовать режим, но не должен молча выбирать `FORENSIC`.
+The Skill may recommend a mode, but must not silently choose `FORENSIC`.
 
-### Конечный результат
+### Endpoint
 
-Глубина не определяет endpoint автоматически.
+Depth does not determine endpoint automatically.
 
-- `REVIEW_ONLY` — аудит и авторитетный реестр замечаний.
-- `REVIEW_PLUS_TARGET_ARCHITECTURE` — аудит + целевая архитектура после принятия аудита.
-- `REVIEW_PLUS_TARGET_AND_ROADMAP` — аудит + целевая архитектура + план исправлений после принятия предыдущих артефактов.
+- `REVIEW_ONLY` — review plus authoritative findings ledger.
+- `REVIEW_PLUS_TARGET_ARCHITECTURE` — review plus Target Architecture after the review is accepted.
+- `REVIEW_PLUS_TARGET_AND_ROADMAP` — review plus Target Architecture plus remediation roadmap after preceding artifacts are accepted.
 
-Не добавляй оценки времени или ярлыки «лёгкий/сложный/максимальный».
+Do not add time estimates or labels such as “easy”, “hard”, or “maximum”.
 
-## 2. Пакет артефактов
+## 2. Artifact package
 
-Рекомендуемый корень:
+Recommended root:
 
 ```text
 docs/reviews/architecture-review/
 ├── 01-architecture-review.md
 ├── 02-authoritative-findings-ledger.md
-├── 03-target-architecture.md          # если заказано
-├── 04-remediation-roadmap.md          # если заказано
+├── 03-target-architecture.md          # when requested
+├── 04-remediation-roadmap.md          # when requested
 └── working/
     ├── README.md
     ├── INDEX.md
     └── ...
 ```
 
-Следуй локальной директории проекта, если у репозитория уже есть установленная convention.
+Follow the project's local review directory if the repository already has an established convention.
 
 ### STANDARD_FULL
 
@@ -352,8 +225,8 @@ working/
 ├── 01d-coverage-re-review.md        # conditional
 ├── 02-independent-verification.md
 ├── 03-root-and-severity-adjudication.md
-├── 04-target-consistency.md         # если нужно
-├── 05-roadmap-consistency.md        # если нужно
+├── 04-target-consistency.md         # when needed
+├── 05-roadmap-consistency.md        # when needed
 └── 06-final-editorial-review.md
 ```
 
@@ -392,43 +265,41 @@ working/
 └── 13b-final-editorial-re-review.md
 ```
 
-Создавай conditional correction/re-review files только когда соответствующий pass реально нужен.
+Create conditional correction/re-review files only when the corresponding pass is actually required.
 
-## 3. Карта авторитетности
+## 3. Authority map
 
-Не дублируй один нормативный контракт в нескольких местах.
+Do not duplicate one normative contract across several locations.
 
-| Концепт | Авторитетный источник |
+| Concept | Authoritative source |
 |---|---|
 | mode / endpoint / workflow state / resume / subagent handoff | `review-modes-and-orchestration.md` |
 | factual STM families / fact lifecycle / Technical Model Gate | `shared-technical-model.md` |
 | STM factual domain coverage / mode projection / technical coverage review | `technical-model-coverage.md` |
-| Dependency/index semantics / impact traversal | `technical-model-dependencies.md` |
-| общая evidence-first методика | `review-method.md` |
+| dependency/index semantics / impact traversal | `technical-model-dependencies.md` |
+| shared evidence-first method | `review-method.md` |
 | discovery coverage matrix / domains / coverage verdicts / coverage review | `discovery-coverage.md` |
-| ownership/invariants/adversarial scenarios | `ownership-and-scenarios.md` |
-| interaction/interpreter/resource/authority boundary dimensions | `boundary-contract-audit.md` |
+| ownership / invariants / adversarial scenarios | `ownership-and-scenarios.md` |
+| interaction / interpreter / resource / authority boundary dimensions | `boundary-contract-audit.md` |
 | evidence / candidate lifecycle / severity / security attack chain | `evidence-and-severity.md` |
-| независимая falsification кандидатов | `independent-verification.md` |
-| root/projection/SER split | `root-boundary-adjudication.md` |
+| independent candidate falsification | `independent-verification.md` |
+| root / projection / SER split | `root-boundary-adjudication.md` |
 | lifecycle diagrams | `lifecycle-and-mermaid.md` |
-| финальный пакет / cross-links / writing | `report-contract.md` |
+| final package / cross-links / writing | `report-contract.md` |
 | target review | `target-architecture-review.md` |
 | roadmap review | `remediation-roadmap-review.md` |
 | editorial gate | `final-editorial-review.md` |
 | projection packages / freshness gates | `projection-gates-and-packages.md` |
 
-`SKILL.md` оркестрирует эти контракты и не должен переопределять их подробно.
+`SKILL.md` orchestrates these contracts and must not redefine them in detail.
 
 ## 4. `working/INDEX.md`
 
-`INDEX.md` — постоянный источник состояния процесса. Он должен оставаться компактным.
+`INDEX.md` is the persistent source of workflow state. It must remain compact.
 
 ### Product mode coordinator state
 
-Product mode is selected explicitly; it is not inferred from repository
-membership or a multi-repository path. When selected, `INDEX.md` records only
-the compact routing tuple below and references the owning Product records:
+Product mode is selected explicitly; it is not inferred from repository membership or a multi-repository path. When selected, `INDEX.md` records only the compact routing tuple below and references the owning Product records:
 
 ```text
 product_context:
@@ -440,29 +311,13 @@ product_context:
   baseline_coherency: COHERENT | MIXED_EXPLICIT | UNKNOWN
 ```
 
-The coordinator pins the exact accepted Product revision and baseline for the
-session. Historical revisions, membership snapshots, and baselines remain
-addressable even when the Product identity's `current_revision` advances.
-Product revision is Product meaning/membership; Product baseline is the exact
-per-Project and external source vector reviewed by the session, not one Git
-SHA. The coherency value is independent of source availability, review
-coverage, semantic availability, projection freshness/availability, and
-package gate result.
+The coordinator pins the exact accepted Product revision and baseline for the session. Historical revisions, membership snapshots, and baselines remain addressable even when the Product identity's `current_revision` advances. Product revision is Product meaning/membership; Product baseline is the exact per-Project and external source vector reviewed by the session, not one Git SHA. The coherency value is independent of source availability, review coverage, semantic availability, projection freshness/availability, and package gate result.
 
-For `product_mode: NONE`, the existing local session shape and artifact
-references remain valid and no synthetic one-member Product is created.
-`INDEX.md` remains coordinator routing authority only: Product semantic
-records, evidence, STM, findings, capability records, projections, and package
-gates remain owned by their existing contracts. Product Context Workflow
-authorization is separate from source-read authorization and dirty-admission
-authorization; membership grants no repository, semantic-write, test, code,
-worktree, commit, push, PR, or deployment permission.
+For `product_mode: NONE`, the existing local session shape and artifact references remain valid and no synthetic one-member Product is created. `INDEX.md` remains coordinator routing authority only: Product semantic records, evidence, STM, findings, capability records, projections, and package gates remain owned by their existing contracts. Product Context Workflow authorization is separate from source-read authorization and dirty-admission authorization; membership grants no repository, semantic-write, test, code, worktree, commit, push, PR, or deployment permission.
 
 ### Frozen federated coordination state
 
-When Product coordination is dispatched from a Coordination Root, the
-resume-critical coordinator state stores references to one immutable or
-superseding plan under the existing `working/INDEX.md` authority:
+When Product coordination is dispatched from a Coordination Root, the resume-critical coordinator state stores references to one immutable or superseding plan under the existing `working/INDEX.md` authority:
 
 ```text
 coordination_plan_ref
@@ -475,42 +330,19 @@ Product baseline candidate ref
 limitations
 ```
 
-On resume, reload the frozen plan and compare the current Product, member, and
-source context with it. A mismatch routes to bounded requalification or a new
-plan; it never mutates the old plan. The coordinator stores references rather
-than a second Product semantic record, and no Product root path, `HEAD`,
-`latest` audit, or convenience pointer retargets in-flight work.
+On resume, reload the frozen plan and compare the current Product, member, and source context with it. A mismatch routes to bounded requalification or a new plan; it never mutates the old plan. The coordinator stores references rather than a second Product semantic record, and no Product root path, `HEAD`, `latest` audit, or convenience pointer retargets in-flight work.
 
 ### Product `REVALIDATE` and `EXTEND` routing
 
-In Product mode, `REVALIDATE` starts from the pinned Product baseline and
-routes only the changed Project/source binding, its Project-local impact root,
-qualified direct dependencies, affected cross-project relations and
-capability records, and their Product outputs. It preserves accepted
-unaffected state and records `CONTEXT_EXPANSION_REQUIRED` when a material
-dependency is missing. `LOCAL`, `BOUNDARY`, and `SYSTEMIC` remain impact
-classifications; `SYSTEMIC` may recommend `FULL_REAUDIT_RECOMMENDED`, but it
-does not automatically execute a full Product review.
+In Product mode, `REVALIDATE` starts from the pinned Product baseline and routes only the changed Project/source binding, its Project-local impact root, qualified direct dependencies, affected cross-project relations and capability records, and their Product outputs. It preserves accepted unaffected state and records `CONTEXT_EXPANSION_REQUIRED` when a material dependency is missing. `LOCAL`, `BOUNDARY`, and `SYSTEMIC` remain impact classifications; `SYSTEMIC` may recommend `FULL_REAUDIT_RECOMMENDED`, but it does not automatically execute a full Product review.
 
-`EXTEND` adds only the requested Project, capability, cross-project
-investigation, output, or shared-resource context and the minimum dependency
-slice required for it. Removing/replacing a member, changing its role, or
-changing shared-resource meaning creates a new Product revision and receives
-explicit bounded impact adjudication. Historical Product revisions,
-baselines, and findings remain addressable; unrelated accepted Projects are
-not reopened.
+`EXTEND` adds only the requested Project, capability, cross-project investigation, output, or shared-resource context and the minimum dependency slice required for it. Removing or replacing a member, changing its role, or changing shared-resource meaning creates a new Product revision and receives explicit bounded impact adjudication. Historical Product revisions, baselines, and findings remain addressable; unrelated accepted Projects are not reopened.
 
-These routes do not grant operations authority. Product Context Workflow,
-source-read, revision-selection, dirty-admission, semantic-write, projection,
-test, code, worktree, branch, commit, push, PR, and deployment authorization
-are separate decisions. No Product-wide status is inferred from a missing
-member, and no projection is regenerated implicitly.
+These routes do not grant operations authority. Product Context Workflow, source-read, revision-selection, dirty-admission, semantic-write, projection, test, code, worktree, branch, commit, push, PR, and deployment authorization are separate decisions. No Product-wide status is inferred from a missing member, and no projection is regenerated implicitly.
 
 ### Session Orchestration coordinator state
 
-Startup selection is owned by `references/session-orchestration.md`. Persist its
-compact coordinator routing state here, without turning it into substantive
-technical authority:
+Startup selection is owned by `references/session-orchestration.md`. Persist its compact coordinator routing state here, without turning it into substantive technical authority:
 
 ```text
 orchestrator_version: 0.3
@@ -557,9 +389,7 @@ revalidation:
   context_expansions
 ```
 
-Absent v0.3 fields in a legacy package indicate legacy state requiring additive
-reconciliation/backfill, not automatic corruption. Validate owning-artifact
-freshness before using any projection downstream.
+Absent v0.3 fields in a legacy package indicate legacy state requiring additive reconciliation/backfill, not automatic corruption. Validate owning-artifact freshness before using any projection downstream.
 
 Session integration rules:
 
@@ -574,63 +404,35 @@ RECONCILE_CHANGE (contextual action, not a startup intent) → after explicit co
 PROJECTION_REPAIR → with BASELINE_MATCH, repair only selected presentation projections from unchanged accepted authority; otherwise block current repair until source reconciliation. Semantic drift returns to technical revalidation.
 ```
 
-These rules consume the coordinator's deterministic intent matrix: an
-accepted package at A is always shown separately from current source B, and no
-intent may infer B from A. `USE_EXISTING` can consume A as current only on a
-matching binding; `NEW` starts an independently confirmed flow from B and never
-silently enriches A. `REVALIDATE` reevaluates accepted state against B, while a
-completed CR supplies routing evidence only and cannot satisfy the
-revalidation gate or bypass owner adjudication. `EXTEND` is additive only
-after an accepted matching B and never performs an implicit
-review-plus-reconcile-plus-extend chain. A mismatched
-`PROJECTION_REPAIR` is blocked as current repair; no historical-repair mode is
-created.
+These rules consume the coordinator's deterministic intent matrix: an accepted package at A is always shown separately from current source B, and no intent may infer B from A. `USE_EXISTING` can consume A as current only on a matching binding; `NEW` starts an independently confirmed flow from B and never silently enriches A. `REVALIDATE` reevaluates accepted state against B, while a completed CR supplies routing evidence only and cannot satisfy the revalidation gate or bypass owner adjudication. `EXTEND` is additive only after an accepted matching B and never performs an implicit review-plus-reconcile-plus-extend chain. A mismatched `PROJECTION_REPAIR` is blocked as current repair; no historical-repair mode is created.
 
-After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the
-coordinator performs one Projection Impact Analysis handoff and persists
-`PROJECTION_IMPACT_ACCOUNTED`. This is an accounting gate, not a regeneration
-command. A separately requested fresh deliverable starts an explicit `RG-*`
-session; `TARGETED` execution contains the requested projections and required
-stale upstream prerequisites, while downstream impact remains outside execution
-scope. `PROJECTION_REPAIR` does not use this path to carry semantic meaning or
-create persistent manual sections.
+After `NEW`, `EXTEND`, or `REVALIDATE` reaches a stabilized semantic state, the coordinator performs one Projection Impact Analysis handoff and persists `PROJECTION_IMPACT_ACCOUNTED`. This is an accounting gate, not a regeneration command. A separately requested fresh deliverable starts an explicit `RG-*` session; `TARGETED` execution contains the requested projections and required stale upstream prerequisites, while downstream impact remains outside execution scope. `PROJECTION_REPAIR` does not use this path to carry semantic meaning or create persistent manual sections.
 
-For a dependency-sliced capability dispatch, request the current semantic
-object, its HARD dependencies, unresolved CONDITIONAL dependencies, and
-required evidence. Resolve this bounded set through the generated indexes and
-owning direct metadata; do not preload unrelated accepted artifacts. The
-dependency contract owns the detailed traversal and impact rules.
+For a dependency-sliced capability dispatch, request the current semantic object, its HARD dependencies, unresolved CONDITIONAL dependencies, and required evidence. Resolve this bounded set through the generated indexes and owning direct metadata; do not preload unrelated accepted artifacts. The dependency contract owns the detailed traversal and impact rules.
 
-For `NEW`, create the persistent STM manifest and this compact coordinator
-routing state before capability execution. The manifest, not `INDEX.md`, owns the
-model. Model creation does not require complete population: the selected
-downstream requirement determines the initially required factual slice. See
-`shared-technical-model.md` for fact authority and persistence.
+For `NEW`, create the persistent STM manifest and this compact coordinator routing state before capability execution. The manifest, not `INDEX.md`, owns the model. Model creation does not require complete population: the selected downstream requirement determines the initially required factual slice. See `shared-technical-model.md` for fact authority and persistence.
 
-Test Review methodology remains in `capabilities/test-review/SKILL.md`; startup
-visibility and selection remain in Session Orchestration.
+Test Review methodology remains in `capabilities/test-review/SKILL.md`; startup visibility and selection remain in Session Orchestration.
 
-Минимальные разделы:
+Minimum sections:
 
-1. repository path/ref/commit и dirty-state на старте;
-2. selected capability configuration (Architecture `mode`/`endpoint` only when
-   Architecture Review is selected);
+1. repository path/ref/commit and initial dirty state;
+2. selected capability configuration (Architecture `mode`/`endpoint` only when Architecture Review is selected);
 3. current phase;
 4. execution plan;
 5. artifact registry;
 6. candidate registry;
-7. positive controls;
+7. Positive Controls;
 8. open questions;
 9. architecture-correction candidates;
 10. Discovery Coverage projection;
-11. supersessions/corrections;
-12. authoritative-document registry.
-
+11. supersessions and corrections;
+12. authoritative-document registry;
 13. capability registry.
 
 ### Discovery Coverage coordinator summary
 
-Полная matrix принадлежит `01a-...` / `06a-...` artifact. `INDEX.md` хранит только компактное coordinator summary:
+The complete matrix belongs to the `01a-...` or `06a-...` artifact. `INDEX.md` stores only the compact coordinator summary:
 
 ```text
 coverage_artifact: working/<coverage-matrix-file>
@@ -649,14 +451,13 @@ high_risk:
   accepted: <n>
 ```
 
-Перед downstream use coordinator обязан проверить freshness/revision binding owning coverage artifact и independent coverage review.
+Before downstream use, the coordinator must verify freshness and revision binding of the owning coverage artifact and independent coverage review.
 
-Только coordinator редактирует `INDEX.md`. Тематические агенты пишут собственные файлы и persisted handoff.
+Only the coordinator edits `INDEX.md`. Thematic agents write their own files and persisted handoffs.
 
 ### Capability registry
 
-`INDEX.md` records capability ownership and dependency freshness in a compact
-registry. The following statuses reuse the existing workflow state vocabulary:
+`INDEX.md` records capability ownership and dependency freshness in a compact registry. The following statuses reuse the existing workflow state vocabulary:
 
 ```text
 capabilities:
@@ -715,27 +516,11 @@ architecture-review.selected == false
   → Architecture work is not enabled
 ```
 
-`ARCHITECTURE_NOT_SELECTED` therefore implies
-`ARCHITECTURE_MODE_NOT_REQUIRED` and `ARCHITECTURE_ENDPOINT_NOT_REQUIRED`.
-The absence of Architecture mode/endpoint does not prevent a selected Test
-Engineering or Code Quality capability from resolving its own shared factual
-dependencies.
+`ARCHITECTURE_NOT_SELECTED` therefore implies `ARCHITECTURE_MODE_NOT_REQUIRED` and `ARCHITECTURE_ENDPOINT_NOT_REQUIRED`. The absence of Architecture mode/endpoint does not prevent a selected Test Engineering or Code Quality capability from resolving its own shared factual dependencies.
 
-For Test Engineering, `outputs` is the persisted configuration authority; the
-fresh NEW menu represents each optional output as UNSPECIFIED until the user
-explicitly selects it or declines it as NOT_SELECTED. A false-valued registry
-example is not an explicit user decision. The
-legacy `endpoint` is retained only for backward-compatible Test Review packages
-and must not be used as the sole output selection or exposed as a current
-`NEW`/`EXTEND` menu option. `LEGACY_COMPATIBILITY_STATE` is not a
-`CURRENT_USER_MENU_OPTION`. When normalizing legacy state:
+For Test Engineering, `outputs` is the persisted configuration authority; the fresh NEW menu represents each optional output as UNSPECIFIED until the user explicitly selects it or declines it as NOT_SELECTED. A false-valued registry example is not an explicit user decision. The legacy `endpoint` is retained only for backward-compatible Test Review packages and must not be used as the sole output selection or exposed as a current `NEW`/`EXTEND` menu option. `LEGACY_COMPATIBILITY_STATE` is not a `CURRENT_USER_MENU_OPTION`. When normalizing legacy state:
 
-`NEW` writes the user's independent Test Engineering selection directly to
-`outputs`. `RESUME`, `EXTEND`, `USE_EXISTING`, and `REVALIDATE` read that
-persisted independent selection; `EXTEND` preserves accepted selected outputs
-and adds only explicitly requested outputs plus structurally required upstream
-dependencies. The legacy endpoint is not the primary `NEW` or `EXTEND` UI or
-source of truth.
+`NEW` writes the user's independent Test Engineering selection directly to `outputs`. `RESUME`, `EXTEND`, `USE_EXISTING`, and `REVALIDATE` read that persisted independent selection; `EXTEND` preserves accepted selected outputs and adds only explicitly requested outputs plus structurally required upstream dependencies. The legacy endpoint is not the primary `NEW` or `EXTEND` UI or source of truth.
 
 ```text
 REVIEW_ONLY
@@ -745,13 +530,9 @@ REVIEW_PLUS_TEST_PLAN
   → test_assurance=true; test_plan=true; every other optional output=false
 ```
 
-Normalization is additive and conservative: it never infers an extended output.
-`test_assurance` is required when the capability is enabled. Behavior Model is
-an internal dependency and materially applicable Contract Verification is an
-automatic gate; neither is a persisted user-selected output.
+Normalization is additive and conservative: it never infers an extended output. `test_assurance` is required when the capability is enabled. Behavior Model is an internal dependency and materially applicable Contract Verification is an automatic gate; neither is a persisted user-selected output.
 
-Test Review may be selected initially, recommended from a discovered material test
-surface, or attached to an existing audit. Later attachment resumes from `INDEX`:
+Test Review may be selected initially, recommended from a discovered material test surface, or attached to an existing audit. Later attachment resumes from `INDEX`:
 
 ```text
 resume INDEX
@@ -764,11 +545,9 @@ resume INDEX
 → targeted revalidation only for affected dependencies
 ```
 
-Adding a capability does not restart unrelated accepted stages by default. A stale
-or disputed dependency blocks downstream use under the freshness contract.
+Adding a capability does not restart unrelated accepted stages by default. A stale or disputed dependency blocks downstream use under the freshness contract.
 
-For the Test Engineering extension, the capability registry may project these
-separate outputs and their owning artifacts:
+For the Test Engineering extension, the capability registry may project these separate outputs and their owning artifacts:
 
 ```text
 00-test-assurance-summary.md
@@ -783,25 +562,9 @@ separate outputs and their owning artifacts:
 working/                                     # authoritative BC/CC/TM/GAP ledgers
 ```
 
-The registry stores output selection as the independent `outputs` fields above.
-For `EXTEND`, the coordinator first separates accepted/fresh selected outputs
-from available additions, then persists the union of the existing selection and
-the requested additions. It explains any structurally required dependency
-addition before execution. An E2E Test Plan
-requires Test Assurance, the internal Behavior Model, applicable Contract
-Verification, and E2E Design; Service Simulator Design is added only when the
-selected topology requires it. A Service Simulator Implementation Plan requires
-an accepted and fresh simulator specification, so a missing simulator design is
-the minimum upstream addition for that request. `EXTEND` reuses the accepted
-upstream slice instead of replaying the full review.
+The registry stores output selection as the independent `outputs` fields above. For `EXTEND`, the coordinator first separates accepted/fresh selected outputs from available additions, then persists the union of the existing selection and the requested additions. It explains any structurally required dependency addition before execution. An E2E Test Plan requires Test Assurance, the internal Behavior Model, applicable Contract Verification, and E2E Design; Service Simulator Design is added only when the selected topology requires it. A Service Simulator Implementation Plan requires an accepted and fresh simulator specification, so a missing simulator design is the minimum upstream addition for that request. `EXTEND` reuses the accepted upstream slice instead of replaying the full review.
 
-The same `EXTEND` presentation rule applies to every capability: existing
-capabilities and outputs are shown read-only for context, while only unselected
-capabilities and outputs are offered as additions. For Architecture Review,
-adding an absent capability opens its normal depth/endpoint configuration;
-extending an accepted capability preserves depth and offers only monotonic
-endpoint additions. No accepted capability or output is silently removed or
-reconfigured.
+The same `EXTEND` presentation rule applies to every capability: existing capabilities and outputs are shown read-only for context, while only unselected capabilities and outputs are offered as additions. For Architecture Review, adding an absent capability opens its normal depth/endpoint configuration; extending an accepted capability preserves depth and offers only monotonic endpoint additions. No accepted capability or output is silently removed or reconfigured.
 
 Capability-owned artifacts may use project-local paths, for example:
 
@@ -813,26 +576,9 @@ working/capabilities/test-review/...
 
 The `INDEX` ownership and revision binding are the invariant, not the exact paths.
 
-For Code Quality Review, the `outputs` fields are independent coordinator
-selection state, not semantic authority and not Stage B projection records.
-Fresh NEW state keeps each output UNSPECIFIED until explicit selection or
-decline; zero selected outputs is valid only after configuration_status is
-CONFIRMED by the user.
-Each listed Code Quality output is both `USER_SELECTABLE` and a
-`DERIVED_PROJECTION`: it is derived from accepted CQ authority, but it is not
-implicitly selected, mandatory, or always generated. `Code Quality Summary`,
-`Maintainability Hotspots`, and `Roadmap Contribution` are selected only when
-requested or structurally required by a selected output. Package membership is
-resolved later as explicit selection plus dependency closure under the shared
-Stage B package policies; this registry does not register `PRJ-*` records.
+For Code Quality Review, the `outputs` fields are independent coordinator selection state, not semantic authority and not Stage B projection records. Fresh NEW state keeps each output UNSPECIFIED until explicit selection or decline; zero selected outputs is valid only after `configuration_status` is CONFIRMED by the user. Each listed Code Quality output is both `USER_SELECTABLE` and a `DERIVED_PROJECTION`: it is derived from accepted CQ authority, but it is not implicitly selected, mandatory, or always generated. `Code Quality Summary`, `Maintainability Hotspots`, and `Roadmap Contribution` are selected only when requested or structurally required by a selected output. Package membership is resolved later as explicit selection plus dependency closure under the shared Stage B package policies; this registry does not register `PRJ-*` records.
 
-Code Quality session state keeps the qualified coverage reference alongside the
-capability entry. The owning Code Quality assessment/session state records
-`COMPLETE`, `PARTIAL`, or `BLOCKED` coverage and its requested, reviewable,
-excluded, unavailable, unsupported, dirty/noncanonical, limitation, and
-affected-claim context. A partial or blocked slice qualifies aggregate claims
-but does not invalidate unrelated accepted CQ findings whose dependencies
-remain sufficient.
+Code Quality session state keeps the qualified coverage reference alongside the capability entry. The owning Code Quality assessment/session state records `COMPLETE`, `PARTIAL`, or `BLOCKED` coverage and its requested, reviewable, excluded, unavailable, unsupported, dirty/noncanonical, limitation, and affected-claim context. A partial or blocked slice qualifies aggregate claims but does not invalidate unrelated accepted CQ findings whose dependencies remain sufficient.
 
 For the Code Quality capability, coordinator transitions are:
 
@@ -851,22 +597,13 @@ RESUME
   → continue from the first non-accepted durable boundary
 ```
 
-`RESUME` does not restart the full review, become `NEW`, or become automatic
-`REVALIDATE`; it never reconstructs workflow state from chat or prose memory.
-`working/INDEX.md` stores only this coordinator routing state and references the
-owning Code Quality semantic artifacts. It is not CQ semantic authority.
+`RESUME` does not restart the full review, become `NEW`, or become automatic `REVALIDATE`; it never reconstructs workflow state from chat or prose memory. `working/INDEX.md` stores only this coordinator routing state and references the owning Code Quality semantic artifacts. It is not CQ semantic authority.
 
-Code Quality participates in the existing `REVALIDATE` intent, but the
-impact-driven CQ freshness and semantic revalidation contract is implemented by
-the Code Quality revalidation contract in
-`references/revalidation-and-freshness.md`. This section preserves the
-routing/dependency boundary. Missing or stale shared evidence/STM blocks only
-the dependent CQ slice and does not rewrite shared facts or invalidate
-unrelated findings.
+Code Quality participates in the existing `REVALIDATE` intent, but the impact-driven CQ freshness and semantic revalidation contract is implemented by the Code Quality revalidation contract in `references/revalidation-and-freshness.md`. This section preserves the routing/dependency boundary. Missing or stale shared evidence/STM blocks only the dependent CQ slice and does not rewrite shared facts or invalidate unrelated findings.
 
-## 5. Статусы
+## 5. Statuses
 
-Общие artifact/stage statuses:
+Common artifact/stage statuses:
 
 ```text
 PENDING
@@ -880,11 +617,11 @@ COMPLETE
 NOT_APPLICABLE
 ```
 
-Coverage-row states и coverage-review verdicts принадлежат `discovery-coverage.md` и не заменяют общий lifecycle status.
+Coverage-row states and coverage-review verdicts belong to `discovery-coverage.md` and do not replace the common lifecycle status.
 
-`ARTIFACT_WRITTEN` означает только факт записи. Для артефакта с обязательным review следующий статус — `REVIEW_REQUIRED`, а не `COMPLETE`.
+`ARTIFACT_WRITTEN` means only that the artifact was written. For an artifact with mandatory review, the next status is `REVIEW_REQUIRED`, not `COMPLETE`.
 
-Типовой цикл:
+Typical lifecycle:
 
 ```text
 PENDING
@@ -894,7 +631,7 @@ PENDING
 → COMPLETE
 ```
 
-При замечаниях:
+When review finds issues:
 
 ```text
 REVIEW_REQUIRED
@@ -914,7 +651,7 @@ Discovery artifacts COMPLETE
 → COVERAGE_ACCEPTED
 ```
 
-При coverage gap:
+On a coverage gap:
 
 ```text
 COVERAGE_CORRECTION_REQUIRED
@@ -924,9 +661,9 @@ COVERAGE_CORRECTION_REQUIRED
 → COVERAGE_ACCEPTED | COVERAGE_BLOCKED
 ```
 
-`COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` и `COVERAGE_CORRECTION_REQUIRED` нельзя project как `COMPLETE` для downstream candidate verification.
+`COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT`, and `COVERAGE_CORRECTION_REQUIRED` cannot be projected as `COMPLETE` for downstream candidate verification.
 
-После подтверждённой корректировки As-Built:
+After a confirmed As-Built correction:
 
 ```text
 COMPLETE
@@ -937,13 +674,13 @@ COMPLETE
 → COMPLETE | CORRECTION_REQUIRED | BLOCKED
 ```
 
-`REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED` и `BLOCKED` **не являются принятым авторитетным входом** для зависимых downstream-этапов.
+`REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, and `BLOCKED` **are not accepted authoritative input** for dependent downstream stages.
 
 ## 6. Persisted handoff
 
-Никакое состояние, необходимое для resume, не должно существовать только в чате.
+No state required for resume may exist only in chat.
 
-Каждый agent-owned working artifact заканчивается жёстко структурированным разделом:
+Every agent-owned working artifact ends with a strictly structured section:
 
 ```markdown
 ## HANDOFF SUMMARY
@@ -963,11 +700,11 @@ supersedes:
 - ...
 ```
 
-Coverage artifacts дополнительно должны явно ссылаться на owning matrix/review baseline и affected domains, если pass является correction/re-review.
+Coverage artifacts additionally reference the owning matrix/review baseline and affected domains when the pass is a correction or re-review.
 
-Допускается `none`, но поля должны присутствовать.
+`none` is allowed, but every field must be present.
 
-Безопасный порядок:
+Safe ordering:
 
 ```text
 write complete artifact
@@ -978,7 +715,7 @@ write complete artifact
 → stage may advance
 ```
 
-Если файл существует, а `INDEX.md` не обновлён после потери ответа/контекста:
+If a file exists but `INDEX.md` was not updated because a response or context was lost:
 
 ```text
 read persisted HANDOFF SUMMARY
@@ -987,18 +724,18 @@ read persisted HANDOFF SUMMARY
 → continue
 ```
 
-## 7. Видимый план выполнения
+## 7. Visible execution plan
 
-Пользователь должен видеть текущий план и статус длинного аудита.
+The user must be able to see the current plan and status of a long-running review.
 
-`INDEX.md` всегда является persistent authority. Любой native Todo/task/plan UI — только **non-authoritative projection** этого состояния.
+`INDEX.md` is always persistent authority. Any native Todo/task/plan UI is only a **non-authoritative projection** of that state.
 
-- Если host предоставляет native todo/task/plan **tool**, coordinator обязан **реально вызвать этот tool** для создания и последующих обновлений видимого плана. Само изменение `INDEX.md`, prose вроде «план синхронизирован» или внутреннее reasoning не считаются синхронизацией UI.
-- Если native tool отсутствует — показывай компактный текстовый план в CLI/chat.
+- If the host provides a native todo/task/plan **tool**, the coordinator must **actually invoke that tool** to create and subsequently update the visible plan. Merely editing `INDEX.md`, writing prose such as “plan synchronized”, or relying on internal reasoning does not synchronize the UI.
+- If no native tool exists, show a compact text plan in the CLI or chat.
 
 ### Native Plan Projection Sync Contract
 
-После каждого **material coordinator state transition** порядок обязателен:
+After every **material coordinator state transition**, this order is mandatory:
 
 ```text
 validate completed artifact / persisted handoff
@@ -1007,17 +744,17 @@ validate completed artifact / persisted handoff
 → only then advance/dispatch the next visible phase
 ```
 
-К material transition относятся:
+Material transitions include:
 
-- изменение tracked stage между `PENDING`, `IN_PROGRESS`, `ARTIFACT_WRITTEN`, `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED`, `COMPLETE`, `NOT_APPLICABLE`;
-- изменение coverage review verdict, которое открывает/закрывает downstream gate;
-- смена active top-level phase;
-- завершение batch subagents после проверки их persisted handoffs и отражения результатов в `INDEX.md`;
-- подтверждённая architecture correction и последующее выставление `REVALIDATION_REQUIRED` зависимым stages/domains.
+- any tracked-stage change among `PENDING`, `IN_PROGRESS`, `ARTIFACT_WRITTEN`, `REVIEW_REQUIRED`, `CORRECTION_REQUIRED`, `REVALIDATION_REQUIRED`, `BLOCKED`, `COMPLETE`, and `NOT_APPLICABLE`;
+- a coverage-review verdict change that opens or closes a downstream gate;
+- a change of active top-level phase;
+- completion of a subagent batch after its persisted handoffs are validated and reflected in `INDEX.md`;
+- an accepted architecture correction followed by setting dependent stages or domains to `REVALIDATION_REQUIRED`.
 
-При initial setup, если native tool доступен, вызови его сразу после создания/заполнения `INDEX.md`.
+During initial setup, if a native tool is available, call it immediately after creating and populating `INDEX.md`.
 
-При resume обязательный порядок:
+On resume, the required order is:
 
 ```text
 read INDEX
@@ -1029,68 +766,52 @@ read INDEX
 → continue
 ```
 
-Если host tool имеет конкретное имя, например `todowrite`, используй именно доступный runtime tool. Не ограничивай Skill одним vendor name: требование — **фактический tool invocation**, а не конкретное название API.
+If the host tool has a specific name such as `todowrite`, use the actual runtime tool that is available. Do not bind the Skill to one vendor name: the requirement is **actual tool invocation**, not a particular API name.
 
-Не обновляй native UI после каждого microscopic tool call, чтения файла, shell-команды или внутреннего reasoning step. Цель — точная coarse-grained projection, а не шумный progress ticker.
+Do not update native UI after every microscopic tool call, file read, shell command, or internal reasoning step. The goal is an accurate coarse-grained projection, not a noisy progress ticker.
 
-Если native plan расходится с `INDEX.md`, это `NATIVE_PLAN_DRIFT`. Не доверяй UI и не перезапускай accepted work. Восстанови projection из `INDEX.md` реальным вызовом native tool, затем продолжай с первого реально non-accepted gate.
+If the native plan diverges from `INDEX.md`, that is `NATIVE_PLAN_DRIFT`. Do not trust the UI and do not rerun accepted work. Restore the projection from `INDEX.md` by actually invoking the native tool, then continue from the first genuinely non-accepted gate.
 
-Пример:
+Example:
 
 ```text
-[✓] Фактическая архитектура — COMPLETE
-[✓] Тематическое discovery — COMPLETE
+[✓] Factual architecture — COMPLETE
+[✓] Thematic discovery — COMPLETE
 [!] Discovery Coverage — COVERAGE_CORRECTION_REQUIRED
 [ ] Independent Candidate Verification — PENDING
 ```
 
-План динамический: подтверждённые architecture corrections и coverage review gaps могут добавить targeted correction/impact/revalidation stages. Не перезапускай весь аудит, если impact scan показывает локальное влияние.
+The plan is dynamic: accepted architecture corrections and coverage-review gaps may add targeted correction, impact, or revalidation stages. Do not restart the whole review when the impact scan shows only local impact.
 
-## 8. Subagents и стабильность
+## 8. Subagents and stability
 
 ### Context Orchestration v0.3
 
-Capability dispatch uses the minimum fresh authoritative context needed for the
-current decision. Start with structure/inventory, then materiality and evidence
-pointers, then targeted reads; deepen only for unresolved material questions.
+Capability dispatch uses the minimum fresh authoritative context needed for the current decision. Start with structure/inventory, then materiality and evidence pointers, then targeted reads; deepen only for unresolved material questions.
 
-The dispatch envelope contains exact baseline/revision, mission and narrow scope,
-forbidden scope, accepted dependency artifact pointers with revisions, required
-shared/reference contracts, output path, and the `HANDOFF SUMMARY` contract.
-Routing projections select reads but cannot replace owning decision evidence.
-Unrelated accepted artifacts are not preloaded. A material omission or boundary
-discovered outside the initial slice is a recorded `CONTEXT_EXPANSION_REQUIRED`,
-not a blindfold or an unbounded restart.
+The dispatch envelope contains exact baseline/revision, mission and narrow scope, forbidden scope, accepted dependency artifact pointers with revisions, required shared/reference contracts, output path, and the `HANDOFF SUMMARY` contract. Routing projections select reads but cannot replace owning decision evidence. Unrelated accepted artifacts are not preloaded. A material omission or boundary discovered outside the initial slice is a recorded `CONTEXT_EXPANSION_REQUIRED`, not a blindfold or an unbounded restart.
 
-Субагенты — механизм изоляции контекста, а не только ускорение.
+Subagents are a context-isolation mechanism, not only a speed optimization.
 
-Каждый substantial agent получает:
+Every substantial agent receives:
 
 - exact baseline;
 - mode/endpoint;
 - `INDEX.md`;
 - accepted/fresh required STM factual slice and its coverage/revision binding;
 - As-Built projection only when its human-readable context is useful, never as factual authority;
-- узкий scope;
+- narrow scope;
 - forbidden scope;
-- собственный output path;
+- its own output path;
 - `HANDOFF SUMMARY` contract.
 
-Technical Model Coverage Reviewer получает bounded STM factual packet, owning
-technical coverage matrix и baseline/revision binding. Architecture Coverage
-Reviewer получает accepted/fresh required STM slice, Architecture Discovery
-Coverage matrix, thematic artifact registry, candidate/PC/OQ registries и
-baseline binding. Ни один reviewer не получает predecessor reasoning или
-As-Built prose как factual authority.
+The Technical Model Coverage Reviewer receives a bounded STM factual packet, the owning technical coverage matrix, and baseline/revision binding. The Architecture Coverage Reviewer receives the accepted/fresh required STM slice, Architecture Discovery Coverage matrix, thematic artifact registry, candidate/PC/OQ registries, and baseline binding. Neither reviewer receives predecessor reasoning or As-Built prose as factual authority.
 
-Один файл — один активный writer. Параллельные агенты не редактируют один файл.
+One file has one active writer. Parallel agents do not edit the same file.
 
-Сначала Baseline/session orchestration → required Shared Evidence/STM build →
-independent STM coverage/review gate → accepted full STM. Только после этого
-запускай Architecture thematic passes. As-Built projection собирается из
-accepted/fresh STM и проходит parity/projection review, не заменяя factual gate.
+Run Baseline/session orchestration first, then required Shared Evidence/STM build, then the independent STM coverage/review gate, and accept the required full STM. Only after that may Architecture thematic passes start. The As-Built projection is assembled from accepted/fresh STM and receives parity/projection review; it never replaces the factual gate.
 
-После thematic discovery обязательный порядок:
+After thematic discovery, the required order is:
 
 ```text
 discovery artifacts complete
@@ -1101,17 +822,13 @@ discovery artifacts complete
 → candidate verification
 ```
 
-Параллельность ограниченная и адаптивная. При сомнении выполняй последовательно. Stability-first.
+Parallelism is bounded and adaptive. When uncertain, execute sequentially. Stability comes first.
 
 ## 9. Factual reconciliation and Architecture correction
 
-Тематический агент не исправляет STM или As-Built projection напрямую. Factual
-contradiction создаёт `TECH_FACT_CONFLICT`; new fact — `TECH_FACT_CANDIDATE`;
-stale or impact-affected fact — `TECH_FACT_REVALIDATION_REQUEST`. Запрос
-содержит current STM fact/revision, contradiction or candidate, evidence,
-expected impact и affected technical domains/projections.
+A thematic agent does not modify STM or the As-Built projection directly. A factual contradiction creates `TECH_FACT_CONFLICT`; a new fact creates `TECH_FACT_CANDIDATE`; a stale or impact-affected fact creates `TECH_FACT_REVALIDATION_REQUEST`. The request records the current STM fact/revision, contradiction or candidate, evidence, expected impact, and affected technical domains or projections.
 
-Отдельный fresh-context reviewer выдаёт:
+A separate fresh-context reviewer returns one of:
 
 ```text
 CONFIRMED_CORRECTION
@@ -1120,11 +837,9 @@ PARTIALLY_CORRECT
 INSUFFICIENT_EVIDENCE
 ```
 
-Technical Model Gate подтверждает/rejects/revises factual STM artifact и затем
-выполняет impact scan. Architecture Review может продолжать только в unaffected
-scope; disputed required fact не является accepted downstream input.
+The Technical Model Gate confirms, rejects, or revises the factual STM artifact and then runs impact analysis. Architecture Review may continue only within unaffected scope; a disputed required fact is not accepted downstream input.
 
-Impact scan обязан включать Discovery Coverage:
+The impact scan must include Discovery Coverage:
 
 ```text
 confirmed STM change
@@ -1132,16 +847,13 @@ confirmed STM change
 → only affected accepted rows/stages become REVALIDATION_REQUIRED
 ```
 
-Не сбрасывай unrelated accepted coverage без concrete impact.
+Do not reset unrelated accepted coverage without concrete impact.
 
-`ARCH-CORRECTION-CANDIDATE` сохраняется для correction Architecture-owned
-invariant, adverse-scenario/race interpretation, finding/root/severity или
-remediation implication. Он не является factual correction record и не меняет
-STM owner/writer/boundary inventory.
+`ARCH-CORRECTION-CANDIDATE` remains the mechanism for correcting an Architecture-owned invariant, adverse-scenario or race interpretation, finding/root/severity, or remediation implication. It is not a factual correction record and does not modify STM owner/writer/boundary inventory.
 
 ## 10. Candidate verification gate
 
-Independent candidate verification разрешён только при:
+Independent candidate verification is allowed only when:
 
 ```text
 DISCOVERY_COMPLETE
@@ -1149,7 +861,7 @@ AND
 COVERAGE_ACCEPTED
 ```
 
-Следующие состояния запрещают переход:
+The following states block progression:
 
 ```text
 PARTIALLY_COVERED
@@ -1160,54 +872,27 @@ COVERAGE_AUTHORITY_DRIFT
 REVALIDATION_REQUIRED on material affected coverage
 ```
 
-Coverage Review не проверяет correctness каждого кандидата; candidate verification не используется как замена coverage review.
+Coverage Review does not verify correctness of each candidate; candidate verification is not a substitute for coverage review.
 
 ## 10a. Technical Model Coverage precondition
 
-For a full Architecture Review, `TECHNICAL_MODEL_COVERAGE_ACCEPTED` from
-`technical-model-coverage.md` is required before Architecture thematic
-discovery or another capability that needs the complete factual substrate.
-`PARTIAL`, `BLOCKED`, or `UNKNOWN` material technical-domain rows block that
-transition; a prose reviewer verdict cannot override them. This is separate
-from the later Architecture Discovery Coverage gate above.
+For a full Architecture Review, `TECHNICAL_MODEL_COVERAGE_ACCEPTED` from `technical-model-coverage.md` is required before Architecture thematic discovery or another capability that needs the complete factual substrate. `PARTIAL`, `BLOCKED`, or `UNKNOWN` material technical-domain rows block that transition; a prose reviewer verdict cannot override them. This is separate from the later Architecture Discovery Coverage gate above.
 
 ## 11. As-Built projection authority
 
-Accepted/fresh required STM — **technical factual authority**. Controlled
-working As-Built (`00-...as-built-projection.md`) — substantial human-readable
-projection accepted/fresh STM плюс architecture-oriented synthesis, не второй
-technical source of truth.
+Accepted/fresh required STM is **technical factual authority**. The controlled working As-Built (`00-...as-built-projection.md`) is a substantial human-readable projection of accepted/fresh STM plus architecture-oriented synthesis, not a second technical source of truth.
 
-`01-architecture-review.md` содержит user-facing projection factual STM и
-рендерит Architecture Review authority из именованных upstream semantic owners;
-он не является единственным местом persistence этой authority. Если STM
-revision/coverage или projection selector меняется после сборки, зависимые
-sections считаются stale до повторной synthesis/review. `PROJECTION_REPAIR`
-исправляет только presentation from unchanged accepted authority; semantic
-drift требует technical revalidation.
+`01-architecture-review.md` contains the user-facing projection of factual STM and renders Architecture Review authority from named upstream semantic owners; it is not the sole persistence location of that authority. If STM revision/coverage or a projection selector changes after assembly, dependent sections are stale until synthesis and review are repeated. `PROJECTION_REPAIR` repairs only presentation derived from unchanged accepted authority; semantic drift requires technical revalidation.
 
-Technical Model Coverage Review обязателен в обоих режимах; в `STANDARD_FULL`
-его evidence depth может быть compact. As-Built parity/projection review также
-обязателен, но не принимает factual STM.
+Technical Model Coverage Review is mandatory in both modes; in `STANDARD_FULL`, its evidence depth may be compact. As-Built parity/projection review is also mandatory but does not accept factual STM.
 
-Projection-sensitive capability or endpoint closeout uses the named package
-and policy in [`projection-gates-and-packages.md`](projection-gates-and-packages.md).
-After semantic gates are accepted, the coordinator must persist
-`PROJECTION_IMPACT_ACCOUNTED`, resolve the package membership, and enforce the
-package's required scoped projections before permitting closeout or publication.
-Unrelated stale projections remain visible but do not block an unrelated gate;
-the coordinator must not apply a repository-wide zero-stale rule.
+Projection-sensitive capability or endpoint closeout uses the named package and policy in [`projection-gates-and-packages.md`](projection-gates-and-packages.md). After semantic gates are accepted, the coordinator must persist `PROJECTION_IMPACT_ACCOUNTED`, resolve package membership, and enforce the package's required scoped projections before permitting closeout or publication. Unrelated stale projections remain visible but do not block an unrelated gate; the coordinator must not apply a repository-wide zero-stale rule.
 
-The same closeout rule applies to `NEW`, `EXTEND`, and `REVALIDATE`: semantic
-gates stabilize first, impact is accounted once, and only the resolved package
-scope is freshness-gated. `PERMISSIVE` permits semantic closeout with deferred
-stale projections; `REQUIRED_SCOPE_CURRENT` and `ALL_SCOPED_CURRENT` block only
-when their resolved required scope is non-current. The closeout gate never
-implicitly invokes regeneration.
+The same closeout rule applies to `NEW`, `EXTEND`, and `REVALIDATE`: semantic gates stabilize first, impact is accounted once, and only the resolved package scope is freshness-gated. `PERMISSIVE` permits semantic closeout with deferred stale projections; `REQUIRED_SCOPE_CURRENT` and `ALL_SCOPED_CURRENT` block only when their resolved required scope is non-current. The closeout gate never implicitly invokes regeneration.
 
 ## 12. Recovery
 
-При новой сессии:
+In a new session:
 
 ```text
 read INDEX
@@ -1220,9 +905,6 @@ read INDEX
 → continue
 ```
 
-Если INDEX утверждает accepted coverage, но owning technical/Architecture
-matrix/review stale, missing или bound to another STM revision/baseline, не
-доверяй compact projection. Используй freshness/reconciliation contract и
-верни соответствующий coverage stage в non-accepted state.
+If `INDEX.md` claims accepted coverage while the owning technical or Architecture matrix/review is stale, missing, or bound to another STM revision or baseline, do not trust the compact projection. Apply the freshness/reconciliation contract and return the corresponding coverage stage to a non-accepted state.
 
-Не полагайся на память предыдущего чата и не используй stale native UI как authority.
+Do not rely on memory from a previous chat and do not use stale native UI as authority.
