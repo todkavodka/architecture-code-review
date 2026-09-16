@@ -4,6 +4,8 @@ This gate runs only after all requested endpoint artifacts have been technically
 
 Editorial Review **does not edit documents directly**. It produces an issue list. A separate correction pass applies the fixes, followed by a fresh-context re-review.
 
+Before this gate may accept a package, read and apply [`artifact-layout-and-package-completeness.md`](artifact-layout-and-package-completeness.md). Final editorial acceptance requires a successful `ARTIFACT_PACKAGE_RECONCILIATION`; prose quality cannot compensate for a missing, invented, misnumbered, misplaced, or role-mismatched artifact.
+
 ## 1. Purpose
 
 Verify that final user-facing documents:
@@ -16,11 +18,16 @@ Verify that final user-facing documents:
 - agree with each other and with the authoritative ledger;
 - have a coherent cross-link graph;
 - do not distort severity, evidence, target, or roadmap semantics during editing;
-- do not claim `REVIEW_COMPLETE` when Discovery Coverage is not in accepted `COVERAGE_ACCEPTED` state.
+- do not claim `REVIEW_COMPLETE` when Discovery Coverage is not in accepted `COVERAGE_ACCEPTED` state;
+- use the frozen package root and declared artifact paths;
+- contain every unconditional and triggered conditional artifact required by the selected mode/endpoint/capability configuration;
+- contain no undeclared generated review files or speculative directories.
 
 Editorial Review **is not a technical re-audit**. It does not need to rediscover omitted vulnerability or mechanism classes across the repository. Completeness of thematic discovery and absence-of-investigation gaps belong to the Independent Coverage Review defined in `discovery-coverage.md`.
 
 Editorial Review also performs a targeted workflow-authority consistency check against accepted final artifact state and requires the coordinator's `FINAL_WORKFLOW_AUTHORITY_RECONCILED`. This does not turn editorial review into a technical re-audit.
+
+Artifact-package reconciliation is a separate structural gate. It compares the frozen `ARTIFACT_LAYOUT_MANIFEST`, actual filesystem tree, `working/INDEX.md` artifact registry, and owning semantic/projection/capability contracts. The accepted result is `ARTIFACT_PACKAGE_RECONCILED`; otherwise editorial acceptance is blocked with `ARTIFACT_PACKAGE_RECONCILIATION_REQUIRED`.
 
 ## 2. Language contract
 
@@ -192,6 +199,7 @@ CONS-###   prose/table/diagram/document contradiction
 STALE-###  superseded claim resurfaced
 SEV-###    wording rhetorically exceeds adjudicated severity
 STATUS-### final status contradicts accepted technical/coverage gate state
+LAYOUT-### package root/path/role/manifest/filesystem mismatch
 ```
 
 ## 6. Checks
@@ -225,9 +233,17 @@ Verify:
 - superseded working claims point forward to current authority where required;
 - no unsupported intensifiers such as `catastrophic`, `RCE`, `data loss`, or `critical` appear outside adjudicated context;
 - final status agrees with `working/INDEX.md` and accepted Discovery Coverage state;
+- the frozen `ARTIFACT_LAYOUT_MANIFEST` exists and its package root matches the actual package root;
+- every unconditional selected-mode artifact and every triggered conditional artifact exists;
+- Architecture authority filenames/roles match the manifest, including `02-authoritative-findings-ledger.md` when Architecture Review is selected;
+- selected capability outputs use their declared capability-owned paths instead of invented umbrella aggregate filenames;
+- no undeclared generated review file, speculative directory, or empty undeclared directory remains inside the package;
+- the actual tree, `working/INDEX.md` artifact registry, and owning contracts reconcile to `ARTIFACT_PACKAGE_RECONCILED`;
 - `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted only when final status agrees with all mandatory workflow/gate states, the `INDEX.md` artifact registry agrees with final registered deliverables, and candidate/finding mappings, Positive Controls aggregates, authoritative-document registry, and selected-package projection lifecycle states agree with their owning authorities;
 - `project_profile.status: PENDING` is not by itself a contradiction because Project Profile is routing-only metadata; any other mandatory `PENDING` or `IN_PROGRESS` state, or an unresolved reconciliation mismatch, blocks the gate;
 - the package does not claim `REVIEW_COMPLETE` while coverage is `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT`, or material `REVALIDATION_REQUIRED`.
+
+If the expected-vs-actual tree comparison finds missing or undeclared paths, emit `LAYOUT-*` issues and `ARTIFACT_PACKAGE_RECONCILIATION_REQUIRED`. Do not downgrade these to style issues merely because all present files read well.
 
 ## 7. Semantic safety
 
@@ -248,6 +264,8 @@ The editorial reviewer also **does not perform a new repository-wide vulnerabili
 
 If language or diagram cleanup reveals a real technical contradiction, create a `CONS-*` issue and return it to the appropriate technical gate.
 
+A layout mismatch is structural, not semantic. Editorial correction may remove an undeclared empty directory or fix a purely misplaced projection only when ownership/authority is unchanged and the frozen manifest unambiguously defines the correct path. If content was produced through the wrong semantic/projection workflow, return it to the owning gate instead of fixing the problem by rename alone.
+
 ## 8. Output
 
 The review artifact records:
@@ -256,6 +274,8 @@ The review artifact records:
 reviewed final artifact refs
 baseline / authoritative ledger ref
 coverage verdict / coverage artifact ref
+artifact_layout_manifest_ref
+artifact_package_reconciliation_result
 issue ID
 location
 category
@@ -273,16 +293,30 @@ result: PASS | FAIL | UNAVAILABLE
 correction/revalidation ref if failed
 ```
 
+For package reconciliation, retain at minimum:
+
+```text
+expected package root
+actual package root
+required paths checked
+conditional paths checked
+undeclared paths found
+missing paths found
+role mismatches found
+result: ARTIFACT_PACKAGE_RECONCILED | ARTIFACT_PACKAGE_RECONCILIATION_REQUIRED
+```
+
 Do not reproduce the full reviewed document inside the review artifact.
 
 ## 9. Correction loop
 
 ```text
 FINAL PACKAGE ASSEMBLED
+→ ARTIFACT_PACKAGE_RECONCILIATION
 → fresh-context editorial review
 → issue list
 → separate editorial correction writer
-→ verify links/semantics + Mermaid renderability + status consistency
+→ verify links/semantics + Mermaid renderability + status consistency + package tree
 → fresh-context editorial re-review
 → FINAL_PACKAGE_ACCEPTED | CORRECTION_REQUIRED | TECHNICAL_GATE_REQUIRED
 ```
@@ -291,6 +325,8 @@ The correction writer changes only what is authorized by the issue list. Do not 
 
 A coverage-related `STATUS-*` issue is not repaired by editorially changing a verdict. If coverage is not accepted, the correction boundary is the technical Coverage Review, correction, or revalidation process.
 
+A `LAYOUT-*` issue is not closed until the expected-vs-actual tree is reconciled and `ARTIFACT_PACKAGE_RECONCILED` is recorded. Missing semantic authority or an output produced through the wrong owner cannot be repaired by simply moving/renaming the Markdown file.
+
 ## 10. Final acceptance
 
 The package cannot be declared final until:
@@ -298,6 +334,8 @@ The package cannot be declared final until:
 - every editorial issue is closed or explicitly blocked;
 - re-review has been completed;
 - cross-links have been checked;
+- `ARTIFACT_PACKAGE_RECONCILED` is accepted against the frozen `ARTIFACT_LAYOUT_MANIFEST`, actual filesystem tree, artifact registry, and owning contracts;
+- no `ARTIFACT_PATH_NOT_DECLARED`, `REQUIRED_ARTIFACT_MISSING`, `ARTIFACT_LAYOUT_DRIFT`, or `ARTIFACT_ROLE_MISMATCH` remains unresolved;
 - no stale authoritative projection remains within the required scope of the selected endpoint/package; unrelated stale projections remain visible and deferred according to `PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, or `ALL_SCOPED_CURRENT` policy;
 - `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted after the final correction/re-review, including final `INDEX.md` reconciliation against registered deliverables, owning authoritative artifacts, mandatory workflow/gate states, and selected-package projection lifecycle records;
 - the language/prose quality contract is satisfied;
@@ -309,3 +347,5 @@ The package cannot be declared final until:
 - requested target/roadmap artifacts have already been technically accepted;
 - Discovery Coverage is in accepted `COVERAGE_ACCEPTED` state bound to the current accepted As-Built/baseline;
 - final status does not hide a material coverage limitation.
+
+If semantic/workflow gates are otherwise complete but package reconciliation fails, return `REVIEW_PARTIALLY_COMPLETE` with the exact layout blockers; do not return `REVIEW_COMPLETE`.
