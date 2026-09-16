@@ -4,6 +4,12 @@ This reference is the owning Stage B contract for derived projection identity,
 verified content revisions, freshness, drift, and required action. It defines a
 projection lifecycle; it does not create or replace semantic authority.
 
+The REVALIDATE closeout boundary in
+[`revalidate-closeout-hardening.md`](revalidate-closeout-hardening.md) is
+mandatory whenever projection state is evaluated after source/baseline change.
+That contract does not replace this lifecycle; it makes the authority and
+verification preconditions operational for closeout and regeneration.
+
 ## 1. Explicit classification and authority boundary
 
 An artifact is a projection only when an explicit contract declares it to be a
@@ -24,8 +30,20 @@ The following are outside automatic projection classification and outside the
 working/INDEX.md
 STM semantic artifacts
 Architecture findings and semantic ledgers
+02-authoritative-findings-ledger.md
+03-target-architecture.md
+04-remediation-roadmap.md
+Code Quality CQ/CQRA semantic authority
 Test Engineering BC/CC/MAT/TM/GAP authorities
 ```
+
+The explicit Architecture filenames above are semantic-authority roles defined
+by `report-contract.md`; listing them here prevents an orchestrator from
+misclassifying them merely because they are Markdown deliverables. They MUST
+NOT receive `PRJ-*` identity, projection freshness, or `RG-*` execution state
+unless a future approved contract first changes their semantic role. A stale or
+changed authority document routes to its owning semantic review/revalidation
+workflow, not projection regeneration.
 
 `working/INDEX.md` is `COORDINATOR_WORKFLOW_AUTHORITY`. Projection impact
 analysis and regeneration must not regenerate, overwrite, reconstruct, retire,
@@ -36,6 +54,11 @@ Semantic authorities remain owned by their applicable contracts. A projection
 may consume an authority or another projection, but its prose cannot resolve a
 semantic conflict, promote manual content into authority, or mutate the
 authority to make the projection consistent.
+
+If a regeneration request names an artifact that cannot resolve to an active,
+explicitly registered `PRJ-*` identity, the Projection Layer must fail before
+creating an `RG-*` plan with `REGENERATION_TARGET_NOT_PROJECTION`; it must not
+infer identity from the path or convert semantic work into regeneration.
 
 ## 1.1 Operational registry view
 
@@ -93,7 +116,9 @@ candidate passes the applicable `V1`–`V4` verification gates. Therefore:
 
 ```text
 readable legacy file != CURRENT
+rewritten Markdown != CURRENT
 registered identity != CURRENT
+RG execution success != CURRENT
 verified fingerprint/revision + V1..V4 = CURRENT
 ```
 
@@ -138,6 +163,24 @@ freshness is no longer proven; it does not by itself prove that the visible
 content is false. `BLOCKED` means the Projection Layer cannot restore
 `CURRENT` until a structural prerequisite or semantic authority problem is
 resolved.
+
+A persisted `CURRENT` state requires all of the following to exist or be bound
+by the lifecycle record:
+
+```text
+stable active PRJ-* identity
+projection contract + contract revision
+accepted dependency / selector-resolution snapshot
+V1 STRUCTURAL: PASS
+V2 DEPENDENCY / PROVENANCE: PASS
+V3 CONTRACT COMPLETENESS: PASS
+V4 AUTHORITY CONSISTENCY: PASS
+canonical generated-content fingerprint
+accepted PRJ-*@revN or verified NO_CHANGE
+```
+
+Coordinator metadata, a rewritten file, or an `RG-*` outcome cannot substitute
+for any missing element.
 
 ## 3. Projection revisions and contract revisions
 
