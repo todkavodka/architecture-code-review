@@ -1,61 +1,53 @@
-# Владение, инварианты и неблагоприятные сценарии
+# Ownership, Invariants, and Adversarial Scenarios
 
-Этот файл является авторитетным источником для Architecture Review interpretation
-ownership (владения состоянием и ресурсами), derivation of invariants (вывода
-инвариантов) и adversarial scenarios (неблагоприятных сценариев
-конкурентности/жизненного цикла). Factual owner/writer/reader/lifetime/scope
-records принадлежат accepted/fresh Shared Technical Model (STM), а здесь
-используются как factual input для architecture analysis.
+This file is the authoritative Architecture Review reference for interpretation of ownership, derivation of invariants, and adversarial concurrency/lifecycle scenarios. Factual owner, writer, reader, lifetime, and scope records belong to the accepted, sufficiently fresh Shared Technical Model (STM); this reference consumes them as factual input for architectural analysis.
 
-## 1. Матрица владения
+## 1. Ownership matrix
 
-Для значимых сущностей/ресурсов STM фиксирует factual matrix:
+For material entities and resources, STM records the factual matrix:
 
 | Entity/resource | Authoritative owner | Writers | Readers | Lifetime | Scope |
 |---|---|---|---|---|---|
 
-Владение выводится из реальных путей кода и runtime-поведения, а не из названий
-директорий или желаемой архитектуры. Матрица с owner/writers/readers/lifetime/
-scope — STM fact with evidence/provenance, не architecture finding и не
-`SER-*`. Если required factual row missing, stale или conflicting, запроси
-`TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT` или
-`TECH_FACT_REVALIDATION_REQUEST`; не создавай parallel ownership inventory.
+Ownership is derived from real code paths and runtime behavior, not from directory names or desired architecture. The owner/writers/readers/lifetime/scope matrix is an STM fact with evidence and provenance; it is not an Architecture finding and not an `SER-*`.
 
-Особенно проверяй:
+If a required factual row is missing, stale, or conflicting, request `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT`, or `TECH_FACT_REVALIDATION_REQUEST`. Do not create a parallel ownership inventory.
 
-- process-global singleton;
-- per-connection/per-session ownership;
+Pay particular attention to:
+
+- process-global singletons;
+- per-connection and per-session ownership;
 - frontend store vs backend/native state;
-- временные файлы/порты/child processes;
-- event listeners/subscriptions;
-- locks/abort controllers/retry loops;
-- persistent state/cache/configuration.
+- temporary files, ports, and child processes;
+- event listeners and subscriptions;
+- locks, abort controllers, and retry loops;
+- persistent state, caches, and configuration.
 
-## 2. Инварианты
+## 2. Invariants
 
-Инвариант — требуемое свойство системы, которое следует из реального продукта/контракта/поведения.
+An invariant is a required system property derived from real product requirements, contracts, or behavior.
 
-Хорошая форма:
+A good form is:
 
 ```text
-Наблюдение: profileId уникален только внутри connection.
-Требование продукта: две connections могут существовать одновременно.
-Инвариант: session state нельзя глобально идентифицировать только profileId.
+Observation: profileId is unique only within a connection.
+Product requirement: two connections may exist simultaneously.
+Invariant: session state cannot be identified globally by profileId alone.
 ```
 
-Не придумывай инвариант только потому, что он сделал бы архитектуру «чище».
+Do not invent an invariant merely because it would make the architecture “cleaner”.
 
-Для каждого инварианта укажи:
+For every invariant, record:
 
-- источник требования;
+- the source of the requirement;
 - scope;
-- владельца;
-- что нарушит инвариант;
-- какими flows он проверяется.
+- owner;
+- what would violate the invariant;
+- which flows exercise it.
 
-## 3. Неблагоприятная матрица сценариев
+## 3. Adversarial scenario matrix
 
-Для stateful/concurrent областей, где применимо, проверь минимум:
+For stateful or concurrent areas, test at least the applicable scenarios from this set:
 
 ```text
 A + A duplicate operation
@@ -70,11 +62,11 @@ missing event
 same local ID under two parent owners
 ```
 
-Не превращай список в механическую квоту. Выбирай сценарии по реальным capability/ownership boundaries.
+Do not turn this list into a mechanical quota. Select scenarios according to actual capability and ownership boundaries.
 
 ## 4. Race/interleaving evidence
 
-Race finding обычно требует конкретной последовательности:
+A race finding normally requires a concrete sequence:
 
 ```text
 A starts
@@ -84,9 +76,9 @@ A starts
 → stale/invalid mutation or wrong-owner effect
 ```
 
-Без достижимой последовательности это кандидат, а не подтверждённый race.
+Without a reachable sequence, the issue is a candidate rather than a confirmed race.
 
-Для каждого сценария укажи:
+For every scenario, record:
 
 - initial state;
 - actors/owners;
@@ -94,13 +86,13 @@ A starts
 - state mutation;
 - resumed behavior;
 - concrete consequence;
-- existing guards/falsification attempt.
+- existing guards and falsification attempt.
 
-## 5. Positive controls
+## 5. Positive Controls
 
-Фиксируй механизмы, которые правильно обеспечивают ownership/isolation/concurrency:
+Record mechanisms that correctly enforce ownership, isolation, or concurrency, such as:
 
-- корректные owner keys;
+- correct owner keys;
 - locks;
 - generation/version checks;
 - cancellation tokens;
@@ -108,39 +100,33 @@ A starts
 - idempotency;
 - dynamic resource allocation.
 
-Positive Control не является «похвалой ради баланса»; это механизм, который целевая архитектура и remediation не должны случайно сломать.
+A Positive Control is not praise for balance. It is a mechanism that Target Architecture and remediation must not accidentally break.
 
 ## 6. Factual correction request
 
-Если тематическое исследование противоречит accepted/fresh STM ownership fact,
-**не редактируй STM или As-Built projection напрямую**. Запроси Technical Model
-Gate:
+If thematic investigation conflicts with an accepted, sufficiently fresh STM ownership fact, **do not edit STM or the As-Built projection directly**. Request Technical Model Gate adjudication.
 
-Запиши:
+Record:
 
 ```markdown
 ## TECH_FACT_CONFLICT TFC-###
 
-**Текущий STM факт/revision:** ...
-**Наблюдаемое противоречие:** ...
-**Доказательства:** ...
-**Предполагаемое влияние:** ...
-**Затронутые области:** ...
+**Current STM fact/revision:** ...
+**Observed contradiction:** ...
+**Evidence:** ...
+**Expected impact:** ...
+**Affected areas:** ...
 
-Статус: TECH_FACT_CONFLICT
+Status: TECH_FACT_CONFLICT
 ```
 
-Используй `TECH_FACT_CANDIDATE` для нового factual material и
-`TECH_FACT_REVALIDATION_REQUEST` для stale/impact-affected factual material.
-Дальше применяется Technical Model Gate из `shared-technical-model.md`.
+Use `TECH_FACT_CANDIDATE` for new factual material and `TECH_FACT_REVALIDATION_REQUEST` for stale or impact-affected factual material. The Technical Model Gate defined in `shared-technical-model.md` then applies.
 
 ## 7. Architecture correction candidate
 
-Если factual input accepted/fresh, но Architecture-owned invariant, adverse
-scenario interpretation, race conclusion, `SER-*`, finding/root/severity или
-remediation implication требует correction, используй
-`ARCH-CORRECTION-CANDIDATE`. Он не меняет factual owner/writer matrix и следует
-architecture correction/adjudication protocol.
+If factual input is accepted and sufficiently fresh, but an Architecture-owned invariant, adverse-scenario interpretation, race conclusion, `SER-*`, finding/root/severity, or remediation implication requires correction, use `ARCH-CORRECTION-CANDIDATE`.
+
+It does not change the factual owner/writer matrix and follows the Architecture correction/adjudication protocol.
 
 ## 7.1 Change Review candidate Architecture assessment
 
@@ -157,50 +143,32 @@ architecture_candidate_assessment:
   limitations
 ```
 
-This assessment cannot create an accepted Architecture finding, root,
-severity, invariant, or STM fact. `RESOLVED`, `CLOSED`, and `ACCEPTED` are not
-candidate Architecture outcomes; they may only quote an existing canonical
-state. An explicit `RECONCILE_CHANGE` dispatch routes the qualified input to
-Architecture authority, which independently adjudicates and creates or links
-the canonical record while retaining `candidate_origin` traceability.
+This assessment cannot create an accepted Architecture finding, root, severity, invariant, or STM fact. `RESOLVED`, `CLOSED`, and `ACCEPTED` are not candidate Architecture outcomes; they may only quote an existing canonical state.
 
-`CHANGE_REVIEW_CANDIDATE` is the Architecture candidate mode for a selected
-Change Review. It may interpret changed accepted references, including
-parent-qualified API operation, property, and boundary evidence, but it must
-remain review-local: it cannot allocate or mutate an accepted `RF-*`, STM
-fact, invariant, root, severity, or lifecycle state. The later Architecture
-authority decision is the only path to canonical acceptance.
+An explicit `RECONCILE_CHANGE` dispatch routes qualified input to Architecture authority, which independently adjudicates and creates or links the canonical record while retaining `candidate_origin` traceability.
+
+`CHANGE_REVIEW_CANDIDATE` is the Architecture candidate mode for a selected Change Review. It may interpret changed accepted references, including parent-qualified API operation, property, and boundary evidence, but it must remain review-local. It cannot allocate or mutate an accepted `RF-*`, STM fact, invariant, root, severity, or lifecycle state. The later Architecture authority decision is the only path to canonical acceptance.
 
 ## 8. Supporting Engineering Risks
 
-Broad structural patterns могут повышать вероятность повторения дефектов, не являясь сами одним runtime root finding:
+Broad structural patterns can increase the probability of repeated defects without constituting one runtime root finding by themselves, for example:
 
-- semantic owner не закодирован в identity;
-- lifecycle размазан по нескольким флагам;
-- event переносит identity, но consumer её выбрасывает;
-- shared resource не owner-keyed;
-- нет локального deterministic regression suite.
+- semantic ownership is not encoded in identity;
+- lifecycle state is spread across several flags;
+- an event carries identity but the consumer discards it;
+- a shared resource is not owner-keyed;
+- there is no local deterministic regression suite.
 
-Такие наблюдения можно вести как `SER-*`; не присваивай им автоматически severity продуктового дефекта.
+Such observations may be tracked as `SER-*`; do not automatically assign them the severity of a Product defect.
 
 ## Product Architecture Review boundary
 
-In Product mode, a Product-scoped `RF-*` is an Architecture Review semantic
-record only when it has an independently adjudicated cross-project
-architectural consequence. Its evidence packet names the accepted Product
-revision and immutable baseline, affected Projects, qualified `WS-*`/`EV-*`
-observations, accepted STM facts/relations, lifecycle, severity, provenance,
-and direct dependencies. Product membership or a generated aggregation does
-not promote a Project-local RF. Product report/projection content is
-navigation only and cannot write the RF.
+In Product mode, a Product-scoped `RF-*` is an Architecture Review semantic record only when it has an independently adjudicated cross-project architectural consequence. Its evidence packet names the accepted Product revision and immutable baseline, affected Projects, qualified `WS-*`/`EV-*` observations, accepted STM facts/relations, lifecycle, severity, provenance, and direct dependencies.
+
+Product membership or a generated aggregation does not promote a Project-local RF. Product report/projection content is navigation only and cannot write the RF.
 
 ### Finding lifecycle authority barrier
 
-Architecture Review alone accepts or changes `RF-*` lifecycle, severity,
-disposition, revision, resolution, reopening, and supersession. `Product`
-qualification and aggregation can consume accepted child state but cannot
-perform an RF transition. `CHANGE_REVIEW` may record candidate
-`POTENTIALLY_RESOLVES`; only contextual `RECONCILE_CHANGE` can route qualified
-evidence to Architecture owner adjudication, which must independently accept
-the new RF revision. Candidate assessment and projection prose never mutate
-accepted RF authority.
+Architecture Review alone accepts or changes `RF-*` lifecycle, severity, disposition, revision, resolution, reopening, and supersession. `Product` qualification and aggregation may consume accepted child state but cannot perform an RF transition.
+
+`CHANGE_REVIEW` may record candidate `POTENTIALLY_RESOLVES`; only contextual `RECONCILE_CHANGE` can route qualified evidence to Architecture owner adjudication, which must independently accept the new RF revision. Candidate assessment and projection prose never mutate accepted RF authority.
