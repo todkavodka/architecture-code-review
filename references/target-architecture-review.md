@@ -1,10 +1,10 @@
-# Целевая архитектура и её независимое ревью
+# Target Architecture and Independent Review
 
-Этот этап выполняется только для endpoint `REVIEW_PLUS_TARGET_ARCHITECTURE` или `REVIEW_PLUS_TARGET_AND_ROADMAP` и только после принятия authoritative audit state.
+This stage runs only for the `REVIEW_PLUS_TARGET_ARCHITECTURE` or `REVIEW_PLUS_TARGET_AND_ROADMAP` endpoint, and only after the authoritative audit state has been accepted.
 
-## 1. Вход целевой архитектуры
+## 1. Target Architecture input
 
-Target Architecture (целевая архитектура) выводится из:
+Target Architecture is derived from:
 
 ```text
 verified RF roots
@@ -14,33 +14,33 @@ verified RF roots
 + explicit product decisions
 ```
 
-Не проектируй «идеальную систему» с нуля.
+Do not design an “ideal system” from scratch.
 
-Для каждого значимого нового abstraction/mechanism ответь:
+For every material new abstraction or mechanism, answer:
 
-> Какой RF/SER/invariant/product requirement требует это изменение?
+> Which RF, SER, invariant, or product requirement requires this change?
 
-Если ответа нет — убери abstraction, если она не нужна существующему продукту.
+If there is no answer, remove the abstraction unless the existing product genuinely requires it.
 
-## 2. Обязательное содержание
+## 2. Required content
 
-Где применимо, target документ описывает:
+Where applicable, the target document describes:
 
-- target component/responsibility boundaries;
-- authoritative ownership и identity model;
-- state/lifecycle transitions;
-- cancellation/retry/shutdown semantics;
+- target component and responsibility boundaries;
+- authoritative ownership and identity model;
+- state and lifecycle transitions;
+- cancellation, retry, and shutdown semantics;
 - boundary contracts;
-- security/trust model;
-- resource ownership/allocation;
-- migration/compatibility constraints;
-- Positive Controls, которые сохраняются;
-- unresolved product/deployment decisions;
-- RF/SER/invariant coverage matrix.
+- security and trust model;
+- resource ownership and allocation;
+- migration and compatibility constraints;
+- Positive Controls that must be preserved;
+- unresolved product or deployment decisions;
+- an RF/SER/invariant coverage matrix.
 
 ## 3. Feasibility classification
 
-Значимые assumptions маркируй:
+Classify material assumptions as:
 
 ```text
 PROVEN_FEASIBLE
@@ -48,24 +48,24 @@ PLAUSIBLE_NEEDS_REMEDIATION_VALIDATION
 PRODUCT_OR_DEPLOYMENT_DECISION
 ```
 
-Не выдавай plausible implementation option за факт текущего deployment/infrastructure.
+Do not present a plausible implementation option as a fact about the current deployment or infrastructure.
 
 ## 4. Independent Target Review
 
-Target author не принимает собственный документ.
+The Target Architecture author does not accept their own document.
 
-Fresh-context reviewer проверяет:
+A fresh-context reviewer checks:
 
 - prose ↔ diagrams ↔ state tables;
-- target ownership не противоречит самому себе;
-- stale completion/cancellation semantics непротиворечивы;
-- Positive Controls не удалены случайно;
-- каждый material target mechanism мотивирован RF/SER/invariant;
-- product intent не «решён» автором без evidence;
-- feasibility assumptions честно классифицированы;
-- target не вводит новый unsupported service/boundary/dependency без необходимости;
-- security design не предполагает несуществующий trust anchor/signing capability;
-- As-Built facts не перепутаны с target facts.
+- target ownership is internally consistent;
+- completion and cancellation semantics are internally consistent;
+- Positive Controls are not removed accidentally;
+- every material target mechanism is motivated by an RF, SER, or invariant;
+- product intent is not “resolved” by the author without evidence;
+- feasibility assumptions are classified honestly;
+- the target does not introduce a new unsupported service, boundary, or dependency without necessity;
+- the security design does not assume a non-existent trust anchor or signing capability;
+- As-Built facts are not confused with target-state facts.
 
 ## 5. Review outcomes
 
@@ -75,7 +75,7 @@ TARGET_CORRECTION_REQUIRED
 TARGET_BLOCKED_BY_DECISION
 ```
 
-При correction:
+When correction is required:
 
 ```text
 author artifact
@@ -84,11 +84,11 @@ author artifact
 → fresh-context re-review
 ```
 
-Correction не скрывает историю исходного review.
+Correction must not hide the history of the original review.
 
 ## 6. Review artifact
 
-Review фиксирует для каждого issue:
+For every issue, the review records:
 
 ```text
 ID
@@ -99,15 +99,15 @@ required correction
 RF/SER/invariant affected
 ```
 
-Reviewer не должен сам переписывать target document в рамках review pass.
+The reviewer must not rewrite the target document during the review pass.
 
 ## 7. Acceptance
 
-Target считается accepted только когда:
+Target Architecture is accepted only when:
 
-- нет unresolved internal contradictions;
-- feasibility assumptions классифицированы;
-- RF/SER/invariant coverage traceable;
-- Positive Controls accounted for;
-- required correction/re-review закрыты;
-- blocked product/deployment decisions явно изолированы и не замаскированы как technical facts.
+- no unresolved internal contradictions remain;
+- feasibility assumptions are classified;
+- RF/SER/invariant coverage is traceable;
+- Positive Controls are accounted for;
+- required correction and re-review work is closed;
+- blocked product/deployment decisions are explicitly isolated and are not disguised as technical facts.
