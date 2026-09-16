@@ -1,82 +1,56 @@
-# Метод архитектурного и кодового аудита
+# Architecture and Code Review Method
 
-Этот файл задаёт общую evidence-first методику. Режимы/статусы/INDEX описаны в `review-modes-and-orchestration.md`; ownership/scenarios — в `ownership-and-scenarios.md`; boundary dimensions — в `boundary-contract-audit.md`; доказательство полноты discovery — в `discovery-coverage.md`.
+This file defines the shared evidence-first review method. Modes, statuses, and `INDEX.md` are defined in `review-modes-and-orchestration.md`; ownership and scenarios in `ownership-and-scenarios.md`; boundary dimensions in `boundary-contract-audit.md`; and proof of discovery completeness in `discovery-coverage.md`.
 
-## 1. Сначала фактическая система, потом суждение
+## 1. Reconstruct the factual system before judging it
 
-Прочитай repository-local instructions, manifests/lockfiles, CI, packaging/deployment, configuration, tests, service definitions и актуальные архитектурные документы. Зафиксируй exact repository path, branch/ref, commit и dirty state.
+Read repository-local instructions, manifests and lockfiles, CI configuration, packaging/deployment, configuration, tests, service definitions, and current architecture documents. Record the exact repository path, branch/ref, commit, and working-tree state.
 
-Не выводи архитектуру из названий директорий. Проследи реальные entry points, object/service construction, state ownership, boundaries и side effects.
+Do not infer architecture from directory names. Trace real entry points, object/service construction, state ownership, boundaries, and side effects.
 
-## 2. Factual STM и As-Built projection — первый крупный результат
+## 2. Factual STM and the As-Built projection are the first major result
 
-До глубокого thematic discovery собери/revalidate required Shared Evidence и
-Shared Technical Model (STM) facts. Accepted/fresh STM, а не As-Built prose,
-является factual technical authority. Для full Architecture Review сначала
-требуется `FULL` STM и `TECHNICAL_MODEL_COVERAGE_ACCEPTED` по
-`technical-model-coverage.md`.
+Before deep thematic discovery, collect or revalidate the required Shared Evidence and Shared Technical Model (STM) facts. Accepted, sufficiently fresh STM — not As-Built prose — is the factual technical authority. A full Architecture Review first requires a `FULL` STM and `TECHNICAL_MODEL_COVERAGE_ACCEPTED` according to `technical-model-coverage.md`.
 
-После этого собери human-readable As-Built projection из accepted/fresh STM
-плюс architecture-oriented synthesis. Она должна позволять техническому лидеру
-понять систему без повторного открытия source tree. Для medium project глубина
-обычно эквивалентна substantial 5–10 page chapter, но acceptance определяется
-содержанием, а не page count.
+Then build the human-readable As-Built projection from accepted, sufficiently fresh STM plus Architecture-oriented synthesis. It should let a technical lead understand the system without reopening the source tree. For a medium-sized project, useful depth often resembles a substantial 5–10 page chapter, but acceptance is based on content rather than page count.
 
-Покрой, где применимо:
+Where applicable, cover:
 
-1. назначение системы и ключевые сценарии;
-2. deployment topology и runtime components/processes;
-3. ownership state, lifecycle и authority;
-4. API/IPC/process/persistence/trust/deployment boundaries;
-5. command/write, read/query, async/background и external-integration flows;
-6. state machines и lifecycle transitions;
-7. startup/readiness/shutdown, cancellation, retry и recovery;
-8. concurrency, shared state, serialization и idempotency;
-9. failure domains и partial failure;
-10. authentication/authorization и trust contracts;
-11. configuration/secrets;
-12. persistence, migrations и consistency;
-13. observability/operability, где они material;
-14. platform-specific behavior и positive controls;
-15. краткие архитектурные свойства/ограничения.
+1. system purpose and key scenarios;
+2. deployment topology and runtime components/processes;
+3. state ownership, lifecycle, and authority;
+4. API, IPC, process, persistence, trust, and deployment boundaries;
+5. command/write, read/query, asynchronous/background, and external-integration flows;
+6. state machines and lifecycle transitions;
+7. startup/readiness/shutdown, cancellation, retry, and recovery;
+8. concurrency, shared state, serialization, and idempotency;
+9. failure domains and partial failure;
+10. authentication/authorization and trust contracts;
+11. configuration and secrets;
+12. persistence, migrations, and consistency;
+13. observability and operability where material;
+14. platform-specific behavior and Positive Controls;
+15. concise architectural properties and constraints.
 
-Пункты 1–14 — factual STM coverage/content: purpose/scenarios, topology,
-ownership, boundaries, flows, lifecycle, concurrency, failure, trust,
-configuration, persistence, observability и platform facts. Пункт 15 —
-Architecture-owned interpretation, не STM fact. Это materiality-driven модель,
-а не универсальный checklist с одинаковой глубиной для каждого пункта.
-Technical Model Coverage и materiality map определяют, что применимо, что
-получает bounded evidence, а что фиксируется как `NOT_APPLICABLE` или `UNKNOWN`
-с причиной. As-Built projection сохраняет эту factual parity, provenance и
-видимые limitations; она не нормализует `PARTIAL`, stale или unresolved input в
-certainty.
+Items 1–14 belong to factual STM coverage/content: purpose and scenarios, topology, ownership, boundaries, flows, lifecycle, concurrency, failure, trust, configuration, persistence, observability, and platform facts. Item 15 is Architecture-owned interpretation, not an STM fact.
 
-Используй ownership matrix и evidence-driven diagrams, если они улучшают понимание.
+This is a materiality-driven model, not a universal checklist with equal depth for every item. Technical Model Coverage and the materiality map determine what applies, what receives bounded evidence, and what is recorded as `NOT_APPLICABLE` or `UNKNOWN` with a reason. The As-Built projection preserves factual parity, provenance, and visible limitations; it must not normalize `PARTIAL`, stale, or unresolved input into certainty.
 
-Technical Model Coverage Review независимо принимает factual substrate в обоих
-режимах. Только accepted/fresh required STM является базой зависимых thematic
-passes. As-Built projection проходит отдельную projection/parity review, но не
-становится factual authority.
+Use an ownership matrix and evidence-driven diagrams when they improve understanding.
 
-Architecture-owned interpretation is persisted separately from this factual
-projection: accepted `RF-*`/`SER-*` and accepted properties/invariants belong
-to the Architecture semantic authority defined by `report-contract.md`.
-`01-architecture-review.md` may render that meaning, but it cannot be the only
-record that survives a later fully generated assembly.
+Technical Model Coverage Review independently accepts the factual substrate in both modes. Only accepted, sufficiently fresh required STM may feed dependent thematic passes. The As-Built projection passes its own projection/parity review but never becomes factual authority.
+
+Architecture-owned interpretation is persisted separately from the factual projection. Accepted `RF-*` / `SER-*` and accepted properties/invariants belong to Architecture semantic authority defined by `report-contract.md`. `01-architecture-review.md` may render that meaning, but it cannot be the only record that survives a later fully generated assembly.
 
 ### Evidence-bounded architecture claims
 
-Architecture claim scope must not exceed directly investigated evidence scope:
+The scope of an architectural claim must not exceed the directly investigated evidence scope:
 
 ```text
 supported claim scope <= directly exercised / directly evidenced material scope
 ```
 
-Read-path authorization evidence does not prove write, enumeration, background,
-or export authorization. Nominal success does not prove retry, unknown-outcome
-recovery, restart durability, or concurrent duplicate safety. Missing evidence
-alone is not an implementation defect; preserve `PARTIAL`, `NOT_PROVEN`, or
-`UNKNOWN` where the wider claim was not exercised.
+Read-path authorization evidence does not prove write, enumeration, background, or export authorization. Nominal success does not prove retry behavior, unknown-outcome recovery, restart durability, or concurrent duplicate safety. Missing evidence alone is not an implementation defect; preserve `PARTIAL`, `NOT_PROVEN`, or `UNKNOWN` where the wider claim was not exercised.
 
 Search explicitly for material contradictions across:
 
@@ -87,34 +61,30 @@ Search explicitly for material contradictions across:
 - lifecycle assumptions ↔ service/container/Ansible definitions;
 - retry claims ↔ persistence/queue semantics.
 
-Factual contradictions first become `TECH_FACT_CANDIDATE`,
-`TECH_FACT_CONFLICT` или `TECH_FACT_REVALIDATION_REQUEST` with provenance and
-impact. They are not automatic final findings and do not silently rewrite
-accepted STM or an As-Built projection. An Architecture-owned interpretation
-contradiction may instead become `OQ-*` or `ARCH-CORRECTION-CANDIDATE`.
+Factual contradictions first become `TECH_FACT_CANDIDATE`, `TECH_FACT_CONFLICT`, or `TECH_FACT_REVALIDATION_REQUEST` with provenance and impact. They are not automatic final findings and do not silently rewrite accepted STM or the As-Built projection. An Architecture-owned interpretation contradiction may instead become `OQ-*` or `ARCH-CORRECTION-CANDIDATE`.
 
 ## 3. Representative flows
 
-Проследи несколько end-to-end paths, выбирая их по архитектурной значимости:
+Trace several end-to-end paths selected for architectural significance, such as:
 
 - startup/readiness;
 - auth/session restoration;
-- central user operation;
-- background/scheduled work;
+- a central user operation;
+- background or scheduled work;
 - network failure/reconnect;
-- persistent write;
+- a persistent write;
 - shutdown;
-- security-sensitive update/process/native flow.
+- a security-sensitive update, process, or native flow.
 
-Для каждого flow зафиксируй initiator, owner, crossed boundaries, suspension points, failure paths, cleanup и authoritative state changes.
+For every flow, record the initiator, owner, crossed boundaries, suspension points, failure paths, cleanup, and authoritative state changes.
 
-## 4. Тематическое discovery
+## 4. Thematic discovery
 
-Discovery создаёт `CAND-*`, positive controls, open questions и architecture-correction candidates — не final findings.
+Discovery creates `CAND-*`, Positive Controls, open questions, and Architecture correction candidates — not final findings.
 
-Одновременно thematic passes обязаны накапливать coverage evidence по `discovery-coverage.md`. Полнота не выводится из количества кандидатов.
+At the same time, thematic passes must accumulate coverage evidence according to `discovery-coverage.md`. Completeness is not inferred from candidate count.
 
-Общий security/correctness pattern для material source-driven risks:
+A general security/correctness pattern for material source-driven risks is:
 
 ```text
 source / capability
@@ -125,53 +95,53 @@ source / capability
 → reachable consequence
 ```
 
-Этот pattern — не quota и не замена domain-specific contracts. Он помогает не ограничивать security только перечислением trust boundaries.
+This pattern is not a quota and does not replace domain-specific contracts. It helps prevent a security review from degenerating into a list of trust boundaries only.
 
 ### Architecture / responsibility
 
-Проверяй dependency direction, responsibility, hidden global state, service locators, overly broad APIs, cross-layer business rules, duplicated truth. Не требуй Clean Architecture по названию patterns.
+Check dependency direction, responsibility, hidden global state, service locators, overly broad APIs, cross-layer business rules, and duplicated sources of truth. Do not require “Clean Architecture” merely by pattern name.
 
 ### Ownership / isolation / concurrency
 
-Применяй `ownership-and-scenarios.md`: owner/writer/reader/lifetime/scope, A+A/A+B/cancel/disconnect/stale completion/shutdown/interleavings.
+Apply `ownership-and-scenarios.md`: owner/writer/reader/lifetime/scope, A+A, A+B, cancellation, disconnect, stale completion, shutdown, and interleavings.
 
 ### Boundaries
 
-Применяй `boundary-contract-audit.md` для significant interaction, interpreter, resource-addressing и authority/capability boundaries. Coverage completeness для этих classes регулируется `discovery-coverage.md`.
+Apply `boundary-contract-audit.md` to significant interaction, interpreter, resource-addressing, and authority/capability boundaries. Coverage completeness for these classes is governed by `discovery-coverage.md`.
 
 ### Lifecycle / resources
 
-Проверяй create→run→failure/retry→cancel→dispose/shutdown для sockets, child processes, files, timers, listeners, locks, database/session resources, temporary paths/ports.
+Check create → run → failure/retry → cancel → dispose/shutdown for sockets, child processes, files, timers, listeners, locks, database/session resources, temporary paths, and ports.
 
 ### Errors
 
-Проследи error classification/context across boundaries. Ищи swallowed failures, global process termination from local cleanup, retry without classification, fallback hiding failures, inconsistent error contracts.
+Trace error classification and context across boundaries. Look for swallowed failures, process-wide termination from local cleanup, retry without classification, fallbacks that hide failures, and inconsistent error contracts.
 
 ### Security
 
-Map trust boundaries, credentials, TLS, remote content, preload/native capabilities, child processes, filesystem, update chain, deserialization, URL/path validation, authentication/authorization scope, interpreter/dynamic-construction sinks, outbound-target control, secrets propagation, privileged capabilities и legacy/versioned surfaces — только где соответствующие mechanisms реально присутствуют.
+Map trust boundaries, credentials, TLS, remote content, preload/native capabilities, child processes, filesystem, update chain, deserialization, URL/path validation, authentication/authorization scope, interpreter and dynamic-construction sinks, outbound-target control, secret propagation, privileged capabilities, and legacy/versioned surfaces — but only where those mechanisms actually exist.
 
-Не считай этот список достаточным proof-of-coverage. High-risk domains закрываются по semantic contracts из `discovery-coverage.md`.
+Do not treat this list as proof of coverage. High-risk domains are closed according to the semantic contracts in `discovery-coverage.md`.
 
-Serious promotion требует attack chain из `evidence-and-severity.md`.
+Serious promotion requires the attack chain defined in `evidence-and-severity.md`.
 
 ### Configuration / localization / duplication
 
-Ищи conflicting authoritative sources, unsafe defaults, secrets, platform paths, duplicated semantic knowledge, protocol/user-visible string mixing. Не продвигай hardcode/duplicate только из-за внешнего сходства.
+Look for conflicting authoritative sources, unsafe defaults, secrets, platform paths, duplicated semantic knowledge, and mixing of protocol strings with user-visible text. Do not promote a hardcoded or duplicate value solely because it looks similar to another one.
 
 ### Networking / persistence / observability / performance
 
-Review timeout/cancel/retry/idempotency/TLS/proxy, atomic writes/migrations/locking, structured correlation and sensitive logging, blocking/event-loop risks, unbounded queues/caches and lock contention — только в контексте реального impact.
+Review timeout, cancellation, retry, idempotency, TLS, proxies, atomic writes, migrations, locking, structured correlation, sensitive logging, blocking/event-loop risks, unbounded queues or caches, and lock contention only in the context of real impact.
 
-Request-driven amplification/resource exhaustion и business replay/order/idempotency рассматривай как mechanism classes, а не только как performance observations.
+Treat request-driven amplification/resource exhaustion and business replay/order/idempotency as mechanism classes, not merely as performance observations.
 
 ### Tests / testability
 
-Определи, какие risks реально защищены existing tests. Raw test count и отсутствие локальных tests сами по себе не доказывают runtime defect.
+Determine which risks are actually protected by existing tests. Raw test count and absence of local tests do not by themselves prove a runtime defect.
 
 ### Discovery coverage closeout
 
-После planned thematic passes:
+After planned thematic passes:
 
 ```text
 update Discovery Coverage Matrix
@@ -182,19 +152,19 @@ update Discovery Coverage Matrix
 → COVERAGE_ACCEPTED
 ```
 
-`DISCOVERY_COMPLETE` без `COVERAGE_ACCEPTED` не разрешает переход к candidate verification.
+`DISCOVERY_COMPLETE` without `COVERAGE_ACCEPTED` does not permit progression to candidate verification.
 
 ## 5. Safe verification
 
-Запускай existing non-destructive checks, если среда позволяет. Не устанавливай/обновляй dependencies и не запускай fixers только ради зелёного отчёта без разрешения.
+Run existing non-destructive checks when the environment permits. Do not install or upgrade dependencies and do not run fixers merely to obtain a green report without authorization.
 
-Для каждой команды фиксируй result и limitation.
+For every command, record the result and any limitation.
 
-Runtime reproduction для security/correctness evidence выполняется только в безопасных рамках `evidence-and-severity.md`; static finding не требует forced PoC.
+Runtime reproduction for security or correctness evidence must stay within the safety boundaries in `evidence-and-severity.md`; a static finding does not require a forced PoC.
 
-## 6. Независимая проверка и adjudication
+## 6. Independent verification and adjudication
 
-После `COVERAGE_ACCEPTED`:
+After `COVERAGE_ACCEPTED`:
 
 ```text
 candidates
@@ -204,87 +174,66 @@ candidates
 → authoritative ledger
 ```
 
-Следуй `independent-verification.md`, `root-boundary-adjudication.md`, `evidence-and-severity.md`.
+Follow `independent-verification.md`, `root-boundary-adjudication.md`, and `evidence-and-severity.md`.
 
-Coverage Review и candidate verification — разные gates:
+Coverage Review and candidate verification are different gates:
 
 ```text
-Coverage Review: не пропущен ли material class исследования?
-Independent Verification: реален ли уже существующий CAND?
+Coverage Review: did investigation omit a material class?
+Independent Verification: is an existing CAND actually real?
 ```
 
-Не назначай окончательную severity во время discovery или coverage review.
+Do not assign final severity during discovery or coverage review.
 
 ## 7. Factual reconciliation and Architecture corrections
 
-Если thematic pass обнаруживает factual contradiction с accepted/fresh STM, он
-создаёт `TECH_FACT_CONFLICT` (или `TECH_FACT_CANDIDATE` /
-`TECH_FACT_REVALIDATION_REQUEST`) и продолжает только в unaffected scope.
-Technical Model Gate выполняет evidence review, revision/rejection и impact
-analysis; capability не изменяет STM и не «чинит» As-Built projection как
-factual authority.
+If a thematic pass discovers a factual contradiction with accepted, sufficiently fresh STM, it creates `TECH_FACT_CONFLICT` — or `TECH_FACT_CANDIDATE` / `TECH_FACT_REVALIDATION_REQUEST` as appropriate — and continues only in unaffected scope.
 
-Подтверждённая STM correction требует targeted technical-coverage и projection
-impact scan; не сбрасывай unrelated accepted coverage без evidence влияния.
+The Technical Model Gate performs evidence review, revision/rejection, and impact analysis. A capability does not modify STM or “repair” the As-Built projection as factual authority.
 
-Если correction относится к Architecture-owned invariant, causal interpretation,
-race conclusion, finding/root/severity или remedy implication, а не к факту STM,
-используй `ARCH-CORRECTION-CANDIDATE` и существующий architecture
-review/correction/adjudication loop. Такой correction не делает factual matrix
-finding и не переписывает STM.
+A confirmed STM correction requires targeted technical-coverage and projection-impact scanning. Do not invalidate unrelated accepted coverage without evidence of impact.
 
-После acceptance изменение сохраняется сначала в owning Architecture semantic
-authority: `02-authoritative-findings-ledger.md` для `RF-*`, `SER-*` и
-properties/invariants, selected `03-target-architecture.md` for target
-semantics, or selected `04-remediation-roadmap.md` for roadmap semantics.
-It then makes dependent report projections stale. A final-report writer or
-Stage B regeneration cannot apply the correction directly to
-`01-architecture-review.md`, nor use its prose to decide the semantic result.
+If the correction concerns an Architecture-owned invariant, causal interpretation, race conclusion, finding/root/severity, or remediation implication rather than an STM fact, use `ARCH-CORRECTION-CANDIDATE` and the existing Architecture review/correction/adjudication loop. Such a correction does not turn the factual matrix into a finding and does not rewrite STM.
+
+After acceptance, the change is first persisted in the owning Architecture semantic authority: `02-authoritative-findings-ledger.md` for `RF-*`, `SER-*`, and properties/invariants; selected `03-target-architecture.md` for target semantics; or selected `04-remediation-roadmap.md` for roadmap semantics.
+
+The semantic change then makes dependent report projections stale. A final-report writer or Stage B regeneration cannot apply the correction directly to `01-architecture-review.md` or use its prose to decide the semantic result.
 
 ## Product Architecture Review scope
 
-Product Architecture Review may write a Product-scoped existing `RF-*` only
-after independent adjudication of a genuine cross-project architectural
-consequence. The Product RF record binds the accepted Product identity and
-revision, immutable Product baseline, affected Projects, qualified `WS-*`/
-`EV-*` evidence, accepted STM references, consequence, severity, lifecycle,
-dependencies, and provenance. Architecture Review remains the sole writer of
-that interpretation; STM and Shared Evidence remain factual authorities.
+Product Architecture Review may write a Product-scoped existing `RF-*` only after independent adjudication of a genuine cross-project architectural consequence. The Product RF record binds the accepted Product identity and revision, immutable Product baseline, affected Projects, qualified `WS-*` / `EV-*` evidence, accepted STM references, consequence, severity, lifecycle, dependencies, and provenance. Architecture Review remains the sole writer of that interpretation; STM and Shared Evidence remain factual authorities.
 
-A Project-local RF is never promoted by membership, aggregation, correlation,
-or report rendering. A Product report, summary, or projection is navigation or
-derived presentation only and cannot create, revise, resolve, or supersede an
-RF. Product-scoped RFs use the existing local `RF-*` family and local RF
-identity/lifecycle rules; no Product finding family is introduced. Product RF
-scope is independent of Code Quality and Test Engineering ownership.
+A Project-local RF is never promoted by membership, aggregation, correlation, or report rendering. A Product report, summary, or projection is navigation or derived presentation only and cannot create, revise, resolve, or supersede an RF.
 
-## 8. Positive controls и non-findings
+Product-scoped RFs use the existing local `RF-*` family and local RF identity/lifecycle rules; no Product finding family is introduced. Product RF scope is independent of Code Quality and Test Engineering ownership.
 
-Поддерживай registry механизмов, которые следует сохранить. Также сохраняй considered-but-not-promoted conclusions, когда они предотвращают повторное появление false positives и служат coverage evidence.
+## 8. Positive Controls and non-findings
 
-Не считать finding без contextual impact:
+Maintain a registry of mechanisms that should be preserved. Also retain considered-but-not-promoted conclusions when they prevent repeated false positives and serve as coverage evidence.
 
-- TODO/comments;
+Do not treat the following as findings without contextual impact:
+
+- TODOs or comments;
 - file/function size;
 - framework choice;
 - raw warning count;
-- `unwrap`/`clone`/mocks;
+- `unwrap`, `clone`, or mocks;
 - hardcoded literal;
-- отсутствие тестов;
-- raw-looking API name без source/provenance/effect;
-- HTTP client без доказанного control over destination;
-- generic slowness без material resource impact.
+- absence of tests;
+- raw-looking API name without source/provenance/effect;
+- HTTP client without evidenced control over destination;
+- generic slowness without material resource impact.
 
-## 9. Режимы
+## 9. Modes
 
-`STANDARD_FULL` использует те же correctness gates, может объединять thematic working passes, но всё равно создаёт compact coverage matrix и проходит coverage closeout.
+`STANDARD_FULL` uses the same correctness gates. It may combine thematic working passes, but it still creates a compact coverage matrix and passes coverage closeout.
 
-`FORENSIC` разделяет ownership/lifecycle/boundaries/frontend/security/maintainability и последующие adjudication stages явнее, сохраняет более подробный evidence trail и имеет явный Independent Coverage Review gate.
+`FORENSIC` separates ownership, lifecycle, boundaries, frontend, security, maintainability, and subsequent adjudication stages more explicitly, preserves a more detailed evidence trail, and includes an explicit Independent Coverage Review gate.
 
-В обоих режимах не возвращайся к одному giant prompt/report pass.
+Neither mode may collapse back into one giant prompt/report pass.
 
 ## 10. Separation of diagnosis and design
 
-Если endpoint = `REVIEW_ONLY`, остановись после принятого authoritative audit package.
+If the endpoint is `REVIEW_ONLY`, stop after the authoritative audit package is accepted.
 
-Target Architecture и detailed Remediation Roadmap создаются только по выбранному endpoint и проходят собственные независимые reviews.
+Target Architecture and a detailed Remediation Roadmap are created only for endpoints that request them, and each passes its own independent review.
