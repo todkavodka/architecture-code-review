@@ -4,9 +4,9 @@
 
 **Goal:** Implement the approved Finding Lifecycle & Progress Reporting semantics so Architecture and Code Quality findings preserve historical authority while Current Findings, accepted risk, freshness, legacy migration, Product aggregation, and baseline-to-baseline progress are reported deterministically.
 
-**Architecture:** Extend existing owner-specific finding contracts rather than creating a new finding authority. Derive current/historical/progress views from accepted owner revisions, preserve lifecycle/freshness/disposition as orthogonal dimensions, and let Product aggregate only qualified child views bound to exact accepted Product baselines.
+**Architecture:** Extend existing owner-specific finding contracts rather than creating a new finding authority. Derive current/historical/progress views from accepted owner revisions, preserve lifecycle/freshness/disposition/remediation as orthogonal dimensions, and let Product aggregate only qualified child views bound to exact accepted Product baselines. Product remains composition-only.
 
-**Tech Stack:** Markdown skill/reference contracts, existing repository validation conventions, shell/static validation only where already used.
+**Tech Stack:** Markdown skill/reference contracts, repository-native Markdown validation artifacts, shell/static verification with `rg`, `git diff`, and `git diff --check`. No runtime harness.
 
 **Spec:** `docs/superpowers/specs/2026-09-16-finding-lifecycle-progress-reporting-design.md`
 
@@ -16,146 +16,249 @@
 - Preserve exactly the existing top-level semantic capabilities: Architecture Review, Test Engineering, and Code Quality Review. Technical Documentation remains an output/projection.
 - Architecture Review remains the sole authority for `RF-*` lifecycle, disposition, severity, revisions, resolution, reopening, and supersession.
 - Code Quality Review remains the sole authority for `CQ-*` lifecycle, disposition, severity, revisions, resolution, reopening, and supersession.
-- Do not create a generic Finding Management capability, Progress capability, Risk capability, shared cross-capability finding owner, Product finding authority, or Progress authority.
 - Product only qualifies, composes, aggregates, compares, and presents accepted child state. Product never resolves, supersedes, reseveritizes, re-dispositions, reopens, or adjudicates a child finding.
 - Historical finding identities and revisions remain traceable. No historical ledger record is deleted or rewritten to improve a metric.
-- Current Findings is a derived view. Qualified current `RESOLVED` and `SUPERSEDED` findings are excluded from current technical stock; uncertainty caused by stale resolution, legacy unknown state, or unavailable qualification is shown separately.
-- `ACTIVE` findings remain visible when stale or remediation-blocked. Staleness limits certainty; it does not hide known technical risk.
-- A `RESOLVED` finding proven on source B does not prove absence on advanced source C without owner revalidation. The design must not synthesize `ACTIVE` or verified absence from missing evidence.
-- Accepted risk is a disposition/treatment decision, not resolution. Accepted-risk findings remain materially current and are separately classified from actionable findings.
-- `BLOCKED` remediation/execution status is orthogonal to lifecycle, disposition, and freshness. It never implies `RESOLVED` or `ACCEPTED_RISK`.
-- `REOPENED` is a derived baseline transition. The accepted owner state is a newer `ACTIVE` revision with the prior resolution reference where the same root issue remains the same.
-- Legacy lifecycle absence is represented as `LEGACY_STATUS_UNKNOWN`, a migration/qualification condition rather than an implicit `ACTIVE` or `RESOLVED` lifecycle value.
-- The qualified-view fingerprint is deterministic, schema-versioned, canonical, and independent of Markdown wording, row order, timestamps, and workspace paths.
-- Product baseline semantics remain the immutable exact qualified member/source/authority vector. The approved qualified-view fingerprint is an additional derived reproducibility reference, not a child-ledger copy.
+- Current Findings is a derived view. Qualified current `RESOLVED` and `SUPERSEDED` findings are excluded from current technical stock; stale resolution, legacy unknown state, and unavailable qualification are disclosed separately.
+- `ACTIVE` findings remain visible when stale or when remediation is blocked. Staleness limits certainty; it does not hide known technical risk.
+- A `RESOLVED` finding proven on source B does not prove absence on advanced source C without owner revalidation. Missing evidence must not synthesize `ACTIVE` or verified absence.
+- Accepted risk is a disposition/treatment decision, not lifecycle and not resolution. Accepted-risk findings remain materially current.
+- Keep these dimensions distinct and use qualified names in all new normative text:
+  - `lifecycle = ACTIVE | RESOLVED | SUPERSEDED`
+  - `freshness = CURRENT | STALE | BLOCKED`
+  - `disposition = owner-qualified treatment decision`
+  - `remediation_status = owner-specific work/execution state`, including `BLOCKED` where applicable.
+- The token `BLOCKED` MUST always be qualified as either `freshness=BLOCKED` or `remediation_status=BLOCKED` when both interpretations are possible. Do not introduce `ACTIVE_BLOCKED` or any combined lifecycle enum.
+- `REOPENED` is a derived baseline transition. The accepted owner state is a newer `ACTIVE` revision with prior-resolution provenance where identity remains the same.
+- Legacy lifecycle absence is `LEGACY_STATUS_UNKNOWN`, a migration/qualification condition, not implicit `ACTIVE` or `RESOLVED`.
+- Product baseline semantics remain the immutable exact qualified member/source/authority vector. A qualified-view fingerprint is an additional derived reproducibility reference, not a copied child ledger.
+- `CFV-1` uses SHA-256 over exact canonical UTF-8 JSON bytes as specified in Task 5. Serialized digest form is `sha256:<64 lowercase hex chars>`.
 - Source advancement and semantic-authority advancement remain separate axes. Child authority advancement does not silently advance an accepted Product baseline.
-- Change Review `POTENTIALLY_RESOLVES` remains candidate-only. Reconciliation and owner adjudication are required before an accepted finding can become `RESOLVED`.
-- Accepted semantic changes can stale dependent projections. Projection regeneration remains explicit; projections never mutate authority and never override authority.
-- Legacy packages are handled conservatively without forced historical package rewrites, renumbering, or automatic Product baseline advancement.
-- Do not add a database, runtime registry service, event-sourcing framework, persisted generic `FindingEvent` system, dashboard backend, analytics store, scheduler, watcher, automatic ticket integration, or automatic remediation engine.
+- Change Review `POTENTIALLY_RESOLVES` remains candidate-only. Reconciliation and owner adjudication are required before accepted lifecycle mutation.
+- Projection regeneration remains explicit. Projections never mutate authority and never override authority.
+- Do not add a database, runtime registry service, event-sourcing framework, persisted generic `FindingEvent` system, dashboard backend, analytics store, scheduler, watcher, automatic remediation engine, new capability, new Session Intent, new Product authority, or automatic baseline/projection advancement.
+- Stop with `DO_NOT_BUILD_HARNESS` if validation would require a new runtime test harness.
+- Stop with `STOP_HARNESS_EXPANSION` if bounded static evidence starts expanding into a framework.
+- Stop with `VALIDATION_BUDGET_EXCEEDED` if validation growth is no longer proportional to this contract-only change.
 
-## Repository Base and Discovery Record
-
-The implementation plan is based on the following verified state:
-
-| Item | Value |
-|---|---|
-| Working branch | `main` |
-| Local `HEAD` | `adb576e16067ec3113182f5b4f9a865a4ca7e062` |
-| `origin/main` | `2f794499693d789ad654e23056fc449f06586be6` |
-| Approved design base | `2f794499693d789ad654e23056fc449f06586be6` |
-| Working-tree condition | Existing unrelated untracked files preserved; no tracked files modified by planning |
-
-`origin/main` has no material finding-lifecycle, Product-baseline, freshness,
-Change Review, projection, or reporting change beyond the approved design base.
-The local merge descendant contains the already reviewed federated Product
-coordination lineage and does not invalidate the approved design.
-
-The exact current owner boundaries used by the plan are:
-
-- `references/report-contract.md` §2.1 and §4: Architecture report and `02-authoritative-findings-ledger.md` authority boundary.
-- `references/evidence-and-severity.md` §§2, 6, 8, and 10: candidate/evidence/severity/identity foundations and existing RF authority reference.
-- `capabilities/code-quality-review/references/code-quality-lifecycle.md`: existing CQ lifecycle, dispositions, freshness, and resolution rules; this contract is consumed unchanged unless validation proves a compatibility wording defect.
-- `references/ownership-and-scenarios.md` §7.1 and `references/review-modes-and-orchestration.md` §§29–31 and §231: candidate Change Review and contextual reconciliation boundary.
-- `references/revalidation-and-freshness.md` §§6–7 and §499: freshness, semantic-authority advancement, and Product revalidation routing.
-- `references/product-multi-project-review.md` §§1, 5, 7–9: Product composition authority, exact baseline vector, qualification, availability, and bottom-up advancement.
-- `references/projection-impact.md` and `references/projection-regeneration.md`: derived impact and explicit Stage B regeneration.
-- `tests/*-validation.md` and `tests/*-backward-compatibility.md`: repository-style bounded Markdown contract validation; no generic test harness is planned.
+---
 
 ## Planned File Map
 
-| Path | Action | Responsibility in this feature | Owning task |
-|---|---|---|---|
-| `tests/finding-lifecycle-progress-reporting-validation.md` | CREATE | Fail-first and post-change static assertions for owner lifecycle, views, freshness, progress, Product qualification, fingerprint, Change Review, and projection boundaries | Task 1, Task 7 |
-| `tests/finding-lifecycle-progress-reporting-backward-compatibility.md` | CREATE | Compatibility matrix for RF, CQ, TE, single-Project, Product, Change Review, revalidation, projection, and legacy packages | Task 1, Task 7 |
-| `references/report-contract.md` | MODIFY | Architecture RF ledger extension boundary; derived current/historical/progress report contract; legacy qualification; accepted Product view reference | Task 2, Task 3, Task 4, Task 6 |
-| `references/evidence-and-severity.md` | MODIFY | RF owner resolution gate, revision-bound evidence, severity revision rules, and shared vocabulary cross-reference | Task 2 |
-| `docs/reference/artifacts.md` | MODIFY | Reader-facing RF/CQ lifecycle, disposition, freshness, remediation, lineage, and derived-view vocabulary | Task 2, Task 4 |
-| `docs/reference/identifiers-and-statuses.md` | MODIFY | Cross-family dimension table and explicit RF/CQ/TE scope boundary | Task 3, Task 4 |
-| `references/revalidation-and-freshness.md` | MODIFY | Stale active/resolved rules, source versus authority advancement, uncertainty qualification, and Product inheritance | Task 3 |
-| `references/ownership-and-scenarios.md` | MODIFY | RF resolution/supersession/disposition authority barrier and candidate-to-owner reconciliation route | Task 2, Task 6 |
-| `references/product-multi-project-review.md` | MODIFY | Qualified child Current Findings consumption, `CFV-1` binding, reproducible Product comparison, and unavailable-member limitations | Task 5 |
-| `references/projection-impact.md` | MODIFY | Finding lifecycle/disposition semantic impact classification without projection authority | Task 6 |
-| `references/projection-regeneration.md` | MODIFY | Explicit regeneration after accepted finding-view changes and stale projection verification | Task 6 |
-| `docs/reference/outputs.md` | MODIFY | Human-readable separation of current state, progress, history, accepted residual risk, and uncertainty | Task 6 |
+Exactly these implementation files are allowed to change. Task 8 verifies this allowlist.
 
-The existing `capabilities/code-quality-review/references/code-quality-lifecycle.md`,
-`references/review-modes-and-orchestration.md`, and Test Engineering contracts
-are validation inputs in this plan. They are not listed as modifications because
-their current owner semantics already satisfy the approved compatibility
-boundary.
+| Path | Action | Responsibility | Task(s) |
+|---|---|---|---|
+| `tests/finding-lifecycle-progress-reporting-validation.md` | CREATE | Fail-first and post-change contract fixtures for lifecycle, current/history/progress, freshness, accounting, Product qualification, fingerprint, Change Review, and projection boundaries | 1, 7 |
+| `tests/finding-lifecycle-progress-reporting-backward-compatibility.md` | CREATE | Compatibility matrix for RF/CQ/TE, single Project, Product, legacy, Change Review, revalidation, and projections | 1, 7 |
+| `references/report-contract.md` | MODIFY | Architecture RF ledger lifecycle/disposition boundary; Current/Historical/Progress views; legacy qualification | 2, 3, 4, 6 |
+| `references/evidence-and-severity.md` | MODIFY | RF resolution gate, revision-bound evidence, severity revision rules | 2 |
+| `docs/reference/artifacts.md` | MODIFY | Reader-facing lifecycle/disposition/freshness/remediation/lineage vocabulary | 2, 3, 4 |
+| `docs/reference/identifiers-and-statuses.md` | MODIFY | Orthogonal dimension table; RF/CQ scope; TE boundary | 3, 4 |
+| `references/revalidation-and-freshness.md` | MODIFY | Stale-active/stale-resolved rules; source vs semantic authority advancement; Product inheritance | 3 |
+| `references/ownership-and-scenarios.md` | MODIFY | RF authority barrier; candidate-to-owner reconciliation route | 2, 6 |
+| `references/product-multi-project-review.md` | MODIFY | Qualified child Current Findings, `CFV-1`, exact Product comparison, unavailable-member limits | 5 |
+| `references/projection-impact.md` | MODIFY | Finding lifecycle/disposition impact without projection authority | 6 |
+| `references/projection-regeneration.md` | MODIFY | Explicit regeneration after accepted finding-view changes | 6 |
+| `docs/reference/outputs.md` | MODIFY | Human-readable separation of current state, progress, history, residual accepted risk, uncertainty | 6 |
+
+Validation inputs that MUST remain semantically unchanged unless a discovered contradiction blocks execution:
+
+- `capabilities/code-quality-review/references/code-quality-lifecycle.md`
+- `references/review-modes-and-orchestration.md`
+- `capabilities/test-review/SKILL.md`
+- `references/projection-lifecycle.md`
+- `SKILL.md`
+
+---
 
 ## Implementation Plan
 
-### Task 1: Establish the bounded fail-first lifecycle and progress validation contract
+### Task 1: Establish fail-first contract fixtures
 
 **Files:**
 - Create: `tests/finding-lifecycle-progress-reporting-validation.md`
 - Create: `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`
-- Test: `references/report-contract.md`, `references/evidence-and-severity.md`, `references/revalidation-and-freshness.md`, `references/product-multi-project-review.md`, `capabilities/code-quality-review/references/code-quality-lifecycle.md`, `references/review-modes-and-orchestration.md`, `references/projection-regeneration.md`
 
-**Purpose:** Establish a repository-style Markdown evidence surface whose rows
-name the exact owner contract, required outcome, forbidden outcome, and static
-verification evidence. The pre-change rows must demonstrate that the approved
-finding-lifecycle model is not yet fully expressed, without modifying authority
-contracts in this task.
+**Interfaces:**
+- Consumes: existing RF/CQ/Product/freshness/Change Review/projection contracts.
+- Produces: named fixtures and assertions that Tasks 2–7 must make pass.
 
-**Interfaces / Contracts:**
-- Consumes: Current RF authority in `references/report-contract.md` §4, current CQ axes in `capabilities/code-quality-review/references/code-quality-lifecycle.md`, current Product vector in `references/product-multi-project-review.md`, and current projection/reconciliation contracts.
-- Produces: Stable validation IDs and exact assertions that Tasks 2–7 close; no runtime test framework and no persisted finding event model.
+- [ ] **Step 1: Create the validation table with stable fixture IDs.** Include at least `FF-01..FF-10`, `FL-01..FL-30`, and `FL-S1..FL-S6`. Each row must have: precondition, accepted owner state, source/baseline, expected derived view, expected accounting, forbidden outcome, evidence path, status.
 
-- [ ] **Step 1: Define pre-change validation rows.** Add rows for RF owner lifecycle, resolution gate, supersession, accepted-risk classification, `ACTIVE + BLOCKED`, stale active, stale resolved, reopen, severity migration, legacy unknown, current versus historical stock, all baseline transition flows, Product qualification, unavailable member handling, `CFV-1`, bottom-up advancement, Change Review candidate authority, projection freshness, the PB-1/PB-2 accounting case, FL-01 through FL-30, and FL-S1 through FL-S6.
-- [ ] **Step 2: Define compatibility rows.** Add rows proving preservation of RF IDs, CQ IDs and statuses, TE-owned `BC-*`/`CC-*`/`MAT-*`/`TM-*`/`GAP-*`/`TASK-*` semantics, single-Project mode, Product mode, existing seven Session Intents, contextual `RECONCILE_CHANGE`, `REVALIDATE`, `EXTEND`, explicit projection regeneration, legacy packages, and no automatic Product advancement.
-- [ ] **Step 3: Run the fail-first assertion set.** Run:
+- [ ] **Step 2: Add these fail-first fixtures before changing normative contracts.**
+
+  **FF-01 — stale resolved safety**
+  ```text
+  B: RF-001 HIGH RESOLVED + freshness=CURRENT
+  C: relevant source/dependency advanced; no owner revalidation
+  expected:
+    historical: resolved on B
+    C verified absence: NO
+    C automatic ACTIVE: NO
+    current uncertainty: RESOLUTION_REVALIDATION_REQUIRED
+  ```
+
+  **FF-02 — stale active visibility**
+  ```text
+  B: RF-002 HIGH ACTIVE + freshness=CURRENT
+  C: relevant binding advanced; no revalidation
+  expected:
+    finding remains visible
+    freshness=STALE or BLOCKED according to evidence availability
+    verified-current claim: NO
+    silent disappearance: forbidden
+  ```
+
+  **FF-03 — accepted-risk accounting**
+  ```text
+  PB-1: RF-003 HIGH ACTIVE disposition=ACTION_REQUIRED
+  PB-2: RF-003 HIGH ACTIVE disposition=ACCEPTED_RISK
+  expected:
+    Current: 1 -> 1
+    NEW: 0
+    RESOLVED: 0
+    ACCEPTED_RISK_ADDED: 1
+    Actionable: 1 -> 0
+    Residual accepted risk: 0 -> 1
+  ```
+
+  **FF-04 — remediation blocked is not freshness blocked**
+  ```text
+  RF-004 HIGH ACTIVE freshness=CURRENT remediation_status=BLOCKED
+  expected:
+    Current Findings: included
+    RESOLVED: no
+    ACCEPTED_RISK: no unless independent disposition exists
+    reporting label: remediation blocked
+  ```
+
+  **FF-05 — PB accounting**
+  ```text
+  PB-1: RF-001 HIGH ACTIVE; RF-002 HIGH ACTIVE; RF-003 MEDIUM ACTIVE
+  PB-2: RF-001 RESOLVED; RF-002 MEDIUM ACTIVE; RF-003 MEDIUM ACTIVE; RF-004 HIGH ACTIVE
+  expected:
+    historical identities = 4
+    current = 3 -> 3
+    NEW = 1
+    RESOLVED = 1
+    SEVERITY_DECREASED = 1
+    HIGH = 2 -> 1
+    MEDIUM = 1 -> 2
+  ```
+
+  **FF-06 — supersession accounting**
+  ```text
+  PB-1: RF-001 MEDIUM ACTIVE; RF-002 MEDIUM ACTIVE
+  PB-2: RF-001 MEDIUM ACTIVE; RF-002 SUPERSEDED_BY RF-001
+  expected:
+    current = 2 -> 1
+    RESOLVED = 0
+    SUPERSEDED = 1
+    historical identities = 2
+  ```
+
+  **FF-07 — unavailable Product member**
+  ```text
+  PB-N includes Project C
+  PB-N+1 comparison cannot qualify Project C
+  expected:
+    Product result: LIMITED/UNKNOWN for affected aggregate
+    Project C contribution: not zero, not unchanged
+    limitation: mandatory
+  ```
+
+  **FF-08 — bottom-up semantic advancement**
+  ```text
+  PB-10 pins child owner rev5 / same source
+  child accepts RF-017 ACTIVE -> RESOLVED at owner rev6
+  expected:
+    child local authority advances
+    PB-10 unchanged
+    semantic-authority advancement detected
+    Product revalidation required before PB-11
+  ```
+
+  **FF-09 — fingerprint mutation**
+  ```text
+  same semantic rows + Markdown reorder/wording/path move => same fingerprint
+  HIGH -> MEDIUM => different fingerprint
+  ACTIVE -> RESOLVED => different fingerprint
+  ACTION_REQUIRED -> ACCEPTED_RISK => different fingerprint
+  member/source qualification change => different fingerprint
+  ```
+
+  **FF-10 — legacy weak evidence**
+  ```text
+  stable RF ID + old report text says "fixed" + no accepted owner resolution
+  expected:
+    not RESOLVED automatically
+    LEGACY_STATUS_UNKNOWN / owner adjudication required
+  ```
+
+- [ ] **Step 3: Add backward-compatibility rows.** Cover stable RF/CQ IDs, existing CQ lifecycle/dispositions, TE-owned families, seven Session Intents, contextual `RECONCILE_CHANGE`, single-Project mode, Product mode, `REVALIDATE`, `EXTEND`, explicit projection regeneration, legacy package preservation, and no automatic Product advancement.
+
+- [ ] **Step 4: Prove fail-first state.** Run:
   ```bash
   rg -n 'Architecture RF Lifecycle Ownership' references/report-contract.md
   rg -n 'RESOLUTION_REVALIDATION_REQUIRED' references/revalidation-and-freshness.md
   rg -n 'CFV-1' references/product-multi-project-review.md
+  rg -n 'sha256:' references/product-multi-project-review.md
   ```
-  Expected: each command exits with status 1 because the new owner subsection, stale-resolution qualification, and qualified-view fingerprint are not yet present in the pre-change normative contracts; record those three failures in the validation artifact's pre-change evidence section.
-- [ ] **Step 4: Verify the artifacts remain static contracts.** Run:
-  ```bash
-  rg -n 'runtime database|event-sourcing|dashboard|automatic projection regeneration|Product.*resolve|Product.*supersede' tests/finding-lifecycle-progress-reporting-validation.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
-  ```
-  Expected: every match is an explicit forbidden-outcome assertion, not a proposed implementation component.
-- [ ] **Step 5: Record the proposed commit boundary.** Proposed commit message: `test: define finding lifecycle progress contract`. Do not create a commit during plan execution.
+  Expected before implementation: all four searches fail because the approved contract is not yet fully encoded.
 
-### Task 2: Add Architecture RF owner lifecycle, disposition, and resolution authority
+- [ ] **Step 5: Record actual failing evidence in the validation file.** Do not mark `FF-*` or `FL-*` PASS yet.
+
+**Commit boundary:** combine with Task 2 as Commit 1.
+
+---
+
+### Task 2: Add Architecture RF lifecycle, disposition, and resolution authority
 
 **Files:**
 - Modify: `references/report-contract.md`
 - Modify: `references/evidence-and-severity.md`
 - Modify: `docs/reference/artifacts.md`
 - Modify: `references/ownership-and-scenarios.md`
-- Test: `tests/finding-lifecycle-progress-reporting-validation.md`, `capabilities/code-quality-review/references/code-quality-lifecycle.md`
+- Test: `tests/finding-lifecycle-progress-reporting-validation.md`
 
-**Purpose:** Extend the existing Architecture-owned `02-authoritative-findings-ledger.md`
-contract with explicit RF lifecycle/revision/disposition rules while reusing
-the existing owner-qualified vocabulary. The Architecture Review owner remains
-the only writer of accepted RF meaning.
+**Interfaces:**
+- Consumes: Architecture RF ledger boundary and existing CQ lifecycle vocabulary.
+- Produces: owner-local RF lifecycle/disposition semantics used by Tasks 3–6.
 
-**Interfaces / Contracts:**
-- Consumes: `references/report-contract.md` §2 authority map and §4 ledger boundary; `references/evidence-and-severity.md` §§2, 6, 8, 10; CQ vocabulary from `capabilities/code-quality-review/references/code-quality-lifecycle.md`.
-- Produces: Implementation-ready RF owner rules for `ACTIVE`, `RESOLVED`, `SUPERSEDED`, same-identity revision changes, owner-qualified disposition, and the accepted resolution gate.
+- [ ] **Step 1: Add `Architecture RF Lifecycle Ownership` at the existing `02-authoritative-findings-ledger.md` boundary.** Architecture Review alone accepts lifecycle, disposition, severity, revision, resolution, reopening, and supersession.
 
-- [ ] **Step 1: Add the RF owner subsection at the existing ledger boundary.** In `references/report-contract.md` §4, state that Architecture Review alone accepts or changes RF lifecycle, severity, disposition, revision, resolution, reopening, and supersession. Name the Architecture-owned `02-authoritative-findings-ledger.md` as the exact extension target and preserve Product's composition-only boundary.
-- [ ] **Step 2: Specify the RF finding record.** Define stable RF identity, accepted owner revision, lifecycle, owner-qualified disposition, severity, evidence references, exact source/dependency binding, supersession lineage, and `reopened_from` provenance. State that a same-root severity or lifecycle change creates a new revision rather than a new identity.
-- [ ] **Step 3: Specify transition authorities and gates.** Define that Architecture owner adjudicators accept `ACTIVE -> RESOLVED`, `ACTIVE -> SUPERSEDED`, `RESOLVED -> ACTIVE`, severity changes, and disposition changes. Require accepted evidence, owner revalidation, owner adjudication, exact proving source/dependency binding, and an accepted owner revision for resolution. Explicitly reject developer assertion, commit message, candidate Change Review, Product inference, and projection prose as resolution authority.
-- [ ] **Step 4: Specify owner-qualified disposition.** Define `ACTION_REQUIRED` and Architecture's accepted-risk treatment in the RF owner contract without claiming that CQ terminology is automatically RF terminology. Cross-reference CQ's existing `ACCEPTED_EXCEPTION` and `WONT_FIX` semantics without rewriting them.
-- [ ] **Step 5: Add authority-barrier assertions.** Require `references/ownership-and-scenarios.md` to state that Product cannot perform any RF transition and that `CHANGE_REVIEW`/`POTENTIALLY_RESOLVES` must route through contextual reconciliation to Architecture owner adjudication before accepted mutation.
-- [ ] **Step 6: Run owner validation.** Run:
+- [ ] **Step 2: Define accepted RF revision fields.** Include stable identity, accepted owner revision, lifecycle, owner-qualified disposition, severity, evidence refs, exact source/dependency binding, supersession lineage, and reopen provenance.
+
+- [ ] **Step 3: Define transitions.** Support `ACTIVE -> RESOLVED`, `ACTIVE -> SUPERSEDED`, and `RESOLVED -> ACTIVE` on the same identity where root identity remains valid. Severity/disposition changes create new accepted revisions, not new IDs.
+
+- [ ] **Step 4: Define the resolution gate.** Require accepted evidence + owner revalidation + owner adjudication + exact proving binding + accepted RF revision. Explicitly reject developer assertion, commit message, candidate Change Review, Product inference, and projection prose as resolution authority.
+
+- [ ] **Step 5: Define RF treatment vocabulary.** Use `ACTION_REQUIRED` plus an Architecture-owned accepted-risk decision. Do not reinterpret CQ `WONT_FIX` as accepted risk. Preserve CQ `ACCEPTED_EXCEPTION` and `WONT_FIX` unchanged in their owner contract.
+
+- [ ] **Step 6: Preserve authority barrier.** `POTENTIALLY_RESOLVES` routes through contextual reconciliation to the Architecture owner. Product cannot perform any RF transition.
+
+- [ ] **Step 7: Verify Task 2.** Run:
   ```bash
-  rg -n 'Architecture Review.*sole|02-authoritative-findings-ledger.md|ACTIVE.*RESOLVED|ACTIVE.*SUPERSEDED|accepted owner revision|owner adjudication|Product.*must not|POTENTIALLY_RESOLVES' references/report-contract.md references/evidence-and-severity.md references/ownership-and-scenarios.md tests/finding-lifecycle-progress-reporting-validation.md
+  rg -n 'Architecture RF Lifecycle Ownership|02-authoritative-findings-ledger.md|ACTIVE.*RESOLVED|ACTIVE.*SUPERSEDED|RESOLVED.*ACTIVE|accepted owner revision|owner adjudication|POTENTIALLY_RESOLVES' references/report-contract.md references/evidence-and-severity.md references/ownership-and-scenarios.md
+  rg -n 'ACCEPTED_EXCEPTION|WONT_FIX|ACTIVE -> RESOLVED|ACTIVE -> SUPERSEDED' capabilities/code-quality-review/references/code-quality-lifecycle.md
+  git diff --check
   ```
-  Expected: PASS; each RF transition has Architecture ownership, accepted evidence, and revision provenance, and no Product transition is permitted.
-- [ ] **Step 7: Run CQ regression inspection.** Run:
-  ```bash
-  rg -n 'ACTIVE -> RESOLVED|ACTIVE -> SUPERSEDED|ACCEPTED_EXCEPTION|WONT_FIX|RESOLVED.*STALE|COMPLETED.*never resolves' capabilities/code-quality-review/references/code-quality-lifecycle.md
-  ```
-  Expected: PASS; CQ's existing lifecycle and disposition remain unchanged and are not flattened into RF authority.
-- [ ] **Step 8: Record the proposed commit boundary.** Proposed commit message: `feat: define architecture finding lifecycle authority`. Do not create a commit during plan execution.
+  Expected: RF authority is explicit, CQ semantics remain unchanged, and diff check passes.
 
-### Task 3: Define orthogonal dimensions, current/historical views, and freshness-safe progress
+**Commit 1:**
+```bash
+git add tests/finding-lifecycle-progress-reporting-validation.md \
+        tests/finding-lifecycle-progress-reporting-backward-compatibility.md \
+        references/report-contract.md \
+        references/evidence-and-severity.md \
+        docs/reference/artifacts.md \
+        references/ownership-and-scenarios.md
+git commit -m "feat: define finding lifecycle authority contract"
+```
+
+---
+
+### Task 3: Define Current/Historical/Progress views and freshness-safe accounting
 
 **Files:**
 - Modify: `references/report-contract.md`
@@ -164,98 +267,171 @@ the only writer of accepted RF meaning.
 - Modify: `docs/reference/artifacts.md`
 - Test: `tests/finding-lifecycle-progress-reporting-validation.md`
 
-**Purpose:** Make current technical risk, historical identity history, freshness,
-remediation status, and baseline deltas deterministic derived views. The
-contract must keep stale risk visible and prevent a stale resolution from
-claiming absence on an advanced source.
+**Interfaces:**
+- Consumes: Task 2 accepted owner revisions.
+- Produces: deterministic current/history/progress views and orthogonal state dimensions.
 
-**Interfaces / Contracts:**
-- Consumes: RF/CQ accepted owner revisions from Task 2; existing CQ freshness `CURRENT|STALE|BLOCKED`; existing source/semantic-authority advancement rules in `references/revalidation-and-freshness.md`.
-- Produces: The `Current Findings View`, `Historical Findings View`, verified-current qualification, stock/flow/classification rules, and source-bound stale-resolution behavior.
+- [ ] **Step 1: Add the orthogonal dimension table.** Use the exact qualified forms `lifecycle`, `freshness`, `disposition`, and `remediation_status`. State explicitly that `freshness=BLOCKED` and `remediation_status=BLOCKED` are different axes.
 
-- [ ] **Step 1: Add the four-dimension model.** In `docs/reference/identifiers-and-statuses.md` and the reader-facing artifact reference, define independent dimensions: lifecycle (`ACTIVE|RESOLVED|SUPERSEDED`), owner-qualified disposition, freshness (`CURRENT|STALE|BLOCKED`), and owner-specific remediation/execution status. State that Test Engineering families retain their existing semantics.
-- [ ] **Step 2: Define the Current Findings predicate.** In `references/report-contract.md`, specify inclusion for qualified `ACTIVE + CURRENT`, `ACTIVE + STALE`, `ACTIVE + BLOCKED`, and active accepted-risk findings; exclusion for `RESOLVED + CURRENT`, `SUPERSEDED`, candidate-only records, and unqualified members; and separate uncertainty reporting for `RESOLVED + STALE`, `LEGACY_STATUS_UNKNOWN`, and unavailable members. State that stale active findings remain visible but are not verified-current.
-- [ ] **Step 3: Define the Historical Findings View.** Specify historical registered identities/revisions, resolved history, superseded history, prior accepted-risk classifications, reopen provenance, and legacy uncertainty. State that historical categories may overlap as views and must not be added as mutually exclusive stocks unless the row-level predicate proves exclusivity.
-- [ ] **Step 4: Add the source-bound freshness rule.** In `references/revalidation-and-freshness.md`, state that resolution is proven only for its accepted source/dependency snapshot. When the source or relevant dependency advances, retain the historical resolved fact, expose `RESOLUTION_REVALIDATION_REQUIRED`, withhold verified-current absence, do not synthesize `ACTIVE`, and route owner revalidation. State the parallel rule that stale active risk remains visible with a revalidation limitation.
-- [ ] **Step 5: Define same-source authority advancement.** Preserve the independent `SOURCE ADVANCEMENT` and `SEMANTIC AUTHORITY ADVANCEMENT` axes. A newer accepted owner revision on the same source changes dependent semantic freshness without fabricating source advancement or silently advancing Product state.
-- [ ] **Step 6: Define progress transitions.** In `references/report-contract.md`, define `NEW`, `RESOLVED`, `REOPENED`, `SUPERSEDED`, `SEVERITY_INCREASED`, `SEVERITY_DECREASED`, `UNCHANGED`, `ACCEPTED_RISK_ADDED`, and `ACCEPTED_RISK_REMOVED` as derived comparisons between two accepted comparable states. Mark current views as stock, lifecycle transitions as flows, and severity/disposition transitions as classifications.
-- [ ] **Step 7: Define blocked remediation.** State that `ACTIVE + remediation_status: BLOCKED` remains in Current Findings, counts as technical risk, is not resolved, and is not accepted risk without an independent disposition. Freshness `BLOCKED` remains visible technical risk but is excluded from `VERIFIED_CURRENT`.
-- [ ] **Step 8: Run freshness and accounting validation.** Run:
+- [ ] **Step 2: Define Current Findings inclusion.**
+  - include `ACTIVE + freshness=CURRENT`;
+  - include `ACTIVE + freshness=STALE` with revalidation limitation;
+  - include `ACTIVE + freshness=BLOCKED` with evidence/freshness limitation;
+  - include active accepted-risk findings in technical current risk, but classify them outside actionable remediation;
+  - include `ACTIVE + remediation_status=BLOCKED` in technical current risk and mark remediation blocked;
+  - exclude qualified `RESOLVED + CURRENT` from current stock;
+  - exclude `SUPERSEDED` from current stock;
+  - do not invent rows for unavailable members;
+  - report `RESOLVED + stale proof` as `RESOLUTION_REVALIDATION_REQUIRED`, not verified absence and not synthetic ACTIVE;
+  - report `LEGACY_STATUS_UNKNOWN` separately from definitive lifecycle counts.
+
+- [ ] **Step 3: Define Historical Findings.** Preserve all accepted identities/revisions and separate `REGISTERED_RF`, `RESOLVED_RF_HISTORICALLY`, `SUPERSEDED_RF_HISTORICALLY`, `CURRENT_RF`, and `ACCEPTED_RISK_RF`. Explicitly state these are not a disjoint arithmetic partition.
+
+- [ ] **Step 4: Define source-bound freshness.** Resolution is proven only for its accepted source/evidence/dependency snapshot. Source/dependency advancement invalidates the verified-absence claim until owner revalidation.
+
+- [ ] **Step 5: Define progress transitions.** `NEW`, `RESOLVED`, `REOPENED`, `SUPERSEDED`, `SEVERITY_INCREASED`, `SEVERITY_DECREASED`, `UNCHANGED`, `ACCEPTED_RISK_ADDED`, `ACCEPTED_RISK_REMOVED` are derived baseline comparisons. Severity/disposition changes do not create fake new/resolved events.
+
+- [ ] **Step 6: Encode the exact accounting fixtures from FF-03 through FF-06 in the validation artifact.** Ensure accepted-risk, severity movement, supersession, and current-stock arithmetic are asserted numerically.
+
+- [ ] **Step 7: Verify Task 3.** Run:
   ```bash
-  rg -n 'ACTIVE.*CURRENT|ACTIVE.*STALE|ACTIVE.*BLOCKED|RESOLVED.*CURRENT|RESOLVED.*STALE|SUPERSEDED|LEGACY_STATUS_UNKNOWN|RESOLUTION_REVALIDATION_REQUIRED|SOURCE ADVANCEMENT|SEMANTIC AUTHORITY ADVANCEMENT' references/report-contract.md references/revalidation-and-freshness.md docs/reference/identifiers-and-statuses.md tests/finding-lifecycle-progress-reporting-validation.md
+  rg -n 'freshness=BLOCKED|remediation_status=BLOCKED|RESOLUTION_REVALIDATION_REQUIRED|LEGACY_STATUS_UNKNOWN|ACCEPTED_RISK_ADDED|SEVERITY_DECREASED|CURRENT_RF|REGISTERED_RF' references/report-contract.md references/revalidation-and-freshness.md docs/reference/identifiers-and-statuses.md tests/finding-lifecycle-progress-reporting-validation.md
+  rg -n 'Current: 1 -> 1|Actionable: 1 -> 0|Residual accepted risk: 0 -> 1|current = 3 -> 3|NEW = 1|RESOLVED = 1|SEVERITY_DECREASED = 1|SUPERSEDED = 1' tests/finding-lifecycle-progress-reporting-validation.md
+  git diff --check
   ```
-  Expected: PASS; every lifecycle/freshness combination has an inclusion or uncertainty outcome and source advancement cannot turn stale resolution into verified absence.
-- [ ] **Step 9: Run the exact PB-1/PB-2 accounting assertion.** Run:
-  ```bash
-  rg -n 'historical identities.*4|current.*3.*3|NEW.*1|RESOLVED.*1|severity decreased.*1|HIGH.*2.*1|MEDIUM.*1.*2' tests/finding-lifecycle-progress-reporting-validation.md
-  ```
-  Expected: PASS; the accounting example keeps current stock at `3 -> 3`, reports one new finding, one resolved finding, and one severity decrease without double counting.
-- [ ] **Step 10: Record the proposed commit boundary.** Proposed commit message: `feat: define current historical and progress views`. Do not create a commit during plan execution.
+  Expected: both BLOCKED dimensions are explicit and all accounting fixtures are present.
 
-### Task 4: Add conservative legacy migration and compatibility qualification
+---
+
+### Task 4: Add conservative legacy migration
 
 **Files:**
 - Modify: `references/report-contract.md`
 - Modify: `docs/reference/identifiers-and-statuses.md`
 - Modify: `docs/reference/artifacts.md`
-- Test: `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`, `tests/finding-lifecycle-progress-reporting-validation.md`, `references/projection-lifecycle.md`
+- Test: `tests/finding-lifecycle-progress-reporting-validation.md`
+- Test: `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`
 
-**Purpose:** Make legacy findings and legacy projections safe to consume without
-silently activating or resolving records. Preserve old packages and route
-ambiguous records to owner adjudication and bounded requalification.
+**Interfaces:**
+- Consumes: Task 2 owner gate and Task 3 view semantics.
+- Produces: deterministic migration qualification without rewriting history.
 
-**Interfaces / Contracts:**
-- Consumes: Existing legacy Architecture registration in `references/report-contract.md` §2.2, projection legacy registration in `references/projection-lifecycle.md` §1.2, RF owner gate from Task 2, and derived views from Task 3.
-- Produces: A deterministic evidence hierarchy, `LEGACY_STATUS_UNKNOWN` qualification behavior, migration outcomes, projection freshness behavior, and Product requalification conditions.
+- [ ] **Step 1: Define evidence tiers.** Tier 1 explicit accepted owner lifecycle/status; Tier 2 complete accepted resolution/supersession with identity/owner/source; Tier 3 accepted remediation verification requiring owner adjudication; Tier 4 report/projection prose; Tier 5 commit/code/timestamp inference.
 
-- [ ] **Step 1: Define the evidence hierarchy.** In `references/report-contract.md` §2.2 and the RF ledger section, define Tier 1 as explicit accepted owner lifecycle/status with complete identity/owner binding; Tier 2 as complete accepted resolution/supersession with identity, owner, and exact source binding; Tier 3 as finding-tied accepted remediation verification requiring owner adjudication when lifecycle authority is absent; Tier 4 as report/projection prose; Tier 5 as commit messages, code absence, timestamps, or inference.
-- [ ] **Step 2: Define migration outcomes.** Permit mechanical migration only for complete Tier 1 and Tier 2 evidence. Route Tier 3 to Architecture or CQ owner adjudication. Reject Tier 4 and Tier 5 as lifecycle authority. Use `LEGACY_STATUS_UNKNOWN` as a derived migration/qualification condition, never as a permanent lifecycle state unless an owner contract explicitly requires storage.
-- [ ] **Step 3: Define unknown reporting.** State that unknown legacy records are excluded from definitive current/resolved/severity counts, shown in a mandatory uncertainty set, cannot be treated as zero risk or verified resolved by Product, and require owner adjudication for strong current claims.
-- [ ] **Step 4: Define preservation behavior.** State that old ledgers and packages are not rewritten automatically, old RF/CQ IDs remain stable, affected projections are marked non-current/stale through existing projection rules, and Product baseline requalification is required when child binding or qualified-view evidence cannot be proven.
-- [ ] **Step 5: Add negative migration assertions.** Require the validation artifact to reject an old report saying “fixed” without accepted owner resolution, missing lifecycle metadata defaulted to `ACTIVE`, and missing lifecycle metadata defaulted to `RESOLVED`.
-- [ ] **Step 6: Run legacy validation.** Run:
+- [ ] **Step 2: Permit mechanical migration only from complete Tier 1 and Tier 2.** Tier 3 requires owner adjudication. Tier 4/5 cannot mutate lifecycle.
+
+- [ ] **Step 3: Define `LEGACY_STATUS_UNKNOWN`.** It is a migration/qualification condition, excluded from definitive lifecycle/severity counts and `VERIFIED_CURRENT`, shown as mandatory uncertainty, and never interpreted as zero risk or verified resolved.
+
+- [ ] **Step 4: Preserve packages.** No mass rewrite, renumbering, or automatic Product baseline advancement. Requalify only affected Product baselines where child lifecycle/revision evidence cannot be proven.
+
+- [ ] **Step 5: Verify FF-10.** Old report prose saying “fixed” without accepted owner resolution must remain `LEGACY_STATUS_UNKNOWN`/owner-adjudication-required.
+
+- [ ] **Step 6: Verify Task 4.** Run:
   ```bash
-  rg -n 'Tier 1|Tier 2|Tier 3|Tier 4|Tier 5|LEGACY_STATUS_UNKNOWN|fixed|not.*ACTIVE|not.*RESOLVED|owner adjudication|Product.*requalification|not.*rewrite' references/report-contract.md docs/reference/identifiers-and-statuses.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md tests/finding-lifecycle-progress-reporting-validation.md
+  rg -n 'Tier 1|Tier 2|Tier 3|Tier 4|Tier 5|LEGACY_STATUS_UNKNOWN|owner adjudication|not.*RESOLVED|not.*ACTIVE|not.*rewrite' references/report-contract.md docs/reference/identifiers-and-statuses.md tests/finding-lifecycle-progress-reporting-validation.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
+  git diff --check
   ```
-  Expected: PASS; the evidence threshold and all conservative outcomes are explicit.
-- [ ] **Step 7: Run projection compatibility inspection.** Run:
-  ```bash
-  rg -n 'legacy|non-current|STALE|semantic authority|projection.*not.*authority|do not.*overwrite' references/projection-lifecycle.md references/report-contract.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
-  ```
-  Expected: PASS; legacy registration and projection status remain separate from finding lifecycle authority.
-- [ ] **Step 8: Record the proposed commit boundary.** Proposed commit message: `feat: define conservative legacy finding migration`. Do not create a commit during plan execution.
 
-### Task 5: Integrate qualified Product current views and deterministic `CFV-1` fingerprints
+**Commit 2:**
+```bash
+git add references/report-contract.md \
+        references/revalidation-and-freshness.md \
+        docs/reference/identifiers-and-statuses.md \
+        docs/reference/artifacts.md \
+        tests/finding-lifecycle-progress-reporting-validation.md \
+        tests/finding-lifecycle-progress-reporting-backward-compatibility.md
+git commit -m "feat: define current findings freshness and legacy semantics"
+```
+
+---
+
+### Task 5: Add qualified Product views and deterministic `CFV-1`
 
 **Files:**
 - Modify: `references/product-multi-project-review.md`
-- Test: `tests/finding-lifecycle-progress-reporting-validation.md`, `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`, `references/revalidation-and-freshness.md`
+- Test: `tests/finding-lifecycle-progress-reporting-validation.md`
+- Test: `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`
 
-**Purpose:** Let Product compare qualified child current state reproducibly
-without copying child ledgers or gaining child lifecycle authority.
+**Interfaces:**
+- Consumes: Task 3 Current Findings and Task 4 legacy qualification.
+- Produces: member-qualified Product aggregation, deterministic fingerprint, and reproducible PB-N/PB-N+1 comparison.
 
-**Interfaces / Contracts:**
-- Consumes: Task 3 Current Findings View and freshness/limitation rules; existing Product exact vector and bottom-up advancement rules in `references/product-multi-project-review.md` §§5, 7–9.
-- Produces: Member-qualified Product current aggregation, exact `CFV-1` canonical payload, and minimum Product baseline binding for baseline-to-baseline progress.
+- [ ] **Step 1: Define qualified Product rows.** Retain member key, Project identity, owner capability/family, local finding ID, accepted owner revision, exact source/baseline binding, lifecycle, owner-qualified disposition, severity, freshness, and semantic limitation markers. Bare RF/CQ IDs are never Product-global.
 
-- [ ] **Step 1: Define qualified child input.** In `references/product-multi-project-review.md`, require each Product row to retain member key, Project identity, owner capability/finding family, accepted child owner revision, exact source/baseline binding, freshness, disposition, and limitation references. State that bare RF/CQ IDs are not Product-global identities.
-- [ ] **Step 2: Define Product current aggregation.** Specify that Product consumes each qualified child Current Findings View, preserves unavailable/unknown members as limitations rather than zero rows, and derives current risk, actionable count, accepted residual risk, verified-current count, and uncertainty count. Product never changes child lifecycle or disposition.
-- [ ] **Step 3: Define `CFV-1` scope.** Specify that `CFV-1` covers only the qualified Current Findings snapshot, not the historical registry. Include Product/member qualification context, member/project identity, owner capability, finding family, finding ID, accepted owner revision, lifecycle, owner-qualified disposition, severity, freshness classification where it changes interpretation, exact source/content binding, and interpretation-changing limitation markers. Exclude timestamps, workspace paths, Markdown text, rendering order, and volatile presentation metadata.
-- [ ] **Step 4: Define canonical serialization.** Require UTF-8 canonical JSON with fixed field order, no insignificant whitespace, normalized strings, explicit `null` values, schema/version marker `CFV-1`, and rows sorted lexicographically by `member_key`, `project_key`, `owner_capability`, `finding_family`, `finding_id`, and `accepted_owner_revision`. State that semantic severity, lifecycle, disposition, freshness, source binding, qualification, or limitation changes alter the payload; Markdown wording/order and workspace path changes do not.
-- [ ] **Step 5: Bind the fingerprint to Product baselines.** Preserve the immutable Product member/source vector and accepted child authority references. Add only the `CFV-1` qualified-view fingerprint/reference and its schema identifier; do not embed historical child ledgers. Require PB-N and PB-N+1 to compare exact accepted qualified bindings and fingerprints.
-- [ ] **Step 6: Preserve bottom-up advancement.** State that child authority revision advancement, including same-source `ACTIVE -> RESOLVED`, makes the accepted Product state stale/needs revalidation. Only accepted Product `REVALIDATE` or complete-vector `CHANGE_REVIEW` followed by Product Baseline Acceptance creates the next Product baseline.
-- [ ] **Step 7: Add fingerprint scenarios.** Require assertions for identical child source/owner revision and canonical view producing the same fingerprint; Markdown wording/order and workspace path changes preserving it; severity/lifecycle/disposition/member qualification/source binding changes altering it; and historical records remaining outside the payload.
-- [ ] **Step 8: Run Product validation.** Run:
-  ```bash
-  rg -n 'member_key|project_key|accepted owner revision|CFV-1|canonical JSON|UTF-8|fixed field order|workspace path|historical.*not|unavailable.*not.*zero|Product.*must not|baseline.*fingerprint' references/product-multi-project-review.md tests/finding-lifecycle-progress-reporting-validation.md
+- [ ] **Step 2: Define Product aggregation.** Product derives current technical risk, actionable, accepted residual risk, verified-current, and uncertainty counts from qualified child views. Unavailable/unqualified members are limitations, never zero rows or implicit unchanged state.
+
+- [ ] **Step 3: Define `CFV-1` canonical payload.** Canonical JSON object fields, in this exact order:
+  ```text
+  schema
+  product_revision
+  product_baseline_key
+  rows
   ```
-  Expected: PASS; Product aggregation is qualified, fingerprint semantics are deterministic, and the baseline remains a reference to child authority rather than a copied ledger.
-- [ ] **Step 9: Run bottom-up advancement validation.** Run:
-  ```bash
-  rg -n 'rev5|rev6|same source|child.*RESOLVED|Product.*unchanged|Product.*revalidation|Product Baseline Acceptance' references/product-multi-project-review.md references/revalidation-and-freshness.md tests/finding-lifecycle-progress-reporting-validation.md
+  Each row uses this exact field order:
+  ```text
+  member_key
+  project_key
+  owner_capability
+  finding_family
+  finding_id
+  accepted_owner_revision
+  lifecycle
+  owner_qualified_disposition
+  severity
+  freshness
+  exact_source_or_content_binding
+  semantic_limitation_marker
   ```
-  Expected: PASS; child semantic authority advancement cannot auto-advance PB-10.
-- [ ] **Step 10: Record the proposed commit boundary.** Proposed commit message: `feat: add qualified Product finding progress views`. Do not create a commit during plan execution.
+  Rows are sorted lexicographically by `member_key`, `project_key`, `owner_capability`, `finding_family`, `finding_id`, `accepted_owner_revision`.
+
+- [ ] **Step 4: Define canonicalization exactly.**
+  ```text
+  encoding: UTF-8, no BOM
+  Unicode normalization: NFC for every string before serialization
+  insignificant whitespace: none
+  absent optional field: explicit JSON null
+  object field order: exactly CFV-1 schema order above
+  array order: canonical sorted row order above
+  numbers/booleans: standard JSON lexical form if ever present
+  volatile exclusions: timestamps, Markdown wording, Markdown row order, workspace/filesystem paths, rendering metadata
+  ```
+
+- [ ] **Step 5: Define digest exactly.**
+  ```text
+  digest_algorithm = SHA-256
+  digest_input = exact canonical UTF-8 JSON bytes
+  digest_output = lowercase hexadecimal
+  serialized_fingerprint = "sha256:" + 64 lowercase hex characters
+  schema identifier = "CFV-1"
+  ```
+  A future canonical payload change MUST use a new schema identifier and cannot compare as `CFV-1`.
+
+- [ ] **Step 6: Preserve Product baseline semantics.** Existing immutable Product member/source/authority vector remains authoritative. Add only `CFV-1` schema + fingerprint/reference. Do not embed historical child ledgers or replace owner revision refs.
+
+- [ ] **Step 7: Preserve bottom-up semantics.** Same-source child owner rev5 -> rev6 is semantic-authority advancement; accepted Product PB-10 remains unchanged until Product revalidation/baseline acceptance.
+
+- [ ] **Step 8: Add concrete Product fixtures.** Validation must include:
+  - FF-07 unavailable member -> limited/unknown, not zero;
+  - FF-08 child semantic advancement -> PB unchanged until acceptance;
+  - FF-09 fingerprint invariance/mutation;
+  - Project A `RF-001` and Project B `RF-001` remain distinct qualified rows.
+
+- [ ] **Step 9: Verify Task 5.** Run:
+  ```bash
+  rg -n 'CFV-1|SHA-256|sha256:|UTF-8|NFC|no BOM|explicit.*null|member_key|project_key|accepted_owner_revision|workspace.*path|unavailable.*not.*zero|Product Baseline Acceptance' references/product-multi-project-review.md tests/finding-lifecycle-progress-reporting-validation.md
+  git diff --check
+  ```
+  Expected: fingerprint is reproducible by independent implementations and Product remains composition-only.
+
+**Commit 3:**
+```bash
+git add references/product-multi-project-review.md \
+        tests/finding-lifecycle-progress-reporting-validation.md \
+        tests/finding-lifecycle-progress-reporting-backward-compatibility.md
+git commit -m "feat: add qualified Product finding progress fingerprint"
+```
+
+---
 
 ### Task 6: Align Change Review, projection freshness, and report presentation
 
@@ -264,164 +440,199 @@ without copying child ledgers or gaining child lifecycle authority.
 - Modify: `references/projection-impact.md`
 - Modify: `references/projection-regeneration.md`
 - Modify: `docs/reference/outputs.md`
-- Test: `references/review-modes-and-orchestration.md`, `tests/finding-lifecycle-progress-reporting-validation.md`
+- Test: `tests/finding-lifecycle-progress-reporting-validation.md`
 
-**Purpose:** Connect accepted finding-view changes to existing candidate,
-impact, and projection workflows while keeping candidate assessment and
-human-readable output non-authoritative.
+**Interfaces:**
+- Consumes: Tasks 2–5.
+- Produces: candidate-only resolution semantics, explicit projection staleness/regeneration, and current/progress/history output contract.
 
-**Interfaces / Contracts:**
-- Consumes: Task 2 owner gate, Task 3 derived views, Task 5 Product qualified view, existing Change Review in `references/review-modes-and-orchestration.md`, and existing projection V1–V4/regeneration contracts.
-- Produces: Candidate-only `POTENTIALLY_RESOLVES`, explicit semantic impact, explicit regeneration, and unambiguous report labels for current state, progress, history, accepted risk, and uncertainty.
+- [ ] **Step 1: Preserve candidate-only resolution.** `POTENTIALLY_RESOLVES` never mutates Current Findings. `RECONCILE_CHANGE` routes evidence to the owning capability.
 
-- [ ] **Step 1: Preserve candidate-only resolution.** In `references/ownership-and-scenarios.md`, state that `CHANGE_REVIEW: POTENTIALLY_RESOLVES` may appear only in candidate assessment; accepted Current Findings remains unchanged until `RECONCILE_CHANGE` dispatches to the owning Architecture or Code Quality authority and the owner accepts evidence.
-- [ ] **Step 2: Connect finding changes to impact accounting.** In `references/projection-impact.md`, classify accepted lifecycle, severity, disposition, source-binding, and qualified-view changes as semantic inputs for derived impact analysis. State that the impact record predicts affected projections and does not mutate finding authority.
-- [ ] **Step 3: Preserve explicit projection regeneration.** In `references/projection-regeneration.md`, state that accepted owner changes may mark dependent projections stale, regeneration requires an explicit existing regeneration session and V1–V4 checks, and old Markdown cannot override accepted owner state. Prohibit automatic regeneration.
-- [ ] **Step 4: Define human-readable output sections.** In `docs/reference/outputs.md`, require separate sections for `CURRENT STATE`, `PROGRESS SINCE PREVIOUS ACCEPTED BASELINE`, `HISTORICAL`, and `RESIDUAL ACCEPTED RISK`, with stale/unknown/unavailable limitations. Define current severity distribution as the distribution over qualified included Current Findings only.
-- [ ] **Step 5: Add negative Change Review assertions.** Require validation to prove that candidate `POTENTIALLY_RESOLVES` does not remove an accepted RF/CQ row, change current severity, close a finding, or advance Product baseline.
-- [ ] **Step 6: Add projection assertions.** Require validation to prove owner authority changes first, dependent projections may become stale, explicit regeneration updates only presentation, and projection wording never creates resolution or Product advancement.
-- [ ] **Step 7: Run cross-boundary validation.** Run:
+- [ ] **Step 2: Define projection impact.** Accepted lifecycle/severity/disposition/source-binding/current-view changes may stale dependent projections; impact records do not mutate semantic authority.
+
+- [ ] **Step 3: Preserve explicit regeneration.** Existing regeneration/V1–V4 rules remain explicit. Old Markdown cannot override accepted owner state.
+
+- [ ] **Step 4: Define report sections.** Require `CURRENT STATE`, `PROGRESS SINCE PREVIOUS ACCEPTED BASELINE`, `HISTORICAL`, `RESIDUAL ACCEPTED RISK`, plus freshness/legacy/unavailable limitations. Current severity distribution counts only included current active findings under the approved freshness semantics.
+
+- [ ] **Step 5: Verify Task 6.** Run:
   ```bash
-  rg -n 'POTENTIALLY_RESOLVES|RECONCILE_CHANGE|owner.*accept|semantic impact|V1|V2|V3|V4|explicit.*regeneration|automatic.*regeneration|CURRENT STATE|PROGRESS SINCE|HISTORICAL|RESIDUAL ACCEPTED RISK' references/ownership-and-scenarios.md references/review-modes-and-orchestration.md references/projection-impact.md references/projection-regeneration.md docs/reference/outputs.md tests/finding-lifecycle-progress-reporting-validation.md
+  rg -n 'POTENTIALLY_RESOLVES|RECONCILE_CHANGE|explicit.*regeneration|V1|V2|V3|V4|CURRENT STATE|PROGRESS SINCE|HISTORICAL|RESIDUAL ACCEPTED RISK' references/ownership-and-scenarios.md references/projection-impact.md references/projection-regeneration.md docs/reference/outputs.md tests/finding-lifecycle-progress-reporting-validation.md
+  git diff --check
   ```
-  Expected: PASS; candidate, semantic authority, Product baseline, and projection presentation remain separate.
-- [ ] **Step 8: Record the proposed commit boundary.** Proposed commit message: `docs: align finding progress and projection reporting`. Do not create a commit during plan execution.
 
-### Task 7: Close bounded validation and backward-compatibility evidence
+---
+
+### Task 7: Close all validation and backward compatibility evidence
 
 **Files:**
 - Modify: `tests/finding-lifecycle-progress-reporting-validation.md`
 - Modify: `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`
-- Test: `SKILL.md`, `references/review-modes-and-orchestration.md`, `references/revalidation-and-freshness.md`, `references/product-multi-project-review.md`, `capabilities/code-quality-review/references/code-quality-lifecycle.md`, `capabilities/test-review/SKILL.md`, `references/projection-lifecycle.md`, `references/projection-regeneration.md`
+- Test: `SKILL.md`
+- Test: `capabilities/code-quality-review/references/code-quality-lifecycle.md`
+- Test: `capabilities/test-review/SKILL.md`
+- Test: `references/review-modes-and-orchestration.md`
+- Test: `references/projection-lifecycle.md`
 
-**Purpose:** Convert the fail-first matrices into bounded post-change evidence
-covering every approved pressure scenario and compatibility boundary. This task
-does not add a generic harness or change Test Engineering ownership.
+**Interfaces:**
+- Consumes: Tasks 2–6.
+- Produces: bounded evidence that all approved scenarios and compatibility boundaries hold.
 
-**Interfaces / Contracts:**
-- Consumes: All normative changes from Tasks 2–6 and existing unchanged owner contracts.
-- Produces: Static PASS evidence for FL-01 through FL-30, FL-S1 through FL-S6, authority barriers, accounting, legacy handling, and backward compatibility.
+- [ ] **Step 1: Close FL-01..FL-30.** Each row gets exact owner, accepted-state precondition, current/history result, freshness/qualification result, accounting result, Product/projection boundary, and evidence path. Mark PASS only with cited normative support.
 
-- [ ] **Step 1: Close the lifecycle scenario matrix.** Update each FL-01 through FL-30 row with exact owner, accepted-state precondition, derived view result, freshness/qualification result, accounting result, and Product/projection boundary. Mark each row `PASS` only when its cited contract clause supplies all required dimensions.
-- [ ] **Step 2: Close the safety scenario matrix.** Mark FL-S1 stale resolution, FL-S2 stale active, FL-S3 accepted risk, FL-S4 blocked remediation, FL-S5 legacy “fixed” prose, and FL-S6 fingerprint determinism `PASS` with exact evidence references.
-- [ ] **Step 3: Close compatibility rows.** Mark PASS for existing RF/CQ IDs, CQ lifecycle/dispositions, TE-specific families, seven Session Intents, three capabilities, single-Project reporting, Product composition, Product baseline immutability, Change Review, `REVALIDATE`, `EXTEND`, projection lifecycle, explicit regeneration, legacy package preservation, and no automatic advancement.
-- [ ] **Step 4: Run the static validation command set.** Run:
+- [ ] **Step 2: Close FL-S1..FL-S6 and FF-01..FF-10.** All numeric/accounting/fingerprint/unavailable-member fixtures must have exact expected outcomes.
+
+- [ ] **Step 3: Close backward compatibility.** Verify RF/CQ IDs, CQ lifecycle/dispositions, TE families, seven Session Intents, three capabilities, single-Project mode, Product mode, `CHANGE_REVIEW`, `REVALIDATE`, `EXTEND`, projection lifecycle, explicit regeneration, legacy preservation, and no automatic advancement.
+
+- [ ] **Step 4: Verify TE boundary.** TE-owned `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*`, `TASK-*` remain outside RF/CQ lifecycle normalization.
+
+- [ ] **Step 5: Run static counts.** Run:
   ```bash
-  rg -n '^\| FL-(0[1-9]|1[0-9]|2[0-9]|30) \| PASS \|' tests/finding-lifecycle-progress-reporting-validation.md
-  rg -n '^\| FL-S[1-6] \| PASS \|' tests/finding-lifecycle-progress-reporting-validation.md
+  test "$(rg -c '^\| FL-(0[1-9]|1[0-9]|2[0-9]|30) \|.*PASS' tests/finding-lifecycle-progress-reporting-validation.md)" -eq 30
+  test "$(rg -c '^\| FL-S[1-6] \|.*PASS' tests/finding-lifecycle-progress-reporting-validation.md)" -eq 6
+  test "$(rg -c '^\| FF-(0[1-9]|10) \|.*PASS' tests/finding-lifecycle-progress-reporting-validation.md)" -eq 10
   rg -n '^\| BC[0-9]+ \|.*PASS' tests/finding-lifecycle-progress-reporting-backward-compatibility.md
-  rg -n 'Product.*(never|must not).*resolve|Product.*(never|must not).*supersede|POTENTIALLY_RESOLVES|LEGACY_STATUS_UNKNOWN|RESOLUTION_REVALIDATION_REQUIRED|CFV-1' tests/finding-lifecycle-progress-reporting-validation.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
   ```
-  Expected: 30 FL rows, 6 safety rows, and every compatibility row report `PASS`; the negative authority assertions are present.
-- [ ] **Step 5: Inspect the Test Engineering boundary.** Run:
-  ```bash
-  rg -n 'BC-|CC-|MAT-|TM-|GAP-|TASK-|TASK.*never resolves.*GAP|Test Engineering' capabilities/test-review/SKILL.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
-  ```
-  Expected: PASS; TE artifacts retain owner-specific semantics and are not assigned RF/CQ lifecycle.
-- [ ] **Step 6: Run repository-wide hygiene checks.** Run:
+  Expected: 30 FL PASS, 6 safety PASS, 10 fail-first fixtures now PASS, and every compatibility row PASS.
+
+- [ ] **Step 6: Run authority/YAGNI hygiene.** Run:
   ```bash
   git diff --check
-  rg -n 'FEDERATED_|Finding Management capability|Progress capability|Risk capability|Product.*finding authority|FindingEvent|automatic.*baseline|automatic.*projection' SKILL.md references docs/reference capabilities tests/finding-lifecycle-progress-reporting-validation.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
+  rg -n 'Finding Management capability|Progress capability|Risk capability|Product.*finding authority|FindingEvent|automatic.*baseline|automatic.*projection' references docs/reference capabilities tests/finding-lifecycle-progress-reporting-validation.md tests/finding-lifecycle-progress-reporting-backward-compatibility.md
   ```
-  Expected: `git diff --check` passes; any semantic-term matches are explicit compatibility prohibitions or existing legitimate terms, with no new intent, capability, authority, event framework, or automatic mutation.
-- [ ] **Step 7: Record the proposed commit boundary.** Proposed commit message: `test: close finding lifecycle progress compatibility matrix`. Do not create a commit during plan execution.
+  Expected: matches, if any, are only explicit prohibitions or pre-existing legitimate terms; no new authority/framework is introduced.
 
-### Task 8: Perform final documentation verification and handoff
+**Commit 4:**
+```bash
+git add references/ownership-and-scenarios.md \
+        references/projection-impact.md \
+        references/projection-regeneration.md \
+        docs/reference/outputs.md \
+        tests/finding-lifecycle-progress-reporting-validation.md \
+        tests/finding-lifecycle-progress-reporting-backward-compatibility.md
+git commit -m "test: close finding lifecycle progress compatibility"
+```
+
+---
+
+### Task 8: Final verification and handoff
 
 **Files:**
-- Test: `docs/superpowers/specs/2026-09-16-finding-lifecycle-progress-reporting-design.md`, `docs/superpowers/plans/2026-09-16-finding-lifecycle-progress-reporting-implementation-plan.md`, `tests/finding-lifecycle-progress-reporting-validation.md`, `tests/finding-lifecycle-progress-reporting-backward-compatibility.md`
+- Test only: all files in Planned File Map plus approved design and this plan.
 
-**Purpose:** Verify that the implementation result can be reviewed against the
-approved design, that no task has introduced an architecture decision, and that
-the plan's contract vocabulary is internally consistent.
+**Interfaces:**
+- Consumes: Tasks 1–7.
+- Produces: implementation handoff only; no new architecture decision and normally no new commit.
 
-**Interfaces / Contracts:**
-- Consumes: Approved design §§6, 9, 14, 20, 24 and all Task 1–7 validation evidence.
-- Produces: A review-ready implementation handoff with no unresolved semantic choice and no implementation performed in the planning session.
+- [ ] **Step 1: Verify all eight tasks remain present.** Run:
+  ```bash
+  test "$(rg -c '^### Task [1-8]:' docs/superpowers/plans/2026-09-16-finding-lifecycle-progress-reporting-implementation-plan.md)" -eq 8
+  ```
 
-- [ ] **Step 1: Run the spec-to-plan coverage check.** Run:
+- [ ] **Step 2: Run placeholder scan.** Run:
   ```bash
-  rg -n '^## (6|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)' docs/superpowers/specs/2026-09-16-finding-lifecycle-progress-reporting-design.md
-  rg -n '^### Task [1-8]:' docs/superpowers/plans/2026-09-16-finding-lifecycle-progress-reporting-implementation-plan.md
+  ! rg -n -i '[T]BD|T[O]DO|fill in|implement later|handle edge cases|as needed|relevant files' docs/superpowers/plans/2026-09-16-finding-lifecycle-progress-reporting-implementation-plan.md
   ```
-  Expected: every major approved design section is mapped to one or more tasks and all eight tasks are present.
-- [ ] **Step 2: Run the forbidden-placeholder scan.** Run:
+
+- [ ] **Step 3: Run final scenario counts and diff hygiene.** Re-run Task 7 Step 5 and `git diff --check`.
+
+- [ ] **Step 4: Verify changed-file allowlist.** From the implementation base SHA, run:
   ```bash
-  rg -n -i '[T]BD|T[O]DO|la[t]er|simil[a]r|appropri[a]te|as [n]eeded|e[t]c\.|relevant [f]iles' docs/superpowers/plans/2026-09-16-finding-lifecycle-progress-reporting-implementation-plan.md
+  BASE_SHA=<implementation-base-sha>
+  git diff --name-only "$BASE_SHA"..HEAD | sort > /tmp/finding-lifecycle-actual-files.txt
+  cat > /tmp/finding-lifecycle-allowed-files.txt <<'EOF'
+  docs/reference/artifacts.md
+  docs/reference/identifiers-and-statuses.md
+  docs/reference/outputs.md
+  references/evidence-and-severity.md
+  references/ownership-and-scenarios.md
+  references/product-multi-project-review.md
+  references/projection-impact.md
+  references/projection-regeneration.md
+  references/report-contract.md
+  references/revalidation-and-freshness.md
+  tests/finding-lifecycle-progress-reporting-backward-compatibility.md
+  tests/finding-lifecycle-progress-reporting-validation.md
+  EOF
+  sort -o /tmp/finding-lifecycle-allowed-files.txt /tmp/finding-lifecycle-allowed-files.txt
+  diff -u /tmp/finding-lifecycle-allowed-files.txt /tmp/finding-lifecycle-actual-files.txt
   ```
-  Expected: no matches.
-- [ ] **Step 3: Run the task vocabulary consistency check.** Run:
+  Expected: no diff. The implementation changes exactly the 12 files in Planned File Map and no unrelated file.
+
+- [ ] **Step 5: Verify immutable boundaries.** Run:
   ```bash
-  rg -n 'ACTIVE|RESOLVED|SUPERSEDED|ACTION_REQUIRED|ACCEPTED_RISK|BLOCKED|STALE|CURRENT|LEGACY_STATUS_UNKNOWN|RESOLUTION_REVALIDATION_REQUIRED|REOPENED|CFV-1|POTENTIALLY_RESOLVES' docs/superpowers/plans/2026-09-16-finding-lifecycle-progress-reporting-implementation-plan.md
+  git diff "$BASE_SHA"..HEAD -- SKILL.md \
+    capabilities/code-quality-review/references/code-quality-lifecycle.md \
+    capabilities/test-review/SKILL.md \
+    references/review-modes-and-orchestration.md \
+    references/projection-lifecycle.md
   ```
-  Expected: each term is used with the exact approved meaning and no task introduces a competing enum or authority.
-- [ ] **Step 4: Verify scope restriction.** Run:
+  Expected: empty diff.
+
+- [ ] **Step 6: Verify commit shape.** Run:
   ```bash
-  git status --short
-  git diff --name-only -- SKILL.md references capabilities tests docs/current-status.md docs/roadmap.md
+  git log --oneline "$BASE_SHA"..HEAD
   ```
-  Expected: the planning session has not modified restricted implementation/contract files; only the two permitted plan/report artifacts are created or modified.
-- [ ] **Step 5: Record the proposed handoff boundary.** Proposed commit message: `docs: add finding lifecycle progress implementation plan`. Do not create a commit during plan execution.
+  Expected: four bounded semantic commits corresponding to Tasks 1–2, 3–4, 5, and 6–7. Task 8 creates no commit unless verification itself uncovers and fixes a real plan-covered defect.
+
+- [ ] **Step 7: Produce implementation report.** Record base SHA, four commit SHAs, exact changed files, all validation counts, limitations, and final status. Do not claim completion unless every check above passes.
+
+---
 
 ## Implementation Review Gates
 
-### Gate 1: Owner lifecycle contract
+Use four gates only; do not start a review loop after every task.
 
-Review after Task 1 and Task 2. Confirm that the exact Architecture ledger
-extension target is named, RF and CQ authorities remain separate, resolution is
-evidence/revalidation/adjudication/revision gated, and all fail-first owner
-assertions pass.
+1. **Gate 1 — after Commit 1:** RF lifecycle/disposition authority + fail-first fixtures.
+2. **Gate 2 — after Commit 2:** Current/history/progress, stale active/resolved, BLOCKED dimension separation, accepted-risk accounting, legacy qualification.
+3. **Gate 3 — after Commit 3:** Product qualification, deterministic `CFV-1`, bottom-up semantic advancement.
+4. **Gate 4 — final:** Change Review/projection/reporting + all scenario/compatibility/allowlist checks.
 
-### Gate 2: Freshness, views, and legacy qualification
+A gate checks the implemented slice. It does not reopen approved design unless implementation evidence exposes a genuine contradiction.
 
-Review after Task 3 and Task 4. Confirm that current stock, historical views,
-freshness, blocked remediation, stale resolution, stale active findings, and
-legacy unknown records have deterministic inclusion and uncertainty behavior.
-
-### Gate 3: Product qualified views and fingerprint
-
-Review after Task 5. Confirm that Product binds qualified child authority and
-`CFV-1` without copying child ledgers, that unavailable members are not zero,
-and that bottom-up authority advancement does not advance a Product baseline.
-
-### Gate 4: Integrated compatibility and reporting
-
-Review after Task 6 and Task 7. Confirm Change Review candidate-only behavior,
-explicit projection regeneration, single-Project reporting, federated Product
-aggregation, TE boundary, accounting scenarios, all FL rows, all safety rows,
-and all compatibility rows.
+---
 
 ## Final Verification Matrix
 
-| Requirement | Validation artifact | Task | Expected result |
+| Requirement | Evidence | Task(s) | Expected result |
 |---|---|---:|---|
-| RF lifecycle authority | `tests/finding-lifecycle-progress-reporting-validation.md` | 2, 7 | Architecture owner alone accepts lifecycle/revision transitions. |
-| CQ compatibility | `tests/finding-lifecycle-progress-reporting-backward-compatibility.md` | 2, 7 | Existing CQ lifecycle, dispositions, freshness, and CQRA separation remain intact. |
-| Accepted risk | Both lifecycle artifacts | 2, 3, 7 | Accepted risk is current technical risk with separate actionable/residual classification and no resolution credit. |
-| `ACTIVE + BLOCKED` | Lifecycle validation FL-S4 | 3, 7 | Finding remains current technical risk; blocked remediation is not resolution or acceptance. |
-| Stale active | Lifecycle validation FL-S2 | 3, 7 | Finding remains visible with revalidation limitation. |
-| Stale resolved | Lifecycle validation FL-S1 | 3, 7 | Historical resolution remains bound to B; C has uncertainty and no invented active/verified absence. |
-| Legacy unknown | Backward compatibility matrix and FL-S5 | 4, 7 | Missing or weak evidence is unknown, never implicit active or resolved. |
-| Reopen | Lifecycle validation FL-07 and FL-28 | 2, 3, 7 | Same identity uses newer accepted active revision; derived reopen preserves prior resolution history. |
-| Severity changes | FL-08, FL-09, FL-26 and PB-1/PB-2 row | 2, 3, 7 | Severity migration preserves identity and is not counted as delete plus create. |
-| Current versus historical | FL-02, FL-03, FL-19, FL-27 | 3, 7 | Current stock excludes qualified resolved/superseded records; history retains them. |
-| Product qualification | FL-12, FL-13, FL-22, FL-23, FL-25 | 5, 7 | Member/project/owner/source qualification is preserved and unavailable members are limited, not zero. |
-| `CFV-1` fingerprint | FL-S6 and Product fingerprint rows | 5, 7 | Canonical semantic payload is stable for presentation/path changes and changes for semantic changes. |
-| Bottom-up authority advancement | FL-12, FL-13, FL-23, FL-24 | 5, 7 | Child advancement stales Product state; Product acceptance is required for the next baseline. |
-| Change Review | FL-14, FL-15 and negative candidate assertions | 2, 6, 7 | Candidate potential never mutates accepted lifecycle or Product baseline. |
-| Projection freshness | FL-16, FL-17 | 6, 7 | Authority changes first; projections become stale and regenerate only explicitly. |
-| Single-Project compatibility | Backward compatibility matrix | 7 | Single Project reports current, history, progress, risk disposition, and uncertainty without Product mode. |
-| Federated Product compatibility | Backward compatibility matrix and Product rows | 5, 7 | Product composes qualified child views without becoming child authority. |
-| Historical accounting | FL-02, FL-05, FL-18, FL-19, FL-27, FL-28, FL-29 | 3, 7 | Historical count may increase while current risk decreases; flows and classifications do not double count. |
-| Authority/YAGNI | Compatibility matrix and repository hygiene command | 6, 7 | No new authority, capability, intent, runtime framework, event system, or automatic mutation appears. |
+| RF lifecycle authority | lifecycle validation + RF ledger contract | 1,2,7 | Architecture alone accepts RF lifecycle/revision transitions |
+| CQ compatibility | backward-compatibility matrix | 2,7 | Existing CQ lifecycle/dispositions unchanged |
+| Accepted risk accounting | FF-03 / FL-S3 | 1,3,7 | Current unchanged; resolved/new zero; actionable/residual split changes |
+| `remediation_status=BLOCKED` | FF-04 / FL-S4 | 1,3,7 | Active risk remains; no resolution/acceptance inference |
+| `freshness=BLOCKED` | Current Findings rows | 3,7 | visible with evidence limitation; not verified-current |
+| Stale ACTIVE | FF-02 / FL-S2 | 1,3,7 | remains visible with revalidation limitation |
+| Stale RESOLVED | FF-01 / FL-S1 | 1,3,7 | old resolution historical; new absence unverified; no synthetic ACTIVE |
+| Legacy weak evidence | FF-10 / FL-S5 | 1,4,7 | no automatic resolution; owner adjudication required |
+| Reopen | FL-07/FL-28 | 2,3,7 | same identity gets newer ACTIVE revision; derived REOPENED |
+| Severity movement | FF-05 / FL-08/09 | 1,3,7 | no delete+create accounting |
+| Supersession | FF-06 / FL-18 | 1,3,7 | current decreases; resolved remains zero |
+| Product unavailable member | FF-07 / FL-22 | 1,5,7 | limited/unknown, never zero/unchanged |
+| Bottom-up semantic advancement | FF-08 / FL-12/13/23/24 | 1,5,7 | child advances; accepted Product baseline does not |
+| `CFV-1` determinism | FF-09 / FL-S6 | 1,5,7 | SHA-256 canonical JSON; presentation/path invariant; semantic changes alter digest |
+| Cross-member identity | Product fixture | 5,7 | Project A RF-001 != Project B RF-001 |
+| Change Review | FL-14/15 | 2,6,7 | candidate potential never mutates accepted lifecycle |
+| Projection freshness | FL-16/17 | 6,7 | authority first; regeneration explicit |
+| Single Project | compatibility matrix | 7 | reports current/history/progress without Product |
+| TE boundary | compatibility matrix | 7 | TE families keep own semantics |
+| Changed-file scope | Task 8 allowlist | 8 | exactly 12 planned implementation files |
+| Authority/YAGNI | hygiene checks | 7,8 | no new intent/capability/authority/runtime framework |
 
-## Plan Completion Criteria
+---
 
-The implementation session is complete only when all tasks have passed their
-targeted static validations, the final matrix has no GAP row, all FL-01 through
-FL-30 and FL-S1 through FL-S6 rows are `PASS`, restricted files remain
-unchanged outside approved implementation work, and no new authority or runtime
-framework has been introduced. The executor must stop with
-`DO_NOT_BUILD_HARNESS` if a validation request would require a new runtime test
-harness, and must stop with `STOP_HARNESS_EXPANSION` if static Markdown evidence
-cannot express the requested assertion without a materially new framework.
+## Definition of Done
+
+Implementation is complete only when:
+
+1. all `FF-01..FF-10`, `FL-01..FL-30`, and `FL-S1..FL-S6` fixtures are PASS;
+2. every backward-compatibility row is PASS;
+3. accepted-risk accounting, PB accounting, supersession, unavailable-member, bottom-up advancement, and fingerprint fixtures match exact expected results;
+4. `freshness=BLOCKED` and `remediation_status=BLOCKED` are unambiguously separate;
+5. `CFV-1` uses SHA-256 over exact canonical UTF-8 NFC-normalized JSON and serializes as `sha256:<64 lowercase hex>`;
+6. Product remains composition-only and accepted Product baselines never auto-advance;
+7. the implementation changes exactly the 12 allowlisted files;
+8. the five immutable validation-input contracts remain unchanged;
+9. `git diff --check` passes;
+10. exactly four bounded semantic implementation commits exist unless a documented plan-covered fix required one additional corrective commit;
+11. no new runtime harness/framework/authority/capability/intent is introduced.
+
+After this plan is implemented, proceed to one final implementation review of the resulting diff and validation evidence. Do not start another design/plan review cycle unless implementation exposes a genuine architecture contradiction.
