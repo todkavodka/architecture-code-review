@@ -1,57 +1,66 @@
-# План исправлений и проверка исполнимости
+# Remediation Roadmap and Execution-Consistency Review
 
-Этот этап выполняется только для `REVIEW_PLUS_TARGET_AND_ROADMAP` после принятия Target Architecture.
+This stage runs only for `REVIEW_PLUS_TARGET_AND_ROADMAP` and only after Target Architecture has been accepted.
 
-## 1. Roadmap строится по зависимостям, не по severity
+## 1. Build the roadmap from dependencies, not severity
 
-Severity помогает приоритизировать риск, но порядок реализации определяется prerequisites и безопасной активацией.
+Severity helps prioritize risk, but implementation order is determined by prerequisites and safe activation.
 
-Каждая material task должна содержать два слоя: сначала человеческое объяснение архитектурной проблемы и результата, затем implementation contract.
+Every material task must contain two layers: first a human-readable explanation of the architectural problem and intended result, then an implementation contract.
 
 ### 1.1 Human-readable task layer
 
-До списка файлов, tests, prerequisites и rollback каждая material task объясняет:
+Before listing files, tests, prerequisites, or rollback details, every material task explains:
 
-1. **Проблема.** Что сейчас работает неправильно или нестабильно.
-2. **Почему это происходит.** Какой ownership/lifecycle/boundary/state mechanism является причиной.
-3. **Практическое последствие.** Какой runtime/security/reliability/testability effect возникает.
-4. **Что нужно изменить.** Какой target mechanism вводится или какая ответственность переносится.
-5. **Почему это закрывает root cause.** Какая causal link исчезает после изменения.
-6. **Что получим после исправления.** Как изменится наблюдаемое поведение системы.
+1. **Problem.** What currently behaves incorrectly or unreliably.
+2. **Why it happens.** Which ownership, lifecycle, boundary, or state mechanism causes it.
+3. **Practical consequence.** Which runtime, security, reliability, or testability effect occurs.
+4. **What must change.** Which target mechanism is introduced or which responsibility moves.
+5. **Why this closes the root cause.** Which causal link disappears after the change.
+6. **What the system gains.** How observable system behavior changes after remediation.
 
-Human-readable layer пишется связанными абзацами. Для material explanatory prose придерживайся правила **one primary mechanism per paragraph**: один абзац может содержать evidence и последствия одного механизма, но не должен одновременно объяснять несколько независимых root causes.
+Write the human-readable layer as connected prose. For material explanatory prose, follow the rule **one primary mechanism per paragraph**: one paragraph may contain evidence and consequences of one mechanism, but it must not explain several independent root causes at the same time.
 
-Specialist English term или hybrid shorthand сначала объясни естественным русским предложением, если термин не очевиден из контекста. После этого точное техническое имя можно использовать как сокращение. Не превращай текст в словарь и не переводи exact identifiers.
+Explain a specialized term in plain language before using it as shorthand when its meaning is not obvious from context. Do not turn the text into a glossary and do not translate exact identifiers.
 
-**Не считай технический shorthand объяснением.** Например `eager startup`, `registered shutdown`, `drain+close`, `in-flight`, `producer-miss`, `single-flight` могут быть точными терминами, но сначала должно быть понятно, какое наблюдаемое поведение системы они обозначают.
+**Technical shorthand is not an explanation.** Terms such as `eager startup`, `registered shutdown`, `drain+close`, `in-flight`, `producer-miss`, or `single-flight` may be precise, but the reader must first understand which observable system behavior they denote.
 
-Паттерн трансформации:
+Transformation pattern:
 
 ```text
-Плохо:
-NATS получает eager startup + registered shutdown + drain.
+Poor:
+NATS gets eager startup + registered shutdown + drain.
 
-Хорошо:
-При запуске приложение заранее проверяет доступность NATS и не объявляет себя готовым, если соединение установить невозможно. При остановке оно сначала завершает уже начатые операции, а затем корректно закрывает соединение. После такого объяснения поведение можно кратко называть fail-fast startup и graceful drain.
+Better:
+At startup the application checks NATS availability before declaring itself
+ready. If the connection cannot be established, startup fails instead of
+publishing a false-ready state. During shutdown the application first lets
+already-started operations finish and only then closes the connection. After
+that explanation, the behavior may be referred to briefly as fail-fast startup
+and graceful drain.
 ```
 
-Точные слова примера не нормативны. Нормативен порядок: **объяснение механизма → специализированный термин**.
+The exact wording of the example is non-normative. The normative ordering is:
 
-Если изменение существенно меняет topology, ownership, lifecycle, ordering или trust boundary, добавь Before → After Mermaid/flow diagram либо ссылку на соответствующую target diagram.
+```text
+mechanism explanation → specialized term
+```
 
-Не начинай task сразу с class/registry/function names. Сначала читатель должен понять **зачем вообще существует эта задача**.
+If a change materially alters topology, ownership, lifecycle, ordering, or a trust boundary, add a Before → After Mermaid/flow diagram or link to the corresponding target diagram.
 
-Заголовок material task должен быть человеческим и описывать результат задачи. Не помещай в него `[prereq: ...]`, RF/SER metadata или другую execution metadata. Такие сведения относятся к техническому контракту.
+Do not start a task with class, registry, or function names. The reader must first understand why the task exists.
 
-### 1.2 Технический контракт реализации
+A material task title must be human-readable and describe the intended result. Do not put `[prereq: ...]`, RF/SER metadata, or other execution metadata in the title. That information belongs in the technical contract.
 
-После human-readable layer **обязательно** создай subsection с точным heading:
+### 1.2 Implementation contract
+
+After the human-readable layer, **always** create a subsection with the exact heading:
 
 ```markdown
-### Технический контракт реализации
+### Implementation Contract
 ```
 
-Только после этой границы размещай:
+Only after this boundary should the roadmap place:
 
 ```text
 TASK ID
@@ -67,70 +76,70 @@ exit criteria
 rollback/fail-closed consideration where relevant
 ```
 
-Предпочтительный формат — таблица или другой явно справочный блок. Implementation details должны быть точными, но не заменяют explanatory prose.
+Prefer a table or another clearly reference-oriented block. Implementation details must be precise, but they do not replace explanatory prose.
 
-Пример формы:
+Example structure:
 
 ```markdown
-## TASK-F — Сделать жизненный цикл NATS управляемым
+## TASK-F — Make the NATS lifecycle explicit and managed
 
-### Что сейчас не так
+### Current problem
 <connected prose>
 
-### Почему это происходит
+### Why it happens
 <ownership/lifecycle mechanism>
 
-### Практическое последствие
+### Practical consequence
 <runtime consequence>
 
-### Что предлагаем изменить
+### Proposed change
 <target mechanism described in natural language first>
 
-### Почему это закрывает корневую причину
+### Why this closes the root cause
 <causal explanation>
 
-### Что получим после исправления
+### Result after remediation
 <observable resulting behavior>
 
-### Технический контракт реализации
+### Implementation Contract
 
-| Параметр | Требование |
+| Parameter | Requirement |
 |---|---|
-| Связанные замечания | RF-F |
-| Целевой механизм | `CacheLifecycleManager` |
-| Зависимости | Нет |
-| Инвариант | ... |
-| Регрессионные тесты | ... |
-| Допустимая область изменений | ... |
-| Запрещённая область | ... |
-| Проверка | ... |
-| Критерий завершения | ... |
-| Откат / безопасная активация | ... |
+| Related findings | RF-F |
+| Target mechanism | `CacheLifecycleManager` |
+| Dependencies | None |
+| Invariant | ... |
+| Regression tests | ... |
+| Allowed change scope | ... |
+| Forbidden scope | ... |
+| Verification | ... |
+| Exit criterion | ... |
+| Rollback / safe activation | ... |
 ```
 
-Equivalent table contents are allowed, but the `### Технический контракт реализации` boundary is mandatory for every material roadmap task.
+Equivalent table contents are allowed, but the `### Implementation Contract` boundary is mandatory for every material roadmap task.
 
-Unresolved product/deployment decision блокирует только зависимые tasks.
+An unresolved product or deployment decision blocks only the tasks that depend on it.
 
 ## 2. Semantic invariant → concrete representation
 
-Roadmap обязан переводить target semantics в реальную runtime representation.
+The roadmap must translate target semantics into a real runtime representation.
 
-Проверяй, например:
+Check, for example:
 
-- semantic composite key vs equality semantics конкретного языка/Map/dictionary;
+- semantic composite key vs equality semantics of the concrete language, Map, or dictionary;
 - generation/version identity vs mutable object reference;
-- cancellation scope vs global abort primitive;
+- cancellation scope vs a global abort primitive;
 - ownership model vs actual storage/index keys;
 - durable idempotency vs process-local memory.
 
-Красивый semantic type не гарантирует правильное runtime behavior.
+A well-designed semantic type does not guarantee correct runtime behavior.
 
 ## 3. Dependency isolation
 
-Не создавай global phase gate, если решение влияет только на несколько tasks.
+Do not create a global phase gate when a decision affects only a few tasks.
 
-Нормально:
+Acceptable:
 
 ```text
 Decision D2
@@ -140,26 +149,26 @@ Independent TASK-31/32
 → may proceed
 ```
 
-Неправильно: весь phase блокируется всеми decisions «для простоты».
+Not acceptable: the entire phase is blocked by every decision merely “for simplicity”.
 
 ## 4. Safe activation boundary
 
-Для security/ownership/lifecycle changes явно опиши допустимое intermediate state.
+For security, ownership, and lifecycle changes, define the allowed intermediate state explicitly.
 
-Примеры риска:
+Examples of risk:
 
-- fake verifier существует до production trust authority и случайно активирует execution;
-- новый auth path включён до миграции identity/state;
-- новый cancellation protocol частично активирован и оставляет старый global cancel;
-- signing/checksum enforcement включён несогласованно.
+- a fake verifier exists before production trust authority and accidentally enables execution;
+- a new authorization path is enabled before identity/state migration;
+- a new cancellation protocol is partly activated while the old global cancellation path remains active;
+- signing or checksum enforcement is enabled inconsistently.
 
-Если безопасной промежуточной комбинации нет — активируй зависимые production pieces атомарно или сохраняй fail-closed/old-safe behavior до полного cutover.
+If no safe intermediate combination exists, activate dependent production pieces atomically or preserve fail-closed / old-safe behavior until full cutover.
 
-Test fake/fixture никогда не становится production trust authority.
+A test fake or fixture never becomes production trust authority.
 
 ## 5. Execution Consistency Review
 
-Fresh-context reviewer проверяет цепочку:
+A fresh-context reviewer checks the chain:
 
 ```text
 semantic invariant
@@ -168,23 +177,23 @@ semantic invariant
 → safe production activation boundary
 ```
 
-Также проверяет:
+The reviewer also checks that:
 
-- task покрывает реальный RF/SER/target, а не новый scope;
-- task title понятен как инженерная цель без bracketed prerequisite metadata;
-- human-readable layer действительно объясняет current problem, root mechanism, consequence и target result;
-- material paragraphs не смешивают несколько независимых root mechanisms;
-- specialist shorthand не используется как замена объяснению;
-- каждый material task содержит точный heading `### Технический контракт реализации`;
-- execution metadata находится после этого heading;
-- regression test реально проверяет mechanism;
-- dependencies acyclic/объяснимы;
-- task boundary достаточно мала для отдельного review;
-- product decision не спрятан как implementation detail;
-- platform/deployment constraints учтены;
-- rollback/fail-closed behavior определён для risky activation;
-- Before/After diagram присутствует, если без неё material ownership/lifecycle transition трудно понять;
-- Mermaid diagrams, входящие в final roadmap, проходят render-validation gate из `lifecycle-and-mermaid.md`.
+- the task covers an actual RF, SER, or target requirement rather than introducing new scope;
+- the task title communicates the engineering goal without bracketed prerequisite metadata;
+- the human-readable layer explains the current problem, root mechanism, consequence, and target result;
+- material paragraphs do not mix multiple independent root mechanisms;
+- specialized shorthand is not used instead of explanation;
+- every material task contains the exact heading `### Implementation Contract`;
+- execution metadata appears after that heading;
+- the regression test actually checks the mechanism;
+- dependencies are acyclic or explicitly explainable;
+- the task boundary is small enough for independent review;
+- a product decision is not hidden as an implementation detail;
+- platform and deployment constraints are accounted for;
+- rollback or fail-closed behavior is defined for risky activation;
+- a Before/After diagram is present when a material ownership or lifecycle transition is otherwise difficult to understand;
+- Mermaid diagrams included in the final roadmap pass the render-validation gate from `lifecycle-and-mermaid.md`.
 
 ## 6. Review lifecycle
 
@@ -199,23 +208,23 @@ roadmap author
       → ACCEPTED | BLOCKED
 ```
 
-Reviewer формирует issues, а не редактирует roadmap сам.
+The reviewer produces issues rather than editing the roadmap directly.
 
 ## 7. Acceptance
 
-Roadmap accepted только когда:
+The roadmap is accepted only when:
 
-- все material RF/SER target coverage traceable;
-- material task titles human-readable and free of bracketed execution metadata;
-- tasks имеют human-readable problem/result explanation и concrete implementation contract;
-- каждый material task содержит `### Технический контракт реализации` перед execution metadata;
-- specialist shorthand не заменяет объяснение механизма;
-- tasks имеют concrete representation и verification;
-- independent tasks не блокируются unrelated gates;
-- unsafe intermediate activation не допускается;
-- unresolved decisions изолированы;
-- correction/re-review history сохранена;
-- нет placeholders `TBD/TODO/implement later` в executable parts;
-- dense internal shorthand не заменяет объяснение того, что задача решает и зачем;
-- roadmap explanatory prose не содержит known paragraph-overload issues;
-- все final roadmap Mermaid diagrams соответствуют diagram render-validation contract.
+- all material RF/SER target coverage is traceable;
+- material task titles are human-readable and free of bracketed execution metadata;
+- tasks contain a human-readable problem/result explanation and a concrete implementation contract;
+- every material task contains `### Implementation Contract` before execution metadata;
+- specialized shorthand does not replace mechanism explanation;
+- tasks define a concrete representation and verification;
+- independent tasks are not blocked by unrelated gates;
+- unsafe intermediate activation is prevented;
+- unresolved decisions are isolated;
+- correction/re-review history is preserved;
+- executable sections contain no `TBD`, `TODO`, or `implement later` placeholders;
+- dense internal shorthand does not replace an explanation of what the task solves and why;
+- roadmap explanatory prose has no known paragraph-overload issues;
+- every final roadmap Mermaid diagram satisfies the diagram render-validation contract.
