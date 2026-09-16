@@ -1,14 +1,14 @@
-# Проверка границ корневых причин
+# Root-Boundary Adjudication
 
-Этот gate выполняется после независимой verification и до severity. Его задача — убедиться, что один authoritative root finding соответствует одному concrete correction boundary (границе исправления), а не красивой общей теме.
+This gate runs after independent verification and before severity assignment. Its purpose is to ensure that one authoritative root finding corresponds to one concrete correction boundary, not merely to a broad or attractive theme.
 
 ## 1. Normative root test
 
-Для каждого proposed root спроси:
+For every proposed root, ask:
 
-> Если исправить именно этот конкретный механизм, исчезнут ли все перечисленные projections (проявления)?
+> If this specific mechanism is corrected, will all listed projections of the problem disappear?
 
-Если нет:
+If not:
 
 ```text
 SPLIT_REQUIRED
@@ -16,41 +16,41 @@ SPLIT_REQUIRED
 
 ## 2. Valid root shape
 
-Хороший root обычно имеет:
+A well-formed root normally has:
 
-- один concrete runtime mechanism;
-- один coherent owner/scope;
-- одну plausible correction boundary;
-- достижимый path/scenario;
-- projections, которые действительно устраняются тем же исправлением.
+- one concrete runtime mechanism;
+- one coherent owner/scope;
+- one plausible correction boundary;
+- a reachable path or scenario;
+- projections that are genuinely removed by the same correction.
 
-Не группируй только потому, что findings относятся к одному классу, сервису, «state machine», IPC или concurrency.
+Do not group findings merely because they belong to the same class, service, “state machine”, IPC area, or concurrency theme.
 
 ## 3. Root vs projection vs SER
 
 ### Root finding (`RF-*`)
 
-Concrete mechanism, который непосредственно создаёт material incorrect behavior/risk.
+A concrete mechanism that directly creates a material incorrect behavior or risk.
 
 ### Projection
 
-Наблюдаемое проявление того же механизма в другом path/UI/event/файле. Projection не получает отдельный root ID, если correction boundary действительно одна.
+An observable manifestation of the same mechanism in another path, UI, event, or file. A projection does not receive a separate root ID when the correction boundary is genuinely the same.
 
 ### Supporting Engineering Risk (`SER-*`)
 
-Структурный фактор повторения/необнаружения, например:
+A structural factor that makes recurrence or non-detection more likely, for example:
 
-- semantic owner не закодирован;
-- lifecycle spread across flags;
-- event identity отбрасывается consumer;
-- shared resource allocation ownerless;
-- отсутствует deterministic local regression suite.
+- semantic ownership is not encoded;
+- lifecycle state is spread across flags;
+- event identity is discarded by a consumer;
+- shared resource allocation is ownerless;
+- a deterministic local regression suite is missing.
 
-SER не должен автоматически наследовать severity продуктового root finding.
+An SER must not automatically inherit the severity of the Product root finding.
 
 ## 4. Split/merge decision
 
-Перед merge двух verified candidates проверь:
+Before merging two verified candidates, check:
 
 ```text
 same mechanism?
@@ -59,13 +59,13 @@ same correction unit?
 one fix removes both effects?
 ```
 
-Любой существенный `no` — сильный сигнал к split.
+Any material `no` is a strong signal to split.
 
-Перед split проверь обратное: не создаёшь ли два ID для одного и того же mechanism только потому, что он виден в двух layers.
+Before splitting, check the opposite risk: do not create two IDs for the same mechanism merely because it is visible in two layers.
 
 ## 5. Arithmetic integrity
 
-После adjudication посчитай:
+After adjudication, account for:
 
 ```text
 verified candidates
@@ -74,11 +74,11 @@ verified candidates
 → SER/open questions
 ```
 
-Каждый material verified candidate должен иметь одно основное место: root/projection/SER/open question/refuted. Не допускай двойного primary counting.
+Every material verified candidate must have one primary disposition: root, projection, SER, open question, or refuted. Do not allow double primary counting.
 
 ## 6. Output
 
-Для каждого proposed root:
+For every proposed root, record:
 
 ```text
 root ID
@@ -94,20 +94,15 @@ final action: ACCEPT_ROOT | SPLIT_REQUIRED | MERGE_WITH | DEMOTE_TO_SER | OPEN_Q
 
 ## 7. Anti-patterns
 
-Плохие root labels без concrete mechanism:
+Poor root labels that lack a concrete mechanism include:
 
-- «неявная FSM»;
-- «плохое владение»;
-- «слишком глобальное состояние»;
-- «архитектура событий хрупкая».
+- “implicit FSM”;
+- “bad ownership”;
+- “too much global state”;
+- “fragile event architecture”.
 
-Они могут быть полезными SER/theme, но root finding требует mechanism + reachable effect.
+These may be useful SERs or themes, but a root finding requires a concrete mechanism plus a reachable effect.
 
 ## Product RF root boundary
 
-A Product-scoped `RF-*` root must identify the accepted Product
-revision/baseline, affected Projects, qualified evidence and STM relations,
-and one material cross-project correction boundary. A local RF remains a local
-root unless independent Product consequence is adjudicated. Product
-aggregation, report text, projection, or index entries are mapped projections
-and cannot become the root authority.
+A Product-scoped `RF-*` root must identify the accepted Product revision/baseline, affected Projects, qualified evidence and STM relations, and one material cross-project correction boundary. A local RF remains a local root unless an independent Product consequence is adjudicated. Product aggregation, report text, projections, or index entries are mapped projections and cannot become root authority.
