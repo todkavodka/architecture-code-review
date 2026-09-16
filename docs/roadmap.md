@@ -42,6 +42,7 @@ Interface, API & Data Integration Catalog          DONE
 API Operation Completeness                         DONE
 Change Review & Baseline Reconciliation            DONE
 Federated Product Audit Coordination               DONE
+Finding Lifecycle & Progress Reporting             DONE
 ```
 
 Это означает, что в репозитории описаны, проверены и продвинуты соответствующие
@@ -53,6 +54,10 @@ runtime source scanner или другие execution-функции.
 минимально необходимую работу для `EXTEND` и `REVALIDATE`, независимые
 capabilities, operation-completeness gates, отдельную модель candidate Change
 Review и federated Product coordination поверх нескольких child repositories.
+Accepted RF/CQ finding state поддерживает стабильную lifecycle identity,
+current vs historical views, baseline-to-baseline progress, accepted-risk
+separation, stale-resolution qualification и Product-qualified aggregation,
+не вводя новую semantic authority.
 `Behavior Model` и применимая `Contract Verification` остаются внутренними
 зависимостями и сохраняют собственное authority.
 
@@ -86,13 +91,16 @@ Current Foundation
                                      |
                                      v
                     Cross-cutting Federated Product Audit Coordination [DONE]
+                                     |
+                                     v
+                    Cross-cutting Finding Lifecycle & Progress Reporting [DONE]
 ```
 
 Stage B особенно важен для надёжности генерируемых результатов Stage A, C и D,
 но его наличие не отменяет независимые authority и freshness gates этих этапов.
-Change Review и Federated Product Audit Coordination являются cross-cutting
-orchestration lifecycles, а не новыми semantic capabilities или Stage G
-authority.
+Change Review, Federated Product Audit Coordination и Finding Lifecycle &
+Progress Reporting являются cross-cutting orchestration lifecycles, а не новыми
+semantic capabilities или Stage G authority.
 
 ## Stage A — Shared Technical Model Foundation
 
@@ -570,6 +578,71 @@ milestone does not claim live repository crawling, automatic child execution,
 SCM adapter execution, owner adjudication, baseline mutation or runtime
 projection regeneration.
 
+## Cross-Cutting Milestone — Finding Lifecycle & Progress Reporting
+
+**Status: `DONE`**
+
+### Purpose
+
+Сделать эволюцию finding явной и воспроизводимой между принятыми baseline, не
+делая reports, Product aggregation или projections владельцами lifecycle.
+Milestone применяется прежде всего к Architecture `RF-*` и Code Quality
+`CQ-*`, сохраняя существующие owner-specific families и semantics Test
+Engineering.
+
+### Completed scope
+
+Принятая реализация включает:
+
+- стабильную identity finding и accepted owner revisions;
+- lifecycle `ACTIVE` / `RESOLVED` / `SUPERSEDED`;
+- отдельные dimensions disposition, remediation и freshness;
+- derived baseline progress `NEW`, `RESOLVED`, `REOPENED`, `SUPERSEDED`,
+  изменения severity и accepted-risk classification;
+- current и historical reporting, включая residual accepted-risk view;
+- resolution revalidation при advancement bindings;
+- candidate-only `POTENTIALLY_RESOLVES` в Change Review;
+- Product-qualified lifecycle/progress composition и unavailable-member
+  limitations;
+- CFV-1 semantic fingerprint;
+- Projection Impact при advancement accepted finding semantics;
+- явную regeneration boundary.
+
+Finding Lifecycle & Progress Reporting — это не новая capability, не
+`Session Intent`, не Product authority, не projection authority и не
+database/runtime service. Owner contracts остаются authoritative, reports —
+derived views.
+
+### Completion evidence
+
+```text
+implementation base:
+ffd9fe969340dd4566f2b503979d7f9f908a5c98
+
+reviewed/promoted feature head:
+996ba6b5a79a39caa284dab7d454f80ae6df0984
+
+promotion:
+FAST_FORWARD
+```
+
+```text
+FL-01..FL-30: 30/30 PASS
+FL-S1..FL-S6: 6/6 PASS
+FF-01..FF-10: 10/10 PASS
+
+Backward compatibility: PASS
+Authority: PASS
+YAGNI: PASS
+Allowlist: PASS
+```
+
+Review: `APPROVE / READY_FOR_PROMOTION`.
+`0 HIGH / 0 MEDIUM / 1 LOW`; no remediation required for promotion.
+
+Validation is contract-level Markdown evidence, not executable runtime
+validation. It does not claim a runtime finding lifecycle service.
+
 ## Cross-Stage Architectural Principles
 
 ### Evidence first
@@ -577,6 +650,8 @@ projection regeneration.
 Каждое substantive claim остаётся привязанным к проверяемому evidence.
 
 ### Semantic authority before projections
+
+Accepted owner state остаётся источником derived progress и projections.
 
 Generated reports являются projections принятого semantic state, а не его
 заменой.
@@ -590,7 +665,8 @@ Candidate review может оценивать изменения и прогн�
 ### Freshness and provenance
 
 Переиспользуемые artifacts должны оставаться привязанными к revision и
-baseline, с понятной provenance.
+baseline, с понятной provenance. Freshness qualification предшествует claims о
+текущем состоянии; stable identity предшествует учёту переходов.
 
 ### Minimum necessary work
 
@@ -675,6 +751,18 @@ Federated Product Audit Coordination
     STM/Technical Model Gate authority
     capability-local accepted state
     Product qualification and freshness/dependency contracts
+
+Finding Lifecycle & Progress Reporting
+  depends on:
+    Architecture RF owner semantics
+    Code Quality lifecycle/disposition semantics
+    accepted baseline and freshness bindings
+  reuses:
+    Change Review candidate/reconciliation boundary
+    Product qualification
+    Projection Impact / explicit regeneration
+  preserves:
+    owner-specific capability authority
 ```
 
 `depends on` здесь означает необходимую основу. `supports`, `reuses` и

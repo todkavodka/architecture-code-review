@@ -11,7 +11,9 @@
 [Current Project Status](current-status.md). Текущий baseline включает
 Federated Product Audit Coordination для координации нескольких дочерних
 репозиториев из общего non-Git Coordination Root без превращения этого каталога
-в Product, Project или semantic authority.
+в Product, Project или semantic authority. Он также включает Finding Lifecycle &
+Progress Reporting: стабильную identity findings, current/historical views,
+baseline progress и отдельное отображение accepted risk.
 
 ## С чего начать
 
@@ -26,7 +28,7 @@ Federated Product Audit Coordination для координации нескол�
 - [Review Suite и модули проверки](concepts/review-suite.md) — что можно выбрать и как независимые проверки работают вместе.
 - [Доказательства и Shared Technical Model](concepts/evidence-and-technical-model.md) — как фиксируются наблюдения и принимаются общие технические факты.
 - [Источники истины и происхождение выводов](concepts/authority-and-provenance.md) — где хранится авторитетное состояние и как проследить вывод до исходного кода.
-- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — что означают `CURRENT`, `STALE`, `VALID`, повторная проверка и замещение старых записей новыми.
+- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md) — что означают `ACTIVE`, `RESOLVED`, `SUPERSEDED`, `CURRENT` / `STALE`, reopening, baseline progress и отделение accepted risk.
 - [Проекции и пакеты результатов](concepts/projections-and-packages.md) — как человекочитаемые документы отделены от семантического источника истины.
 
 ## Практические руководства
@@ -60,6 +62,11 @@ Federated Product Audit Coordination для координации нескол�
   обязательные документы;
 - [повторное использование, изменения и Product coordination](guides/reuse-and-change.md) — практический federated Product workflow. Нормативные правила Product membership, exact baseline, frozen coordination plan и revalidation остаются в `references/`.
 
+Детальные semantics finding reporting/status находятся в [идентификаторах и
+статусах](reference/identifiers-and-statuses.md), [итоговых документах](reference/outputs.md)
+и [артефактах](reference/artifacts.md); нормативные правила остаются в
+`references/`.
+
 Другие страницы дают контекст для своей аудитории и ссылаются на эти источники
 за полными правилами.
 
@@ -83,6 +90,10 @@ Federated Product Audit Coordination для координации нескол�
 coordination: существующие принятые child audits сначала квалифицируются и
 переиспользуются, а Product baseline принимается только после stable barrier и
 точной requalification всего выбранного member/source vector.
+
+Сгенерированные результаты разделяют `CURRENT STATE`, `PROGRESS`,
+`HISTORICAL` и `RESIDUAL ACCEPTED RISK`: текущие утверждения квалифицируются
+freshness, а принятый риск не является resolved finding.
 
 ## Нормативные источники
 

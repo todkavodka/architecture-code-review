@@ -9,14 +9,15 @@
 
 ```text
 canonical branch: main
-feature promotion merge: adb576e16067ec3113182f5b4f9a865a4ca7e062
+latest promoted semantic head: 996ba6b5a79a39caa284dab7d454f80ae6df0984
 status: PROMOTED
 ```
 
-Текущий semantic baseline включает Federated Product Audit Coordination поверх
-ранее принятого Product / Multi-Project Review и Change Review lifecycle.
-После promotion в `main` могут появляться documentation-only closeout commits;
-они не меняют принятую семантику. Для проверки точного текущего Git HEAD
+Текущий semantic baseline включает Finding Lifecycle & Progress Reporting поверх
+ранее принятого Federated Product Audit Coordination, Product / Multi-Project
+Review и Change Review lifecycle. Promotion была выполнена как `FAST_FORWARD`;
+последующие documentation-only closeout commits не меняют принятую семантику.
+Для проверки точного текущего Git HEAD
 используйте сам `main`.
 
 ## Completed foundation
@@ -33,6 +34,7 @@ Interface, API & Data Integration Catalog         DONE
 API Operation Completeness                        DONE
 Change Review & Baseline Reconciliation           DONE
 Federated Product Audit Coordination              DONE
+Finding Lifecycle & Progress Reporting            DONE
 ```
 
 Это означает завершённые contract/design/implementation/review/promotion циклы.
@@ -134,7 +136,70 @@ optional explicit regeneration
 - фактический Projection Impact выполняется только после принятой reconciliation;
 - regeneration остаётся отдельным явным действием.
 
+## Finding Lifecycle & Progress Reporting
+
+Последнее принятое расширение делает эволюцию Architecture `RF-*` и Code
+Quality `CQ-*` findings явной между принятыми baseline, сохраняя owner
+authority. Identity finding стабильна; принятый owner lifecycle использует
+`ACTIVE`, `RESOLVED` и `SUPERSEDED`, а derived progress — `NEW`, `RESOLVED`,
+`REOPENED`, `SUPERSEDED`, `SEVERITY_INCREASED` и `SEVERITY_DECREASED`.
+
+Disposition, `remediation_status` и freshness остаются отдельными измерениями.
+`ACCEPTED_RISK` не означает `RESOLVED`. Отчёт или projection не могут разрешить
+finding: для resolution требуются accepted owner evidence, revalidation или
+adjudication.
+
+Результаты разделяются на `CURRENT STATE`, `PROGRESS SINCE PREVIOUS ACCEPTED
+BASELINE`, `HISTORICAL` и `RESIDUAL ACCEPTED RISK`. Изменение severity не создаёт
+новый finding, reopening не создаёт новую identity, supersession не является
+resolution, accepted risk не является resolution, а historical count не равен
+current count.
+
+Если finding resolved на baseline `B`, затем dependency/source advances to `C`
+без revalidation, историческое resolution на `B` сохраняется, но resolution
+для current `C` не утверждается и требуется `RESOLUTION_REVALIDATION_REQUIRED`.
+ACTIVE finding при advancement source/binding без revalidation остаётся видимым
+с stale/limited qualification; он не удаляется молча. Stale resolution не
+синтезирует `ACTIVE` автоматически.
+
+Product views квалифицируют состояние child findings; Product не становится
+finding lifecycle authority. Недоступный Product member даёт limitation /
+`LIMITED` / `UNKNOWN` aggregate, где применимо, и не вносит фиктивные `zero`,
+`UNCHANGED` или `verified absence`.
+
+CFV-1 строит SHA-256 digest из canonical semantic payload. Markdown wording,
+row ordering и workspace path digest не меняют; severity, lifecycle,
+disposition, freshness qualification, source binding, accepted owner revision и
+qualification меняют его. CFV не становится новым источником истины.
+
 ## Promotion evidence
+
+### Finding Lifecycle & Progress Reporting
+
+```text
+approved implementation base:
+ffd9fe969340dd4566f2b503979d7f9f908a5c98
+
+reviewed feature head:
+996ba6b5a79a39caa284dab7d454f80ae6df0984
+
+promotion:
+FAST_FORWARD
+
+canonical semantic head:
+996ba6b5a79a39caa284dab7d454f80ae6df0984
+```
+
+Implementation review: `APPROVE / READY_FOR_PROMOTION`.
+
+```text
+HIGH: 0
+MEDIUM: 0
+LOW: 1
+
+remaining remediation:
+NONE REQUIRED FOR PROMOTION
+```
 
 ### Federated Product Audit Coordination
 
@@ -176,6 +241,14 @@ feature promotion merge:
 ## Validation summary
 
 ```text
+Finding lifecycle scenarios:         30/30 PASS
+Finding lifecycle safety scenarios:   6/6 PASS
+Fail-first fixtures:                 10/10 PASS
+Backward compatibility:              PASS
+Authority:                           PASS
+YAGNI:                               PASS
+Allowlist:                           PASS
+
 Federated coordination FC scenarios: 24/24 CLOSED
 Federated pressure scenarios:        13/13 PASS
 Federated backward compatibility:    12/12 PASS
@@ -192,13 +265,22 @@ Migration:                             COMPATIBLE_EXTENSION
 Harness:                               DO_NOT_BUILD_HARNESS
 ```
 
-Federated validation является contract-level Markdown evidence и smoke
-checking. Она не утверждает наличие live repository crawler, SCM/PR adapter,
+Finding lifecycle validation является contract-level Markdown validation, а не
+executable runtime validation. Federated validation является contract-level
+Markdown evidence и smoke checking. Она не утверждает наличие live repository crawler, SCM/PR adapter,
 child workflow executor, automatic owner adjudication или runtime baseline
 mutation.
 
 ## Where to read next
 
+- [Report contract](../references/report-contract.md)
+- [Идентификаторы и статусы](reference/identifiers-and-statuses.md)
+- [Итоговые документы](reference/outputs.md)
+- [Артефакты и состояние](reference/artifacts.md)
+- [Жизненный цикл и актуальность](concepts/lifecycle-and-freshness.md)
+- [Finding Lifecycle & Progress Reporting design](superpowers/specs/2026-09-16-finding-lifecycle-progress-reporting-design.md)
+- [Finding Lifecycle & Progress Reporting validation](../tests/finding-lifecycle-progress-reporting-validation.md)
+- [Finding Lifecycle & Progress Reporting backward compatibility](../tests/finding-lifecycle-progress-reporting-backward-compatibility.md)
 - [Reuse, changes and Product coordination](guides/reuse-and-change.md)
 - [Change Review guide](guides/change-review.md)
 - [Session Intent reference](reference/workflows.md)
