@@ -1,162 +1,268 @@
-# Change Review: проверка ветки, commit или pull request
+# Change Review: как проверять ветку, commit или pull request
 
-`CHANGE_REVIEW` нужен, когда код уже изменён или существует кандидатное изменение,
-но вы ещё не хотите считать его новым принятым состоянием системы.
+`CHANGE_REVIEW` нужен, когда изменение уже существует, но **ещё не должно считаться новым принятым состоянием системы**.
 
-Типичные случаи:
+Это основной сценарий для проверки feature branch, отдельного commit или pull request до merge.
 
-- проверить feature branch до merge;
+## Когда использовать CHANGE_REVIEW
+
+Используйте его, если нужно:
+
+- проверить feature branch перед merge;
 - оценить конкретный commit;
 - проверить pull request;
-- сравнить два кандидатных решения;
-- понять, какие проблемы изменение вводит, ухудшает, смягчает или потенциально решает;
-- заранее увидеть, какие тесты, контракты и итоговые документы могут быть затронуты.
+- понять архитектурное влияние изменения;
+- понять влияние на существующие findings;
+- увидеть, какие тестовые доказательства становятся недостаточными;
+- проверить изменение API или интеграции;
+- заранее определить, какие проекции после принятия изменения станут устаревшими.
 
-`CHANGE_REVIEW` — это orchestration intent, а не четвёртый модуль Review Suite.
-Architecture Review, Test Engineering и Code Quality Review по-прежнему остаются
-тремя независимыми capability.
+Если код уже принят и считается новым текущим состоянием проекта, нужен не `CHANGE_REVIEW`, а `REVALIDATE`.
 
-## Базовая модель
+## Главное различие
+
+`CHANGE_REVIEW` отвечает на вопрос:
+
+> Что произойдёт, если принять это изменение?
+
+`REVALIDATE` отвечает на другой вопрос:
+
+> Что из уже принятого состояния остаётся верным после того, как проект изменился?
+
+Это разные процессы.
+
+## Что сравнивается
 
 Проверка всегда связывается с двумя точными состояниями источника:
 
 ```text
 BASE
-  accepted/main/commit/tree
+  принятое или выбранное исходное состояние
 
 CANDIDATE
-  branch/commit/PR/tree
+  ветка, commit, pull request или другое кандидатное состояние
 ```
 
-Человек может указать удобные ref, но review сохраняет разрешённые immutable
-commit/tree bindings. Перемещение ветки после завершения review не изменяет то,
-что было проверено.
+Пользователь может назвать ветку или PR удобным именем, но внутри review должны сохраняться неизменяемые привязки к конкретным commit/tree.
 
-## Что делает Change Review
+Это важно, потому что branch может продолжить двигаться после начала проверки.
+
+## Общий поток
 
 ```text
-BASE..CANDIDATE
-      ↓
-change inventory
-      ↓
-bounded delta discovery
-      ↓
-candidate facts / affected accepted facts
-      ↓
-selected assessment lenses
-      ↓
-review result
+BASE
+  ↓
+структурная разница
+  ↓
+изменённые файлы и поверхности
+  ↓
+необходимое расширение контекста
+  ↓
+кандидатные факты
+  ↓
+влияние на принятые факты и findings
+  ↓
+архитектура / тесты / качество / контракты
+  ↓
+результат Change Review
 ```
 
-Change Inventory отвечает на вопрос «что изменилось в исходниках». Assessment
-отдельно отвечает на вопрос «что это означает». Эти два слоя не смешиваются.
+Список изменённых файлов — только отправная точка.
 
-Review может показать:
+Если один изменённый файл влияет на другой компонент через интерфейс, конфигурацию или dependency, анализ должен расшириться до минимально необходимого связанного контекста.
+
+## Что может показать Change Review
+
+В зависимости от выбранной области:
 
 - добавленные, изменённые, удалённые и перемещённые поверхности;
-- новые candidate facts;
-- затронутые принятые факты;
-- candidate findings;
+- новые кандидатные технические факты;
+- принятые факты, которые могут измениться;
+- новые candidate findings;
 - влияние на существующие findings;
 - архитектурное влияние;
-- необходимые повторные доказательства Test Engineering;
-- возможное влияние на provider/consumer contracts;
-- прогноз того, какие projections будут затронуты после принятия изменения.
+- влияние на Test Engineering;
+- расхождения provider/consumer контрактов;
+- ожидаемое влияние на проекции после принятия изменения.
 
-Changed paths — это точка входа в анализ, а не доказательство отсутствия других
-зависимостей. Если значимая зависимость выходит за исходный diff, review должен
-расширить только необходимый срез через `CONTEXT_EXPANSION_REQUIRED`.
+## Чего Change Review не делает
 
-## Что Change Review не делает
+Сам `CHANGE_REVIEW` работает в режиме только чтения относительно принятого семантического состояния.
 
-Сам `CHANGE_REVIEW` не может:
+Он не может автоматически:
 
-- менять принятые STM facts;
-- закрывать или создавать canonical CQ/Architecture findings;
-- присваивать Test Engineering состояние `TESTED`;
-- принимать результат Contract Verification;
-- продвигать accepted baseline;
-- ставить projection в `STALE`;
-- автоматически пересобирать документы;
-- approve/merge pull request или release.
+- изменить Shared Technical Model;
+- закрыть `RF-*`;
+- закрыть `CQ-*`;
+- создать принятый новый `RF-*` или `CQ-*`;
+- изменить `BC-*`, `CC-*`, `MAT-*`, `TM-*` или `GAP-*`;
+- объявить тест `TESTED`;
+- продвинуть accepted baseline;
+- продвинуть Product baseline;
+- изменить жизненный цикл существующего finding;
+- сделать старую проекцию `STALE` или `CURRENT`;
+- пересобрать документы;
+- approve или merge pull request.
 
-Review-local `CR-*`, `CF-*` и `CRF-*` могут использоваться только как evidence,
-routing context, historical comparison или reconciliation input. Они не являются
-canonical semantic authority.
+Review-local записи служат доказательствами и контекстом для последующего принятия решения, но не заменяют владельцев семантического состояния.
 
 ## Влияние на существующие findings
 
-Кандидатный review может записать только эффект, например:
+Кандидатное изменение может иметь разное влияние на существующую проблему.
+
+Например:
 
 ```text
-UNAFFECTED
+NO_MATERIAL_IMPACT
 POTENTIALLY_RESOLVES
 MITIGATES
-WORSENS
-INVALIDATES_PRIOR_ASSUMPTION
+WORSENS_EXISTING
 UNKNOWN_IMPACT
 ```
 
-Например, изменение может `POTENTIALLY_RESOLVES` существующий HIGH finding и
-одновременно вводить новый MEDIUM candidate finding. До reconciliation старый
-finding остаётся в своём canonical lifecycle, а новый остаётся candidate-only.
+Главное слово здесь — **candidate**.
 
-## После review: RECONCILE_CHANGE
-
-Если candidate действительно становится предназначенным новым состоянием,
-пользователь отдельно выбирает `RECONCILE_CHANGE`.
+Если Change Review сообщает:
 
 ```text
-completed reusable Change Review
-        ↓
-explicit RECONCILE_CHANGE
-        ↓
-Technical Model Gate / Architecture / CQ / TE / CC
-        ↓
-accepted semantic delta
-        ↓
-baseline advancement gate
-        ↓
-Projection Impact Analysis
+RF-017 → POTENTIALLY_RESOLVES
 ```
 
-`RECONCILE_CHANGE` не является startup intent. Оно доступно только контекстно и
-только когда review пригоден для выбранного source state.
+это не означает:
 
-Review base должен соответствовать текущему accepted baseline. Если accepted
-baseline успел независимо измениться, старый `A → B` review нельзя применять к
-новому `A' → B` только потому, что candidate всё ещё равен `B`. Нужен новый
-review или полностью доказанная linked/supplemental review chain, покрывающая
-пропущенный delta.
+```text
+RF-017 → RESOLVED
+```
 
-Partial reconciliation не может объявить весь baseline согласованным.
-Открытые findings при этом могут остаться открытыми, если существующая политика
-не делает их блокирующими: baseline reconciliation не является release approval.
+До принятой owner revalidation старый finding остаётся в своём текущем принятом состоянии.
 
-## Переиспользование после merge
+## Пример
 
-Commit SHA сам по себе не определяет переиспользуемость.
+Есть принятый finding:
 
-Допустимы два доказательных пути:
+```text
+RF-017 HIGH ACTIVE
+```
+
+В PR добавлен механизм идемпотентности.
+
+Change Review может установить:
+
+```text
+candidate effect:
+  POTENTIALLY_RESOLVES RF-017
+```
+
+Но accepted state остаётся:
+
+```text
+RF-017 HIGH ACTIVE
+```
+
+пока изменение не принято и Architecture Review не проведёт повторную проверку.
+
+## Что делать после успешного review
+
+Если candidate будет принят, используется контекстный `RECONCILE_CHANGE`.
+
+Это не самостоятельный startup intent. Он доступен только тогда, когда существует пригодный завершённый Change Review.
+
+Поток:
+
+```text
+завершённый Change Review
+    ↓
+явное решение принять candidate
+    ↓
+RECONCILE_CHANGE
+    ↓
+Technical Model Gate
+Architecture Review
+Code Quality Review
+Test Engineering
+Contract Verification
+    ↓
+принятый семантический delta
+    ↓
+проверка продвижения baseline
+```
+
+Каждый владелец сам принимает изменения в своей области.
+
+Change Review не получает право записывать чужое состояние только потому, что первым увидел изменение.
+
+## Почему review нельзя бездумно переиспользовать после merge
+
+Предположим:
+
+```text
+BASE = A
+CANDIDATE = B
+```
+
+Review проверил `A → B`.
+
+После merge текущий `main` может оказаться не идентичен `B`:
+
+- merge commit добавил другой tree;
+- при разрешении конфликта код изменился;
+- ветка продвинулась после review;
+- использован partial cherry-pick;
+- squash merge собрал другой результат.
+
+Поэтому reuse требует доказательства эквивалентности.
+
+## Когда review можно переиспользовать
+
+Два основных доказательных случая:
+
+### Полное равенство дерева
 
 ```text
 WHOLE_TREE_EQUAL
+```
+
+Если итоговое дерево совпадает с проверенным candidate при той же qualification, результаты review можно переиспользовать.
+
+### Равенство заранее зафиксированного релевантного среза
+
+```text
 FROZEN_RELEVANT_SCOPE_EQUAL
 ```
 
-Первый использует равенство полного дерева при совпадающей qualification.
-Второй допускается только для заранее зафиксированного релевантного среза с
-сохранённым manifest/fingerprint и доказательством, что исключённые paths не
-влияют на рассмотренный scope.
+Это более узкий случай. Нужно заранее знать, какой срез был проверен, сохранить его manifest/fingerprint и доказать, что остальная разница не влияет на этот срез.
 
-Поэтому no-ff или squash merge может безопасно переиспользовать review, если
-итоговое source state доказанно эквивалентно. Conflict resolution, material
-branch advancement, divergence или недоказанный partial cherry-pick требуют
-дополнительного или нового review.
+Если такой доказательной базы нет, новый review безопаснее, чем предположение об эквивалентности.
 
-## Что происходит с проекциями
+## Squash merge
 
-Во время candidate review допустим только прогноз:
+Squash merge меняет commit SHA и историю, но это не обязательно делает review непригодным.
+
+Если итоговое дерево или проверенный релевантный срез доказанно совпадают, review может быть переиспользован.
+
+Нельзя принимать решение только по ancestry или branch name.
+
+## Merge с разрешением конфликтов
+
+Conflict resolution — отдельная причина для осторожности.
+
+Даже если обе исходные ветки были проверены, ручное разрешение конфликта может создать новый код, которого не было ни в одной из них.
+
+В таком случае нужно проверить фактический итоговый source state или доказать его эквивалентность ранее проверенному.
+
+## Частичный cherry-pick
+
+Если в новый baseline попала только часть candidate, исходный review не переносится автоматически.
+
+Нужно доказать, что выбранный релевантный срез всё ещё полностью покрыт.
+
+Иначе результат становится неопределённым.
+
+## Влияние на проекции
+
+Во время `CHANGE_REVIEW` можно только **предсказать** влияние на человекочитаемые документы.
+
+Например:
 
 ```text
 NO_EXPECTED_IMPACT
@@ -165,52 +271,92 @@ DEFINITELY_AFFECTED_IF_ACCEPTED
 UNKNOWN_IMPACT
 ```
 
-Он не меняет фактические `CURRENT`, `STALE` или `BLOCKED`.
+Эти метки не меняют реальную freshness проекции.
 
-После принятой reconciliation существующий `Projection Impact Analysis`
-рассчитывает реальное влияние. Даже после этого regeneration не запускается
-автоматически: пользователь отдельно выбирает нужные `RG-*` операции.
+Только после принятого semantic delta выполняется фактический анализ влияния на проекции.
 
-## Baseline mismatch и остальные сценарии
+После этого нужные документы пересобираются отдельным явным действием.
 
-| Ситуация | Поведение |
-|---|---|
-| accepted baseline совпадает | `RESUME` / допустимый `EXTEND` работают обычно |
-| accepted baseline отличается | `RESUME` останавливается с `SOURCE_BASELINE_MISMATCH` |
-| `EXTEND` при mismatch | `BASELINE_RECONCILIATION_REQUIRED` |
-| current `PROJECTION_REPAIR` при mismatch | блокируется до reconciliation |
-| нужно оценить candidate до принятия | `CHANGE_REVIEW` |
-| новое состояние уже намеренно считается текущим | `REVALIDATE` |
-| есть пригодный завершённый review | контекстно можно выбрать `RECONCILE_CHANGE` |
+## CHANGE_REVIEW и Product
 
-## Примеры запросов
+В Product-сценарии Change Review также остаётся read-only.
 
-### Feature branch
+Если изменился один дочерний Project:
+
+```text
+Product PB-10
+  backend rev5
+  frontend rev8
+
+candidate:
+  backend rev6
+```
+
+Product Change Review может оценить новый полный вектор, но не должен автоматически создавать новый accepted Product baseline.
+
+Сначала изменившийся child проходит собственную owner revalidation, затем Product повторно квалифицирует весь выбранный вектор и только после этого может принять новый baseline.
+
+## Что происходит при baseline mismatch
+
+Если текущий source уже отличается от accepted baseline:
+
+- `RESUME` не должен делать вид, что ничего не изменилось;
+- `EXTEND` не должен молча добавлять работу поверх несогласованного baseline;
+- `PROJECTION_REPAIR` не должен чинить current-проекцию для уже другого source;
+- нужно выбрать `CHANGE_REVIEW`, `REVALIDATE` или последующее `RECONCILE_CHANGE` в зависимости от ситуации.
+
+## Типовые запросы
+
+### Проверить feature branch
 
 ```text
 Используй architecture-code-review.
-Сделай CHANGE_REVIEW accepted baseline против branch feature/auth-hardening.
-Нужны Architecture impact, Code Quality impact и Test impact.
-Ничего не reconcile автоматически.
+Сделай CHANGE_REVIEW принятого baseline против branch feature/auth-hardening.
+Проверь архитектурное влияние, Code Quality и Test Engineering.
+Ничего не принимай автоматически.
 ```
 
-### Pull request
+### Проверить pull request
 
 ```text
-Сравни accepted baseline с pull request #123 через CHANGE_REVIEW.
-Покажи новые риски, потенциально закрываемые существующие findings и влияние на API/tests.
+Используй architecture-code-review.
+Сделай CHANGE_REVIEW принятого baseline против pull request #123.
+Покажи новые риски, влияние на текущие findings, тесты и API-контракты.
+```
+
+### Проверить конкретный commit
+
+```text
+Сравни accepted baseline с commit <sha> через CHANGE_REVIEW.
+Не меняй accepted state.
 ```
 
 ### После merge
 
 ```text
 Проверь, можно ли переиспользовать завершённый Change Review для текущего main.
-Если source state доказанно эквивалентен, предложи RECONCILE_CHANGE, но не запускай regeneration автоматически.
+Сначала докажи эквивалентность source state.
+Если review пригоден, предложи RECONCILE_CHANGE.
 ```
 
-## См. также
+## Частые ошибки
 
+Не следует:
+
+- считать Change Review принятием candidate;
+- закрывать findings прямо из candidate review;
+- автоматически продвигать baseline после merge;
+- считать одинаковое имя ветки доказательством одинакового source state;
+- считать одинаковый набор изменённых файлов доказательством эквивалентности;
+- автоматически пересобирать все документы после review;
+- смешивать `CHANGE_REVIEW` и `REVALIDATE`;
+- использовать старый review после conflict resolution без проверки результата.
+
+## Связанные документы
+
+- [Что делать после изменения кода](after-code-changes.md)
+- [Жизненный цикл аудита](audit-lifecycle.md)
+- [Практические рецепты](common-recipes.md)
 - [Повторное использование, изменения и расширение](reuse-and-change.md)
 - [Справочник процессов](../reference/workflows.md)
 - [Жизненный цикл и актуальность](../concepts/lifecycle-and-freshness.md)
-- [Текущий статус проекта](../current-status.md)
