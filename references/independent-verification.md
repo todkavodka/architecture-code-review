@@ -1,21 +1,21 @@
-# Независимая проверка кандидатов
+# Independent Candidate Verification
 
-Этот файл определяет Independent Verification (независимую проверку) discovery-кандидатов. Discovery output — это гипотезы; verifier должен заново проверить код/путь и попытаться опровергнуть вывод.
+This file defines Independent Verification for discovery candidates. Discovery output consists of hypotheses; the verifier must independently re-check the code/path and actively attempt to falsify each conclusion.
 
-## 1. Вход
+## 1. Input
 
-Verifier получает:
+The verifier receives:
 
-- exact repository baseline;
+- the exact repository baseline;
 - `working/INDEX.md`;
-- список `CAND-*` и ссылки на исходные working artifacts;
-- принятую As-Built Architecture;
-- relevant positive controls/open questions;
-- узкую задачу: подтвердить/исправить/опровергнуть candidates, не проектировать remediation.
+- the list of `CAND-*` records and links to their source working artifacts;
+- the accepted As-Built Architecture;
+- relevant Positive Controls and open questions;
+- a narrow task: confirm, correct, or refute candidates, not design remediation.
 
-Не доверяй формулировке кандидата только потому, что она появилась в предыдущем pass.
+Do not trust a candidate statement merely because it was produced by an earlier pass.
 
-## 2. Допустимые исходы
+## 2. Allowed outcomes
 
 ```text
 CONFIRMED
@@ -25,28 +25,28 @@ UNVERIFIED
 NEW_ADJACENT
 ```
 
-`NEW_ADJACENT` допустим, если проверка конкретного кандидата обнаружила соседний механизм. Не превращай verification в новый бесконтрольный discovery pass.
+`NEW_ADJACENT` is allowed when verification of a specific candidate reveals a neighboring mechanism. Do not turn verification into a new unbounded discovery pass.
 
-## 3. Минимальный falsification contract
+## 3. Minimum falsification contract
 
-Для каждого кандидата явно спроси:
+For every candidate, explicitly ask:
 
-- состояние/ресурс действительно shared?
-- global scope намеренный?
-- существует ли guard на другом слое/path?
-- alleged stale completion реально достижим?
-- event/boundary уже переносит owner/request identity?
-- consumer действительно теряет эту identity?
-- выбранное состояние snapshot или live observable?
-- resource fixed globally или изолирован другим mechanism?
-- cleanup реально не awaited или runtime гарантированно ждёт?
-- security entry point достижим attacker-controlled input?
+- is the state or resource actually shared?
+- is global scope intentional?
+- does another layer or path provide a guard?
+- is the alleged stale completion actually reachable?
+- does the event or boundary already carry owner/request identity?
+- does the consumer actually discard that identity?
+- is the selected state a snapshot or a live observable?
+- is the resource globally fixed, or isolated by another mechanism?
+- is cleanup actually not awaited, or does the runtime guarantee waiting?
+- is the security entry point reachable from attacker-controlled input?
 
-Если falsification требует неизвестного product intent — не выдумывай его; зафиксируй open question / `PENDING_PRODUCT_INTENT` downstream.
+If falsification requires unknown product intent, do not invent it. Preserve an open question or `PENDING_PRODUCT_INTENT` downstream.
 
 ## 4. Evidence shape
 
-Для `CONFIRMED`/`CORRECTED` укажи:
+For `CONFIRMED` or `CORRECTED`, record:
 
 ```text
 candidate ID
@@ -59,13 +59,13 @@ concrete effect
 result
 ```
 
-Для `REFUTED` обязательно объясни точный falsifier, а не просто «не подтвердилось».
+For `REFUTED`, explain the exact falsifier rather than merely saying “not confirmed”.
 
-Для `UNVERIFIED` укажи, какой evidence отсутствует/недоступен.
+For `UNVERIFIED`, identify the evidence that is missing or unavailable.
 
 ## 5. Correction propagation
 
-Если механизм исправлен относительно раннего pass:
+When the verified mechanism differs from an earlier pass:
 
 ```text
 old statement
@@ -75,24 +75,23 @@ old statement
 → stale contradictory wording marked superseded
 ```
 
-Известный тип ошибки: интуитивная модель library/runtime semantics (`once`, cancellation, shutdown) вместо фактической semantics. При сомнении проверяй реальные API guarantees/code behavior.
+A common failure mode is using an intuitive model of library/runtime semantics — for example `once`, cancellation, or shutdown — instead of the actual semantics. When uncertain, verify real API guarantees or code behavior.
 
-## 6. Роль verification
+## 6. Role of verification
 
-Verification отвечает на вопрос **«это реально так?»**.
+Verification answers the question **“is this actually true?”**
 
-Он не должен:
+It must not:
 
-- назначать окончательную severity;
-- объединять разные mechanisms под красивый root без root-boundary gate;
-- проектировать Target Architecture;
-- переписывать As-Built напрямую;
-- считать absence evidence доказательством дефекта.
+- assign final severity;
+- merge different mechanisms into an attractive root without the root-boundary gate;
+- design Target Architecture;
+- rewrite As-Built directly;
+- treat absence evidence as proof of a defect.
 
 ## Product RF verification
 
-For a Product-scoped Architecture candidate, independent verification must
-confirm the joint scope tuple before Architecture adjudication:
+For a Product-scoped Architecture candidate, independent verification must confirm the joint scope tuple before Architecture adjudication:
 
 ```text
 Product identity/revision + immutable Product baseline
@@ -102,11 +101,8 @@ Product identity/revision + immutable Product baseline
 → material Product architectural consequence
 ```
 
-Verification must also confirm that the candidate uses the existing `RF-*`
-family, remains Architecture-owned, and is not merely a Project-local RF,
-aggregate report, projection, or generated index. A missing or conflicting
-tuple is `UNVERIFIED`/bounded evidence, not a Product RF acceptance.
+Verification must also confirm that the candidate uses the existing `RF-*` family, remains Architecture-owned, and is not merely a Project-local RF, aggregate report, projection, or generated index. A missing or conflicting tuple is `UNVERIFIED` / bounded evidence, not Product RF acceptance.
 
 ## 7. Handoff
 
-Рабочий verification artifact заканчивается persisted `HANDOFF SUMMARY` по contract из `review-modes-and-orchestration.md`, включая outcome каждого `CAND-*`, новые `AC-*`/`OQ-*` и supersessions.
+The working verification artifact ends with the persisted `HANDOFF SUMMARY` required by `review-modes-and-orchestration.md`, including the outcome of every `CAND-*`, any new `AC-*` / `OQ-*`, and supersessions.
