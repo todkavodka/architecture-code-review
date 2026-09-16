@@ -147,6 +147,34 @@ Projection repair cannot change CQ semantic authority, and semantic
 `REVALIDATE` is not projection regeneration. `working/INDEX.md` remains
 coordinator workflow authority only.
 
+### Artifact path discipline
+
+Code Quality output paths are contract-owned, not chosen by the umbrella
+coordinator or a worker. Read
+`references/code-quality-projection.md` and the umbrella
+`references/artifact-layout-and-package-completeness.md` before persisting a
+human-readable Code Quality output.
+
+The registered projection paths are:
+
+```text
+working/projections/code-quality/findings-view.md
+working/projections/code-quality/summary.md
+working/projections/code-quality/hotspots.md
+working/projections/code-quality/roadmap-contribution.md
+```
+
+Only explicitly selected registered projections are written. Do not replace
+these with umbrella aggregate paths such as `05-code-quality.md`,
+`06-code-quality.md`, `working/code-quality.md`, or another convenient filename
+unless an approved projection contract separately registers that exact path.
+
+A requested Code Quality output whose path is not declared by the owning
+projection contract must stop with `ARTIFACT_PATH_NOT_DECLARED`; do not invent a
+path or directory. Directories are created lazily only when a selected declared
+artifact requires them. Final package acceptance is subject to
+`ARTIFACT_PACKAGE_RECONCILIATION`.
+
 ## Handoff boundary
 
 Use the referenced semantic contracts for finding identity, taxonomy, evidence,
