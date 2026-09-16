@@ -669,6 +669,29 @@ uses the shared Stage B handoff after the semantic delta is stabilized.
 
 ### Test Engineering source-view routing
 
+## Finding resolution freshness and semantic authority advancement
+
+Finding lifecycle and freshness remain separate. An accepted `RESOLVED`
+revision is bound to the exact source, evidence, and dependency snapshot that
+proved absence. If a material source, STM fact, dependency, or resolution
+prerequisite advances, the old resolution remains historical but cannot prove
+absence on the new source.
+
+The derived current view then exposes
+`RESOLUTION_REVALIDATION_REQUIRED` for that historical identity, excludes it
+from `RESOLVED + CURRENT` and verified-current absence, and does not invent
+`ACTIVE`. Owner revalidation must create the next accepted `ACTIVE` revision
+with `reopened_from` when the same root returns, or a qualified supersession
+outcome when the mechanism is materially different. Active findings on an
+advanced source remain visible with `STALE` or qualified `freshness=BLOCKED`
+limitation until owner revalidation.
+
+`SOURCE_ADVANCEMENT` and `SEMANTIC_AUTHORITY_ADVANCEMENT` are independent. A
+new accepted owner revision on the same source can stale a dependent Product or
+projection state without changing the source vector or advancing Product
+baseline acceptance. A `remediation_status=BLOCKED` value remains orthogonal
+and never implies resolution or accepted risk.
+
 Test Engineering records concrete revision bindings for each accepted BC and
 CC. A service and consumer may therefore have independent baselines:
 

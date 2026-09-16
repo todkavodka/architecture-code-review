@@ -124,6 +124,24 @@
 
 ## Быстрые проверки различий
 
+## RF/CQ reporting dimensions
+
+The common derived reporting view keeps these independent:
+
+| Dimension | Values / rule | Owner |
+|---|---|---|
+| `lifecycle` | `ACTIVE | RESOLVED | SUPERSEDED`; `REOPENED` is derived | RF or CQ owner |
+| `freshness` | `CURRENT | STALE | BLOCKED` | Existing owner/revalidation contract |
+| `disposition` | Owner-qualified treatment, including accepted risk where explicitly approved | RF or CQ owner |
+| `remediation_status` | Owner-specific work/execution status, including `BLOCKED` | Owner-specific workflow |
+
+`freshness=BLOCKED` is not `remediation_status=BLOCKED`. An active finding
+with either condition remains technical risk; only freshness-blocked state is
+excluded from `VERIFIED_CURRENT`, while remediation blocking is reported as
+blocked work. Test Engineering families (`BC-*`, `CC-*`, `MAT-*`, `TM-*`,
+`GAP-*`, `TASK-*`) retain their existing dimensions and are not assigned RF/CQ
+lifecycle or Current Findings counters.
+
 - `WS-*` не равно `EV-*`; `EV-*` не равно `EVENT-*`.
 - `RF-*` — архитектурный вывод, а не доказательство или факт STM.
 - `BC-*`, `CC-*`, `MAT-*`, `TM-*`, `GAP-*` и `TASK-*` сохраняют разные роли; в частности, `GAP-*` не равно `TASK-*`.

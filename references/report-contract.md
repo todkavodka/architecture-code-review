@@ -507,6 +507,114 @@ Executive summary сначала объясняет системную карт�
 
 ## 12. Final status
 
+## Finding lifecycle, derived views, and progress
+
+The common reporting model applies to accepted `RF-*` and `CQ-*` owner
+revisions. It does not create a shared finding authority and does not coerce
+Test Engineering families into these states.
+
+| Dimension | Values | Meaning |
+|---|---|---|
+| `lifecycle` | `ACTIVE | RESOLVED | SUPERSEDED` | Owner-controlled technical lifecycle; `REOPENED` is derived only. |
+| `freshness` | `CURRENT | STALE | BLOCKED` | Strength/availability of current evidence. |
+| `disposition` | owner-qualified treatment | Action required, accepted risk/exception, declined, or deferred only where the owner contract defines it. |
+| `remediation_status` | owner-specific work state | Execution state such as `BLOCKED`; never a lifecycle or disposition decision. |
+
+Always qualify `BLOCKED` as `freshness=BLOCKED` or
+`remediation_status=BLOCKED`. They may coexist and have different effects.
+
+### Current Findings predicate
+
+`Current Findings` is a derived view over one accepted owner-authority snapshot.
+It includes each qualified active finding with its owner, stable identity,
+accepted revision, lifecycle, disposition, severity, source/baseline binding,
+freshness, evidence, and lineage references.
+
+| State | Current Findings | Additional result |
+|---|---|---|
+| `lifecycle=ACTIVE, freshness=CURRENT` | included | actionable or accepted residual risk by disposition |
+| `lifecycle=ACTIVE, freshness=STALE` | included | revalidation limitation; not verified-current |
+| `lifecycle=ACTIVE, freshness=BLOCKED` | included | freshness limitation; excluded from `VERIFIED_CURRENT` |
+| `lifecycle=ACTIVE, remediation_status=BLOCKED` | included | remediation-blocked label; remains technical risk |
+| `lifecycle=RESOLVED, freshness=CURRENT` | excluded | resolved flow/history |
+| `lifecycle=RESOLVED` with stale proof after source/dependency advancement | excluded from verified absence | `RESOLUTION_REVALIDATION_REQUIRED`; historical resolution remains bound to old source |
+| `lifecycle=SUPERSEDED` | excluded | supersession history and replacement lineage |
+| `LEGACY_STATUS_UNKNOWN` | excluded from definitive lifecycle/severity counts | mandatory migration uncertainty |
+| unavailable owner/member | no invented row | availability limitation; never zero or unchanged |
+
+An active accepted-risk disposition remains in technical Current Findings and
+current stock, but is excluded from actionable/open requiring remediation. Its
+transition from `ACTION_REQUIRED` to accepted risk emits
+`ACCEPTED_RISK_ADDED`, leaves current stock and lifecycle counts unchanged,
+decreases actionable count, and increases residual accepted risk. The reverse
+emits `ACCEPTED_RISK_REMOVED`; neither transition is `NEW` or `RESOLVED`.
+`WONT_FIX` is not accepted risk unless its owner contract establishes exact
+equivalence.
+
+### Historical Findings and progress
+
+The derived Historical Findings view preserves every accepted identity and
+immutable revision, including active, resolved, superseded, reopened, and
+legacy/unknown records. Report these separately as `REGISTERED_RF`,
+`RESOLVED_RF_HISTORICALLY`, `SUPERSEDED_RF_HISTORICALLY`, `CURRENT_RF`, and
+`ACCEPTED_RISK_RF`; they are overlapping views, not an arithmetic partition.
+
+Compare two exact accepted baselines for the same qualified scope and frozen
+member/source vector. Join by qualified stable identity, then compare accepted
+revisions. Derived labels are:
+
+```text
+NEW, RESOLVED, REOPENED, SUPERSEDED, UNCHANGED,
+SEVERITY_INCREASED, SEVERITY_DECREASED,
+ACCEPTED_RISK_ADDED, ACCEPTED_RISK_REMOVED
+```
+
+Each identity receives at most one lifecycle transition per baseline pair;
+severity and disposition changes attach as classification flows. Current stock
+and severity buckets are stocks; lifecycle labels are flows; severity and
+disposition labels are classification flows. A complete comparable pair may
+use:
+
+```text
+CURRENT(N+1) = CURRENT(N) + NEW + REOPENED - RESOLVED - SUPERSEDED
+```
+
+Never force this equation for unavailable, unknown, or otherwise incomparable
+scope. `RESOLVED` and `SUPERSEDED` are distinct and supersession receives no
+resolution credit. Severity changes preserve identity and lifecycle unless a
+separate accepted lifecycle revision changes it.
+
+### Source-bound resolution freshness
+
+Every resolved revision proves absence only for its exact accepted
+source/evidence/dependency snapshot. When that binding advances, retain the
+historical `RESOLVED` fact but do not report `RESOLVED + CURRENT` on the new
+source. Expose `RESOLUTION_REVALIDATION_REQUIRED`, do not synthesize `ACTIVE`,
+and route owner revalidation. Active stale findings remain visible with a
+limitation and are not asserted definitely applicable to the advanced source.
+
+### Legacy qualification
+
+Legacy records are registered under their existing owner and stable identity
+without rewriting the old package. Evidence tiers are:
+
+1. explicit accepted owner lifecycle/status with complete identity and owner
+   binding — mechanical;
+2. complete accepted resolution/supersession with identity, owner, and exact
+   source binding — mechanical when complete;
+3. finding-tied accepted remediation verification without lifecycle authority —
+   owner adjudication required;
+4. report/projection prose, including “fixed” — insufficient;
+5. commit messages, code absence, timestamps, or inference — insufficient.
+
+Only complete Tiers 1–2 mechanically migrate lifecycle. Otherwise derive
+`LEGACY_STATUS_UNKNOWN` as a migration/qualification condition. Unknown records
+are excluded from definitive lifecycle/severity and verified-current counts,
+shown as mandatory uncertainty, and cannot be treated as zero or verified
+resolved by Product. Existing projections use their current legacy registration
+and remain non-current until their own verification; Product baselines with
+unproven child bindings require bounded requalification.
+
 `REVIEW_COMPLETE` допускается только после completion gates `SKILL.md`, включая independent verification/adjudication, cross-link check и editorial correction/re-review.
 
 Иначе `REVIEW_PARTIALLY_COMPLETE` с точным перечислением missing evidence/gates.
