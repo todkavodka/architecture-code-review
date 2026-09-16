@@ -152,3 +152,26 @@ Markdown, ссылка или таблица — допустим `PROJECTION_RE
 Подробнее: [проекции и пакеты результатов](../concepts/projections-and-packages.md),
 [жизненный цикл и актуальность](../concepts/lifecycle-and-freshness.md),
 [справочник процессов](workflows.md) и [руководство по Test Engineering](../guides/test-engineering.md).
+
+## Finding lifecycle and progress reporting
+
+For Architecture `RF-*` and Code Quality `CQ-*`, present separate sections:
+
+```text
+CURRENT STATE
+PROGRESS SINCE PREVIOUS ACCEPTED BASELINE
+HISTORICAL
+RESIDUAL ACCEPTED RISK
+```
+
+`CURRENT STATE` reports qualified active technical risk, verified-current
+subset, current severity distribution, actionable count, blocked remediation,
+and freshness/availability limitations. `PROGRESS` reports derived `NEW`,
+`RESOLVED`, `REOPENED`, `SUPERSEDED`, severity transitions, and accepted-risk
+classification transitions from comparable accepted baselines. `HISTORICAL`
+retains registered, historically resolved, superseded, and reopened identities.
+`RESIDUAL ACCEPTED RISK` is a disposition view and never resolution credit.
+
+Stale resolved proof is shown as `RESOLUTION_REVALIDATION_REQUIRED`; legacy
+unknown and unavailable members remain explicit limitations. A missing prior
+baseline yields `NO_COMPARABLE_BASELINE`, not an invented zero.

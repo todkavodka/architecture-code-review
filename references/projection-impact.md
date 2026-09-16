@@ -291,3 +291,12 @@ the verified fingerprint and all required revisions still match. Impact
 accounting never writes projection content or starts `RG-*`; an explicit
 regeneration request is required after accounting, and unrelated stale
 projections do not block an unrelated resolved package scope.
+
+## Finding semantic impact
+
+An accepted owner revision or derived Current Findings change is a semantic
+input to Projection Impact Analysis. Lifecycle, severity, disposition,
+source/baseline binding, freshness qualification, and interpretation-changing
+limitation changes may stale dependent projections. The impact record preserves
+the reason and affected dependency path; it never writes the owner finding,
+changes Product baseline acceptance, or regenerates Markdown.

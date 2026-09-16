@@ -283,3 +283,12 @@ does not include unrelated members merely because they belong to the Product.
 Generation remains explicit; impact analysis never starts it automatically.
 The Product context and selector snapshot are provenance inputs, not a new
 regeneration identity or semantic authority.
+
+## Finding-view regeneration boundary
+
+Accepted RF/CQ lifecycle, severity, disposition, freshness, or qualified-view
+changes may leave dependent projections `STALE`. Regeneration is available only
+through an explicit existing `RG-*` session and its V1–V4 checks. The previous
+Markdown projection cannot override owner state or create resolution,
+supersession, reopening, accepted risk, severity changes, or Product baseline
+advancement. `REGENERATED` is not `CURRENT` until verification succeeds.
