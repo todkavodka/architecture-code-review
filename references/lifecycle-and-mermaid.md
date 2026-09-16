@@ -1,108 +1,108 @@
-# Жизненный цикл и Mermaid
+# Lifecycle and Mermaid
 
-Lifecycle reconstruction (реконструкция жизненного цикла) обязательна там, где поведение зависит от времени, фоновой работы, соединений, сессий, ресурсов, retry/reconnect или shutdown. Диаграммы нужны только когда добавляют архитектурную информацию; декоративной квоты нет, но substantial final report не должен оставаться без визуального объяснения material topology/lifecycle/ownership только потому, что writer его не нарисовал.
+Lifecycle reconstruction is mandatory wherever behavior depends on time, background work, connections, sessions, resources, retry/reconnect, or shutdown. Diagrams are required only when they add architectural information; there is no decorative quota. However, a substantial final report must not omit a visual explanation of material topology, lifecycle, or ownership merely because the writer did not draw one.
 
-## 1. Обязательные вопросы жизненного цикла
+## 1. Required lifecycle questions
 
-Для каждого significant process/connection/task/session/resource ответь:
+For every significant process, connection, task, session, or resource, answer:
 
-- кто создаёт;
-- какие prerequisites нужны;
-- кто владеет во время работы;
-- какие состояния реально существуют;
-- какие события вызывают transitions;
-- что происходит при failure;
-- кто управляет retry/reconnect;
-- что отменяет работу и какой scope у отмены;
-- что происходит при logout/reconfiguration/window close/process shutdown;
-- какие ресурсы должны быть освобождены;
-- может ли случайно существовать несколько экземпляров;
-- что происходит с in-flight work при смене owner/generation;
-- какой completion считается stale и как он подавляется.
+- who creates it;
+- which prerequisites are required;
+- who owns it while it is active;
+- which states actually exist;
+- which events cause transitions;
+- what happens on failure;
+- who controls retry or reconnect;
+- what cancels the work and what the cancellation scope is;
+- what happens on logout, reconfiguration, window close, or process shutdown;
+- which resources must be released;
+- whether multiple instances can accidentally exist;
+- what happens to in-flight work when owner or generation changes;
+- which completion is stale and how stale completion is suppressed.
 
-Связывай ответы с ownership matrix и adversarial scenarios из `ownership-and-scenarios.md`.
+Connect these answers to the ownership matrix and adversarial scenarios in `ownership-and-scenarios.md`.
 
-## 2. Какие диаграммы использовать
+## 2. Choosing diagrams
 
-Создавай диаграмму, если она помогает доказать или объяснить важный механизм.
+Create a diagram when it helps prove or explain a material mechanism.
 
 ### Architecture flowchart
 
-Показывай процессы/компоненты, state stores, внешние системы и trust-relevant boundaries. Не рисуй directory tree.
+Show processes/components, state stores, external systems, and trust-relevant boundaries. Do not draw a directory tree.
 
 ### Overall lifecycle / state diagram
 
-`stateDiagram-v2` полезен, когда есть реальные состояния и transitions. Включай failure/recovery/cancel/shutdown, а не только happy path.
+Use `stateDiagram-v2` when real states and transitions exist. Include failure, recovery, cancellation, and shutdown rather than only the happy path.
 
 ### Startup
 
-Показывай configuration load, restoration, dependency construction, handler registration, background startup, UI/readiness и startup failure behavior, если это существенно.
+Show configuration loading, restoration, dependency construction, handler registration, background startup, UI/readiness, and startup failure behavior when material.
 
 ### Runtime sequence
 
-`sequenceDiagram` с реальными component names нужен для material end-to-end flow: initiator → boundaries → side effect → completion/error.
+Use `sequenceDiagram` with real component names for a material end-to-end flow: initiator → boundaries → side effect → completion/error.
 
 ### Background task / retry / reconnect
 
-Показывай creation, running/waiting, cancellation, retry/backoff, terminal failure и ownership. Если фоновой работы нет — не изобретай диаграмму.
+Show creation, running/waiting, cancellation, retry/backoff, terminal failure, and ownership. If the system has no relevant background work, do not invent a diagram.
 
 ### Shutdown
 
-Показывай rejection of new work (если есть), cancellation/drain/flush, persistence, sockets/processes/database cleanup и final exit. Отдельно отмечай fire-and-forget cleanup и API, которые runtime может не ожидать.
+Show rejection of new work where applicable, cancellation/drain/flush, persistence, socket/process/database cleanup, and final exit. Explicitly mark fire-and-forget cleanup and APIs that the runtime may not await.
 
 ### Trust boundaries
 
-Показывай untrusted input и места validation/authorization: UI/native, network, filesystem, external process, plugin, deep link, uploaded content и т.п.
+Show untrusted input and validation/authorization points: UI/native, network, filesystem, external process, plugin, deep link, uploaded content, and similar boundaries.
 
 ### Before → After architecture
 
-Используй две компактные диаграммы или одну явно разделённую диаграмму, когда remediation/target меняет owner, lifecycle, boundary, ordering или source of truth. Читатель должен визуально видеть не только новый компонент, но и **какая проблемная зависимость исчезает**.
+Use two compact diagrams, or one clearly partitioned diagram, when remediation or target state changes ownership, lifecycle, boundary, ordering, or source of truth. The reader must be able to see not only the new component, but **which problematic dependency disappears**.
 
 ### Roadmap dependencies
 
-Для нетривиальной dependency graph показывай prerequisites, gates и safe-activation boundary. Не рисуй последовательную цепочку, если задачи реально могут идти параллельно.
+For a non-trivial dependency graph, show prerequisites, gates, and the safe-activation boundary. Do not draw a purely sequential chain when tasks can actually proceed in parallel.
 
 ## 3. Visual coverage contract for final artifacts
 
-Для substantial `STANDARD_FULL` или `FORENSIC` final package ожидается следующее визуальное покрытие, если соответствующая сложность существует в проекте:
+For a substantial `STANDARD_FULL` or `FORENSIC` final package, expect the following visual coverage when the corresponding complexity exists in the project:
 
-1. **As-Built component/boundary view** — когда есть несколько существенных runtime-компонентов, процессов или внешних систем.
-2. **Material runtime/lifecycle view** — когда ordering, ownership, concurrency, retry, startup или shutdown влияют на correctness.
-3. **Target Architecture view** — когда endpoint включает target и target существенно меняет boundaries/ownership/flows.
-4. **Before → After view** — для material correction, которую трудно понять только из prose.
-5. **Roadmap dependency view** — когда prerequisites/safe activation нелинейны.
+1. **As-Built component/boundary view** — when multiple material runtime components, processes, or external systems exist.
+2. **Material runtime/lifecycle view** — when ordering, ownership, concurrency, retry, startup, or shutdown affects correctness.
+3. **Target Architecture view** — when the endpoint includes target state and the target materially changes boundaries, ownership, or flows.
+4. **Before → After view** — for a material correction that is difficult to understand from prose alone.
+5. **Roadmap dependency view** — when prerequisites or safe activation are non-linear.
 
-Это не механическая квота. Если конкретный пункт неприменим, диаграмма не нужна. Но если substantial report содержит сложную topology/lifecycle/target механику и не содержит ни одной полезной диаграммы, final writer/reviewer должен явно обосновать, почему визуализация не добавит информации.
+This is not a mechanical quota. If an item is not applicable, no diagram is required. But if a substantial report contains complex topology, lifecycle, or target mechanics and no useful diagram, the final writer/reviewer must explicitly justify why visualization would add no information.
 
-Диаграммы относятся к user-facing explanation. Working artifacts могут содержать больше или меньше визуализаций по необходимости.
+Diagrams are part of user-facing explanation. Working artifacts may contain more or fewer visualizations as needed.
 
-## 4. Диаграмма должна соответствовать evidence
+## 4. Diagrams must match evidence
 
-Для каждой важной стрелки/transition должен существовать подтверждённый code path или явно маркированное допущение.
+Every material arrow or transition must have a confirmed code path or an explicitly marked assumption.
 
-Не допускается:
+Do not:
 
-- показывать target behavior как будто это current behavior;
-- придумывать state только ради красивой FSM;
-- скрывать race/interleaving, превращая конкурентные операции в линейную sequence;
-- использовать диаграмму как единственное доказательство finding;
-- рисовать generic boxes без связи с реальными subsystem names;
-- повторять directory tree вместо runtime architecture.
+- show target behavior as if it were current behavior;
+- invent a state merely to make a cleaner FSM;
+- hide a race or interleaving by turning concurrent operations into a linear sequence;
+- use a diagram as the only evidence for a finding;
+- draw generic boxes with no relation to real subsystem names;
+- reproduce a directory tree instead of runtime architecture.
 
 ## 5. Diagram explanation contract
 
-Каждая material диаграмма сопровождается коротким prose-блоком:
+Every material diagram must be accompanied by a short prose block explaining:
 
-- что именно она показывает;
-- какой механизм/риск становится на ней виден;
-- где current и где target state;
-- какой вывод читатель должен из неё сделать.
+- what the diagram shows;
+- which mechanism or risk becomes visible;
+- which state is current and which is target;
+- which conclusion the reader should draw from it.
 
-Не вставляй Mermaid без контекста и не заставляй читателя самостоятельно угадывать смысл стрелок.
+Do not insert Mermaid without context or force the reader to infer the meaning of arrows independently.
 
-## 6. Проверка согласованности
+## 6. Consistency check
 
-Перед принятием документа сравни:
+Before accepting a document, compare:
 
 ```text
 prose
@@ -112,13 +112,13 @@ prose
 ↔ authoritative findings
 ```
 
-Если они расходятся, это consistency issue, а не редакционная мелочь.
+A mismatch is a consistency issue, not an editorial detail.
 
 ## 7. Mermaid render-validation gate
 
-Mermaid в final user-facing artifacts считается проверенным только после реальной parser/render validation, если в окружении доступен совместимый инструмент.
+Mermaid in final user-facing artifacts is considered render-validated only after actual parser/render validation when a compatible tool is available in the environment.
 
-Обязательная последовательность:
+Required sequence:
 
 ```text
 enumerate all final Mermaid blocks
@@ -130,26 +130,26 @@ enumerate all final Mermaid blocks
 → only then accept diagram gate
 ```
 
-Подходящие инструменты включают `mmdc`, project-provided Mermaid validator/parser, documentation build pipeline или другой совместимый renderer. Не привязывай Skill к одному vendor tool; предпочитай toolchain, который реально используется проектом или его Markdown/docs workflow.
+Suitable tools include `mmdc`, a project-provided Mermaid validator/parser, a documentation build pipeline, or another compatible renderer. Do not bind the Skill to one vendor tool; prefer the toolchain actually used by the project or its Markdown/docs workflow.
 
-Если renderer/parser доступен, **фактически вызови его**. Визуальная инспекция текста, фраза «syntax looks valid» или проверка только одной sample-diagram не заменяют executable validation.
+If a renderer/parser is available, **actually invoke it**. Visual inspection of source text, a statement that “syntax looks valid”, or validation of only one sample diagram is not executable validation.
 
-Если renderer/parser отсутствует:
+If no renderer/parser is available:
 
-- зафиксируй `MERMAID_RENDER_VALIDATION_UNAVAILABLE`;
-- выполни strongest available structural review;
-- не утверждай, что diagram render validation PASS;
-- явно укажи limitation в final verification record.
+- record `MERMAID_RENDER_VALIDATION_UNAVAILABLE`;
+- perform the strongest available structural review;
+- do not claim that diagram render validation passed;
+- state the limitation explicitly in the final verification record.
 
-Любой известный parser/render failure — `DIAG-*` issue и блокирует `FINAL_PACKAGE_ACCEPTED`, пока диаграмма не исправлена и не прошла повторную проверку.
+Any known parser/render failure is a `DIAG-*` issue and blocks `FINAL_PACKAGE_ACCEPTED` until the diagram is corrected and passes re-validation.
 
-Для compatibility предпочитай простой устойчивый syntax: не используй экзотические directives/extensions без необходимости; осторожно обращайся со special characters, punctuation, multiline labels и state aliases. Однако упрощение синтаксиса не должно менять архитектурную семантику диаграммы.
+For compatibility, prefer simple stable Mermaid syntax. Avoid exotic directives/extensions without necessity and handle special characters, punctuation, multiline labels, and state aliases carefully. Syntax simplification must not change the architectural meaning of the diagram.
 
 ## 8. Mermaid quality
 
-- Используй простой стандартный Mermaid syntax.
-- Реальные subsystem names, не `Service1`/`Component2`.
-- Не кодируй огромные листинги в диаграмме.
-- Подписывай owner/scope там, где это важно для понимания.
-- Проверяй, что arrows/states отражают фактический path.
-- Render validation и semantic consistency — разные gates: успешно отрисованная, но технически неверная диаграмма всё равно FAIL.
+- Use simple standard Mermaid syntax.
+- Use real subsystem names, not `Service1` or `Component2`.
+- Do not encode large code listings in a diagram.
+- Label owner/scope where important to understanding.
+- Verify that arrows and states reflect the actual path.
+- Render validation and semantic consistency are separate gates: a diagram that renders successfully but is technically wrong still fails.
