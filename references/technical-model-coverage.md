@@ -6,6 +6,11 @@ the [Shared Technical Model](shared-technical-model.md). It defines the
 lifecycle, evidence observations, capability findings, or Architecture
 Discovery Coverage.
 
+Artifact paths and review-package topology are governed by
+[`artifact-layout-and-package-completeness.md`](artifact-layout-and-package-completeness.md).
+The domain taxonomy below is semantic coverage taxonomy, not a filesystem
+layout contract.
+
 ## 1. Full technical domains
 
 A `FULL` STM matrix contains each domain in this closed list exactly once and
@@ -32,6 +37,22 @@ classifies every materially applicable domain:
 
 The matrix is materiality- and evidence-bounded. A domain absent by design is
 recorded as `NOT_APPLICABLE` with the evidence-backed reason; it is not omitted.
+
+The domain names MUST NOT be converted into directory names or storage buckets
+unless the owning Shared Technical Model persistence contract or frozen
+`ARTIFACT_LAYOUT_MANIFEST` explicitly declares those paths. For example:
+
+```text
+Components / Runtime Units != working/technical-model/components/
+Provided Interfaces          != working/technical-model/interfaces/
+Authentication / Trust       != working/technical-model/auth/
+Material Flows               != working/technical-model/flows/
+```
+
+An agent must not infer a filesystem taxonomy from this matrix. Create an STM
+subdirectory only when a declared artifact requires that exact directory, and
+create it lazily at the first required write. Otherwise return
+`ARTIFACT_PATH_NOT_DECLARED` rather than inventing storage topology.
 
 ## 2. Matrix rows and status vocabulary
 
@@ -198,6 +219,11 @@ Architecture thematic discovery—remains blocked until this gate is accepted.
 An editor, projection, or reviewer prose verdict cannot override
 `PARTIAL`, `BLOCKED`, or `UNKNOWN` rows; correct the bounded matrix and repeat
 the required review instead.
+
+Filesystem organization is not part of this acceptance verdict. A complete
+18-domain matrix cannot justify ad-hoc STM directories, and a neat directory
+tree cannot prove coverage. Package topology is accepted only through
+`ARTIFACT_PACKAGE_RECONCILIATION`.
 
 ## 8. Separate coverage authorities
 
