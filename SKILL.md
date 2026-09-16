@@ -55,6 +55,8 @@ Stage F routing does not introduce an automatic API compatibility engine, runtim
 
 Stage B session intents converge on the same explicit projection handoff. `NEW` and `EXTEND` complete requested semantic work first; `REVALIDATE` completes its impact-driven semantic delta. Once semantic state is stable, run Projection Impact Analysis and persist `PROJECTION_IMPACT_ACCOUNTED`. This accounts for freshness but never regenerates projection content.
 
+For every project-change `REVALIDATE`, read and enforce `references/revalidate-closeout-hardening.md` before baseline advancement, Projection Impact Analysis closeout, or any `RG-*` request. The REVALIDATE overlay is proposed delta until the owning semantic gates accept the affected revisions; a changed baseline pointer, rewritten Markdown, or completed worker task is not acceptance evidence.
+
 If a requested output or package requires fresh projection content, invoke a separate `RG-*` regeneration workflow with the appropriate scope. Closeout uses the named package and gate policy, so unrelated stale projections remain visible without blocking an unrelated gate. Detailed intent and closeout routing are owned by `references/session-orchestration.md` and `references/review-modes-and-orchestration.md`.
 
 ## Persistent Workflow
@@ -108,6 +110,8 @@ For a full Architecture Review, construct the required `FULL` Shared Technical M
 14. Run issue-only editorial review → separate correction → fresh re-review according to `references/final-editorial-review.md`. Presentation-only correction uses `PROJECTION_REVALIDATION` from `references/revalidation-and-freshness.md` while technical semantics remain unchanged.
 15. Before `REVIEW_COMPLETE`, establish `FINAL_WORKFLOW_AUTHORITY_RECONCILED`: reconcile `working/INDEX.md` against accepted final artifacts and package state. At minimum verify current phase/status, selected mode/endpoint, Technical Model and Discovery Coverage gate states, artifact registry, candidate/finding mappings, positive-controls registry, open questions, architecture-correction candidates, authoritative-document registry, projection state relevant to the selected package, and capability status. This reconciles compact coordinator state and references; it does not copy semantic authority into `INDEX.md`. Any stored aggregate counts/lists must match their owning authoritative artifacts. `project_profile.status` is routing-only metadata and may remain `PENDING` when its profile reference is internally valid; it is not a mandatory completion gate unless the selected workflow explicitly makes it one.
 
+For `REVALIDATE` closeout, that reconciliation MUST also verify the exact `accepted_baseline`, `candidate_baseline` disposition, `source_head`, current-baseline Technical Model and coverage bindings, owner-adjudicated semantic revisions, unresolved-policy references, projection registry membership, accepted projection revisions/fingerprints, and resolved package membership. Contradictory baseline or coverage bindings force `FINAL_WORKFLOW_AUTHORITY_RECONCILED: NOT_ACCEPTED`.
+
 ## Non-Negotiable Gates
 
 - Accepted and sufficiently fresh Shared Technical Model is the factual technical authority. Human-readable As-Built is a projection of accepted/fresh STM plus architecture-oriented synthesis.
@@ -118,6 +122,10 @@ For a full Architecture Review, construct the required `FULL` Shared Technical M
 - Context Orchestration v0.3 loads the minimum fresh decision evidence through dependency-sliced routing; see `references/revalidation-and-freshness.md`.
 - Presentation-only correction does not automatically restart the technical audit. Use `PROJECTION_REVALIDATION`; semantic drift requires `TECHNICAL_REVALIDATION_REQUIRED`.
 - `PROJECTION_REPAIR` must not hide a changed source/baseline. Project-change freshness belongs to `REVALIDATE`.
+- During `REVALIDATE`, `working/revalidation-overlay.md` (or equivalent) is proposed delta until affected owner gates accept it. `overlay complete != semantic authority accepted` and `baseline pointer changed != baseline accepted`.
+- `RG-*` targets MUST be active explicitly registered `PRJ-*` identities. Semantic authority, `working/INDEX.md`, unregistered paths, and path-derived targets are forbidden and return `REGENERATION_TARGET_NOT_PROJECTION`.
+- `ALL_STALE` means only active registered `PRJ-*` identities whose persisted projection freshness is `STALE`; it never means all stale-looking files or changed semantic authorities.
+- `rewritten Markdown != CURRENT`, `RG completed != CURRENT`, and `registered identity != CURRENT`. `CURRENT` requires the accepted projection lifecycle evidence in `references/projection-lifecycle.md`, including V1-V4, canonical fingerprint, and accepted `PRJ-*@revN` or verified `NO_CHANGE`.
 - Major artifact author and final judge must be separate roles. Review, correction, and fresh re-review are distinct stages.
 - Write large Markdown artifacts in logical chunks with validation; do not rely on one giant write.
 - The number or severity of discovered `CAND-*` / `RF-*` records is not evidence of discovery completeness.
@@ -163,6 +171,7 @@ Do not copy the style of `HANDOFF SUMMARY`, ledger rows, or agent scratchpads in
 - startup / previous-audit selection / session intent / Review Suite startup / Project Profile / dirty baseline → `references/session-orchestration.md`
 - modes / endpoint / INDEX / state / resume / subagents → `references/review-modes-and-orchestration.md`
 - projection repair / projection-only revalidation / compact-state freshness / stale projection reconciliation → `references/revalidation-and-freshness.md`
+- REVALIDATE semantic closeout / proposed delta / baseline advancement / RG boundary regression guard → `references/revalidate-closeout-hardening.md`
 - Stage B projection identity, lifecycle, revision, freshness, drift, and required-action authority → `references/projection-lifecycle.md`
 - Stage B projection dependency kinds, selector contracts, resolution snapshots, and projection DAG → `references/projection-dependencies.md`
 - shared authority, evidence scope, bounded accounting, and candidate decomposition → `references/shared-assurance-principles.md`
@@ -187,7 +196,9 @@ Do not copy the style of `HANDOFF SUMMARY`, ledger rows, or agent scratchpads in
 
 Return `REVIEW_COMPLETE` only when all required gates for the selected mode/endpoint are accepted, required full STM coverage is `TECHNICAL_MODEL_COVERAGE_ACCEPTED`, Architecture Discovery Coverage is `COVERAGE_ACCEPTED`, authoritative documents and cross-links are coherent, required independent verification/adjudication gates are accepted, required first-generation or regeneration Stage B projection lifecycle obligations are satisfied, `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted, final editorial correction/fresh re-review is accepted, and limitations are explicit.
 
-When the selected endpoint has a projection-sensitive package gate, also require `PROJECTION_IMPACT_ACCOUNTED`, resolved package membership, and the package policy’s scoped projections to be `CURRENT`. A `PERMISSIVE` gate may close with unrelated projections `STALE` and deferred.
+For `REVALIDATE`, also require that the accepted baseline was advanced only after `DELTA_RECONCILIATION` and `BASELINE_ADVANCE_ALLOWED`, and that Technical Model / coverage acceptance is bound to the accepted baseline rather than only the previous or candidate baseline. A coordinator pointer alone is never baseline acceptance.
+
+When the selected endpoint has a projection-sensitive package gate, also require `PROJECTION_IMPACT_ACCOUNTED`, resolved package membership, and the package policy’s scoped projections to be `CURRENT`. Every such `CURRENT` projection must have an active registered `PRJ-*` identity, projection contract revision, accepted dependency/selector snapshot, V1-V4 pass records, canonical fingerprint, and accepted projection revision or verified `NO_CHANGE`. A `PERMISSIVE` gate may close with unrelated projections `STALE` and deferred.
 
 If material coverage remains `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT`, or `REVALIDATION_REQUIRED`, ordinary `REVIEW_COMPLETE` is forbidden.
 
