@@ -54,11 +54,15 @@ A material task title must be human-readable and describe the intended result. D
 
 ### 1.2 Implementation contract
 
-After the human-readable layer, **always** create a subsection with the exact heading:
+After the human-readable layer, **always** create a dedicated subsection whose heading means “Implementation Contract” in the selected user-facing language.
+
+For Russian output, the exact heading remains:
 
 ```markdown
-### Implementation Contract
+### Технический контракт реализации
 ```
+
+For another user-facing language, use the natural equivalent while preserving the same document boundary and semantics.
 
 Only after this boundary should the roadmap place:
 
@@ -78,46 +82,46 @@ rollback/fail-closed consideration where relevant
 
 Prefer a table or another clearly reference-oriented block. Implementation details must be precise, but they do not replace explanatory prose.
 
-Example structure:
+Example structure for Russian output:
 
 ```markdown
-## TASK-F — Make the NATS lifecycle explicit and managed
+## TASK-F — Сделать жизненный цикл NATS управляемым
 
-### Current problem
+### Что сейчас не так
 <connected prose>
 
-### Why it happens
+### Почему это происходит
 <ownership/lifecycle mechanism>
 
-### Practical consequence
+### Практическое последствие
 <runtime consequence>
 
-### Proposed change
+### Что предлагаем изменить
 <target mechanism described in natural language first>
 
-### Why this closes the root cause
+### Почему это закрывает корневую причину
 <causal explanation>
 
-### Result after remediation
+### Что получим после исправления
 <observable resulting behavior>
 
-### Implementation Contract
+### Технический контракт реализации
 
-| Parameter | Requirement |
+| Параметр | Требование |
 |---|---|
-| Related findings | RF-F |
-| Target mechanism | `CacheLifecycleManager` |
-| Dependencies | None |
-| Invariant | ... |
-| Regression tests | ... |
-| Allowed change scope | ... |
-| Forbidden scope | ... |
-| Verification | ... |
-| Exit criterion | ... |
-| Rollback / safe activation | ... |
+| Связанные замечания | RF-F |
+| Целевой механизм | `CacheLifecycleManager` |
+| Зависимости | Нет |
+| Инвариант | ... |
+| Регрессионные тесты | ... |
+| Допустимая область изменений | ... |
+| Запрещённая область | ... |
+| Проверка | ... |
+| Критерий завершения | ... |
+| Откат / безопасная активация | ... |
 ```
 
-Equivalent table contents are allowed, but the `### Implementation Contract` boundary is mandatory for every material roadmap task.
+Equivalent table contents are allowed, but the dedicated Implementation Contract boundary is mandatory for every material roadmap task.
 
 An unresolved product or deployment decision blocks only the tasks that depend on it.
 
@@ -184,7 +188,7 @@ The reviewer also checks that:
 - the human-readable layer explains the current problem, root mechanism, consequence, and target result;
 - material paragraphs do not mix multiple independent root mechanisms;
 - specialized shorthand is not used instead of explanation;
-- every material task contains the exact heading `### Implementation Contract`;
+- every material task contains the dedicated Implementation Contract heading in the selected user-facing language;
 - execution metadata appears after that heading;
 - the regression test actually checks the mechanism;
 - dependencies are acyclic or explicitly explainable;
@@ -217,7 +221,7 @@ The roadmap is accepted only when:
 - all material RF/SER target coverage is traceable;
 - material task titles are human-readable and free of bracketed execution metadata;
 - tasks contain a human-readable problem/result explanation and a concrete implementation contract;
-- every material task contains `### Implementation Contract` before execution metadata;
+- every material task contains the dedicated Implementation Contract boundary before execution metadata;
 - specialized shorthand does not replace mechanism explanation;
 - tasks define a concrete representation and verification;
 - independent tasks are not blocked by unrelated gates;
