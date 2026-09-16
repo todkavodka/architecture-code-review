@@ -294,3 +294,18 @@ aggregation is not sufficient evidence. The existing Architecture Review
 severity family is introduced. Conflicting or unavailable evidence remains an
 explicit limitation and cannot be silently promoted to an accepted Product
 finding.
+
+## Architecture RF resolution and revision gate
+
+Architecture Review alone accepts RF lifecycle, severity, disposition, and
+revision changes. An RF `RESOLVED` revision requires accepted evidence,
+revalidation against the exact proving source/evidence/dependency binding,
+owner adjudication, and retained provenance to the prior revision. A changed
+severity or disposition is a new accepted revision of the same stable identity
+when the root mechanism and correction boundary remain valid.
+
+Developer assertion, commit message, candidate Change Review, Product
+inference, projection prose/omission, or completed remediation alone cannot
+create `RESOLVED`. A materially different mechanism uses qualified
+supersession authority; recurrence of the same mechanism uses a newer
+`ACTIVE` revision with `reopened_from` provenance.

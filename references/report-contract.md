@@ -269,6 +269,62 @@ identity/revision, accepted status, evidence/provenance and links to affected
 
 Ledger может быть плотным и структурированным. Это не лицензия переносить его terse style в пользовательские narrative sections.
 
+### 4.1 Architecture RF lifecycle ownership
+
+`Architecture Review` is the sole owner and writer of accepted `RF-*`
+lifecycle, severity, disposition, revision, resolution, reopening, and
+supersession. The exact semantic persistence boundary is the generated
+Architecture-owned `02-authoritative-findings-ledger.md`; this reference
+defines the contract that ledger must implement. No Product report, projection,
+index, Change Review candidate, remediation record, or developer assertion is
+an alternative RF authority.
+
+Each accepted RF revision records:
+
+```text
+finding_id
+owner_capability / qualified_project_or_product_scope
+accepted_revision
+lifecycle: ACTIVE | RESOLVED | SUPERSEDED
+disposition: owner-qualified treatment decision
+severity
+evidence_refs
+source_binding / analyzed_baseline
+resolution_evidence (when RESOLVED)
+supersedes / superseded_by (when SUPERSEDED)
+reopened_from / resolution_invalidated_by (when reopened)
+```
+
+The same identity is retained when the root mechanism and correction boundary
+remain the same. A changed lifecycle, severity, or disposition creates a new
+immutable accepted owner revision, not a new ID. A materially different root
+gets a new identity with explicit replacement/supersession lineage.
+
+Architecture accepts these transitions only through its owner gate:
+
+| Transition | Required authority |
+|---|---|
+| `ACTIVE → RESOLVED` | accepted evidence, owner revalidation, owner adjudication, exact proving source/dependency binding, and a new accepted RF revision |
+| `ACTIVE → SUPERSEDED` | owner adjudication, qualified replacement/merge authority, and replacement lineage in a new revision |
+| `RESOLVED → ACTIVE` | owner adjudication of recurrence or invalidated resolution, a new ACTIVE revision, and `reopened_from` provenance |
+| severity change | owner severity adjudication and a new revision with the same identity where the root remains the same |
+| disposition change | Architecture owner/governance decision with rationale, scope, approver, and policy metadata |
+
+The resolution gate is:
+
+```text
+accepted RF evidence
+→ owner revalidation against exact source/evidence binding
+→ owner adjudication
+→ accepted Architecture RF revision
+```
+
+Developer assertions, commit messages, completed remediation alone, candidate
+Change Review, Product inference, report prose, projection omission, and a
+remediation status do not satisfy this gate. `REOPENED` is never persisted as
+a fourth lifecycle value: it is a derived baseline transition over a newer
+accepted `ACTIVE` revision with the prior resolution reference.
+
 ## 5. Cross-link contract
 
 Используй относительные ссылки внутри audit package.

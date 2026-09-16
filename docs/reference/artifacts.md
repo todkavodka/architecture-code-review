@@ -70,6 +70,23 @@ CC-*  → как согласованы конфликтующие предст�
 репозитория. Важнее устойчивые идентификаторы, владелец смысла, редакции и
 происхождение, чем имя каталога.
 
+## Общие измерения RF/CQ
+
+Для канонических `RF-*` и `CQ-*` применяйте общую форму представления только
+как производный reporting view, сохраняя локального владельца записи:
+
+| Измерение | Значения/правило |
+|---|---|
+| `lifecycle` | `ACTIVE | RESOLVED | SUPERSEDED`; владелец finding; `REOPENED` только производный переход |
+| `freshness` | `CURRENT | STALE | BLOCKED`; сила доказательства применимости |
+| `disposition` | owner-qualified treatment decision; accepted risk не является lifecycle |
+| `remediation_status` | owner-specific execution/work state, например `BLOCKED`; не изменяет lifecycle |
+
+`freshness=BLOCKED` и `remediation_status=BLOCKED` — разные состояния. Active
+blocked remediation остаётся техническим риском, а accepted risk требует
+отдельного owner-approved disposition. `PRJ-*`, report prose и `working/INDEX.md`
+не принимают и не меняют эти значения.
+
 ## См. также
 
 - [Идентификаторы и статусы](identifiers-and-statuses.md)

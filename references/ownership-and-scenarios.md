@@ -193,3 +193,14 @@ observations, accepted STM facts/relations, lifecycle, severity, provenance,
 and direct dependencies. Product membership or a generated aggregation does
 not promote a Project-local RF. Product report/projection content is
 navigation only and cannot write the RF.
+
+### Finding lifecycle authority barrier
+
+Architecture Review alone accepts or changes `RF-*` lifecycle, severity,
+disposition, revision, resolution, reopening, and supersession. `Product`
+qualification and aggregation can consume accepted child state but cannot
+perform an RF transition. `CHANGE_REVIEW` may record candidate
+`POTENTIALLY_RESOLVES`; only contextual `RECONCILE_CHANGE` can route qualified
+evidence to Architecture owner adjudication, which must independently accept
+the new RF revision. Candidate assessment and projection prose never mutate
+accepted RF authority.
