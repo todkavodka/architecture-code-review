@@ -1,49 +1,45 @@
-# Финальное редакционное ревью
+# Final Editorial Review
 
-Этот gate запускается только после технического принятия всех requested endpoint artifacts и финальной сборки пакета.
+This gate runs only after all requested endpoint artifacts have been technically accepted and the final package has been assembled.
 
-Editorial Review (редакционное ревью) **не редактирует документы напрямую**. Оно создаёт issue list. Исправление выполняет отдельный correction pass, затем новый fresh-context re-review.
+Editorial Review **does not edit documents directly**. It produces an issue list. A separate correction pass applies the fixes, followed by a fresh-context re-review.
 
-## 1. Цель
+## 1. Purpose
 
-Проверить, что финальные документы:
+Verify that final user-facing documents:
 
-- написаны связным русским техническим языком;
-- объясняют material mechanisms человеку, а не копируют terse working-artifact style;
-- используют терминологию последовательно;
-- содержат полезные и реально валидированные диаграммы там, где topology/lifecycle/ownership/target behavior трудно понять только текстом;
-- не содержат stale/superseded technical claims;
-- согласованы между собой и с authoritative ledger;
-- имеют целостный cross-link graph;
-- не искажают severity/evidence/target/roadmap semantics при редактуре;
-- не заявляют `REVIEW_COMPLETE`, если Discovery Coverage не имеет принятого `COVERAGE_ACCEPTED` state.
+- are written as coherent professional technical prose in the selected user-facing language;
+- explain material mechanisms to a human reader rather than copying terse working-artifact style;
+- use terminology consistently;
+- contain useful, actually validated diagrams when topology, lifecycle, ownership, or target behavior is difficult to understand from prose alone;
+- contain no stale or superseded technical claims;
+- agree with each other and with the authoritative ledger;
+- have a coherent cross-link graph;
+- do not distort severity, evidence, target, or roadmap semantics during editing;
+- do not claim `REVIEW_COMPLETE` when Discovery Coverage is not in accepted `COVERAGE_ACCEPTED` state.
 
-Editorial Review **не является техническим re-audit**. Он не обязан заново искать пропущенные vulnerability/mechanism classes в repository. Проверка полноты thematic discovery и absence-of-investigation gaps принадлежит Independent Coverage Review из `discovery-coverage.md`. Он также выполняет targeted workflow-authority consistency check against accepted final artifact state and requires the coordinator's `FINAL_WORKFLOW_AUTHORITY_RECONCILED`; this does not turn editorial review into a technical re-audit.
+Editorial Review **is not a technical re-audit**. It does not need to rediscover omitted vulnerability or mechanism classes across the repository. Completeness of thematic discovery and absence-of-investigation gaps belong to the Independent Coverage Review defined in `discovery-coverage.md`.
+
+Editorial Review also performs a targeted workflow-authority consistency check against accepted final artifact state and requires the coordinator's `FINAL_WORKFLOW_AUTHORITY_RECONCILED`. This does not turn editorial review into a technical re-audit.
 
 ## 2. Language contract
 
-Narrative — русский.
+Narrative uses the selected user-facing language from the umbrella Skill language contract.
 
-При первом существенном употреблении допустимо:
+At first material use, an established English technical term may be paired with a natural-language equivalent when that improves understanding. Exact identifiers remain unchanged.
 
-```text
-English term (русский аналог)
-```
-
-Дальше предпочитай русский аналог, если точность не теряется.
-
-Не переводи exact:
+Do not translate exact:
 
 - class/function/type identifiers;
-- filenames/paths;
+- filenames and paths;
 - API/IPC/protocol names;
 - runtime states;
 - verdict/status tokens;
-- commands/code.
+- commands and code.
 
-Флагай случайные английские paragraphs/headings/table explanations.
+Flag accidental language drift: paragraphs, headings, or table explanations that unexpectedly switch away from the selected user-facing language.
 
-Также флагай mixed-language shorthand, если обычную мысль можно естественно выразить по-русски без потери точности. Примеры нежелательной final prose:
+Also flag mixed-language shorthand when an ordinary idea can be stated naturally without losing precision. For Russian output, examples of undesirable final prose include:
 
 ```text
 error-boundary протекает credential-ами
@@ -53,42 +49,42 @@ designated owner отсутствует
 runtime-drift
 ```
 
-Не требуй искусственного перевода exact identifiers или established technical terms. Цель — профессиональный читаемый русский, а не языковой пуризм.
+Do not require artificial translation of exact identifiers or established technical terms. The goal is professional, readable prose in the selected language, not linguistic purism.
 
 ## 3. Prose quality contract
 
-Working notes, HANDOFF SUMMARY, ledger rows и verification matrices могут быть плотными. Final user-facing narrative должен быть объясняющим.
+Working notes, `HANDOFF SUMMARY`, ledger rows, and verification matrices may be dense. Final user-facing narrative must explain the system.
 
-Для каждого material conclusion проверь, что текст отвечает на четыре вопроса:
+For every material conclusion, verify that the prose answers four questions:
 
-1. что происходит сейчас;
-2. почему это происходит;
-3. к чему это приводит;
-4. что нужно изменить или сохранить.
+1. what happens now;
+2. why it happens;
+3. what consequence follows;
+4. what must change or be preserved.
 
-Предпочтительная causal structure:
+Preferred causal structure:
 
 ```text
 mechanism → evidence → consequence → correction direction
 ```
 
-Это структура мысли, а не требование писать стрелками.
+This is a reasoning structure, not a requirement to write literal arrows in final prose.
 
-### 3.1 Один основной механизм на абзац
+### 3.1 One primary mechanism per paragraph
 
-Один абзац должен иметь один dominant architectural mechanism или одну causal chain. Связанные evidence/consequences могут находиться в том же абзаце, но несколько независимых root mechanisms не должны сливаться в одну стену текста.
+A paragraph should have one dominant architectural mechanism or one causal chain. Related evidence and consequences may stay in the same paragraph, but several independent root mechanisms must not be compressed into one wall of text.
 
-Если после чтения абзаца на вопрос «какой один механизм здесь объясняется?» требуется перечислить несколько независимых ответов, раздели или реструктурируй текст.
+If answering “which single mechanism is explained here?” requires listing several independent answers, split or restructure the paragraph.
 
-Не вводи механическую квоту по длине предложений/абзацев: короткий сложный абзац тоже может быть перегружен, а длинный — оставаться связным, если раскрывает одну причинную цепочку.
+Do not impose a mechanical sentence- or paragraph-length quota. A short paragraph may still be overloaded, and a long paragraph may remain coherent when it develops one causal chain.
 
 ### 3.2 Explain before compressing
 
-На первом material употреблении specialist English term, hybrid shorthand или неочевидного architecture pattern объясни механизм естественным русским предложением. Exact term можно сохранить в скобках или использовать дальше как короткое имя.
+On first material use of a specialized English term, hybrid shorthand, or non-obvious architecture pattern, explain the mechanism naturally in the selected user-facing language. The exact term may then be retained in parentheses or reused as shorthand.
 
-**Technical shorthand не считается объяснением сам по себе.** Точное сочетание терминов может правильно называть решение, но не заменяет описания поведения системы.
+**Technical shorthand is not an explanation by itself.** A precise cluster of terms may name a solution correctly but does not replace a description of system behavior.
 
-Не пиши в explanatory layer так:
+For Russian output, avoid explanatory layers such as:
 
 ```text
 NATS получает eager startup + registered shutdown + drain.
@@ -96,86 +92,95 @@ in-flight KV puts дропаются при shutdown.
 single-flight wrapper предотвращает thundering-herd на cold-cache miss.
 ```
 
-Сначала раскрой наблюдаемое поведение нормальным языком. Например:
+Explain observable behavior first. For example:
 
 ```text
-При запуске приложение заранее проверяет доступность NATS и не объявляет себя готовым, если соединение установить невозможно. При остановке оно сначала завершает уже начатые операции, а затем корректно закрывает соединение. Такой подход можно дальше кратко называть fail-fast startup и graceful drain.
+При запуске приложение заранее проверяет доступность NATS и не объявляет себя
+готовым, если соединение установить невозможно. При остановке оно сначала
+завершает уже начатые операции, а затем корректно закрывает соединение. Такой
+подход можно дальше кратко называть fail-fast startup и graceful drain.
 ```
 
-Или:
+Or:
 
 ```text
-При остановке приложения уже начатые операции записи в NATS KV могут быть оборваны до завершения, если соединение закрывается без ожидания активной работы.
+При остановке приложения уже начатые операции записи в NATS KV могут быть
+оборваны до завершения, если соединение закрывается без ожидания активной работы.
 ```
 
-Для single-flight сначала объясни, что при одновременном отсутствии значения в кэше несколько одинаковых запросов могут обратиться к источнику параллельно, а механизм оставляет один запрос к источнику и заставляет остальные ждать его результат. После этого термин `single-flight` можно использовать как краткое имя уже объяснённого поведения.
+For `single-flight`, first explain that when a cache value is absent, several identical requests may hit the backing source concurrently, while the mechanism leaves one source request active and makes the others wait for its result. After that, `single-flight` may be used as a compact name for the already explained behavior.
 
-Точные формулировки примеров не нормативны. Нормативен порядок: **сначала механизм на естественном языке → затем специализированный термин как краткое название**.
+The exact example wording is non-normative. The normative ordering is:
 
-Не требуется заново объяснять общеизвестные для целевой аудитории термины в каждом абзаце. Gate направлен против кластеров shorthand, которые заменяют explanation.
+```text
+natural-language mechanism explanation → specialized term as shorthand
+```
+
+Do not re-explain terms that are already obvious to the target audience in every paragraph. The gate prevents clusters of shorthand from replacing explanation.
 
 ### 3.3 Roadmap presentation
 
-Roadmap task сначала содержит human-readable problem/cause/consequence/target-result layer, затем визуально отделённый implementation contract.
+A roadmap task first contains a human-readable problem/cause/consequence/target-result layer and then a visually separate implementation contract.
 
-Для material roadmap task:
+For every material roadmap task:
 
-- заголовок должен быть понятен как инженерная задача без `[prereq: ...]`, `[RF: ...]` и другой execution metadata;
-- prerequisite/RF/SER/target metadata переносится в технический контракт;
-- после explanatory layer обязателен отдельный heading `### Технический контракт реализации`;
-- prerequisites, allowed/forbidden scope, regression tests, verification, exit criteria, rollback и safe activation находятся после этого heading, предпочтительно в таблице или другом явно справочном формате.
+- the title must read as an engineering goal without `[prereq: ...]`, `[RF: ...]`, or other execution metadata;
+- prerequisite, RF, SER, and target metadata belongs in the technical contract;
+- after the explanatory layer, a dedicated heading meaning “Implementation Contract” in the selected user-facing language is mandatory;
+- for Russian output, the exact heading remains `### Технический контракт реализации`;
+- prerequisites, allowed/forbidden scope, regression tests, verification, exit criteria, rollback, and safe activation appear after that heading, preferably in a table or another clearly reference-oriented format.
 
-Labels `Prerequisites`, `Allowed boundary`, `Verification` не должны сливаться с объясняющим текстом.
+Labels such as `Prerequisites`, `Allowed boundary`, and `Verification` must not blend into explanatory prose.
 
-Флагай как `STYLE-*` / `TERM-*`, если:
+Flag `STYLE-*` or `TERM-*` when:
 
-- final prose выглядит как agent scratchpad/handoff;
-- предложения заменены fragments/labels;
-- стрелки `->`, `!=`, slash-compounds и скобочные IDs несут основную смысловую нагрузку;
-- RF/SER/TASK IDs заменяют объяснение;
-- implementation nouns появляются раньше объяснения самой проблемы;
-- executive summary является ledger dump вместо synthesis;
-- один абзац заставляет одновременно отслеживать несколько независимых root mechanisms;
-- specialist shorthand используется до понятного объяснения его механики;
-- technical shorthand сам является explanatory layer;
-- material roadmap title содержит bracketed execution metadata;
-- material roadmap task не содержит `### Технический контракт реализации`;
-- roadmap human-readable layer и execution contract визуально не разделены.
+- final prose reads like an agent scratchpad or handoff;
+- sentences are replaced with fragments or labels;
+- arrows such as `->`, `!=`, slash-compounds, or parenthesized IDs carry the primary semantic load;
+- RF/SER/TASK IDs replace explanation;
+- implementation nouns appear before the problem itself is explained;
+- the executive summary is a ledger dump rather than synthesis;
+- one paragraph forces the reader to track several independent root mechanisms;
+- specialized shorthand appears before its mechanics are explained;
+- technical shorthand itself is used as the explanatory layer;
+- a material roadmap title contains bracketed execution metadata;
+- a material roadmap task lacks the dedicated Implementation Contract heading in the selected user-facing language;
+- the roadmap human-readable layer and execution contract are not visually separated.
 
 ## 4. Diagram coverage and renderability contract
 
-Сверь final package с `lifecycle-and-mermaid.md` и `report-contract.md`.
+Compare the final package with `lifecycle-and-mermaid.md` and `report-contract.md`.
 
-Если в системе есть material topology, lifecycle, ownership, trust boundary, ordering или target transition, проверь наличие useful visual explanation.
+When the system contains material topology, lifecycle, ownership, trust boundaries, ordering, or target transitions, verify that useful visual explanation exists.
 
-Для substantial report особенно ожидаются, когда применимы:
+For a substantial report, the following are especially expected when applicable:
 
-- As-Built component/boundary diagram;
-- runtime/lifecycle/sequence diagram;
-- Target Architecture diagram;
-- Before → After diagram для material correction;
-- roadmap dependency diagram для нетривиального sequencing/safe activation.
+- an As-Built component/boundary diagram;
+- a runtime, lifecycle, or sequence diagram;
+- a Target Architecture diagram;
+- a Before → After diagram for a material correction;
+- a roadmap dependency diagram for non-trivial sequencing or safe activation.
 
-Отсутствие диаграммы допустимо, если visual representation реально не добавляет архитектурной информации. В substantial package такое решение должно быть явно объяснимо.
+A missing diagram is acceptable when visualization genuinely adds no architectural information. In a substantial package, that decision should be explicitly defensible.
 
-Каждый Mermaid block в final user-facing artifacts должен быть enumerated. Если доступен совместимый parser/renderer, reviewer/correction workflow должен иметь evidence реального tool invocation для каждого блока. Известный parser/render failure блокирует acceptance.
+Every Mermaid block in final user-facing artifacts must be enumerated. If a compatible parser or renderer is available, the reviewer/correction workflow must retain evidence of actual tool invocation for every block. Any known parser/render failure blocks acceptance.
 
-Если renderer отсутствует, зафиксируй `MERMAID_RENDER_VALIDATION_UNAVAILABLE` и не называй Mermaid render validation успешной.
+If no renderer is available, record `MERMAID_RENDER_VALIDATION_UNAVAILABLE` and do not claim Mermaid render validation passed.
 
-Флагай как `DIAG-*`, если:
+Flag `DIAG-*` when:
 
-- material architecture трудно понять без visual aid, но его нет;
-- диаграмма декоративна и не объясняет real mechanism;
-- current/target behavior смешаны;
-- Mermaid противоречит prose или accepted evidence;
-- diagram uses generic fake components instead of real subsystem names;
-- Mermaid block не проходит доступный parser/renderer;
-- часть final Mermaid blocks не была фактически проверена при доступном renderer;
-- заявлен render-validation PASS без evidence tool invocation.
+- material architecture is difficult to understand without a visual aid and none is provided;
+- a diagram is decorative and does not explain a real mechanism;
+- current and target behavior are mixed;
+- Mermaid contradicts prose or accepted evidence;
+- a diagram uses generic fake components instead of real subsystem names;
+- a Mermaid block fails the available parser/renderer;
+- some final Mermaid blocks were not actually validated despite an available renderer;
+- render-validation `PASS` is claimed without evidence of tool invocation.
 
 ## 5. Issue types
 
-Рекомендуемые IDs:
+Recommended IDs:
 
 ```text
 LANG-###   language drift / grammar / hybrid shorthand
@@ -191,61 +196,61 @@ STATUS-### final status contradicts accepted technical/coverage gate state
 
 ## 6. Checks
 
-Проверь:
+Verify:
 
-- connected prose `mechanism → evidence → consequence → correction direction`;
-- one primary mechanism per paragraph for material explanatory prose;
-- specialist shorthand explained before it becomes compressed terminology;
+- connected prose follows `mechanism → evidence → consequence → correction direction`;
+- material explanatory prose has one primary mechanism per paragraph;
+- specialized shorthand is explained before becoming compressed terminology;
 - technical shorthand is not used as the explanation itself;
-- accidental English drift;
-- mixed-language shorthand/transliteration;
-- inconsistent translations/terms;
-- grammar/readability;
-- executive summary explains system-level causes before RF lists;
-- material roadmap title is human-readable and does not carry bracketed execution metadata;
-- roadmap tasks first explain problem/root cause/result, then contain mandatory `### Технический контракт реализации`;
-- useful diagram coverage where material complexity warrants it;
-- every final Mermaid block enumerated;
-- actual parser/render validation for every final Mermaid block when a compatible renderer is available;
-- failed Mermaid blocks corrected and revalidated before acceptance;
-- explicit `MERMAID_RENDER_VALIDATION_UNAVAILABLE` when executable validation cannot be performed;
-- duplicate paragraphs/findings;
-- stale superseded statements;
-- root titles/status/severity одинаковы во всех final artifacts;
-- diagrams/state tables не противоречат prose;
+- no accidental drift away from the selected user-facing language;
+- no awkward mixed-language shorthand or transliteration;
+- terminology is consistent;
+- grammar and readability are acceptable;
+- the executive summary explains system-level causes before listing RFs;
+- material roadmap titles are human-readable and do not carry bracketed execution metadata;
+- roadmap tasks first explain problem, root cause, and result, then contain the mandatory localized Implementation Contract boundary;
+- useful diagram coverage exists where material complexity warrants it;
+- every final Mermaid block is enumerated;
+- actual parser/render validation exists for every final Mermaid block when a compatible renderer is available;
+- failed Mermaid blocks are corrected and revalidated before acceptance;
+- `MERMAID_RENDER_VALIDATION_UNAVAILABLE` is explicit when executable validation cannot be performed;
+- there are no duplicated paragraphs or findings;
+- no stale superseded statements resurfaced;
+- root titles, status, and severity are identical across all final artifacts;
+- diagrams and state tables do not contradict prose;
 - important relative links resolve conceptually;
-- no orphan RF/SER/TASK/target references;
-- target mechanisms link to motivating RF/SER/invariant;
-- roadmap tasks link to target/RF;
-- working superseded claims point forward to current authority where required;
-- no unsupported intensifiers `catastrophic`, `RCE`, `data loss`, `critical` вне adjudicated context;
-- final status соответствует `working/INDEX.md` и accepted Discovery Coverage state;
-- `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted only when final status agrees with all mandatory workflow/gate states; the `INDEX.md` artifact registry agrees with final registered deliverables; candidate/finding mappings, positive-controls aggregates, authoritative-document registry, and selected-package projection lifecycle states agree with their owning authorities;
+- there are no orphan RF, SER, TASK, or target references;
+- target mechanisms link to their motivating RF, SER, or invariant;
+- roadmap tasks link to target state and RF as required;
+- superseded working claims point forward to current authority where required;
+- no unsupported intensifiers such as `catastrophic`, `RCE`, `data loss`, or `critical` appear outside adjudicated context;
+- final status agrees with `working/INDEX.md` and accepted Discovery Coverage state;
+- `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted only when final status agrees with all mandatory workflow/gate states, the `INDEX.md` artifact registry agrees with final registered deliverables, and candidate/finding mappings, Positive Controls aggregates, authoritative-document registry, and selected-package projection lifecycle states agree with their owning authorities;
 - `project_profile.status: PENDING` is not by itself a contradiction because Project Profile is routing-only metadata; any other mandatory `PENDING` or `IN_PROGRESS` state, or an unresolved reconciliation mismatch, blocks the gate;
-- package не утверждает `REVIEW_COMPLETE`, если coverage находится в `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT` или material `REVALIDATION_REQUIRED`.
+- the package does not claim `REVIEW_COMPLETE` while coverage is `PARTIALLY_COVERED`, `BLOCKED`, `COVERAGE_CORRECTION_REQUIRED`, `COVERAGE_BLOCKED`, `COVERAGE_AUTHORITY_DRIFT`, or material `REVALIDATION_REQUIRED`.
 
 ## 7. Semantic safety
 
-Editorial reviewer **не имеет права молча менять**:
+The editorial reviewer **must not silently change**:
 
 - evidence;
 - root identity;
 - severity;
-- confidence/exploitability;
+- confidence or exploitability;
 - product-intent status;
-- target invariants/ownership;
+- target invariants or ownership;
 - feasibility classification;
-- roadmap dependencies/gates;
+- roadmap dependencies or gates;
 - security assumptions;
-- Discovery Coverage technical verdict.
+- the Discovery Coverage technical verdict.
 
-Editorial reviewer также **не выполняет новый repository-wide vulnerability/discovery search** для доказательства coverage. Если final package показывает non-accepted/stale coverage state, он флагирует status/consistency issue и возвращает пакет в соответствующий technical coverage gate.
+The editorial reviewer also **does not perform a new repository-wide vulnerability/discovery search** to prove coverage. If the final package shows non-accepted or stale coverage state, flag a status/consistency issue and return the package to the appropriate technical coverage gate.
 
-Если language/diagram cleanup обнаруживает реальное technical contradiction, issue получает `CONS-*` и возвращается в соответствующий technical gate.
+If language or diagram cleanup reveals a real technical contradiction, create a `CONS-*` issue and return it to the appropriate technical gate.
 
 ## 8. Output
 
-Review artifact содержит:
+The review artifact records:
 
 ```text
 reviewed final artifact refs
@@ -259,7 +264,7 @@ required correction boundary
 technical-gate escalation? yes/no
 ```
 
-Для Mermaid validation дополнительно сохрани compact record:
+For Mermaid validation, also retain a compact record:
 
 ```text
 diagram/document location
@@ -268,7 +273,7 @@ result: PASS | FAIL | UNAVAILABLE
 correction/revalidation ref if failed
 ```
 
-Не переписывай полный документ в review artifact.
+Do not reproduce the full reviewed document inside the review artifact.
 
 ## 9. Correction loop
 
@@ -282,25 +287,25 @@ FINAL PACKAGE ASSEMBLED
 → FINAL_PACKAGE_ACCEPTED | CORRECTION_REQUIRED | TECHNICAL_GATE_REQUIRED
 ```
 
-Correction writer меняет только то, что разрешено issue list; новый technical content не добавляет без возврата в technical gate.
+The correction writer changes only what is authorized by the issue list. Do not add new technical content without returning to the appropriate technical gate.
 
-Coverage-related `STATUS-*` не исправляется редактором подменой verdict. Если coverage не принято, correction boundary — technical Coverage Review/correction/revalidation.
+A coverage-related `STATUS-*` issue is not repaired by editorially changing a verdict. If coverage is not accepted, the correction boundary is the technical Coverage Review, correction, or revalidation process.
 
 ## 10. Final acceptance
 
-Пакет нельзя объявлять финальным, пока:
+The package cannot be declared final until:
 
-- все editorial issues closed или explicitly blocked;
-- re-review выполнен;
-- cross-links проверены;
-- no stale authoritative projection remains within the selected endpoint/package required scope; unrelated stale projections remain visible and deferred according to `PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, or `ALL_SCOPED_CURRENT` policy;
-- `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted after the final correction/re-review, including the final `INDEX.md` reconciliation against registered deliverables, owning authoritative artifacts, mandatory workflow/gate states, and selected-package projection lifecycle records;
-- language/prose quality contract соблюдён;
-- material roadmap tasks имеют human-readable titles и явную границу `### Технический контракт реализации`;
-- diagram coverage contract соблюдён либо отсутствие диаграмм обосновано;
-- нет known Mermaid parser/render failures;
-- при доступном renderer все final Mermaid blocks имеют executable validation evidence;
-- при недоступном renderer limitation явно зафиксирован и render PASS не заявлен;
-- requested target/roadmap artifacts уже accepted технически;
-- Discovery Coverage имеет accepted `COVERAGE_ACCEPTED` state, bound to current accepted As-Built/baseline;
-- final status не маскирует material coverage limitation.
+- every editorial issue is closed or explicitly blocked;
+- re-review has been completed;
+- cross-links have been checked;
+- no stale authoritative projection remains within the required scope of the selected endpoint/package; unrelated stale projections remain visible and deferred according to `PERMISSIVE`, `REQUIRED_SCOPE_CURRENT`, or `ALL_SCOPED_CURRENT` policy;
+- `FINAL_WORKFLOW_AUTHORITY_RECONCILED` is accepted after the final correction/re-review, including final `INDEX.md` reconciliation against registered deliverables, owning authoritative artifacts, mandatory workflow/gate states, and selected-package projection lifecycle records;
+- the language/prose quality contract is satisfied;
+- material roadmap tasks have human-readable titles and an explicit localized Implementation Contract boundary;
+- the diagram coverage contract is satisfied or the absence of diagrams is justified;
+- there are no known Mermaid parser/render failures;
+- when a renderer is available, every final Mermaid block has executable validation evidence;
+- when no renderer is available, the limitation is explicit and render `PASS` is not claimed;
+- requested target/roadmap artifacts have already been technically accepted;
+- Discovery Coverage is in accepted `COVERAGE_ACCEPTED` state bound to the current accepted As-Built/baseline;
+- final status does not hide a material coverage limitation.
