@@ -2,9 +2,9 @@
 
 This reference maps Code Quality semantic authority to the approved Stage B
 projection lifecycle. It defines Code Quality's projection identities,
-dependencies, and package declaration; it does not create semantic authority or
-redefine Stage B lifecycle, verification, impact, regeneration, or package
-policies.
+dependencies, delivery paths, and package declaration; it does not create
+semantic authority or redefine Stage B lifecycle, verification, impact,
+regeneration, or package policies.
 
 ## Authority boundary
 
@@ -31,20 +31,44 @@ and does not supply missing registration metadata. Paths remain distinct from
 projection identities, and a path change does not create a new identity when
 the projection meaning and contract remain unchanged.
 
+Code Quality human-readable delivery projections live with the capability, not
+under `working/`. The canonical paths are relative to the architecture-review
+package root:
+
 | Projection | Declared artifact path | Human-readable output | Direct semantic inputs |
 |---|---|---|---|
-| `PRJ-CQ-00-FINDINGS-VIEW` | `working/projections/code-quality/findings-view.md` | Code Quality Findings View/Report | selected accepted `CQ-*` records; Code Quality coverage state |
-| `PRJ-CQ-01-SUMMARY` | `working/projections/code-quality/summary.md` | Code Quality Summary | selected accepted `CQ-*` records; linked `CQRA-*` records when remediation status is shown; Code Quality coverage state |
-| `PRJ-CQ-02-HOTSPOTS` | `working/projections/code-quality/hotspots.md` | Maintainability Hotspots | selected accepted `CQ-*` records; Code Quality coverage state |
-| `PRJ-CQ-03-ROADMAP-CONTRIBUTION` | `working/projections/code-quality/roadmap-contribution.md` | Code Quality Roadmap Contribution | selected accepted `CQ-*` and linked `CQRA-*` records; Code Quality coverage state |
+| `PRJ-CQ-00-FINDINGS-VIEW` | `capabilities/code-quality-review/00-code-quality-findings.md` | Code Quality Findings View/Report | selected accepted `CQ-*` records; Code Quality coverage state |
+| `PRJ-CQ-01-SUMMARY` | `capabilities/code-quality-review/01-code-quality-summary.md` | Code Quality Summary | selected accepted `CQ-*` records; linked `CQRA-*` records when remediation status is shown; Code Quality coverage state |
+| `PRJ-CQ-02-HOTSPOTS` | `capabilities/code-quality-review/02-maintainability-hotspots.md` | Maintainability Hotspots | selected accepted `CQ-*` records; Code Quality coverage state |
+| `PRJ-CQ-03-ROADMAP-CONTRIBUTION` | `capabilities/code-quality-review/03-roadmap-contribution.md` | Code Quality Roadmap Contribution | selected accepted `CQ-*` and linked `CQRA-*` records; Code Quality coverage state |
 
 These are all Stage B `PRJ-*` identities. Each is a `DERIVED_PROJECTION` and
 `USER_SELECTABLE` output: it is derived from the listed accepted semantic
 authority, but selection is explicit and no projection is automatically enabled
-or mandatory merely because Code Quality Review is selected. They use the shared projection
-contract revision, freshness states, dependency snapshots, `V1`–`V4`,
-fingerprint, verified revision, and `RG-*` regeneration workflow. No
+or mandatory merely because Code Quality Review is selected. They use the
+shared projection contract revision, freshness states, dependency snapshots,
+`V1`–`V4`, fingerprint, verified revision, and `RG-*` regeneration workflow. No
 Code-Quality-specific lifecycle or validation ladder exists.
+
+### Delivery-path migration
+
+The earlier declared paths under:
+
+```text
+working/projections/code-quality/
+```
+
+are superseded delivery locations. Moving an existing verified Code Quality
+projection to the capability-owned path preserves its stable `PRJ-CQ-*`
+identity and semantic dependencies, but the declared path is part of the
+projection contract. Therefore the path migration is a projection-contract
+change and requires the normal lifecycle reconciliation before the moved output
+may be `CURRENT`.
+
+Do not keep both paths as current copies. The `working/projections/` namespace
+is reserved for operational Stage B views such as registry, impact, and
+regeneration-session state; it is not the publication location for Code Quality
+human-readable deliverables.
 
 ## Direct dependency and selector contract
 
@@ -137,7 +161,7 @@ consumer-owned metadata with the canonical direction `consumer -> prerequisite`.
 
 ## Stage B generation and freshness
 
-For a new projection type, registration precedes regeneration:
+For a new projection type, registration precedes publication:
 
 ```text
 assign PRJ identity
@@ -148,17 +172,23 @@ assign PRJ identity
 → V2 DEPENDENCY / PROVENANCE
 → V3 CONTRACT COMPLETENESS
 → V4 AUTHORITY CONSISTENCY
-→ canonical fingerprint comparison
-→ publish verified PRJ-*@revN or NO_CHANGE
-→ persist CURRENT, STALE, or BLOCKED
+→ canonical fingerprint
+→ publish verified PRJ-*@revN
+→ persist CURRENT
 ```
 
+For an existing verified projection, a requested regeneration follows the
+shared `RG-*` workflow and may publish a new revision or verified `NO_CHANGE`.
 The normative meanings and failure routing for these stages remain in
 `references/projection-lifecycle.md` and
-`references/projection-verification.md`. An unchanged fingerprint returns
-`NO_CHANGE` and retains the existing revision; a changed fingerprint publishes
-a new verified revision only after all applicable gates pass. Running a
-generator alone does not create a revision or `CURRENT` state.
+`references/projection-verification.md`.
+
+A selected Code Quality Markdown file does not satisfy the delivery package by
+existing on disk. Git tracked/untracked state, file timestamp, YAML prose, or an
+ad-hoc hash computed after generation is not a projection revision or canonical
+verification fingerprint. Until the lifecycle record contains the accepted
+`PRJ-*` revision, dependency snapshot, V1–V4 results, canonical fingerprint,
+and `CURRENT`, that selected projection is not publishable package evidence.
 
 Semantic change or changed selector/coverage dependency flows through the
 existing Projection Impact Analysis. It identifies affected projections and
@@ -233,6 +263,11 @@ requires every projection resolved into the named package scope to be current.
 These meanings are inherited without CQ-specific variants. Package state
 governs projection usability only; it does not validate or invalidate CQ
 semantic authority.
+
+A selected package member whose lifecycle evidence is missing or incomplete is
+not `CURRENT` and therefore cannot satisfy a package gate that requires current
+members. Do not classify such a package as valid merely because all declared
+files exist.
 
 CQRA completion or a linked CQ finding revalidation is a semantic dependency
 change for projections that consume the affected record. PIA may mark those
