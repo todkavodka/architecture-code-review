@@ -36,18 +36,18 @@
 
 **Files:**
 - Modify: `references/artifact-layout-and-package-completeness.md`
-- Modify: `references/final-editorial-review.md`
+- Verify: `references/final-editorial-review.md` already consumes `ARTIFACT_PACKAGE_RECONCILED` as a mandatory closeout gate.
 
-- [ ] Add `PROJECTION_LIFECYCLE_INCOMPLETE`.
 - [ ] Require active PRJ identity, contract revision, accepted dependency snapshot, V1-V4, canonical fingerprint, accepted revision/NO_CHANGE, and CURRENT for every selected package projection.
-- [ ] State that generated Markdown and reconciliation-time hashes are insufficient.
-- [ ] Make missing lifecycle evidence block `ARTIFACT_PACKAGE_RECONCILED`.
+- [ ] State that generated Markdown, Git status, and reconciliation-time hashes are insufficient.
+- [ ] State that lifecycle evidence is read from canonical lifecycle/registry authority, not inferred from output-file YAML.
+- [ ] Make missing lifecycle evidence return `PACKAGE_LIFECYCLE_INVALID` and block `ARTIFACT_PACKAGE_RECONCILED`.
 
 ### Task 3: Declare coordinator meta paths and remove undeclared exceptions
 
 **Files:**
 - Modify: `references/artifact-layout-and-package-completeness.md`
-- Modify: `references/session-orchestration.md`
+- Verify: root `SKILL.md` Start Gate already requires this owning layout contract before persistent filesystem mutation.
 
 - [ ] Declare `working/ARTIFACT_LAYOUT_MANIFEST.md` as canonical manifest persistence path.
 - [ ] Declare `working/project-profile.md` when Project Profile is materialized.
@@ -58,7 +58,6 @@
 
 **Files:**
 - Modify: `references/artifact-layout-and-package-completeness.md`
-- Modify: `references/final-editorial-review.md`
 
 - [ ] Add mutually exclusive package verdict vocabulary.
 - [ ] Allow `PACKAGE_VALID` only when package reconciliation is accepted.
@@ -67,7 +66,7 @@
 
 ### Task 5: Verify net contract consistency
 
-- [ ] Search/fetch changed files and confirm no active Code Quality registration still points to `working/projections/code-quality/`.
+- [ ] Confirm no active Code Quality registration still points to `working/projections/code-quality/`.
 - [ ] Confirm `working/projections/` remains documented for operational Stage B views only.
 - [ ] Confirm every selected projection must have V1-V4 + canonical fingerprint + revision/NO_CHANGE + CURRENT before package acceptance.
 - [ ] Confirm undeclared files cannot be called non-blocking.
