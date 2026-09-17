@@ -15,8 +15,8 @@ The latest pressure run reached a structurally improved package but still expose
 Keep existing stable projection identities. Change only their declared artifact paths to capability-owned delivery paths:
 
 ```text
-capabilities/code-quality-review/00-findings-view.md
-capabilities/code-quality-review/01-summary.md
+capabilities/code-quality-review/00-code-quality-findings.md
+capabilities/code-quality-review/01-code-quality-summary.md
 capabilities/code-quality-review/02-maintainability-hotspots.md
 capabilities/code-quality-review/03-roadmap-contribution.md
 ```
@@ -42,13 +42,17 @@ accepted PRJ-*@revN or verified NO_CHANGE
 freshness: CURRENT
 ```
 
-Missing lifecycle evidence returns `PROJECTION_LIFECYCLE_INCOMPLETE` and prevents `ARTIFACT_PACKAGE_RECONCILED` and `PACKAGE_VALID`.
+For first generation there is no previous accepted revision to preserve with `NO_CHANGE`; successful publication establishes the initial `PRJ-*@revN`.
 
-A checksum computed ad hoc during reconciliation is not a canonical lifecycle fingerprint.
+Missing lifecycle evidence returns `PACKAGE_LIFECYCLE_INVALID` and prevents `ARTIFACT_PACKAGE_RECONCILED` and `PACKAGE_VALID`.
+
+A checksum computed ad hoc during reconciliation is not a canonical lifecycle fingerprint. Git tracked/untracked state is not projection revision authority.
+
+Lifecycle evidence belongs to the canonical projection lifecycle/registry record. It need not be embedded in the generated Markdown header, so absence from the Markdown file alone is not proof of missing lifecycle evidence; reconciliation must inspect the owning lifecycle record.
 
 ### 3. Strict undeclared-path policy
 
-There is no `non-blocking undeclared path` category. Every actual generated review-package file or directory must be declared by the frozen manifest or an owning operational contract.
+There is no `non-blocking undeclared path` category. Every actual persistent review-package file or directory must be declared by the frozen manifest or an owning operational contract.
 
 Canonical coordinator/meta paths are declared explicitly:
 
@@ -82,7 +86,7 @@ The following must be rejected:
 
 ```text
 selected tech-doc Markdown exists
-+ no PRJ revision/V1-V4/fingerprint/CURRENT
++ no accepted lifecycle record with PRJ revision/V1-V4/fingerprint/CURRENT
 + two undeclared files
 + stale INDEX
 → PACKAGE_VALID
