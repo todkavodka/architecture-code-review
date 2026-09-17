@@ -1,14 +1,32 @@
 # Artifact Layout and Package Completeness
 
-This reference owns deterministic review-package topology, frozen artifact layout, and final filesystem/package reconciliation. It does not own semantic meaning, projection identity, capability selection, or review methodology. Existing owner contracts still define artifact semantics; this contract defines where resolved artifacts are allowed to live and how package completeness is proven.
+This reference owns deterministic review-package topology, frozen artifact
+layout, final filesystem/package reconciliation, and package-structural
+readiness. It does not own semantic meaning, projection identity, capability
+selection, or review methodology. Existing owner contracts still define
+artifact semantics; this contract defines where resolved artifacts are allowed
+to live and how package completeness is proven.
 
 ## 1. Artifact layout is resolved state, not agent preference
 
-Before the first substantive persistent review artifact is written, the coordinator resolves and persists one frozen:
+Before the first substantive persistent review artifact is written, the
+coordinator resolves and persists one frozen:
 
 ```text
 ARTIFACT_LAYOUT_MANIFEST
 ```
+
+The canonical persistent manifest path, relative to the review-package root,
+is:
+
+```text
+working/ARTIFACT_LAYOUT_MANIFEST.md
+```
+
+The manifest itself is coordinator routing state and MUST be included in the
+frozen manifest as an allowed coordinator path. Storing it elsewhere requires
+an explicitly accepted local layout convention; a convenient root-level
+`ARTIFACT_LAYOUT_MANIFEST.md` is not implicitly exempt from layout rules.
 
 The manifest records at minimum:
 
@@ -23,15 +41,38 @@ capability_owned_paths
 required_working_paths
 conditional_paths
 allowed_operational_paths
+coordinator_meta_paths
 ```
 
-A path not present in the frozen manifest or directly declared by an owning contract is not writable review topology merely because it looks tidy, matches a semantic category, or was created by a worker.
+A path not present in the frozen manifest or directly declared by an owning
+contract is not writable review topology merely because it looks tidy, matches
+a semantic category, or was created by a worker.
 
-The manifest is coordinator routing state. It does not create semantic authority, projection authority, or a second artifact registry.
+The manifest is coordinator routing state. It does not create semantic
+authority, projection authority, or a second artifact registry.
+
+### Project Profile persistence
+
+Project Profile is routing metadata. When it is materialized as a file in the
+review package, the canonical coordinator path is:
+
+```text
+working/project-profile.md
+```
+
+and that path must appear in `coordinator_meta_paths` before creation. If the
+workflow stores Project Profile only as `INDEX.md` state or an external
+reference, do not create a convenience file.
+
+There is no generic category of "non-blocking undeclared file". A persistent
+review-package file is either declared/contract-owned or it is layout drift
+until reconciled.
 
 ## 2. Package root resolution
 
-If the repository already contains an established, coherent review-package convention compatible with the selected workflow, the coordinator may preserve it. The decision must be evidenced and persisted before substantive writes.
+If the repository already contains an established, coherent review-package
+convention compatible with the selected workflow, the coordinator may preserve
+it. The decision must be evidenced and persisted before substantive writes.
 
 Otherwise use exactly:
 
@@ -39,13 +80,17 @@ Otherwise use exactly:
 docs/reviews/architecture-review/
 ```
 
-Do not shorten the default to `docs/reviews/`, invent a sibling root, or move files after generation merely for presentation.
+Do not shorten the default to `docs/reviews/`, invent a sibling root, or move
+files after generation merely for presentation.
 
-Once frozen, the package root cannot change inside the same review execution without explicit layout reconciliation. A later path change is a package migration decision, not a convenience rename.
+Once frozen, the package root cannot change inside the same review execution
+without explicit layout reconciliation. A later path change is a package
+migration decision, not a convenience rename.
 
 ## 3. Canonical Architecture package roles
 
-Absent an accepted established local convention that preserves the same roles, Architecture Review uses:
+Absent an accepted established local convention that preserves the same roles,
+Architecture Review uses:
 
 ```text
 docs/reviews/architecture-review/
@@ -53,9 +98,14 @@ docs/reviews/architecture-review/
 ├── 02-authoritative-findings-ledger.md
 ├── 03-target-architecture.md          # when endpoint selects Target Architecture
 ├── 04-remediation-roadmap.md          # when endpoint selects Roadmap
+├── capabilities/
+│   └── <capability-owned user-facing outputs>
+├── technical-documentation/
+│   └── <selected Technical Documentation projections>
 └── working/
     ├── README.md
     ├── INDEX.md
+    ├── ARTIFACT_LAYOUT_MANIFEST.md
     └── <mode/capability working artifacts declared by contract>
 ```
 
@@ -78,9 +128,14 @@ The executing agent MUST NOT:
 
 ## 4. Mode-specific working artifacts are executable manifest inputs
 
-The mode-specific artifact sets in `review-modes-and-orchestration.md` are not examples once mode is selected. They are inputs to `ARTIFACT_LAYOUT_MANIFEST`.
+The mode-specific artifact sets in `review-modes-and-orchestration.md` are not
+examples once mode is selected. They are inputs to
+`ARTIFACT_LAYOUT_MANIFEST`.
 
-For `STANDARD_FULL` and `FORENSIC`, every unconditional working artifact declared by the selected mode must appear in the manifest and must exist before package closeout. A conditional correction or re-review artifact is included only when its documented trigger occurred.
+For `STANDARD_FULL` and `FORENSIC`, every unconditional working artifact
+declared by the selected mode must appear in the manifest and must exist before
+package closeout. A conditional correction or re-review artifact is included
+only when its documented trigger occurred.
 
 Therefore:
 
@@ -98,13 +153,17 @@ Missing unconditional or triggered conditional files return:
 REQUIRED_ARTIFACT_MISSING
 ```
 
-A mode artifact cannot be silently replaced by one broad combined note unless the owning contract explicitly permits that substitution.
+A mode artifact cannot be silently replaced by one broad combined note unless
+the owning contract explicitly permits that substitution.
 
 ## 5. Capability output ownership and paths
 
-Capability outputs retain the paths and identities declared by their owning contracts. Umbrella orchestration may link, summarize, or include them in a resolved package, but it cannot invent replacement aggregate paths.
+Capability outputs retain the paths and identities declared by their owning
+contracts. Umbrella orchestration may link, summarize, or include them in a
+resolved package, but it cannot invent replacement aggregate paths.
 
-Examples of invalid umbrella-created outputs unless separately registered by an approved projection contract:
+Examples of invalid umbrella-created outputs unless separately registered by
+an approved projection contract:
 
 ```text
 05-test-engineering.md
@@ -115,20 +174,31 @@ working/code-quality.md
 
 A human-readable capability name is not a filesystem path contract.
 
-For Code Quality, registered Stage B output paths are owned by `capabilities/code-quality-review/references/code-quality-projection.md`, including:
+For Code Quality, registered Stage B user-facing output paths are owned by
+`capabilities/code-quality-review/references/code-quality-projection.md`:
 
 ```text
-working/projections/code-quality/findings-view.md
-working/projections/code-quality/summary.md
-working/projections/code-quality/hotspots.md
-working/projections/code-quality/roadmap-contribution.md
+capabilities/code-quality-review/00-code-quality-findings.md
+capabilities/code-quality-review/01-code-quality-summary.md
+capabilities/code-quality-review/02-maintainability-hotspots.md
+capabilities/code-quality-review/03-roadmap-contribution.md
 ```
 
-Only selected registered members are required.
+Only selected registered members are required. The former
+`working/projections/code-quality/*` delivery paths are superseded and must not
+be used as current Code Quality publication locations.
 
-For Test Engineering, use the exact capability-owned output/projection paths declared by `capabilities/test-review/SKILL.md` and `capabilities/test-review/references/test-engineering-contract.md`. Do not derive umbrella numbering from the Architecture package.
+For Test Engineering, use the exact capability-owned output/projection paths
+declared by `capabilities/test-review/SKILL.md` and
+`capabilities/test-review/references/test-engineering-contract.md`. Do not
+derive umbrella numbering from the Architecture package.
 
-If a requested output has no declared path/registration and no approved local convention resolves it, stop with:
+For Technical Documentation, use the exact selected `PRJ-TECH-DOC-*` paths
+declared by `technical-documentation.md`. "All outputs" means the finite set of
+selected registered projections, not one aggregate document.
+
+If a requested output has no declared path/registration and no approved local
+convention resolves it, stop with:
 
 ```text
 ARTIFACT_PATH_NOT_DECLARED
@@ -148,9 +218,11 @@ STM domain "Provided Interfaces"       != permission to create working/technical
 STM domain "Authentication / Trust"    != permission to create working/technical-model/auth/
 ```
 
-Directories may be created only when at least one manifest-declared artifact or owning contract requires that exact directory.
+Directories may be created only when at least one manifest-declared artifact or
+owning contract requires that exact directory.
 
-Create directories lazily at first required write. Do not run broad speculative `mkdir -p` for directories that may never receive declared artifacts.
+Create directories lazily at first required write. Do not run broad speculative
+`mkdir -p` for directories that may never receive declared artifacts.
 
 An undeclared generated directory inside the review package is:
 
@@ -158,11 +230,13 @@ An undeclared generated directory inside the review package is:
 ARTIFACT_LAYOUT_DRIFT
 ```
 
-Empty speculative directories must be removed before closeout; their presence proves the actual tree is not reconciled with the frozen manifest.
+Empty speculative directories must be removed before closeout; their presence
+proves the actual tree is not reconciled with the frozen manifest.
 
 ## 7. Allowed operational paths
 
-Operational history may use paths already explicitly defined by owning contracts, for example:
+Operational Stage B history may use paths explicitly defined by owning
+contracts, for example:
 
 ```text
 working/projections/registry.md
@@ -170,11 +244,61 @@ working/projections/impact.md
 working/projections/sessions/RG-*.md
 ```
 
-These are allowed only under their Stage B contracts. Their existence does not authorize arbitrary sibling directories.
+These are operational views, not capability delivery outputs. Their existence
+does not authorize arbitrary sibling directories.
 
-Likewise `working/evidence/` is valid when the selected mode/evidence contract declares shared `WS-*` worksets. Its validity comes from the contract, not from a generic permission to create utility directories.
+Likewise `working/evidence/` is valid when the selected mode/evidence contract
+declares shared `WS-*` worksets. Its validity comes from the contract, not from
+a generic permission to create utility directories.
 
-## 8. Artifact package reconciliation
+## 8. Projection publication completeness
+
+Filesystem presence and projection acceptance are separate checks.
+
+For every selected generated projection required by the resolved package,
+package reconciliation must bind accepted lifecycle evidence from
+`projection-lifecycle.md` and the owning projection contract:
+
+```text
+stable active PRJ-* identity
+projection contract + contract revision
+accepted dependency / selector-resolution snapshot
+V1 STRUCTURAL: PASS
+V2 DEPENDENCY / PROVENANCE: PASS
+V3 CONTRACT COMPLETENESS: PASS
+V4 AUTHORITY CONSISTENCY: PASS
+canonical generated-content fingerprint
+accepted PRJ-*@revN or verified NO_CHANGE
+freshness: CURRENT
+```
+
+For first generation there is no pre-existing revision to preserve with
+`NO_CHANGE`; successful publication establishes the initial accepted
+`PRJ-*@revN` (normally `rev1` under the owning allocation rules).
+
+The following do not satisfy projection publication:
+
+```text
+Markdown file exists
+Git tracked/untracked status
+Git commit SHA
+file timestamp
+YAML header without lifecycle authority
+ad-hoc MD5/SHA computed after generation
+worker says generated
+package tree contains the expected filename
+```
+
+If a selected projection file exists but any required lifecycle element is
+missing, record:
+
+```text
+PACKAGE_LIFECYCLE_INVALID
+```
+
+and do not accept the package gate that requires that projection to be current.
+
+## 9. Artifact package reconciliation
 
 Before final editorial acceptance and before `REVIEW_COMPLETE`, perform:
 
@@ -192,6 +316,8 @@ actual filesystem/package tree
 working/INDEX.md artifact registry
         ↕
 owning semantic/projection/capability contracts
+        ↕
+selected projection lifecycle records
 ```
 
 The accepted result is exactly:
@@ -213,15 +339,17 @@ At minimum verify:
 3. every triggered conditional artifact exists;
 4. every selected endpoint authority exists at its declared role/path;
 5. every selected capability output uses its declared capability path;
-6. every actual generated review file is declared by the manifest or an allowed operational contract;
+6. every actual persistent review file is declared by the manifest or an allowed owning contract;
 7. no semantic authority is substituted by a projection or working note;
 8. no projection path contradicts its registered projection contract;
-9. no undeclared generated directory remains;
-10. no empty speculative directory remains;
-11. `working/INDEX.md` artifact registry and actual tree agree;
-12. actual role, owner, and classification of each final artifact agree with the owning contract.
+9. every selected package projection has accepted lifecycle evidence and `CURRENT` freshness when required by package policy;
+10. no undeclared generated directory remains;
+11. no empty speculative undeclared directory remains;
+12. `working/INDEX.md` artifact registry and actual tree agree;
+13. actual role, owner, and classification of each final artifact agree with the owning contract;
+14. coordinator meta files are present only at manifest-declared paths.
 
-## 9. Reconciliation failures
+## 10. Reconciliation failures
 
 Use these failures consistently:
 
@@ -233,18 +361,29 @@ REQUIRED_ARTIFACT_MISSING
   a required unconditional or triggered artifact is absent
 
 ARTIFACT_LAYOUT_DRIFT
-  actual package tree contains undeclared generated path/directory or wrong root
+  actual package tree contains undeclared persistent path/directory or wrong root
 
 ARTIFACT_ROLE_MISMATCH
   file exists but its semantic/projection/capability role contradicts the contract
 
+PACKAGE_LIFECYCLE_INVALID
+  selected generated projection exists but lacks accepted lifecycle evidence
+  required by its package policy
+
 ARTIFACT_PACKAGE_RECONCILIATION_REQUIRED
-  final expected-vs-actual reconciliation has not passed
+  final expected-vs-actual/lifecycle reconciliation has not passed
 ```
 
-Do not repair a role mismatch by merely renaming a file if its contents/authority were produced through the wrong workflow. Route semantic/projection ownership problems to their owning gate.
+Do not repair a role mismatch by merely renaming a file if its contents or
+authority were produced through the wrong workflow. Route semantic/projection
+ownership problems to their owning gate.
 
-## 10. Completion gate
+An undeclared persistent path is never downgraded to a generic non-blocking
+exception. It must be removed, moved to an already-declared path when that move
+is semantically safe, or explicitly added through the owning contract and
+manifest reconciliation.
+
+## 11. Completion gate and verdict vocabulary
 
 A review may return `REVIEW_COMPLETE` only when both are accepted:
 
@@ -253,13 +392,34 @@ FINAL_WORKFLOW_AUTHORITY_RECONCILED
 ARTIFACT_PACKAGE_RECONCILED
 ```
 
-A review whose semantic analysis is otherwise complete but whose artifact package is missing, invented, misnumbered, misplaced, or unreconciled returns:
+Package verdicts are mutually exclusive:
+
+```text
+PACKAGE_VALID
+  only when ARTIFACT_PACKAGE_RECONCILED is ACCEPTED
+
+PACKAGE_INCOMPLETE
+  required/selected declared artifacts are missing
+
+PACKAGE_LAYOUT_INVALID
+  undeclared/wrong-root/role-mismatched persistent topology exists
+
+PACKAGE_LIFECYCLE_INVALID
+  required selected projections lack accepted publication lifecycle evidence
+```
+
+Do not return `PACKAGE_VALID` in the same result that reports
+`ARTIFACT_PACKAGE_RECONCILED: NOT_ACCEPTED`.
+
+A review whose semantic analysis is otherwise complete but whose artifact
+package is missing, invented, misnumbered, misplaced, lifecycle-incomplete, or
+unreconciled returns:
 
 ```text
 REVIEW_PARTIALLY_COMPLETE
 ```
 
-with the exact layout/package blockers.
+with the exact layout/package/lifecycle blockers.
 
 The following never prove package completeness:
 
@@ -270,9 +430,12 @@ all workers reported done
 artifact count looks plausible
 INDEX says COMPLETE
 final prose looks coherent
+files have hashes computed after generation
 ```
 
-## 11. Canonical regression case
+## 12. Canonical regression cases
+
+### Layout regression
 
 Invalid:
 
@@ -295,6 +458,28 @@ ARTIFACT_PACKAGE_RECONCILIATION_REQUIRED
 REVIEW_PARTIALLY_COMPLETE
 ```
 
+### Lifecycle regression
+
+Invalid:
+
+```text
+selected Technical Documentation projection exists as Markdown
+→ PRJ revision absent
+→ V1-V4 absent
+→ canonical fingerprint absent
+→ freshness absent
+→ compute MD5 after the fact
+→ call package valid
+```
+
+Required result:
+
+```text
+PACKAGE_LIFECYCLE_INVALID
+ARTIFACT_PACKAGE_RECONCILIATION_REQUIRED
+REVIEW_PARTIALLY_COMPLETE
+```
+
 Valid:
 
 ```text
@@ -303,9 +488,10 @@ resolve/freeze ARTIFACT_LAYOUT_MANIFEST
 → resolve mode/endpoint/capability members
 → create directories lazily
 → write artifacts only at declared paths
-→ complete owner/projection gates
-→ reconcile actual tree against manifest + registry
+→ complete owner/projection publication gates
+→ reconcile actual tree + INDEX + lifecycle records
 → ARTIFACT_PACKAGE_RECONCILED
 → final editorial acceptance
+→ FINAL_WORKFLOW_AUTHORITY_RECONCILED
 → REVIEW_COMPLETE
 ```
