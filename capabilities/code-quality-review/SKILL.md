@@ -155,13 +155,14 @@ coordinator or a worker. Read
 `references/artifact-layout-and-package-completeness.md` before persisting a
 human-readable Code Quality output.
 
-The registered projection paths are:
+The registered human-readable projection paths, relative to the
+architecture-review package root, are:
 
 ```text
-working/projections/code-quality/findings-view.md
-working/projections/code-quality/summary.md
-working/projections/code-quality/hotspots.md
-working/projections/code-quality/roadmap-contribution.md
+capabilities/code-quality-review/00-code-quality-findings.md
+capabilities/code-quality-review/01-code-quality-summary.md
+capabilities/code-quality-review/02-maintainability-hotspots.md
+capabilities/code-quality-review/03-roadmap-contribution.md
 ```
 
 Only explicitly selected registered projections are written. Do not replace
@@ -169,11 +170,27 @@ these with umbrella aggregate paths such as `05-code-quality.md`,
 `06-code-quality.md`, `working/code-quality.md`, or another convenient filename
 unless an approved projection contract separately registers that exact path.
 
+The former `working/projections/code-quality/*` delivery paths are superseded.
+`working/projections/` is reserved for operational Stage B views such as the
+projection registry, impact accounting, and regeneration-session state; it is
+not the publication location for Code Quality delivery documents.
+
+Moving an existing `PRJ-CQ-*` file to the capability-owned path preserves the
+stable projection identity but changes the projection contract path. Complete
+the shared lifecycle reconciliation before marking the moved projection
+`CURRENT`.
+
 A requested Code Quality output whose path is not declared by the owning
 projection contract must stop with `ARTIFACT_PATH_NOT_DECLARED`; do not invent a
 path or directory. Directories are created lazily only when a selected declared
 artifact requires them. Final package acceptance is subject to
 `ARTIFACT_PACKAGE_RECONCILIATION`.
+
+A selected Code Quality output is not complete merely because its Markdown file
+exists. It must have accepted projection lifecycle evidence: active `PRJ-*`
+identity, contract revision, accepted dependency/selector snapshot, V1–V4 pass,
+canonical fingerprint, accepted projection revision (or valid `NO_CHANGE` for
+an existing revision), and `CURRENT` freshness.
 
 ## Handoff boundary
 
